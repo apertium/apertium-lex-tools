@@ -1,0 +1,50 @@
+===============================================================================
+
+===============================================================================
+
+apertium-train-lex-freq.py:
+
+$ python apertium-train-lex-freq.py SLTL TL > OUTPUT
+
+   SLTL: A corpus with both source and target language (e.g. lt-proc -b output)
+   TL: A tagged target language corpus (with apertium-tagger -p -g)
+   OUTPUT: The model of analysis + TL frequency
+
+apertium-lex-freq.py:
+
+The input is the output of lt-proc -b and the model produced
+by the training script.
+
+$ python apertium-lex-freq.py -d MODEL 
+
+Example model:
+
+37896 	party<n><sg>
+37626 	language<n><sg>
+37145 	couple<n><pl>
+36251 	time<n><pl>
+
+Example input:
+
+^Després de<pr>/After<pr>$ ^aquest<det><dem><m><sg>/this<det><dem><m><sg>$ 
+^temps<n><m><sp>/time<n><ND>/weather<n><ND>$^,<cm>/,<cm>$ 
+^el<det><def><m><sg>/the<det><def><m><sg>$ ^individu<n><m><sg>/individual<n><sg>$ 
+^poder<vbmod><pri><p3><sg>/can<vaux><pri><p3><sg>$ 
+^tornar<vblex><inf>/go# back<vblex><inf>/give# back<vblex><sep><inf>$ 
+^a<pr>/at<pr>$ 
+^fer<vblex><inf>/do<vblex><inf>$ ^un<det><ind><f><sg>/a<det><ind><sg>$ 
+^vida<n><f><sg>/life<n><sg>$ ^normal<adj><mf><sg>/normal<adj><sg>$
+^.<sent>/.<sent>$
+
+Example output (with -d):
+
+^Després de<pr>/After<pr>$ ^aquest<det><dem><m><sg>/this<det><dem><m><sg>$ 
+^temps<n><m><sp>/weather<n><ND>/=time<n><ND>$^,<cm>/,<cm>$ 
+^el<det><def><m><sg>/the<det><def><m><sg>$ ^individu<n><m><sg>/individual<n><sg>$
+^poder<vbmod><pri><p3><sg>/can<vaux><pri><p3><sg>$ 
+^tornar<vblex><inf>/go# back<vblex><inf>/=give# back<vblex><sep><inf>$ 
+^a<pr>/at<pr>$ 
+^fer<vblex><inf>/do<vblex><inf>$ ^un<det><ind><f><sg>/a<det><ind><sg>$
+^vida<n><f><sg>/life<n><sg>$ ^normal<adj><mf><sg>/normal<adj><sg>$
+^.<sent>/.<sent>$
+
