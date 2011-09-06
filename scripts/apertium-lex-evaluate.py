@@ -85,6 +85,10 @@ def sanityChecks(l_src, l_ref, l_tst): #{
 #       i) do a sanity check, look for outN in tst that aren't in src: LEX module is outputting strange stuff
 
 	for i in range(0, len(tst_lu)): #{
+		if len(tst_lu[i][1]) > 1: #{
+			print >> sys.stderr, 'WARNING: Test sentence has a translation with more than one option.';
+			print >> sys.stderr, tst_lu[i][1];
+		#}	
 		for lu in tst_lu[i][1]: #{
 			if lu not in src_lu[i][1]: #{
 				print >> sys.stderr, 'WARNING: Test sentence has a translation option that can never be '
