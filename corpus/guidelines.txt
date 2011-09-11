@@ -1,0 +1,8 @@
+
+
+Sentence in the 'taxa' file that has more than one ambiguity, e.g. 
+  - La taxa mitjana mensual registrat al març (de baix cabal mínim) és de 53 m³/segon
+  - The monthly average rate registered in March (of low minimum flow) is of 53 m³/second
+  
+  'cabal' can be {discharge, flow} -- but the reference only has 'flow', but
+  the file is about 'taxa', not about 'cabal'.

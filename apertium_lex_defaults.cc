@@ -237,42 +237,98 @@ int main(int argc, char **argv)
   // read until '/', then read each from '/' adding to a map, then look up first in transducer, and if the result
   // is found in the map, then output it, otherwise error.
 
-  /*wstring in = L"^patró<n><m><pl>$";
-  wstring trad = fstp.biltrans(in);
-  wcout << input << L" --> " << trad << endl;*/
-
-  skipUntil(input, output, L'^');
   int val = 0, i = 0;
   bool seenFirst = false;
   wstring sl = L"";
   wstring tl = L"";
   set<wstring> tllu;
+  set<wstring> tllu_defaults;
+
+  skipUntil(input, output, L'^');
+  outOfWord = false;
+
   while((val = readGeneration(input, output)) != 0x7fffffff)
   {
     switch(val) 
     { 
       case L'^':
         outOfWord = false;
-        fputwc_unlocked(L'i', output);
+	val = readGeneration(input, output);
         break;
       case L'/':
         if(!seenFirst) 
         { 
           seenFirst = true;
-          fputwc_unlocked(L'f', output);
+        } 
+        else 
+        {
+          tllu.insert(tl);
         }
         i++;
-        wcout << i;
-        fputwc_unlocked(L':', output); 
-        fputws_unlocked(tl.c_str(), output);
         tl = L"";
-        break;
+	val = readGeneration(input, output);
+        if(val != L'$')  
+        {
+          break;
+        } 
       case L'$':
         outOfWord = true;
+        if(!seenFirst) 
+        { 
+          seenFirst = true;
+        } 
+        else 
+        {
+          tllu.insert(tl);
+        }
+
         seenFirst = false;
-        fputws_unlocked(L"i: ", output);
+        fputws_unlocked(L"^", output);
         fputws_unlocked(sl.c_str(), output);
+        if(tllu.size() > 1) 
+        {
+          tl = L"";
+          wstring in = L"^" + sl + L"$";
+          wstring trad = fstp.biltrans(in);
+          int j = 0;
+          bool tlout = false;
+          for(set<wstring>::const_iterator it = tllu.begin(), j = tllu.end(); it != j; it++)
+          {
+            wstring t = L"^" + *it + L"$";
+            if(t == trad)
+            {
+              fputws_unlocked(L"/", output);
+              wstring to = t.substr(1, wcslen(t.c_str())-2);
+              fputws_unlocked(to.c_str(), output);
+              tlout = true;
+              break;
+            }
+          }
+        
+          j = 0;
+          if(!tlout)  // if we haven't found a default translation, then output all
+          {
+            for(set<wstring>::const_iterator it = tllu.begin(), j = tllu.end(); it != j; it++)
+            {
+              if(it != tllu.end())
+              {
+                fputws_unlocked(L"/", output);
+              }
+              wstring t = *it;
+              fputws_unlocked(t.c_str(), output);
+            }
+          }
+
+        }
+        else 
+        {
+          fputws_unlocked(L"/", output);
+          fputws_unlocked(tl.c_str(), output);
+        }
+        fputws_unlocked(L"$", output);
+
         sl = L""; tl = L"";       
+        tllu.clear();
         i = 0;
         break;
     }
