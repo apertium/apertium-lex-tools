@@ -20,10 +20,14 @@ for i in $TESTDIR/*.$LANG2; do
 	cat $i | cut -f2- | apertium-destxt | apertium -f none -d $PAIRDIR $BILMODE > $SRC;
 	cat $SRC | python ../apertium-lex-freq.py ../freq.txt > $TST;	
 	RES=`python $EVAL $SRC $REF $TST 2>/dev/null`;
-	echo -e $RES"\tfreq\t"`basename $i`;
+	RES1=`python $EVAL $SRC $REF $TST 2>/dev/null | cut -f2`;
+	#echo -e $RES"\tfreq\t"`basename $i`;
 	cat $SRC | ../apertium-lex-defaults $PAIRDIR/ca-en.autoldx.bin | python ../apertium-lex-freq.py ../freq.txt > $TST;	
 	RES=`python $EVAL $SRC $REF $TST 2>/dev/null`;
-	echo -e $RES"\tling\t"`basename $i`;
+	RES2=`python $EVAL $SRC $REF $TST 2>/dev/null | cut -f2`;
+	#echo -e $RES"\tling\t"`basename $i`;
+
+	echo -e `basename $i`"\t"$RES1"\t"$RES2;
 done
 
 exit;

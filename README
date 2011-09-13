@@ -48,3 +48,4 @@ Example output (with -d):
 ^vida<n><f><sg>/life<n><sg>$ ^normal<adj><mf><sg>/normal<adj><sg>$
 ^.<sent>/.<sent>$
 
+If the bilingual dictionary is updated, a new model will need to be trained.
