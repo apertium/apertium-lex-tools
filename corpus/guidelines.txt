@@ -6,3 +6,8 @@ Sentence in the 'taxa' file that has more than one ambiguity, e.g.
   
   'cabal' can be {discharge, flow} -- but the reference only has 'flow', but
   the file is about 'taxa', not about 'cabal'.
+
+pos tagging errors: 
+	leave
+
+don't annotate closed categories  (e.g. prepositions)
