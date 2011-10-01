@@ -210,9 +210,9 @@ while lines: #{
 	#}
 
 	if num_fallos == 0 and num_ambig_lus == 0: #{
-		print 'WEIRD: ' , l_src ;
-		print '     : ' , l_ref ;
-		print '     : ' , l_tst ;
+#		print 'WEIRD: ' , l_src ;
+#		print '     : ' , l_ref ;
+#		print '     : ' , l_tst ;
 		continue;
 	#}
 	err = float(num_fallos)/float(num_ambig_lus)*100;

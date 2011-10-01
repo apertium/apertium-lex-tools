@@ -26,8 +26,11 @@ for i in $TESTDIR/*.$LANG2; do
 	RES=`python $EVAL $SRC $REF $TST 2>/dev/null`;
 	RES2=`python $EVAL $SRC $REF $TST 2>/dev/null | cut -f2`;
 	#echo -e $RES"\tling\t"`basename $i`;
+	cat $SRC | ../apertium-lex-defaults $PAIRDIR/dev/lex.f2e.top.bin | python ../apertium-lex-freq.py ../freq.txt > $TST;	
+	RES=`python $EVAL $SRC $REF $TST 2>/dev/null`;
+	RES3=`python $EVAL $SRC $REF $TST 2>/dev/null | cut -f2`;
 
-	echo -e `basename $i`"\t"$RES1"\t"$RES2;
+	echo -e `basename $i`"\t"$RES1"\t"$RES2"\t"$RES3;
 done
 
 exit;
