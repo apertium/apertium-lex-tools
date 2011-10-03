@@ -2,7 +2,7 @@
 # coding=utf-8
 # -*- encoding: utf-8 -*-
 
-import sys, codecs, copy;
+import sys, codecs, copy, re;
 
 sys.stdin  = codecs.getreader('utf-8')(sys.stdin);
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout);
@@ -52,17 +52,55 @@ def loadRulesFromFile(f): #{
 		tl_tags = row[2].split('"')[2].split(')')[0].strip().replace(' ', '><');
 		tl_patro = tl_lema + '<' + tl_tags + '>';
 		pattern = row[3];
-		pattern_items = pattern.split(') (');
-		sl_patro = {};
-		for p in pattern_items: #{
-			pos = int(p.split(' ')[0].strip('(-'));
-			if pos > ngram: #{
-				ngram = pos;
-			#}
-			pos = int(p.split(' ')[0].strip('('));
-			w = p.split(' ')[1].strip('")');
 
-			sl_patro[pos] = w;
+		sl_patro = {};
+		in_context = False;
+		in_pattern = False;
+		in_lemma = False;
+		in_tags = False;
+		pos = '';
+		lemma = '';
+		tags = '';
+		for c in pattern.decode('utf-8'): #{
+			if c == '(': #{
+				in_context = True;	
+				in_lemma = False;
+				in_pattern = False;
+				continue;
+			#}
+			if c == ')': #{
+				lemma = lemma.replace('*', '[\w ]+');
+				repatro = lemma + '<' + tags.strip().replace(' ', '><') 
+				if repatro.count('><') > 0: repatro = repatro + '>' + '.*';
+				#print sl_centre , '>>>' , tl_patro , '>>> ' , pos , repatro;
+				sl_patro[int(pos)] = re.compile(repatro);
+				pos = '';
+				lemma = '';
+				tags = '';
+				continue;
+			#}
+			if in_context == True and in_pattern ==  False: #{
+				if c == ' ': #{
+					in_pattern = True;
+					continue;
+				else: #{
+					pos = pos + c;	
+					continue;
+				#}
+			#}
+			if in_context == True and in_pattern == True and in_lemma == False: #{
+				if c == '"': #{
+					in_lemma = True;
+				else: #{
+					tags = tags + c;
+				#}
+			elif in_context == True and in_pattern == True and in_lemma == True: #{
+				if c == '"': #{
+					in_lemma = False;
+				else: #{
+					lemma = lemma + c;
+				#}
+			#}
 		#}
 
 		# Rule:
@@ -141,7 +179,8 @@ def procBlock(sentence): #{
 						if contloc >= len(sentence): #{
 							continue;
 						#}
-						if sentence[contloc][0].find(rule.sl_patro[cont]) == 0: #{
+						#if sentence[contloc][0].find(rule.sl_patro[cont]) == 0: #{
+						if rule.sl_patro[cont].match(sentence[contloc][0]): #{
 							matched = True;
 						else: #{
 							matched = False;
@@ -208,9 +247,10 @@ else: #{
 	rule_table = loadRulesFromFile(sys.argv[1]);
 #}
 
+#sys.exit(-1);
+
 ngram = ngram + 1; # start with '1' not '0'
 
-#sys.exit(-1);
 
 escaped = False;
 
