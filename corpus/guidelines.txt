@@ -11,3 +11,11 @@ pos tagging errors:
 	leave
 
 don't annotate closed categories  (e.g. prepositions)
+
+File structure:
+
+prova.n_f.ca	Original file (catalan)
+prova.n_f.en	Posteditted translation (English)
+prova.n_f.full	Fully open-category disambiguated/annotated file
+prova.n_f.word	File with only the target word annotated
+
