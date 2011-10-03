@@ -243,12 +243,12 @@ while c: #{
 
 	if c == '^' and not escaped: #{
 		sent.append(procLexicalUnit(c));
-	elif c == '[' and not escaped: #{
-		sys.stdout.write(c);
-		while c and c != ']':  #{
-			c = sys.stdin.read(1);
-			sys.stdout.write(c);
-		#}
+#	elif c == '[' and not escaped: #{
+#		sys.stdout.write(c);
+#		while c and c != ']':  #{
+#			c = sys.stdin.read(1);
+#			sys.stdout.write(c);
+#		#}
 #	else: #{
 #		sys.stdout.write(c);
 	#}
