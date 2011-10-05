@@ -9,7 +9,7 @@ sys.stdout = codecs.getwriter('utf-8')(sys.stdout);
 sys.stderr = codecs.getwriter('utf-8')(sys.stderr);
 
 global debug;
-global ngram;
+global trace;
 rule_table = {};
 
 class Rule: #{
@@ -18,6 +18,7 @@ class Rule: #{
 	tl_patro = [];
 	sl_patro = {};
 	lineno = 0;
+	patro_size = 0;
 
 	def __init__(self, _tipus, _line, _centre, _tl, _sl): #{
 		self.tipus = _tipus;
@@ -25,6 +26,7 @@ class Rule: #{
 		self.tl_patro = _tl;
 		self.lineno = _line;
 		self.sl_patro = _sl;
+		self.patro_size = len(_sl);
 	#}
 
 	def show(self): #{
@@ -36,7 +38,6 @@ class Rule: #{
 
 
 def loadRulesFromFile(f): #{
-	global ngram;
 	curline = 0;
 	for line in file(f).read().split('\n'): #{
 		curline = curline + 1;
@@ -114,6 +115,7 @@ def loadRulesFromFile(f): #{
 		#}
 		rule_table[sl_centre].append(rule);
 	#}
+
 	return rule_table;
 #}
 
@@ -158,6 +160,7 @@ def procLexicalUnit(c): #{
 
 
 def procBlock(sentence): #{
+	global trace;
 	newsentence = [];
 	#print >> sys.stderr ,  sentence;
 	i = 0;
@@ -168,8 +171,13 @@ def procBlock(sentence): #{
 		for centre in rule_table: #{
 			# Check to see if we find the centre in the current LU on the SL side
 			if pair[0].find(centre) == 0: #{
+				
+				# sort rules by length;
+				rules = sorted(rule_table[centre], key=lambda rule: rule.patro_size);
+				rules.reverse();
+
 				# If we find it then run through each of the rules with that centre
-				for rule in rule_table[centre]: #{
+				for rule in rules: #{
 					#print pair , centre , rule.show();
 					matched = False;
 					# For each of the context items in the rule, we check if it is matched
@@ -192,7 +200,9 @@ def procBlock(sentence): #{
 					if matched: #{
 						newx = [];
 						if rule.tipus == 's': #{
-							sys.stderr.write('SELECT:' + str(rule.lineno) + ' ' + str(rule.tl_patro) + '\n');
+							if trace: #{
+								sys.stderr.write('SELECT:' + str(rule.lineno) + ' ' + str(rule.tl_patro) + '\n');
+							#}
 							for tl in sentence[i][1]: #{
 								for tlf in rule.tl_patro: #{	
 									if tl.find(tlf) == 0: #{
@@ -202,8 +212,11 @@ def procBlock(sentence): #{
 									#}
 								#}
 							#}
+				
 						elif rule.tipus == 'r': #{
-							sys.stderr.write('REMOVE:' + str(rule.lineno) + ' ' + str(rule.tl_patro) + '\n');
+							if trace: #{
+								sys.stderr.write('REMOVE:' + str(rule.lineno) + ' ' + str(rule.tl_patro) + '\n');
+							#}
 							for tl in sentence[i][1]: #{
 								for tlf in rule.tl_patro: #{	
 									if tl.find(tlf) != 0: #{
@@ -216,6 +229,7 @@ def procBlock(sentence): #{
 						#}
 						del newsentence[i];
 						newsentence.append((sentence[i][0], newx));
+						break;
 					else: #{
 						continue;
 					#}
@@ -229,11 +243,11 @@ def procBlock(sentence): #{
 #}
 
 def usage(): #{
-	print 'apertium-lex-rules.py [-d] <rule file>';
+	print 'apertium-lex-rules.py [-d|-t] <rule file>';
 #}
 
 debug = False;
-ngram = 1;
+trace = False;
 
 if len(sys.argv) < 2: #{
 	usage();
@@ -243,14 +257,14 @@ if len(sys.argv) < 2: #{
 if sys.argv[1] == '-d': #{
 	debug = True;
 	rule_table = loadRulesFromFile(sys.argv[2]);
+elif sys.argv[1] == '-t': #{
+	trace = True;
+	rule_table = loadRulesFromFile(sys.argv[2]);
 else: #{
 	rule_table = loadRulesFromFile(sys.argv[1]);
 #}
 
 #sys.exit(-1);
-
-ngram = ngram + 1; # start with '1' not '0'
-
 
 escaped = False;
 
@@ -264,6 +278,9 @@ while c: #{
 		for lu in sent: #{
 			sys.stdout.write('^' + lu[0] + '/');
 			lus = list(set(lu[1]));
+			if len(lus) == 0: #{
+				sys.stderr.write('Error: output LU count 0\n');
+			#}
 			for tl in lus: #{
 				sys.stdout.write(tl);
 				if tl != lus[-1]: #{
