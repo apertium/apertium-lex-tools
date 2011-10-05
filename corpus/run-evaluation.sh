@@ -17,12 +17,12 @@ else
 fi
 ## Frequency
 
-#for i in $TESTDIR/*.$LANG2; do 
-for i in $TESTDIR/prova.n_f.$LANG2; do 
+for i in $TESTDIR/*.$LANG2; do 
+#for i in $TESTDIR/prova.n_f.$LANG2; do 
 	SRC=$TEMPDIR"/"`basename $i`".$TYPE.src";
 	TST=$TEMPDIR"/"`basename $i`".$TYPE.tst";
 	REF=`echo $i | sed "s/\.$LANG2/.$TYPE/g"`;
-	echo $SRC" "$TST" "$REF
+	#echo $SRC" "$TST" "$REF
 	#cat $i | cut -f2- | apertium-destxt | apertium -f none -d $PAIRDIR $BILMODE > $SRC;
 	cat $i | apertium-destxt | sed 's/\([0-9]*\)\[\t/[\1\t/g' | apertium -f none -d $PAIRDIR $BILMODE > $SRC;
 	cat $SRC | python ../apertium-lex-freq.py ../examples/freq.txt > $TST".0";	
