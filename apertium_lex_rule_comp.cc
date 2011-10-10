@@ -51,37 +51,38 @@ int main (int argc, char** argv)
   wstring rule = L"";
   int val = 0;
   val = fgetwc_unlocked(ins);
+  // We read the rule file character by character until the end
   while(val != EOF) {
-     if(val == L'\n') 
+     if(val == L'\n') // One rule per line
      {
        wchar_t c;
-       wstring tipus = L"";
-       wstring sl = L"";
-       wstring tl = L"";
+       wstring tipus = L""; // The type of rule (s 'select', r 'remove')
+       wstring sl = L""; // The source language pattern of the rule 
+       wstring tl = L""; // The target language pattern of the rule (that the operation works on)
 
-       int i = 0; 
-       while(rule.at(i) != '\t')                                     // First read the rule type
+       unsigned int i = 0; 
+       while(rule.at(i) != '\t')                 // First read the rule type
        {
          tipus = tipus + rule.at(i);
          i++;
        }
        i++;
        c = rule.at(i);
-       bool inq = false;
-       bool inp = false;
-       int seen = 0;
+       bool inq = false; // In quote marks "
+       bool inp = false; // In parentheses (
+       int seen = 0; // What have we seen ?
 
-       while(c != L'\t')                                             // Then the source word
+       while(c != L'\t')                         // Then the source word
        {
-         if(c == L'(' || c == L')')  
+         if(c == L'(' || c == L')') // Skip parentheses 
          {
            i++;
            c = rule.at(i);
            continue; 
          }
-         if(seen == 0 && c == L'"' && inq == false) 
+         if(seen == 0 && c == L'"' && inq == false)  
          {
-           seen = 1; 
+           seen = 1; // We're seeing the lemma
            inq = true;
            i++;
            c = rule.at(i);
@@ -89,7 +90,7 @@ int main (int argc, char** argv)
          }
          if(seen == 1 && c == L'"' && inq == true) 
          {
-           seen = 2; 
+           seen = 2; // We've seen the lemma
            inq = false;
            i++;
            c = rule.at(i);
@@ -98,7 +99,7 @@ int main (int argc, char** argv)
          if(seen == 2 && c == L' ') 
          { 
            sl = sl + L'<'; 
-           seen = 3;
+           seen = 3; // We're in the first tag 
            i++;
            c = rule.at(i); 
            continue;
@@ -120,7 +121,7 @@ int main (int argc, char** argv)
        inp = false;
        seen = 0;
        c = rule.at(i);
-       while(c != L'\t')                                             // Then the target word
+       while(c != L'\t')                         // Then the target word (this pattern is as above)
        {
          if(c == L'(' || c == L')')  
          {
@@ -175,7 +176,7 @@ int main (int argc, char** argv)
        inp = false;
        seen = 0;
        c = rule.at(i);
-       while(i < (rule.size() - 1))                                             // Then the context 
+       while(i < (rule.size() - 1))              // Then the context 
        {
          //fwprintf(ous, L"%d %d %c\n ", i, rule.size(), c);
          if(c == L'(') 
@@ -236,7 +237,7 @@ int main (int argc, char** argv)
            case 1: 
               if(c == L'*') 
               {
-                lem = lem + L"[\\w ]+";
+                lem = lem + L"[\\w ]+"; // Replace Kleene star with equivalent in regex
               } 
               else 
               {
@@ -276,7 +277,7 @@ int main (int argc, char** argv)
        }
        
        wistringstream wstrm(pos);
-       int p = 1001;
+       int p = 1001; // The position
        wstrm >> p;
        wstring csl;
        if(tag != L"") 
@@ -344,6 +345,8 @@ int main (int argc, char** argv)
 
   t.minimize();
   fwprintf(ous, L"%d@%d %d\n", t.size(), t.numberOfTransitions(), alphabet.size());
+
+  t.show(alphabet, ous);
 
   alphabet.write(fst);
   t.write(fst);
