@@ -12,12 +12,14 @@
 #include <lttoolbox/lt_locale.h>
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/alphabet.h>
+#include <lttoolbox/compression.h>
 #include <lttoolbox/pool.h>
 #include <lttoolbox/state.h>
 #include <lttoolbox/trans_exe.h>
 
 using namespace std;
 
+#define PACKAGE_VERSION "0.1.0"
 
 int main (int argc, char** argv)
 {
@@ -50,20 +52,17 @@ int main (int argc, char** argv)
   set<Node *> anfinals;
   anfinals.insert(te.getFinals().begin(), te.getFinals().end());
 
-
-  bool reading=true;
-  // This is our runtime: see if the input matches
   wstring v= L"";
   wchar_t c = (wchar_t)fgetwc(in);
   while (c != WEOF)
   {
     if(iswspace(c))
     {
-      input = input + c;
       fwprintf(ous, L"%S/" , v.c_str());
       current_state.step(alphabet(v));
       input.append(v);
       v = L"";
+      input = input + c;
     }
     else
     {
@@ -83,7 +82,7 @@ int main (int argc, char** argv)
   }
   else
   {
-    wcout << L"Unrecognised: " << input << endl;
+    wcout << L"\nUnrecognised: " << input << endl;
   }
 
   return 0;

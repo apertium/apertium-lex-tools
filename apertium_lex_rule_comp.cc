@@ -1,5 +1,6 @@
 #include <cwchar>
 #include <cstdio>
+#include <libgen.h>
 #include <cerrno>
 #include <string>
 #include <iostream>
@@ -16,7 +17,20 @@
 #include <lttoolbox/state.h>
 #include <lttoolbox/trans_exe.h>
 
+#define PACKAGE_VERSION "0.1.0"
+
+
 using namespace std;
+
+void endProgram(char *name)
+{
+  if(name != NULL)
+  {
+    cout << basename(name) << " v" << PACKAGE_VERSION <<": build a selection transducer from a ruleset" << endl;
+    cout << "USAGE: " << basename(name) << " rule_file output_file" << endl;
+  }
+  exit(EXIT_FAILURE);
+}
 
 int main (int argc, char** argv)
 {
@@ -25,7 +39,13 @@ int main (int argc, char** argv)
 
   LtLocale::tryToSetLocale();
 
+  if(argc < 3) 
+  {
+    endProgram(argv[0]);
+  }
+
   FILE *ins = fopen(argv[1], "r");
+  FILE *fst = fopen(argv[2], "w");
   FILE *ous = stdout;
 
   wstring rule = L"";
@@ -325,10 +345,11 @@ int main (int argc, char** argv)
   t.minimize();
   fwprintf(ous, L"%d@%d %d\n", t.size(), t.numberOfTransitions(), alphabet.size());
 
-  FILE* fst=fopen(argv[2], "w");
   alphabet.write(fst);
   t.write(fst);
   fclose(fst);
+
+  
 
   return 0;
 }
