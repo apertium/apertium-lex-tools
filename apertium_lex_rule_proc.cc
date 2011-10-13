@@ -21,22 +21,26 @@ using namespace std;
 
 #define PACKAGE_VERSION "0.1.0"
 
+map<wstring, TransExe> transducers; 
+
 int main (int argc, char** argv)
 {
   Alphabet alphabet;
   Transducer t;
+  TransExe te;
 
   LtLocale::tryToSetLocale();
+
+  set<wchar_t> escaped;
+  escaped.insert(L'$');
 
   FILE* in=stdin;
   FILE* ous=stdout;
 
   FILE* fst;
-  fst=fopen(argv[1], "r");
-
-  TransExe te;
+  fst = fopen(argv[1], "r");
   alphabet.read(fst);
-  fwprintf(ous, L"%d\n", alphabet.size());
+  //alphabet.show(ous);
   te.read(fst, alphabet);
   fclose(fst);
 
@@ -58,11 +62,17 @@ int main (int argc, char** argv)
   {
     if(iswspace(c))
     {
-      fwprintf(ous, L"%S/" , v.c_str());
+      v = L"<" + v + L">";
+      if(!alphabet.isSymbolDefined(v))
+      {
+        fwprintf(ous, L"pattern: %S not defined in alphabet\n", v.c_str());
+      }
       current_state.step(alphabet(v));
       input.append(v);
       v = L"";
       input = input + c;
+      //wstring x = current_state.getReadableString(alphabet);
+      //fwprintf(ous, L"grs: %S\n", x.c_str());
     }
     else
     {
@@ -73,16 +83,13 @@ int main (int argc, char** argv)
 
   if (current_state.isFinal(anfinals))
   {
-    // Not used, just don't want it to be empty...
-    set<wchar_t> escaped;
-    escaped.insert(L'$');
     output = current_state.filterFinals(anfinals, alphabet, escaped);
-
-    wcout << input << output << endl;
+    wcout << endl << input << endl;
+    wcout << output.substr(1, -1) << endl;
   }
   else
   {
-    wcout << L"\nUnrecognised: " << input << endl;
+    wcout << endl << L"\nUnrecognised: " << input << endl;
   }
 
   return 0;

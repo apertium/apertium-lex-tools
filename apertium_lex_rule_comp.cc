@@ -237,7 +237,7 @@ int main (int argc, char** argv)
            case 1: 
               if(c == L'*') 
               {
-                lem = lem + L"[\\w ]+"; // Replace Kleene star with equivalent in regex
+                lem = lem + L"[\\w #]+"; // Replace Kleene star with equivalent in regex
               } 
               else 
               {
@@ -293,6 +293,14 @@ int main (int argc, char** argv)
        inp = false;
        pos = L"", lem = L"", tag = L"";
 
+       if(tipus == L"s")
+       { 
+         tipus = L"select"; 
+       }
+       else if(tipus == L"r")
+       {
+         tipus = L"remove"; 
+       }
        fputws_unlocked(rule.c_str(), ous);
        fputws_unlocked(L"\n", ous);
        fputws_unlocked(L" tipus: ", ous);
@@ -302,33 +310,60 @@ int main (int argc, char** argv)
        fputws_unlocked(sl.c_str(), ous);
        fputws_unlocked(L"\n", ous);
        fputws_unlocked(L" tl: ", ous);
+       fputws_unlocked(tipus.c_str(), ous);
+       fputws_unlocked(L"(", ous);
        fputws_unlocked(tl.c_str(), ous);
+       fputws_unlocked(L")", ous);
        fputws_unlocked(L"\n", ous);
        fputws_unlocked(L" context: ", ous);
        fputws_unlocked(L"\n", ous);
+
+       if(!alphabet.isSymbolDefined(L"<*>"))
+       {
+         alphabet.includeSymbol(L"<*>");  
+       }
+       if(!alphabet.isSymbolDefined(L"<skip(*)>"))
+       {
+         alphabet.includeSymbol(L"<skip(*)>");
+       }
+
+
        int s = t.getInitial();
+       map<int, pair<wstring, wstring> >::iterator fpos = context.begin();
+       int first_pos = (fpos->first - 1);  
+       fwprintf(ous, L" first: %d\n", first_pos);
        for(map<int, pair<wstring, wstring> >::iterator it = context.begin();  
                  it != context.end(); it++)
        {
-         fputws_unlocked(L"  ", ous);
          int pos = it->first;
+ 
          pair<wstring, wstring> pat = it->second;
-         fwprintf(ous, L"%d ", pos);
+         fwprintf(ous, L"  %d ", pos);
          fputws_unlocked(pat.first.c_str(), ous);
          fputws_unlocked(L":", ous);
          fputws_unlocked(pat.second.c_str(), ous);
          fputws_unlocked(L"\n", ous);
 
-         if(!alphabet.isSymbolDefined(pat.first.c_str()))
+         wstring left = L"<" + pat.first + L">";
+         wstring right = L"";
+         if(pos == 0) 
          {
-           alphabet.includeSymbol(pat.first.c_str());  
-         }
-         if(!alphabet.isSymbolDefined(pat.second.c_str()))
+           right = L"<" + tipus + L"(" + pat.second + L")>";
+         } 
+         else
          {
-           alphabet.includeSymbol(pat.second.c_str());  
+           right = L"<skip(" + pat.second + L")>";
          }
 
-         s = t.insertSingleTransduction(alphabet(alphabet(pat.first.c_str()), alphabet(pat.second.c_str())), s);
+         if(!alphabet.isSymbolDefined(left.c_str()))
+         {
+           alphabet.includeSymbol(left.c_str());  
+         }
+         if(!alphabet.isSymbolDefined(right.c_str()))
+         {
+           alphabet.includeSymbol(right.c_str());  
+         }
+         s = t.insertSingleTransduction(alphabet(alphabet(left.c_str()), alphabet(right.c_str())), s);
        }
        t.setFinal(s);
        fputws_unlocked(L"\n", ous);
