@@ -14,6 +14,8 @@
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/alphabet.h>
 #include <lttoolbox/pool.h>
+#include <lttoolbox/compression.h>
+#include <lttoolbox/regexp_compiler.h>
 #include <lttoolbox/state.h>
 #include <lttoolbox/trans_exe.h>
 
@@ -32,10 +34,17 @@ void endProgram(char *name)
   exit(EXIT_FAILURE);
 }
 
+void read_rules(FILE *in)
+{
+
+}
+
 int main (int argc, char** argv)
 {
   Alphabet alphabet;
   Transducer t;
+  RegexpCompiler re;
+  map<int, Transducer> patterns;
 
   LtLocale::tryToSetLocale();
 
@@ -47,6 +56,8 @@ int main (int argc, char** argv)
   FILE *ins = fopen(argv[1], "r");
   FILE *fst = fopen(argv[2], "w");
   FILE *ous = stdout;
+
+  re.initialize(&alphabet);
 
   wstring rule = L"";
   int val = 0;
@@ -200,7 +211,7 @@ int main (int argc, char** argv)
            } 
            else
            {
-             csl = lem;
+             csl = lem + L"<.*";
            }
            pair<wstring, wstring> td = pair<wstring, wstring>(csl, L"*");
            context[p] = td;
@@ -237,7 +248,7 @@ int main (int argc, char** argv)
            case 1: 
               if(c == L'*') 
               {
-                lem = lem + L"[\\w #]+"; // Replace Kleene star with equivalent in regex
+                lem = lem + L"[A-Za-z #]+"; // Replace Kleene star with equivalent in regex
               } 
               else 
               {
@@ -344,7 +355,16 @@ int main (int argc, char** argv)
          fputws_unlocked(pat.second.c_str(), ous);
          fputws_unlocked(L"\n", ous);
 
-         wstring left = L"<" + pat.first + L">";
+         re.compile(pat.first);
+         wstring left = L"";
+         if(pat.first.find(L"<") == wstring::npos)
+         {
+           left = L"<" + pat.first + L"<.*>";
+         }
+         else
+         {
+           left = L"<" + pat.first + L">";
+         }
          wstring right = L"";
          if(pos == 0) 
          {
@@ -364,6 +384,12 @@ int main (int argc, char** argv)
            alphabet.includeSymbol(right.c_str());  
          }
          s = t.insertSingleTransduction(alphabet(alphabet(left.c_str()), alphabet(right.c_str())), s);
+         if(patterns.count(alphabet(left.c_str())) < 1) 
+         {
+           Transducer t = re.getTransducer();
+           t.minimize();
+           patterns[alphabet(left.c_str())] = t;
+         }
        }
        t.setFinal(s);
        fputws_unlocked(L"\n", ous);
@@ -379,15 +405,25 @@ int main (int argc, char** argv)
   } 
 
   t.minimize();
-  fwprintf(ous, L"%d@%d %d\n", t.size(), t.numberOfTransitions(), alphabet.size());
+  fwprintf(ous, L"%d@%d %d %d\n", t.size(), t.numberOfTransitions(), alphabet.size(), patterns.size());
 
   t.show(alphabet, ous);
 
   alphabet.write(fst);
+  Compression::multibyte_write(patterns.size(), fst);
+  for(map<int, Transducer>::iterator it = patterns.begin(); it != patterns.end(); it++) 
+  {
+    wchar_t buf[50];
+    memset(buf, '\0', sizeof(buf));
+    swprintf(buf, 50, L"%d", it->first);
+    wstring id(buf);
+    wcout << id << " " << it->second.size() << endl;
+    Compression::wstring_write(id, fst);
+    it->second.write(fst);
+  } 
+  Compression::wstring_write(L"main", fst);
   t.write(fst);
   fclose(fst);
-
-  
 
   return 0;
 }
