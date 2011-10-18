@@ -28,23 +28,58 @@ int main (int argc, char** argv)
   Alphabet alphabet;
   Transducer t;
   TransExe te;
+  map<int, Transducer> patterns;
+  map<wstring, Transducer> transducers;
 
   LtLocale::tryToSetLocale();
 
   set<wchar_t> escaped;
   escaped.insert(L'$');
 
-  FILE* in=stdin;
-  FILE* ous=stdout;
+  FILE *in = stdin;
+  FILE *ous = stdout;
 
-  FILE* fst;
+  FILE *fst;
   fst = fopen(argv[1], "r");
-  alphabet.read(fst);
-  //alphabet.show(ous);
-  te.read(fst, alphabet);
-  fclose(fst);
 
-//  exit(-1);
+  alphabet.read(fst);                 
+  //alphabet.show(ous);
+  int len = Compression::multibyte_read(fst); 
+
+  fwprintf(ous, L"%d\n", len);
+
+  while(len > 0)
+  { 
+    int len2 = Compression::multibyte_read(fst);
+    wstring name = L"";
+    while(len2 > 0)
+    {
+      name += static_cast<wchar_t>(Compression::multibyte_read(fst));
+      len2--;
+    }
+    transducers[name].read(fst);
+    len--;
+  }
+  fwprintf(ous, L"Patterns: %d, Alphabet: %d\n", transducers.size(), alphabet.size());
+
+  for(map<wstring, Transducer>::iterator it = transducers.begin(); it != transducers.end(); it++)
+  {
+    fwprintf(ous, L"= %S =============================\n", it->first.c_str());
+    it->second.show(alphabet, ous);
+  }
+
+  int len3 = Compression::multibyte_read(fst);
+  wstring name = L"";
+  while(len3 > 0)
+  {
+      name += static_cast<wchar_t>(Compression::multibyte_read(fst));
+      len3--;
+  }
+  wcout << name << endl;
+  te.read(fst, alphabet);
+  //t.show(alphabet, ous); 
+
+  fclose(fst);
 
   Pool<vector<int> > *pool = new Pool<vector<int> >(1, vector<int>(50));
   State *initial_state = new State(pool);
