@@ -320,9 +320,13 @@ readSentence(FILE *in, FILE *ous)
     }
   }   
 
+
+  //
+  // Collect rules
+  //
   //   pos  id   len  operation
   map< int, wstring> operations;  
-
+  int cur_pos = 0;
   for(map< pair<int, wstring>, vector<wstring> >::iterator it = sentence.begin(); 
       it != sentence.end(); it++) 
   {
@@ -330,17 +334,18 @@ readSentence(FILE *in, FILE *ous)
     vector<wstring> tl_lloc = it->second;
 
     fwprintf(ous, L"%d %S: %d\n", sl_pair.first, sl_pair.second.c_str(), tl_lloc.size());
+    if(current_state.size() == 0) 
+    {
+      cur_pos = sl_pair.first;
+      current_state = *initial_state;
+    }
     current_state.step(sl_pair.second, transducers, alphabet, ous);
     if(current_state.isFinal(anfinals))
     {
       wstring out = current_state.filterFinals(anfinals, alphabet, escaped);
       fwprintf(ous, L"FINAL: %d %S: %d\n", sl_pair.first, sl_pair.second.c_str(), tl_lloc.size());
       fwprintf(ous, L"Path: %S\n", out.c_str());
-      operations[sl_pair.first] = out;
-    }
-    if(current_state.size() == 0) 
-    {
-      current_state = *initial_state;
+      operations[cur_pos] = out;
     }
   }
 
