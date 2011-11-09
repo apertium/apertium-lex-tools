@@ -43,7 +43,6 @@ int main (int argc, char** argv)
 {
   Alphabet alphabet;
   Transducer t;
-  RegexpCompiler re;
   map<int, Transducer> patterns;
 
   LtLocale::tryToSetLocale();
@@ -57,10 +56,10 @@ int main (int argc, char** argv)
   FILE *fst = fopen(argv[2], "w");
   FILE *ous = stdout;
 
-  re.initialize(&alphabet);
 
   wstring rule = L"";
   int val = 0;
+  int rule_count = 1;
   val = fgetwc_unlocked(ins);
   // We read the rule file character by character until the end
   while(val != EOF) {
@@ -126,7 +125,7 @@ int main (int argc, char** argv)
          i++;
          c = rule.at(i);
        }
-       sl = sl + L">.*";
+       sl = sl + L">[0-9A-Za-z <>]*";
        i++;
        inq = false;
        inp = false;
@@ -175,7 +174,7 @@ int main (int argc, char** argv)
          i++;
          c = rule.at(i);
        }
-       tl = tl + L">.*";
+       tl = tl + L">[0-9A-Za-z <>]*";
        i++;
 
        map<int, pair<wstring, wstring> > context;
@@ -187,6 +186,7 @@ int main (int argc, char** argv)
        inp = false;
        seen = 0;
        c = rule.at(i);
+       int context_count = 0;
        while(i < (rule.size() - 1))              // Then the context 
        {
          //fwprintf(ous, L"%d %d %c\n ", i, rule.size(), c);
@@ -197,6 +197,7 @@ int main (int argc, char** argv)
            inp = true;
            i++; 
            c = rule.at(i);
+           context_count++;
            continue;
          }
          else if(c == L')') 
@@ -207,11 +208,11 @@ int main (int argc, char** argv)
            wstring csl;
            if(tag != L"") 
            {
-             csl = lem + L"<" + tag + L">.*";
+             csl = lem + L"<" + tag + L">[0-9A-Za-z <>]*";
            } 
            else
            {
-             csl = lem + L"<.*";
+             csl = lem + L"<[0-9A-Za-z <>]*";
            }
            pair<wstring, wstring> td = pair<wstring, wstring>(csl, L"*");
            context[p] = td;
@@ -248,7 +249,7 @@ int main (int argc, char** argv)
            case 1: 
               if(c == L'*') 
               {
-                lem = lem + L"[A-Za-z #]+"; // Replace Kleene star with equivalent in regex
+                lem = lem + L"[0-9A-Za-z #]+"; // Replace Kleene star with equivalent in regex
               } 
               else 
               {
@@ -293,7 +294,7 @@ int main (int argc, char** argv)
        wstring csl;
        if(tag != L"") 
        {
-         csl = lem + L"<" + tag + L">.*";
+         csl = lem + L"<" + tag + L">[0-9A-Za-z <>]*";
        } 
        else
        {
@@ -326,7 +327,7 @@ int main (int argc, char** argv)
        fputws_unlocked(tl.c_str(), ous);
        fputws_unlocked(L")", ous);
        fputws_unlocked(L"\n", ous);
-       fputws_unlocked(L" context: ", ous);
+       fwprintf(ous, L" context (%d): ", context_count);
        fputws_unlocked(L"\n", ous);
 
        if(!alphabet.isSymbolDefined(L"<*>"))
@@ -355,11 +356,13 @@ int main (int argc, char** argv)
          fputws_unlocked(pat.second.c_str(), ous);
          fputws_unlocked(L"\n", ous);
 
+         RegexpCompiler re;
+         re.initialize(&alphabet);
          re.compile(pat.first);
          wstring left = L"";
          if(pat.first.find(L"<") == wstring::npos)
          {
-           left = L"<" + pat.first + L"<.*>";
+           left = L"<" + pat.first + L"<[0-9A-Za-z <>]*>";
          }
          else
          {
@@ -391,11 +394,30 @@ int main (int argc, char** argv)
            patterns[alphabet(left.c_str())] = t;
          }
        }
+       wchar_t rule_count_str[50];
+       wchar_t context_count_str[50];
+       memset(rule_count_str, '\0', sizeof(rule_count_str));
+       memset(context_count_str, '\0', sizeof(rule_count_str));
+       swprintf(rule_count_str, 50, L"%d", rule_count);
+       swprintf(context_count_str, 50, L"%d", context_count);
+       fwprintf(ous, L"rule/context_number: %S %S\n", rule_count_str, context_count_str);
+       wstring id(rule_count_str);
+       wstring cc(context_count_str);
+       id = L"<" + id + L"," + cc + L">";
+       if(!alphabet.isSymbolDefined(id.c_str()))
+       {
+         alphabet.includeSymbol(id.c_str());  
+       }
+
+       s = t.insertSingleTransduction(alphabet(0, alphabet(id)), s);
+
        t.setFinal(s);
        fputws_unlocked(L"\n", ous);
        fwprintf(ous, L"%d@%d %d\n", t.size(), t.numberOfTransitions(), alphabet.size());
 
        rule = L"";
+ 
+       rule_count++;
      }
      else
      {
