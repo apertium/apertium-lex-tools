@@ -299,20 +299,19 @@ readSentence(FILE *in, FILE *ous)
         }
 
         seenFirst = false;
-        fputws_unlocked(L"^", ous);
-        fputws_unlocked(sl.c_str(), ous);
+        //fputws_unlocked(L"^", ous);
+        //fputws_unlocked(sl.c_str(), ous);
         for(set<wstring>::const_iterator it = tllu.begin(), j = tllu.end(); it != j; it++)
         {
           if(it != tllu.end())
           {
-            fputws_unlocked(L"/", ous);
+            //fputws_unlocked(L"/", ous);
           }
           wstring t = *it;
-          fputws_unlocked(t.c_str(), ous);
+          //fputws_unlocked(t.c_str(), ous);
           sentence[cur_sl].push_back(t);
         }
-        fputws_unlocked(L"$", ous);
-
+        //fputws_unlocked(L"$", ous);
         sl = L""; tl = L"";       
         tllu.clear();
         i = 0;
@@ -341,7 +340,7 @@ readSentence(FILE *in, FILE *ous)
     pair<int, wstring> sl_pair = it->first;
     vector<wstring> tl_lloc = it->second;
 
-    fwprintf(ous, L"%d %S: %d\n", sl_pair.first, sl_pair.second.c_str(), tl_lloc.size());
+    fwprintf(stderr, L"%d %S: %d\n", sl_pair.first, sl_pair.second.c_str(), tl_lloc.size());
     if(current_state.size() == 0) 
     {
       cur_pos = sl_pair.first;
@@ -351,13 +350,13 @@ readSentence(FILE *in, FILE *ous)
     if(current_state.isFinal(anfinals))
     {
       wstring out = current_state.filterFinals(anfinals, alphabet, escaped);
-      fwprintf(ous, L"FINAL: %d %S: %d\n", sl_pair.first, sl_pair.second.c_str(), tl_lloc.size());
-      fwprintf(ous, L"Path: %S\n", out.c_str());
+      fwprintf(stderr, L"FINAL: %d %S: %d\n", sl_pair.first, sl_pair.second.c_str(), tl_lloc.size());
+      fwprintf(stderr, L"Path: %S\n", out.c_str());
       operations[cur_pos] = out;
     }
   }
 
-  fwprintf(ous, L"\n");
+  fwprintf(stderr, L"\n");
   int pos = 1;
   for(map< pair<int, wstring>, vector<wstring> >::iterator it = sentence.begin(); 
       it != sentence.end(); it++) 
@@ -413,7 +412,7 @@ readSentence(FILE *in, FILE *ous)
           }
           if(x.find(L"<skip(") != wstring::npos) 
           {
-            fwprintf(ous, L"SKIP: %S %S %S %S\n", sl_pair.second.c_str(), it6->c_str(), x.c_str(), tl_pattern.c_str());
+            fwprintf(stderr, L"SKIP: %S %S %S %S\n", sl_pair.second.c_str(), it6->c_str(), x.c_str(), tl_pattern.c_str());
             new_tlloc = tl_lloc;
             break;
 
@@ -425,10 +424,10 @@ readSentence(FILE *in, FILE *ous)
           Transducer tl_pattern_re = re.getTransducer();
           tl_pattern_re.minimize();
           bool matched = false;
-          matched = tl_pattern_re.recognise(*it6, alphabet, ous);
+          matched = tl_pattern_re.recognise(*it6, alphabet, stderr);
           if(x.find(L"<select(") != wstring::npos)
           {
-            fwprintf(ous, L"SELECT: %S %S %S %S = %d\n", sl_pair.second.c_str(), it6->c_str(), x.c_str(), tl_pattern.c_str(), matched);
+            fwprintf(stderr, L"SELECT: %S %S %S %S = %d\n", sl_pair.second.c_str(), it6->c_str(), x.c_str(), tl_pattern.c_str(), matched);
             if(matched)
             {
               new_tlloc.push_back(*it6);
@@ -436,7 +435,7 @@ readSentence(FILE *in, FILE *ous)
           }
           else if(x.find(L"<remove(") != wstring::npos)
           {
-            fwprintf(ous, L"REMOVE: %S %S %S %S = %d\n", sl_pair.second.c_str(), it6->c_str(), x.c_str(), tl_pattern.c_str(), matched);
+            fwprintf(stderr, L"REMOVE: %S %S %S %S = %d\n", sl_pair.second.c_str(), it6->c_str(), x.c_str(), tl_pattern.c_str(), matched);
             if(!matched)
             {
               new_tlloc.push_back(*it6);
@@ -444,7 +443,7 @@ readSentence(FILE *in, FILE *ous)
           }
           else
           {
-            fwprintf(ous, L"unsupported operation\n");
+            fwprintf(stderr, L"unsupported operation\n");
           }
         } 
       }
@@ -623,7 +622,7 @@ main (int argc, char** argv)
   //alphabet.show(ous);
   int len = Compression::multibyte_read(fst); 
 
-  fwprintf(ous, L"%d\n", len);
+  fwprintf(stderr, L"%d\n", len);
 
   while(len > 0)
   { 
@@ -641,15 +640,15 @@ main (int argc, char** argv)
     transducers[i_name].read(fst);
     len--;
   }
-  fwprintf(ous, L"Patterns: %d, Alphabet: %d\n", transducers.size(), alphabet.size());
+  fwprintf(stderr, L"Patterns: %d, Alphabet: %d\n", transducers.size(), alphabet.size());
 
   for(map<int, Transducer>::iterator it = transducers.begin(); it != transducers.end(); it++)
   {
     wstring sym;
     alphabet.getSymbol(sym, it->first, false);
-    fwprintf(ous, L"= %d (%d) =============================\n", it->first, it->second.size());
-    fwprintf(ous, L"  %S\n", sym.c_str());
-    it->second.show(alphabet, ous);
+    fwprintf(stderr, L"= %d (%d) =============================\n", it->first, it->second.size());
+    fwprintf(stderr, L"  %S\n", sym.c_str());
+    it->second.show(alphabet, stderr);
   }
 
   int len3 = Compression::multibyte_read(fst);
