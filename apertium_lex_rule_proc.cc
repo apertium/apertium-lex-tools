@@ -3,6 +3,7 @@
 #include <cerrno>
 #include <string>
 #include <iostream>
+#include <algorithm>
 #include <sstream>
 #include <cstdlib>
 #include <list>
@@ -12,6 +13,7 @@
 #include <lttoolbox/lt_locale.h>
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/alphabet.h>
+#include <lttoolbox/regexp_compiler.h>
 #include <lttoolbox/compression.h>
 #include <lttoolbox/pool.h>
 #include <lttoolbox/state.h>
@@ -30,6 +32,8 @@ void skipUntil(FILE *input, FILE *output, wint_t const character);
 wstring readFullBlock(FILE *input, wchar_t const delim1, wchar_t const delim2);
 wchar_t readEscaped(FILE *input);
 void streamError();
+map< pair<int, wstring>, vector<int> > rule_pos_from_string(int pos, wstring w);
+
 
 
 
@@ -51,7 +55,12 @@ typedef struct SL
 // {0, prova<n><f><sg>: [proof<n><sg>, event<n><sg>, exam<n><sg>, trial<n><sg>, test<n><sg>]}
 map< pair<int, wstring>, vector<wstring> > sentence;
 
-
+typedef struct Rule
+{
+  wstring pattern;
+  int id;
+  int len;
+} Rule;
 
 
 
@@ -292,7 +301,6 @@ readSentence(FILE *in, FILE *ous)
         seenFirst = false;
         fputws_unlocked(L"^", ous);
         fputws_unlocked(sl.c_str(), ous);
-        int j = 0;
         for(set<wstring>::const_iterator it = tllu.begin(), j = tllu.end(); it != j; it++)
         {
           if(it != tllu.end())
@@ -350,60 +358,252 @@ readSentence(FILE *in, FILE *ous)
   }
 
   fwprintf(ous, L"\n");
-  for(map< int, wstring>::iterator it2 = operations.begin(); it2 != operations.end(); it2++)
+  int pos = 1;
+  for(map< pair<int, wstring>, vector<wstring> >::iterator it = sentence.begin(); 
+      it != sentence.end(); it++) 
   {
-    fwprintf(ous, L"%d -> %S\n", it2->first, it2->second.c_str());
-  }
-
-/*
-  wchar_t c = (wchar_t)fgetwc(in);
-  while (c != WEOF)
-  {
-    if(iswspace(c))
+    pair<int, wstring> sl_pair = it->first;
+    vector<wstring> tl_lloc = it->second;
+    int j = sl_pair.first;
+    vector<wstring> ops;
+    for(map< int, wstring>::iterator it2 = operations.begin(); it2 != operations.end(); it2++)
     {
-      v = L"<" + v + L">";
-      if(!alphabet.isSymbolDefined(v))
+      //fwprintf(ous, L"* %d -> %S\n", it2->first, it2->second.c_str());
+    
+      // pos, op => {rule_id, rule_id, ...}
+      map< pair<int, wstring>, vector<int> > rule_pos = rule_pos_from_string(it2->first, it2->second);
+
+      for(map< pair<int, wstring>, vector<int> >::iterator it3 = rule_pos.begin(); it3 != rule_pos.end(); it3++)
       {
-        fwprintf(ous, L"pattern: %S not defined in alphabet\n", v.c_str());
+        pair<int, wstring> r = it3->first;
+        if(r.first == pos) 
+        {
+          ops.push_back(r.second);
+        }
       }
-      //current_state.step(v, alphabet(v));
-      input.append(v);
-      v = L"";
-      input = input + c;
-      //wstring x = current_state.getReadableString(alphabet);
-      //fwprintf(ous, L"grs: %S\n", x.c_str());
+
+      //fwprintf(ous, L"** %d %S ! %d %d ** \n", j, sl_pair.second.c_str(), tl_lloc.size(), ops.size());
+      vector<wstring> new_tlloc;
+      for(vector<wstring>::iterator it4 = ops.begin(); it4 != ops.end(); it4++) 
+      {
+        wstring x = *it4;
+        // sentence[sl_pair] = tl_lloc
+
+        for(vector<wstring>::iterator it6 = tl_lloc.begin(); it6 != tl_lloc.end(); it6++) 
+        { 
+          wstring tl_pattern = L"";
+          int parens = 0;
+          for(wstring::iterator it7 = x.begin(); it7 != x.end(); it7++)
+          { 
+            if(*it7 == L'(')
+            {
+              parens++;
+              continue;
+            } 
+            else if(*it7 == L')')
+            {
+              parens--;
+              continue;
+            } 
+            
+            if(parens > 0) 
+            {
+              tl_pattern = tl_pattern + *it7;
+            }
+          }
+          if(x.find(L"<skip(") != wstring::npos) 
+          {
+            fwprintf(ous, L"SKIP: %S %S %S %S\n", sl_pair.second.c_str(), it6->c_str(), x.c_str(), tl_pattern.c_str());
+            new_tlloc = tl_lloc;
+            break;
+
+          }
+          RegexpCompiler re;
+          Alphabet alphabet;
+          re.initialize(&alphabet);
+          re.compile(tl_pattern);
+          Transducer tl_pattern_re = re.getTransducer();
+          tl_pattern_re.minimize();
+          bool matched = false;
+          matched = tl_pattern_re.recognise(*it6, alphabet, ous);
+          if(x.find(L"<select(") != wstring::npos)
+          {
+            fwprintf(ous, L"SELECT: %S %S %S %S = %d\n", sl_pair.second.c_str(), it6->c_str(), x.c_str(), tl_pattern.c_str(), matched);
+            if(matched)
+            {
+              new_tlloc.push_back(*it6);
+            }
+          }
+          else if(x.find(L"<remove(") != wstring::npos)
+          {
+            fwprintf(ous, L"REMOVE: %S %S %S %S = %d\n", sl_pair.second.c_str(), it6->c_str(), x.c_str(), tl_pattern.c_str(), matched);
+            if(!matched)
+            {
+              new_tlloc.push_back(*it6);
+            }
+          }
+          else
+          {
+            fwprintf(ous, L"unsupported operation\n");
+          }
+        } 
+      }
+      if(new_tlloc.size() > 0)
+      {
+        sentence[sl_pair] = new_tlloc;
+      }
     }
-    else
+    pos++;
+  }
+
+  for(map< pair<int, wstring>, vector<wstring> >::iterator it = sentence.begin(); 
+      it != sentence.end(); it++) 
+  {
+    pair<int, wstring> sl_pair = it->first;
+    vector<wstring> tl_lloc = it->second;
+    int j = sl_pair.first;
+
+    fwprintf(ous, L"^%S", sl_pair.second.c_str());
+    for(vector<wstring>::iterator it5 = tl_lloc.begin(); it5 != tl_lloc.end(); it5++)
+    { 
+      if(it5 != tl_lloc.end()) 
+      {
+        fwprintf(ous, L"/");
+      }
+      wstring tli = *it5;
+      fwprintf(ous, L"%S", tli.c_str());
+    }
+    fwprintf(ous, L"$ ");
+  }
+}
+
+map< pair<int, wstring>, vector<int> > 
+rule_pos_from_string(int pos, wstring w)
+{
+  // pos, op => {rule_id, rule_id, ...}
+  map< pair<int, wstring>, vector<int> > pos_rule;
+  // /<skip(*)><select(season<n>[0-9A-Za-z <>]*)><skip(*)><skip(*)><9,3>
+
+  // [pos+0] = <skip(*)>
+  // [pos+1] = <select(season<n>[0-9A-Za-z <>]*)>
+  // [pos+2] = <skip(*)>
+  // [pos+3] = <skip(*)>
+
+  vector<wstring> matched_rules;
+
+  wstring loc_buf = L"";
+  for(wstring::iterator it = w.begin(); it != w.end(); it++)
+  {
+    if(*it == L'/') 
+    { 
+      matched_rules.push_back(loc_buf);
+      loc_buf = L"";
+    }
+    loc_buf = loc_buf + *it;
+  }
+  matched_rules.push_back(loc_buf);
+  int pcount = 0;
+  wstring temp = L"";
+  int acount = 0; // angle bracket (lt/gt) count
+  
+  for(vector<wstring>::iterator it0 = matched_rules.begin(); it0 != matched_rules.end(); it0++)
+  {
+    pcount = 0;
+    wstring wm = *it0;
+    wstring len_buf = L"";
+    wstring id_buf = L"";
+    int where = 0;
+    for(wstring::iterator it = wm.end(); it != wm.begin(); it--)
     {
-        v = v + c; 
+      if(*it == L'>')
+      { 
+        continue;
+      }
+      if(*it == L',')
+      {
+        where = 1;  
+        continue;
+      }
+      if(*it == L'<')
+      {
+        break;
+      }
+      if(where == 0) 
+      {
+        len_buf = len_buf + *it;
+      }
+      else if(where == 1)
+      {
+        id_buf = id_buf + *it;
+      }
     }
-    c = (wchar_t)fgetwc(in);
+    reverse(len_buf.begin(), len_buf.end());
+    reverse(id_buf.begin(), id_buf.end());
+  
+    wistringstream wstrm(len_buf);
+    int p_len = -1; // The pattern length
+    wstrm >> p_len;
+    wistringstream wstrm2(id_buf);
+    int p_id = -1; // The rule id
+    wstrm2 >> p_id;
+   
+/*
+    if(p_len > 0) 
+    { 
+      fwprintf(stderr, L"len: %d id: %d\n", p_len, p_id);
+    }
+  */
+    for(wstring::iterator it = wm.begin(); it != wm.end(); it++)
+    {
+      if(*it == L'<') 
+      {
+        acount++;
+      } 
+      if(*it == L'>')
+      {
+        acount--;
+        if(acount == 0)
+        {
+          temp = temp + *it;
+          pair<int, wstring> key = make_pair(pos + pcount, temp);
+          pos_rule[key].push_back(p_id);
+          temp = L"";
+          pcount++;
+        }
+        if(pcount > p_len)
+        { 
+          break; 
+        }
+      }
+   
+      if(acount > 0) 
+      {
+        temp = temp + *it;
+      }
+    }
   }
-  if (current_state.isFinal(anfinals))
+/*
+  fwprintf(stdout, L"====\n");
+  for(map< pair<int, wstring>, vector<int> >::iterator it2 = pos_rule.begin(); it2 != pos_rule.end(); it2++)
   {
-    output = current_state.filterFinals(anfinals, alphabet, escaped);
-    wcout << endl << input << endl;
-    wcout << output.substr(1, -1) << endl;
-  }
-  else
-  {
-    wcout << endl << L"\nUnrecognised: " << input << endl;
-  }
- 
+    pair<int, wstring> r = it2->first;
+    vector<int> rid = it2->second;
 
-  for(map< pair<int, wstring>, vector<wstring> >::iterator it = sentence.begin(); it != sentence.end(); it++)
-  {
-    pair<int, wstring> sl = it->first;
-    vector<wstring> tl = it->second;
-
-    //step;
-  } 
+    fwprintf(stdout, L"%d => %S: ", r.first, r.second.c_str());
+    for(vector<int>::iterator it3 = rid.begin(); it3 != rid.end(); it3++)
+    {
+      fwprintf(stdout, L"%d ", *it3);
+    }
+    fwprintf(stdout, L"\n");
+  }
+  fwprintf(stdout, L"====\n");
 */
+  return pos_rule;
 
 }
 
-
-int main (int argc, char** argv)
+int 
+main (int argc, char** argv)
 {
   Transducer t;
   TransExe te;
