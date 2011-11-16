@@ -72,7 +72,7 @@
     </select>  
     <skip lemma="estadístic" tags="adj.*"/>
   </rule>
-  <rule>
+  <rule><c v="el guanyador de cada prova"/>
     <skip lemma="guanyador" tags="n.*"/>
     <skip lemma="de" tags="pr.*"/>
     <skip/> <!-- det -->
@@ -243,7 +243,7 @@
     </select>  
     <skip lemma="de" tags="pr.*"/>
   </rule>
-  <rule>
+  <rule><c v="la dona dels seus somnis"/>
     <select lemma="dona" tags="n.*">    
       <acception lemma="wife" tags="n.*"/> 
     </select>  
