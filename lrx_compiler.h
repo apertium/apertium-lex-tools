@@ -25,8 +25,18 @@
 #include <lttoolbox/state.h>
 #include <lttoolbox/trans_exe.h>
 
-
 using namespace std;
+
+typedef struct LSRule
+{
+  int id;
+  int len;
+  int centre; // -centre - -pos = relative position
+  map<int, int> sl_context; // position,alphabet(pattern)
+  int tl_pattern; // alphabet(pattern)
+  wstring tl_operation;
+
+} LSRule;
 
 class LRXCompiler
 {
@@ -35,10 +45,25 @@ private:
   Alphabet alphabet;
   Transducer transducer;  
   map<int, Transducer> patterns;
+  map<int, LSRule> rules;
+
   int current_line;
-  int current_rule;
+  int current_rule_id;
+  int current_rule_len;
+  int current_context_pos;
   
+  bool allBlanks();
+  void skipBlanks(wstring &name);
   void procNode();
+  void procRule();
+  void procSkip();
+  void procSelect();
+  void procRemove();
+  void procOr();
+  void procAcception();
+  wstring attrib(wstring const &name);
+  wstring attribsToPattern(wstring lemma, wstring tags);
+
 
 
 public:
@@ -53,6 +78,8 @@ public:
   static wstring const LRX_COMPILER_LEMMA_ATTR;
   static wstring const LRX_COMPILER_TAGS_ATTR;
   static wstring const LRX_COMPILER_C_ATTR;
+
+  static wstring const LRX_COMPILER_ASTERISK;
 
   LRXCompiler();
 
