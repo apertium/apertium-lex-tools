@@ -658,7 +658,7 @@ main (int argc, char** argv)
       name += static_cast<wchar_t>(Compression::multibyte_read(fst));
       len3--;
   }
-  wcout << name << endl;
+  //wcout << name << endl;
   te.read(fst, alphabet);
   //t.show(alphabet, ous); 
 
