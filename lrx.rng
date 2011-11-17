@@ -1,0 +1,262 @@
+<?xml version="1.0"?>
+<element name="rules" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+  <oneOrMore>
+    <element name="rule"> 
+      <optional>
+        <attribute name="c">
+          <text/>
+        </attribute>
+      </optional>
+      <choice> 
+        <group>
+          <oneOrMore>
+            <choice>
+              <oneOrMore>
+                <element name="skip">
+                  <optional>
+                    <attribute name="lemma">
+                      <text/>
+                    </attribute>
+                    <attribute name="tags">
+                      <text/>
+                    </attribute>
+                  </optional>
+                </element> 
+              </oneOrMore>
+              <oneOrMore>
+                <element name="or">
+                  <oneOrMore>
+                    <element name="skip">
+                      <optional>
+                        <attribute name="lemma">
+                          <text/>
+                        </attribute>
+                        <attribute name="tags">
+                          <text/>
+                        </attribute>
+                      </optional>
+                    </element> 
+                  </oneOrMore>
+                </element>
+              </oneOrMore>
+            </choice>
+          </oneOrMore>
+          <choice>
+            <element name="select">
+              <attribute name="lemma">
+                <text/>
+              </attribute>
+              <attribute name="tags">
+                <text/>
+              </attribute>
+              <oneOrMore>
+                <element name="acception">
+                  <attribute name="lemma">
+                    <text/>
+                  </attribute>
+                  <attribute name="tags">
+                    <text/>
+                  </attribute>
+                </element> 
+              </oneOrMore>
+            </element> 
+            <element name="remove">
+              <attribute name="lemma">
+                <text/>
+              </attribute>
+              <attribute name="tags">
+                <text/>
+              </attribute>
+              <oneOrMore>
+                <element name="acception">
+                  <attribute name="lemma">
+                    <text/>
+                  </attribute>
+                  <attribute name="tags">
+                    <text/>
+                  </attribute>
+                </element>
+              </oneOrMore>
+            </element>
+          </choice>
+        </group> 
+        <group>
+          <oneOrMore>
+            <choice>
+              <oneOrMore>
+                <element name="skip">
+                  <optional>
+                    <attribute name="lemma">
+                      <text/>
+                    </attribute>
+                    <attribute name="tags">
+                      <text/>
+                    </attribute>
+                  </optional>
+                </element>
+              </oneOrMore>
+              <oneOrMore>
+                <element name="or">
+                  <oneOrMore>
+                    <element name="skip">
+                      <optional>
+                        <attribute name="lemma">
+                          <text/>
+                        </attribute>
+                        <attribute name="tags">
+                          <text/>
+                        </attribute>
+                      </optional>
+                    </element>
+                  </oneOrMore>
+                </element>
+              </oneOrMore>
+            </choice>
+          </oneOrMore>
+          <choice>
+            <element name="select">
+              <attribute name="lemma">
+                <text/>
+              </attribute>
+              <attribute name="tags">
+                <text/>
+              </attribute>
+              <oneOrMore>
+                <element name="acception">
+                  <attribute name="lemma">
+                    <text/>
+                  </attribute>
+                  <attribute name="tags">
+                    <text/>
+                  </attribute>
+                </element>
+              </oneOrMore>
+            </element> 
+            <element name="remove">
+              <attribute name="lemma">
+                <text/>
+              </attribute>
+              <attribute name="tags">
+                <text/>
+              </attribute>
+              <oneOrMore>
+                <element name="acception">
+                  <attribute name="lemma">
+                    <text/>
+                  </attribute>
+                  <attribute name="tags">
+                    <text/>
+                  </attribute>
+                </element>
+              </oneOrMore>
+            </element>
+          </choice>
+          <oneOrMore>
+            <choice>
+              <oneOrMore>
+                <element name="skip">
+                  <optional>
+                    <attribute name="lemma">
+                      <text/>
+                    </attribute>
+                    <attribute name="tags">
+                      <text/>
+                    </attribute>
+                  </optional>
+                </element>
+              </oneOrMore>
+              <oneOrMore>
+                <element name="or">
+                  <oneOrMore>
+                    <element name="skip">
+                      <optional>
+                        <attribute name="lemma">
+                          <text/>
+                        </attribute>
+                        <attribute name="tags">
+                          <text/>
+                        </attribute>
+                      </optional>
+                    </element>
+                  </oneOrMore>
+                </element>
+              </oneOrMore>
+            </choice>
+          </oneOrMore>
+        </group> 
+        <group>
+          <choice>
+            <element name="select">
+              <attribute name="lemma">
+                <text/>
+              </attribute>
+              <attribute name="tags">
+                <text/>
+              </attribute>
+              <oneOrMore>
+                <element name="acception">
+                  <attribute name="lemma">
+                    <text/>
+                  </attribute>
+                  <attribute name="tags">
+                    <text/>
+                  </attribute>
+                </element> 
+              </oneOrMore>
+            </element> 
+            <element name="remove">
+              <attribute name="lemma">
+                <text/>
+              </attribute>
+              <attribute name="tags">
+                <text/>
+              </attribute>
+              <oneOrMore>
+                <element name="acception">
+                  <attribute name="lemma">
+                    <text/>
+                  </attribute>
+                  <attribute name="tags">
+                    <text/>
+                  </attribute>
+                </element>
+              </oneOrMore>
+            </element> 
+          </choice>
+          <oneOrMore>
+            <choice>
+              <oneOrMore>
+                <element name="skip">
+                  <optional>
+                    <attribute name="lemma">
+                      <text/>
+                    </attribute>
+                    <attribute name="tags">
+                      <text/>
+                    </attribute>
+                  </optional>
+                </element>
+              </oneOrMore>
+              <oneOrMore>
+                <element name="or">
+                  <oneOrMore>
+                    <element name="skip">
+                      <optional>
+                        <attribute name="lemma">
+                          <text/>
+                        </attribute>
+                        <attribute name="tags">
+                          <text/>
+                        </attribute>
+                      </optional>
+                    </element>
+                  </oneOrMore>
+                </element>
+              </oneOrMore>
+            </choice>
+          </oneOrMore>
+        </group> 
+      </choice>
+    </element>  
+  </oneOrMore>
+</element>
