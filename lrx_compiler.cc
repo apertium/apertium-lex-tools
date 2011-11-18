@@ -29,6 +29,16 @@ LRXCompiler::~LRXCompiler()
 {
 }
 
+wstring
+LRXCompiler::itow(int i)
+{
+  wchar_t buf[50];
+  memset(buf, '\0', sizeof(buf));
+  swprintf(buf, 50, L"%d", i);
+  wstring id(buf);
+  return id;
+}
+
 void
 LRXCompiler::parse(string const &fitxer)
 {
@@ -50,6 +60,50 @@ LRXCompiler::parse(string const &fitxer)
   {
     wcerr << L"Error: Parse error at the end of input." << endl;
   }
+
+  for(map<int, LSRule>::iterator it = rules.begin(); it != rules.end(); it++)
+  {
+    LSRule rule = it->second; 
+    int s = transducer.getInitial();
+    wstring w_id = itow(rule.id);
+    if(!alphabet.isSymbolDefined(w_id.c_str()))
+    {
+      alphabet.includeSymbol(w_id.c_str());
+    }
+    for(map<int, wstring>::iterator it3 = rule.sl_context.begin(); it3 != rule.sl_context.end(); it3++) 
+    {
+      int pos = it3->first;
+      wstring pattern = it3->second;
+      if(pos == rule.centre) 
+      {
+        int k = s;
+        for(vector<wstring>::iterator it2 = rule.tl_patterns.begin(); it2 != rule.tl_patterns.end(); it2++) 
+        {
+          wstring left = rule.sl_pattern;
+          wstring right = *it2;
+          wcerr << rule.id << L" " << pos << L" " << rule.type << L" " << rule.sl_pattern << L":" << *it2 << endl;
+          s = transducer.insertSingleTransduction(alphabet(alphabet(left.c_str()), alphabet(right.c_str())), k);
+        }
+      }
+      else
+      {
+        wcerr << rule.id << L" " << pos << L" " << pattern << L" skip " << endl;
+        wstring left = pattern;
+        wstring right = L"skip(*)";
+        if(!alphabet.isSymbolDefined(right.c_str()))
+        {
+          alphabet.includeSymbol(right.c_str());
+        }
+        s = transducer.insertSingleTransduction(alphabet(alphabet(left.c_str()), alphabet(right.c_str())), s);
+      }
+    }
+    s = transducer.insertSingleTransduction(alphabet(0, alphabet(w_id.c_str())), s);
+    transducer.setFinal(s);
+    wcout << endl;
+  }
+  transducer.minimize();
+  wcout << transducer.size() << endl;
+  transducer.show(alphabet, stderr);
 
   xmlFreeTextReader(reader);
   xmlCleanupParser();
@@ -128,7 +182,13 @@ LRXCompiler::procAcception()
   {
     return;
   }
-  wstring tl_pattern = attribsToPattern(lemma, tags);
+  wstring tl_pattern = rules[current_rule_id].type + L"(" + attribsToPattern(lemma, tags) + L")";
+  if(!alphabet.isSymbolDefined(tl_pattern.c_str()))
+  {
+    alphabet.includeSymbol(tl_pattern.c_str());
+  }
+  rules[current_rule_id].tl_patterns.push_back(tl_pattern);
+
 
   wcout << L"    Acception: " << tl_pattern << endl;
 }
@@ -149,7 +209,12 @@ LRXCompiler::procSkip()
   {
     sl_pattern = attribsToPattern(lemma, tags);
   }
-
+  if(!alphabet.isSymbolDefined(sl_pattern.c_str()))
+  {
+    alphabet.includeSymbol(sl_pattern.c_str());
+  }
+  current_pattern = current_pattern + sl_pattern;
+  rules[current_rule_id].sl_context[current_rule_len] = sl_pattern;
   wcout << L"  " << current_rule_len << L" " << sl_pattern << L":skip(*)" << endl;
 }
 
@@ -161,6 +226,13 @@ LRXCompiler::procSelect()
   rules[current_rule_id].centre = current_rule_len;
 
   wstring sl_pattern = attribsToPattern(lemma, tags);
+  if(!alphabet.isSymbolDefined(sl_pattern.c_str()))
+  {
+    alphabet.includeSymbol(sl_pattern.c_str());
+  }
+  rules[current_rule_id].sl_pattern = sl_pattern;
+  rules[current_rule_id].centre = current_rule_len;
+  rules[current_rule_id].sl_context[current_rule_len] = sl_pattern;
 
   wcout << L"  Select: " << sl_pattern << endl;
 
@@ -203,6 +275,13 @@ LRXCompiler::procRemove()
   rules[current_rule_id].centre = current_rule_len;
 
   wstring sl_pattern = attribsToPattern(lemma, tags);
+  if(!alphabet.isSymbolDefined(sl_pattern.c_str()))
+  {
+    alphabet.includeSymbol(sl_pattern.c_str());
+  }
+  rules[current_rule_id].sl_pattern = sl_pattern;
+  rules[current_rule_id].centre = current_rule_len;
+  rules[current_rule_id].sl_context[current_rule_len] = sl_pattern;
 
   wcout << L"  Remove: " << sl_pattern << endl;
 
@@ -241,6 +320,8 @@ void
 LRXCompiler::procOr()
 {
 
+  current_pattern = L"(";
+  current_rule_len++;
   while(true)
   {
     int ret = xmlTextReaderRead(reader);
@@ -257,11 +338,19 @@ LRXCompiler::procOr()
     if(name == LRX_COMPILER_SKIP_ELEM)
     {
       wcout << L"  " ;
-      current_rule_len++;
       procSkip();
+      current_pattern = current_pattern + L"|";
     }
     else if(name == LRX_COMPILER_OR_ELEM)
     {
+      current_pattern = current_pattern.substr(0, current_pattern.length()-1) + L")";
+      if(!alphabet.isSymbolDefined(current_pattern.c_str()))
+      {
+        alphabet.includeSymbol(current_pattern.c_str());
+      }
+      wcout << L"  Or: " << current_pattern << endl;
+      rules[current_rule_id].sl_context[current_rule_len] = current_pattern;
+      current_pattern = L"";
       return;
     }
     else
@@ -304,11 +393,13 @@ LRXCompiler::procRule()
     else if(name == LRX_COMPILER_SELECT_ELEM)
     {
       current_rule_len++;
+      rules[current_rule_id].type = L"select";
       procSelect();
     }
     else if(name == LRX_COMPILER_REMOVE_ELEM)
     {
       current_rule_len++;
+      rules[current_rule_id].type = L"remove";
       procRemove();
     }
     else if(name == LRX_COMPILER_OR_ELEM)

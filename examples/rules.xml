@@ -88,8 +88,8 @@
     </select>  
   </rule>
   <rule>
-    <select lemma="prova" tags="n.*">    
-      <acception lemma="testing" tags="n.*"/> 
+    <select lemma="càrrega" tags="n.*">    
+      <acception lemma="charge" tags="n.*"/> 
     </select>  
     <or>
       <skip lemma="negatiu" tags="adj.*"/>
@@ -185,7 +185,7 @@
     <skip lemma="de" tags="pr.*"/>
     <or>
       <skip lemma="[Ll]ínia" tags="n.*"/>
-      <skip lemma="relevisió" tags="n.*"/>
+      <skip lemma="televisió" tags="n.*"/>
     </or>
   </rule>
   <rule>
