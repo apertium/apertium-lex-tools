@@ -31,10 +31,11 @@ typedef struct LSRule
 {
   int id;
   int len;
+  wstring type; // select|remove
   int centre; // -centre - -pos = relative position
-  map<int, int> sl_context; // position,alphabet(pattern)
-  int tl_pattern; // alphabet(pattern)
-  wstring tl_operation;
+  map<int, wstring> sl_context; // position,pattern
+  wstring sl_pattern; // pattern
+  vector<wstring> tl_patterns; // patterns
 
 } LSRule;
 
@@ -51,6 +52,7 @@ private:
   int current_rule_id;
   int current_rule_len;
   int current_context_pos;
+  wstring current_pattern;
   
   bool allBlanks();
   void skipBlanks(wstring &name);
@@ -63,7 +65,7 @@ private:
   void procAcception();
   wstring attrib(wstring const &name);
   wstring attribsToPattern(wstring lemma, wstring tags);
-
+  wstring itow(int i);
 
 
 public:
