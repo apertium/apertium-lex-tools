@@ -130,8 +130,8 @@ LRXProcessor::load(FILE *in)
   wstring name = L"";
   while(len3 > 0)
   {
-      name += static_cast<wchar_t>(Compression::multibyte_read(in));
-      len3--;
+    name += static_cast<wchar_t>(Compression::multibyte_read(in));
+    len3--;
   }
   transducer.read(in, alphabet);
 
@@ -141,15 +141,29 @@ LRXProcessor::load(FILE *in)
   {
     LSRuleExe rec;
     fread(&rec, sizeof(LSRuleExe), 1, in);
-    fwprintf(stderr, L"%d len(%d) weight(%f)\n", rec.id, rec.len, rec.weight);
+    //fwprintf(stderr, L"%d len(%d) weight(%f)\n", rec.id, rec.len, rec.weight);
     rules[rec.id] = rec;
   }
+
+  //fclose(in);
  
   return;
+}
+
+void 
+LRXProcessor::init()
+{
+  initial_state->init(transducer.getInitial());
+
+  anfinals.insert(transducer.getFinals().begin(), transducer.getFinals().end());
 }
 
 void
 LRXProcessor::process(FILE *input, FILE *output)
 {
+
+
+
+  
   return;
 }

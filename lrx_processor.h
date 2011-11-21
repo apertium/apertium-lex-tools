@@ -66,8 +66,8 @@ private:
   set<Node *> anfinals;
   set<wchar_t> escaped_chars;
   Pool<vector<int> > *pool;
-  State *current_state;
   State *initial_state;
+  State *current_state;
  
   bool traceMode;
   
@@ -82,6 +82,7 @@ public:
 
   void setTraceMode(bool mode);
 
+  void init();
   void load(FILE *input);
   void process(FILE *input, FILE *output);
 
