@@ -3,7 +3,7 @@ CFLAGS=-llttoolbox3  -L/home/fran/local/lib -I/home/fran/local/include/lttoolbox
 all:
 	g++ -Wall -c -o lrx_compiler.o lrx_compiler.cc $(CFLAGS)
 	g++ -Wall -o apertium-lrx-comp lrx_comp.cc lrx_compiler.o $(CFLAGS)
+	g++ -Wall -o apertium-ldx-proc ldx_proc.cc $(CFLAGS)
 
 	g++ -Wall apertium_lex_rule_proc.cc -o apertium-lex-rule-proc $(CFLAGS)
-	g++ -Wall apertium_lex_defaults.cc -o apertium-lex-defaults $(CFLAGS)
 
