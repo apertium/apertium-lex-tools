@@ -17,8 +17,8 @@
  * 02111-1307, USA.
  */
 
-#ifndef __LEX_RULE_COMPILER_H__
-#define __LEX_RULE_COMPILER_H__
+#ifndef __LRX_COMPILER_H__
+#define __LRX_COMPILER_H__
 
 #include <cwchar>
 #include <cstdio>
@@ -124,4 +124,4 @@ public:
   void write(FILE *fd);
 };
 
-#endif
+#endif /* __LRX_COMPILER_H__ */
