@@ -1,4 +1,21 @@
-
+/*
+ * Copyright (C) 2011 Universitat d'Alacant 
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+ * 02111-1307, USA.
+ */
 
 #include <lrx_compiler.h>
 
@@ -17,7 +34,7 @@ wstring const LRXCompiler::LRX_COMPILER_C_ATTR          = L"c";
 
 wstring const LRXCompiler::LRX_COMPILER_ASTERISK        = L"[0-9A-Za-z <>]*";
 
-double const LRXCompiler::LRX_COMPILER_DEFAULT_WEIGHT   = 1.0;
+double const  LRXCompiler::LRX_COMPILER_DEFAULT_WEIGHT   = 1.0;
 
 LRXCompiler::LRXCompiler()
 {
@@ -62,6 +79,9 @@ LRXCompiler::parse(string const &fitxer)
   {
     wcerr << L"Error: Parse error at the end of input." << endl;
   }
+
+  // At this point we've read the XML file into the rule structures, and now
+  // we process the rules structures into the necessary transducers
 
   for(map<int, LSRule>::iterator it = rules.begin(); it != rules.end(); it++)
   {
