@@ -111,6 +111,9 @@ public:
   static wstring const LRX_COMPILER_TAGS_ATTR;
   static wstring const LRX_COMPILER_C_ATTR;
 
+  static wstring const LRX_COMPILER_TYPE_SELECT;
+  static wstring const LRX_COMPILER_TYPE_REMOVE;
+
   static wstring const LRX_COMPILER_ASTERISK;
 
   static double  const LRX_COMPILER_DEFAULT_WEIGHT;
