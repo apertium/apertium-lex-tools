@@ -367,7 +367,7 @@ readSentence(FILE *in, FILE *ous)
     vector<wstring> ops;
     for(map< int, wstring>::iterator it2 = operations.begin(); it2 != operations.end(); it2++)
     {
-      //fwprintf(ous, L"* %d -> %S\n", it2->first, it2->second.c_str());
+      fwprintf(ous, L"* %d -> %S\n", it2->first, it2->second.c_str());
     
       // pos, op => {rule_id, rule_id, ...}
       map< pair<int, wstring>, vector<int> > rule_pos = rule_pos_from_string(it2->first, it2->second);
@@ -381,7 +381,7 @@ readSentence(FILE *in, FILE *ous)
         }
       }
 
-      //fwprintf(ous, L"** %d %S ! %d %d ** \n", j, sl_pair.second.c_str(), tl_lloc.size(), ops.size());
+      fwprintf(ous, L"** %d %S ! %d %d ** \n", j, sl_pair.second.c_str(), tl_lloc.size(), ops.size());
       vector<wstring> new_tlloc;
       for(vector<wstring>::iterator it4 = ops.begin(); it4 != ops.end(); it4++) 
       {
@@ -417,12 +417,13 @@ readSentence(FILE *in, FILE *ous)
             break;
 
           }
-          RegexpCompiler re;
-          Alphabet alphabet;
-          re.initialize(&alphabet);
-          re.compile(tl_pattern);
-          Transducer tl_pattern_re = re.getTransducer();
-          tl_pattern_re.minimize();
+          //RegexpCompiler re;
+          //Alphabet alphabet;
+          //re.initialize(&alphabet);
+          //re.compile(tl_pattern);
+          //Transducer tl_pattern_re = re.getTransducer();
+          Transducer tl_pattern_re = transducers[alphabet(tl_pattern)];
+          //tl_pattern_re.minimize();
           bool matched = false;
           matched = tl_pattern_re.recognise(*it6, alphabet, stderr);
           if(x.find(L"<select(") != wstring::npos)
