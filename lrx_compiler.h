@@ -40,6 +40,14 @@ typedef struct LSRule
 
 } LSRule;
 
+typedef struct LSRuleRecord
+{
+  int id;			// id (e.g. line number) of the rule
+  int len;			// length of the pattern (in LUs)
+  double weight;		// an arbitrary rule weight
+
+} LSRuleRecord;
+
 class LRXCompiler
 {
 private:

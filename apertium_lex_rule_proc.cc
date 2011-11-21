@@ -36,16 +36,6 @@ map< pair<int, wstring>, vector<int> > rule_pos_from_string(int pos, wstring w);
 
 
 
-
-//map<wstring, TransExe> transducers; 
-Alphabet alphabet;
-State *initial_state;
-set<Node *> anfinals;
-set<wchar_t> escaped;
-bool outOfWord = true;
-map<int, Transducer> transducers;
-
-
 typedef struct SL 
 {
   int pos;
@@ -55,13 +45,23 @@ typedef struct SL
 // {0, prova<n><f><sg>: [proof<n><sg>, event<n><sg>, exam<n><sg>, trial<n><sg>, test<n><sg>]}
 map< pair<int, wstring>, vector<wstring> > sentence;
 
-typedef struct Rule
+typedef struct LSRuleExe
 {
-  wstring pattern;
-  int id;
-  int len;
-} Rule;
+  int id;                       // id (e.g. line number) of the rule
+  int len;                      // length of the pattern (in LUs)
+  double weight;                // an arbitrary rule weight
 
+} LSRuleExe;
+
+map<int, LSRuleExe> rules;
+
+//map<wstring, TransExe> transducers; 
+Alphabet alphabet;
+State *initial_state;
+set<Node *> anfinals;
+set<wchar_t> escaped;
+bool outOfWord = true;
+map<int, Transducer> transducers;
 
 
 void
@@ -387,6 +387,7 @@ readSentence(FILE *in, FILE *ous)
       {
         wstring x = *it4;
         // sentence[sl_pair] = tl_lloc
+        fwprintf(ous, L"*** x: %S \n", x.c_str());
 
         for(vector<wstring>::iterator it6 = tl_lloc.begin(); it6 != tl_lloc.end(); it6++) 
         { 
@@ -422,7 +423,7 @@ readSentence(FILE *in, FILE *ous)
           //re.initialize(&alphabet);
           //re.compile(tl_pattern);
           //Transducer tl_pattern_re = re.getTransducer();
-          Transducer tl_pattern_re = transducers[alphabet(tl_pattern)];
+          Transducer tl_pattern_re = transducers[alphabet(x)];
           //tl_pattern_re.minimize();
           bool matched = false;
           matched = tl_pattern_re.recognise(*it6, alphabet, stderr);
@@ -482,7 +483,8 @@ rule_pos_from_string(int pos, wstring w)
 {
   // pos, op => {rule_id, rule_id, ...}
   map< pair<int, wstring>, vector<int> > pos_rule;
-  // /<skip(*)><select(season<n>[0-9A-Za-z <>]*)><skip(*)><skip(*)><9,3>
+ 
+  // /<select(season<n>[0-9A-Za-z <>]*)><skip(*)><24>
 
   // [pos+0] = <skip(*)>
   // [pos+1] = <select(season<n>[0-9A-Za-z <>]*)>
@@ -512,47 +514,30 @@ rule_pos_from_string(int pos, wstring w)
     wstring wm = *it0;
     wstring len_buf = L"";
     wstring id_buf = L"";
-    int where = 0;
     for(wstring::iterator it = wm.end(); it != wm.begin(); it--)
     {
       if(*it == L'>')
       { 
         continue;
       }
-      if(*it == L',')
-      {
-        where = 1;  
-        continue;
-      }
       if(*it == L'<')
       {
         break;
       }
-      if(where == 0) 
-      {
-        len_buf = len_buf + *it;
-      }
-      else if(where == 1)
-      {
-        id_buf = id_buf + *it;
-      }
+      id_buf = id_buf + *it;
     }
-    reverse(len_buf.begin(), len_buf.end());
     reverse(id_buf.begin(), id_buf.end());
   
-    wistringstream wstrm(len_buf);
-    int p_len = -1; // The pattern length
-    wstrm >> p_len;
     wistringstream wstrm2(id_buf);
     int p_id = -1; // The rule id
     wstrm2 >> p_id;
+
+    int p_len = rules[p_id].len;
    
-/*
     if(p_len > 0) 
     { 
       fwprintf(stderr, L"len: %d id: %d\n", p_len, p_id);
     }
-  */
     for(wstring::iterator it = wm.begin(); it != wm.end(); it++)
     {
       if(*it == L'<') 
@@ -662,6 +647,14 @@ main (int argc, char** argv)
   //wcout << name << endl;
   te.read(fst, alphabet);
   //t.show(alphabet, ous); 
+
+  while(!feof(fst))
+  {
+    LSRuleExe rec;
+    fread(&rec, sizeof(LSRuleExe), 1, fst);
+    fwprintf(stderr, L"%d len(%d) weight(%f)\n", rec.id, rec.len, rec.weight);
+    rules[rec.id] = rec;
+  }
 
   fclose(fst);
 
