@@ -189,13 +189,6 @@
     </or>
   </rule>
   <rule>
-    <skip lemma="un" tags="det.*"/>
-    <select lemma="estació" tags="n.*">    
-      <acception lemma="station" tags="n.*"/> 
-    </select>  
-    <skip lemma="a" tags="pr.*"/>
-  </rule>
-  <rule>
     <remove lemma="règim" tags="n.*">    
       <acception lemma="diet" tags="n.*"/> 
     </remove>  
@@ -261,5 +254,12 @@
     <remove lemma="necesari" tags="adj.*">    
       <acception lemma="needed" tags="adj.*"/> 
     </remove>  
+  </rule>
+  <rule>
+    <skip lemma="un" tags="det.*"/>
+    <select lemma="estació" tags="n.*">    
+      <acception lemma="station" tags="n.*"/> 
+    </select>  
+    <skip lemma="a" tags="pr.*"/>
   </rule>
 </rules>

@@ -84,7 +84,7 @@ LRXCompiler::parse(string const &fitxer)
           wstring left = rule.sl_pattern;
           wstring right = *it2;
           wstring right_pattern = operationToPattern(*it2); // just the pattern part of the operation
-          wstring left_pattern = pattern.substr(1, left.length()-1);
+          wstring left_pattern = pattern.substr(1, left.length()-1); // all tags are in < >
           wcerr << rule.id << L" " << pos << L" " << rule.type << L" " << rule.sl_pattern << L":" << right << endl;
           s = transducer.insertSingleTransduction(alphabet(alphabet(left.c_str()), alphabet(right.c_str())), k);
           if(patterns.count(alphabet(right.c_str())) < 1)
@@ -112,7 +112,7 @@ LRXCompiler::parse(string const &fitxer)
         wcerr << rule.id << L" " << pos << L" " << pattern << L":skip " << endl;
         wstring left = pattern;
         wstring right = L"<skip(*)>";
-        wstring left_pattern = pattern.substr(1, left.length()-1);
+        wstring left_pattern = pattern.substr(1, left.length()-1); // all tags are in < > 
         RegexpCompiler re;
         re.initialize(&alphabet);
         re.compile(left_pattern);
@@ -130,7 +130,12 @@ LRXCompiler::parse(string const &fitxer)
 
       }
     }
-    s = transducer.insertSingleTransduction(alphabet(0, alphabet(w_id.c_str())), s);
+    wstring id_sym = L"<" + w_id + L">";
+    if(!alphabet.isSymbolDefined(id_sym.c_str()))
+    {
+      alphabet.includeSymbol(id_sym.c_str());
+    }
+    s = transducer.insertSingleTransduction(alphabet(0, alphabet(id_sym.c_str())), s);
     transducer.setFinal(s);
     wcout << endl;
   }
@@ -582,6 +587,12 @@ LRXCompiler::write(FILE *fst)
   } 
   Compression::wstring_write(L"main", fst);
   transducer.write(fst);
+
+  for(map<int, LSRule>::iterator it2 = rules.begin(); it2 != rules.end(); it2++) 
+  {
+    LSRuleRecord record = {  it2->second.id, it2->second.len, it2->second.weight };
+    fwrite((void *)&record, 1, sizeof(record), fst);
+  }
 
   return;
 }
