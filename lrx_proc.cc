@@ -142,6 +142,7 @@ int main(int argc, char *argv[])
         _setmode(_fileno(output), _O_U8TEXT);
 #endif
 
+  lrxp.init();
   lrxp.process(input, output);
 
   fclose(input);
