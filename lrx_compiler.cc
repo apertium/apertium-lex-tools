@@ -34,6 +34,9 @@ wstring const LRXCompiler::LRX_COMPILER_C_ATTR          = L"c";
 
 wstring const LRXCompiler::LRX_COMPILER_ASTERISK        = L"[0-9A-Za-z <>]*";
 
+wstring const LRXCompiler::LRX_COMPILER_TYPE_SELECT     = L"select";
+wstring const LRXCompiler::LRX_COMPILER_TYPE_REMOVE     = L"remove";
+
 double const  LRXCompiler::LRX_COMPILER_DEFAULT_WEIGHT   = 1.0;
 
 LRXCompiler::LRXCompiler()
@@ -51,6 +54,7 @@ LRXCompiler::~LRXCompiler()
 wstring
 LRXCompiler::itow(int i)
 {
+  // Convert an int to a wstring
   wchar_t buf[50];
   memset(buf, '\0', sizeof(buf));
   swprintf(buf, 50, L"%d", i);
@@ -86,6 +90,8 @@ LRXCompiler::parse(string const &fitxer)
   for(map<int, LSRule>::iterator it = rules.begin(); it != rules.end(); it++)
   {
     LSRule rule = it->second; 
+    fwprintf(stderr, L"\b\b%d", rule.id);
+    fflush(stderr);
     int s = transducer.getInitial();
     wstring w_id = itow(rule.id);
     if(!alphabet.isSymbolDefined(w_id.c_str()))
@@ -105,7 +111,7 @@ LRXCompiler::parse(string const &fitxer)
           wstring right = *it2;
           wstring right_pattern = operationToPattern(*it2); // just the pattern part of the operation
           wstring left_pattern = pattern.substr(1, left.length()-1); // all tags are in < >
-          wcerr << rule.id << L" " << pos << L" " << rule.type << L" " << rule.sl_pattern << L":" << right << endl;
+          //wcerr << rule.id << L" " << pos << L" " << rule.type << L" " << rule.sl_pattern << L":" << right << endl;
           s = transducer.insertSingleTransduction(alphabet(alphabet(left.c_str()), alphabet(right.c_str())), k);
           if(patterns.count(alphabet(right.c_str())) < 1)
           {
@@ -129,7 +135,7 @@ LRXCompiler::parse(string const &fitxer)
       }
       else
       {
-        wcerr << rule.id << L" " << pos << L" " << pattern << L":skip " << endl;
+        //wcerr << rule.id << L" " << pos << L" " << pattern << L":skip " << endl;
         wstring left = pattern;
         wstring right = L"<skip(*)>";
         wstring left_pattern = pattern.substr(1, left.length()-1); // all tags are in < > 
@@ -157,23 +163,22 @@ LRXCompiler::parse(string const &fitxer)
     }
     s = transducer.insertSingleTransduction(alphabet(0, alphabet(id_sym.c_str())), s);
     transducer.setFinal(s);
-    wcout << endl;
+    //wcout << endl;
   }
   transducer.minimize();
-  wcout << transducer.size() << L" " << patterns.size() << endl;
-  transducer.show(alphabet, stderr);
+  //wcout << transducer.size() << L" " << patterns.size() << endl;
+  //transducer.show(alphabet, stderr);
 
   for(map<int, Transducer>::iterator it3 = patterns.begin(); it3 != patterns.end(); it3++) 
   {
     wstring sym;
     alphabet.getSymbol(sym, it3->first, false);
-    wcout << it3->first << L" " << it3->second.size() << L" " << sym << endl;
+    //wcout << it3->first << L" " << it3->second.size() << L" " << sym << endl;
   }
+  wcout << endl;
 
   xmlFreeTextReader(reader);
   xmlCleanupParser();
-
-  // Minimise transducers
 
   return;
 }
@@ -181,6 +186,9 @@ LRXCompiler::parse(string const &fitxer)
 wstring
 LRXCompiler::operationToPattern(wstring op)
 {
+  // extracts a pattern like season<n>[0-9A-Za-z <>]* from 
+  // an operation like select(season<n>[0-9A-Za-z <>]*) 
+ 
   wstring patron = L"";
   int pc = 0;
 
@@ -209,6 +217,9 @@ LRXCompiler::operationToPattern(wstring op)
 wstring
 LRXCompiler::attribsToPattern(wstring lemma, wstring tags)
 {
+
+  // turns lemma and tag attributes into a pattern to be compiled into a regex,
+  // e.g. "el seu" det.pos.* -> el seu<det><pos>[0-9A-Za-z <>]*
 
   wstring tl_pattern = L"";
 
@@ -283,7 +294,7 @@ LRXCompiler::procAcception()
   rules[current_rule_id].tl_patterns.push_back(tl_pattern);
 
 
-  wcout << L"    Acception: " << tl_pattern << endl;
+  //wcout << L"    Acception: " << tl_pattern << endl;
 }
 
 
@@ -308,7 +319,7 @@ LRXCompiler::procSkip()
   }
   current_pattern = current_pattern + sl_pattern;
   rules[current_rule_id].sl_context[current_rule_len] = sl_pattern;
-  wcout << L"  " << current_rule_len << L" " << sl_pattern << L":skip(*)" << endl;
+  //wcout << L"  " << current_rule_len << L" " << sl_pattern << L":skip(*)" << endl;
 }
 
 void
@@ -327,7 +338,7 @@ LRXCompiler::procSelect()
   rules[current_rule_id].centre = current_rule_len;
   rules[current_rule_id].sl_context[current_rule_len] = sl_pattern;
 
-  wcout << L"  Select: " << sl_pattern << endl;
+  //wcout << L"  Select: " << sl_pattern << endl;
 
   while(true)
   {
@@ -376,7 +387,7 @@ LRXCompiler::procRemove()
   rules[current_rule_id].centre = current_rule_len;
   rules[current_rule_id].sl_context[current_rule_len] = sl_pattern;
 
-  wcout << L"  Remove: " << sl_pattern << endl;
+  //wcout << L"  Remove: " << sl_pattern << endl;
 
   while(true)
   {
@@ -430,7 +441,7 @@ LRXCompiler::procOr()
 
     if(name == LRX_COMPILER_SKIP_ELEM)
     {
-      wcout << L"  " ;
+      //wcout << L"  " ;
       procSkip();
       current_pattern = current_pattern + L"|";
     }
@@ -441,7 +452,7 @@ LRXCompiler::procOr()
       {
         alphabet.includeSymbol(current_pattern.c_str());
       }
-      wcout << L"  Or: " << current_pattern << endl;
+      //wcout << L"  Or: " << current_pattern << endl;
       rules[current_rule_id].sl_context[current_rule_len] = current_pattern;
       current_pattern = L"";
       return;
@@ -462,7 +473,7 @@ LRXCompiler::procRule()
   wstring comment =this->attrib(LRX_COMPILER_C_ATTR);
   current_context_pos = 0;
 
-  wcout << L"Rule " << current_rule_id << L":" << endl;
+  //wcout << L"Rule " << current_rule_id << L":" << endl;
   rules[current_rule_id].id = current_rule_id;
   rules[current_rule_id].weight = LRX_COMPILER_DEFAULT_WEIGHT;
   
@@ -487,24 +498,24 @@ LRXCompiler::procRule()
     else if(name == LRX_COMPILER_SELECT_ELEM)
     {
       current_rule_len++;
-      rules[current_rule_id].type = L"select";
+      rules[current_rule_id].type = LRX_COMPILER_TYPE_SELECT;
       procSelect();
     }
     else if(name == LRX_COMPILER_REMOVE_ELEM)
     {
       current_rule_len++;
-      rules[current_rule_id].type = L"remove";
+      rules[current_rule_id].type = LRX_COMPILER_TYPE_REMOVE;
       procRemove();
     }
     else if(name == LRX_COMPILER_OR_ELEM)
     {
-      wcout << L"  Or:" << endl;
+      //wcout << L"  Or:" << endl;
       procOr();
     }
     else if(name == LRX_COMPILER_RULE_ELEM)
     {
       rules[current_rule_id].len = current_rule_len;
-      wcout << L" Len: " << rules[current_rule_id].len << L" " << rules[current_rule_id].centre << endl; 
+      //wcout << L" Len: " << rules[current_rule_id].len << L" " << rules[current_rule_id].centre << endl; 
       return;
     }
     else
@@ -601,7 +612,7 @@ LRXCompiler::write(FILE *fst)
   for(map<int, Transducer>::iterator it = patterns.begin(); it != patterns.end(); it++) 
   {
     wstring id = itow(it->first);
-    wcout << id << " " << it->second.size() << endl;
+    //wcout << id << " " << it->second.size() << endl;
     Compression::wstring_write(id, fst);
     it->second.write(fst);
   } 
@@ -610,9 +621,15 @@ LRXCompiler::write(FILE *fst)
 
   for(map<int, LSRule>::iterator it2 = rules.begin(); it2 != rules.end(); it2++) 
   {
-    LSRuleRecord record = {  it2->second.id, it2->second.len, it2->second.weight };
+    LSRuleRecord record = {  
+      it2->second.id, 
+      it2->second.len,
+      it2->second.weight 
+    };
     fwrite((void *)&record, 1, sizeof(record), fst);
   }
+
+  fwprintf(stderr, L"Written %d rules, %d patterns.\n", rules.size(), patterns.size());
 
   return;
 }
