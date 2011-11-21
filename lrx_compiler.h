@@ -29,13 +29,14 @@ using namespace std;
 
 typedef struct LSRule
 {
-  int id;
-  int len;
-  wstring type; // select|remove
-  int centre; // -centre - -pos = relative position
+  int id;			// id (e.g. line number) of the rule
+  int len;			// length of the pattern (in LUs)
+  double weight;		// an arbitrary rule weight
+  wstring type; 		// select|remove
+  int centre; 			// -centre - -pos = relative position
   map<int, wstring> sl_context; // position,pattern
-  wstring sl_pattern; // pattern
-  vector<wstring> tl_patterns; // patterns
+  wstring sl_pattern; 		// pattern
+  vector<wstring> tl_patterns; 	// patterns
 
 } LSRule;
 
@@ -65,6 +66,8 @@ private:
   void procAcception();
   wstring attrib(wstring const &name);
   wstring attribsToPattern(wstring lemma, wstring tags);
+  wstring operationToPattern(wstring op);
+
   wstring itow(int i);
 
 
@@ -82,6 +85,8 @@ public:
   static wstring const LRX_COMPILER_C_ATTR;
 
   static wstring const LRX_COMPILER_ASTERISK;
+
+  static double const LRX_COMPILER_DEFAULT_WEIGHT;
 
   LRXCompiler();
 

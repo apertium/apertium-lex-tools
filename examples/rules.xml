@@ -214,7 +214,6 @@
     </select>  
     <or>
       <skip lemma="oficial" tags="adj.*"/>
-      <skip lemma="co-oficial" tags="adj.*"/>
       <skip lemma="cooficial" tags="adj.*"/>
     </or>
   </rule>

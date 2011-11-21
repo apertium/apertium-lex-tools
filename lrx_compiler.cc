@@ -17,6 +17,8 @@ wstring const LRXCompiler::LRX_COMPILER_C_ATTR          = L"c";
 
 wstring const LRXCompiler::LRX_COMPILER_ASTERISK        = L"[0-9A-Za-z <>]*";
 
+double const LRXCompiler::LRX_COMPILER_DEFAULT_WEIGHT   = 1.0;
+
 LRXCompiler::LRXCompiler()
 {
   LtLocale::tryToSetLocale();
@@ -81,20 +83,51 @@ LRXCompiler::parse(string const &fitxer)
         {
           wstring left = rule.sl_pattern;
           wstring right = *it2;
-          wcerr << rule.id << L" " << pos << L" " << rule.type << L" " << rule.sl_pattern << L":" << *it2 << endl;
+          wstring right_pattern = operationToPattern(*it2); // just the pattern part of the operation
+          wstring left_pattern = pattern.substr(1, left.length()-1);
+          wcerr << rule.id << L" " << pos << L" " << rule.type << L" " << rule.sl_pattern << L":" << right << endl;
           s = transducer.insertSingleTransduction(alphabet(alphabet(left.c_str()), alphabet(right.c_str())), k);
+          if(patterns.count(alphabet(right.c_str())) < 1)
+          {
+            RegexpCompiler re;
+            re.initialize(&alphabet);
+            re.compile(right_pattern);
+            Transducer t = re.getTransducer();
+            t.minimize();
+            patterns[alphabet(right.c_str())] = t;
+          }
+          if(patterns.count(alphabet(left.c_str())) < 1)
+          {
+            RegexpCompiler re;
+            re.initialize(&alphabet);
+            re.compile(left_pattern);
+            Transducer t = re.getTransducer();
+            t.minimize();
+            patterns[alphabet(left.c_str())] = t;
+          }
         }
       }
       else
       {
-        wcerr << rule.id << L" " << pos << L" " << pattern << L" skip " << endl;
+        wcerr << rule.id << L" " << pos << L" " << pattern << L":skip " << endl;
         wstring left = pattern;
-        wstring right = L"skip(*)";
+        wstring right = L"<skip(*)>";
+        wstring left_pattern = pattern.substr(1, left.length()-1);
+        RegexpCompiler re;
+        re.initialize(&alphabet);
+        re.compile(left_pattern);
         if(!alphabet.isSymbolDefined(right.c_str()))
         {
           alphabet.includeSymbol(right.c_str());
         }
         s = transducer.insertSingleTransduction(alphabet(alphabet(left.c_str()), alphabet(right.c_str())), s);
+        if(patterns.count(alphabet(left.c_str())) < 1)
+        {
+          Transducer t = re.getTransducer();
+          t.minimize();
+          patterns[alphabet(left.c_str())] = t;
+        }
+
       }
     }
     s = transducer.insertSingleTransduction(alphabet(0, alphabet(w_id.c_str())), s);
@@ -102,8 +135,15 @@ LRXCompiler::parse(string const &fitxer)
     wcout << endl;
   }
   transducer.minimize();
-  wcout << transducer.size() << endl;
+  wcout << transducer.size() << L" " << patterns.size() << endl;
   transducer.show(alphabet, stderr);
+
+  for(map<int, Transducer>::iterator it3 = patterns.begin(); it3 != patterns.end(); it3++) 
+  {
+    wstring sym;
+    alphabet.getSymbol(sym, it3->first, false);
+    wcout << it3->first << L" " << it3->second.size() << L" " << sym << endl;
+  }
 
   xmlFreeTextReader(reader);
   xmlCleanupParser();
@@ -111,6 +151,34 @@ LRXCompiler::parse(string const &fitxer)
   // Minimise transducers
 
   return;
+}
+
+wstring
+LRXCompiler::operationToPattern(wstring op)
+{
+  wstring patron = L"";
+  int pc = 0;
+
+  for(wstring::iterator it = op.begin(); it != op.end(); it++)
+  {
+    if(*it == L'(') 
+    { 
+      pc++;
+      continue;
+    }
+    if(*it == L')') 
+    {
+      pc--;
+      continue;
+    }
+
+    if(pc >= 1)
+    {
+      patron = patron + *it;
+    } 
+  }
+
+  return patron;
 }
 
 wstring
@@ -182,7 +250,7 @@ LRXCompiler::procAcception()
   {
     return;
   }
-  wstring tl_pattern = rules[current_rule_id].type + L"(" + attribsToPattern(lemma, tags) + L")";
+  wstring tl_pattern = L"<" + rules[current_rule_id].type + L"(" + attribsToPattern(lemma, tags) + L")>";
   if(!alphabet.isSymbolDefined(tl_pattern.c_str()))
   {
     alphabet.includeSymbol(tl_pattern.c_str());
@@ -203,11 +271,11 @@ LRXCompiler::procSkip()
   wstring sl_pattern = L"";
   if(lemma == L"" && tags == L"")
   {
-    sl_pattern = LRX_COMPILER_ASTERISK;
+    sl_pattern = L"<" + LRX_COMPILER_ASTERISK + L">";
   }
   else
   {
-    sl_pattern = attribsToPattern(lemma, tags);
+    sl_pattern = L"<" + attribsToPattern(lemma, tags) + L">";
   }
   if(!alphabet.isSymbolDefined(sl_pattern.c_str()))
   {
@@ -225,7 +293,7 @@ LRXCompiler::procSelect()
   wstring tags =this->attrib(LRX_COMPILER_TAGS_ATTR);
   rules[current_rule_id].centre = current_rule_len;
 
-  wstring sl_pattern = attribsToPattern(lemma, tags);
+  wstring sl_pattern = L"<" + attribsToPattern(lemma, tags) + L">"; 
   if(!alphabet.isSymbolDefined(sl_pattern.c_str()))
   {
     alphabet.includeSymbol(sl_pattern.c_str());
@@ -274,7 +342,7 @@ LRXCompiler::procRemove()
   wstring tags =this->attrib(LRX_COMPILER_TAGS_ATTR);
   rules[current_rule_id].centre = current_rule_len;
 
-  wstring sl_pattern = attribsToPattern(lemma, tags);
+  wstring sl_pattern = L"<" + attribsToPattern(lemma, tags) + L">";
   if(!alphabet.isSymbolDefined(sl_pattern.c_str()))
   {
     alphabet.includeSymbol(sl_pattern.c_str());
@@ -320,7 +388,7 @@ void
 LRXCompiler::procOr()
 {
 
-  current_pattern = L"(";
+  current_pattern = L"<(";
   current_rule_len++;
   while(true)
   {
@@ -343,7 +411,7 @@ LRXCompiler::procOr()
     }
     else if(name == LRX_COMPILER_OR_ELEM)
     {
-      current_pattern = current_pattern.substr(0, current_pattern.length()-1) + L")";
+      current_pattern = current_pattern.substr(0, current_pattern.length()-1) + L")>";
       if(!alphabet.isSymbolDefined(current_pattern.c_str()))
       {
         alphabet.includeSymbol(current_pattern.c_str());
@@ -371,6 +439,7 @@ LRXCompiler::procRule()
 
   wcout << L"Rule " << current_rule_id << L":" << endl;
   rules[current_rule_id].id = current_rule_id;
+  rules[current_rule_id].weight = LRX_COMPILER_DEFAULT_WEIGHT;
   
   while(true)
   {
@@ -500,9 +569,20 @@ LRXCompiler::allBlanks()
 }
 
 void
-LRXCompiler::write(FILE *o)
+LRXCompiler::write(FILE *fst)
 {
+  alphabet.write(fst);
+  Compression::multibyte_write(patterns.size(), fst);
+  for(map<int, Transducer>::iterator it = patterns.begin(); it != patterns.end(); it++) 
+  {
+    wstring id = itow(it->first);
+    wcout << id << " " << it->second.size() << endl;
+    Compression::wstring_write(id, fst);
+    it->second.write(fst);
+  } 
+  Compression::wstring_write(L"main", fst);
+  transducer.write(fst);
+
   return;
 }
-
 
