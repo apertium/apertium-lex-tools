@@ -1,11 +1,11 @@
 CFLAGS=-llttoolbox3  -L/home/fran/local/lib -I/home/fran/local/include/lttoolbox-3.2 -I. -I/usr/include/libxml2
 
 all:
-	g++ -Wall -c -o lrx_compiler.o lrx_compiler.cc $(CFLAGS)
-	g++ -Wall -c -o lrx_processor.o lrx_processor.cc $(CFLAGS)
-	g++ -Wall -o apertium-lrx-comp lrx_comp.cc lrx_compiler.o $(CFLAGS)
-	g++ -Wall -o apertium-lrx-proc lrx_proc.cc lrx_processor.o $(CFLAGS)
-	g++ -Wall -o apertium-ldx-proc ldx_proc.cc $(CFLAGS)
+	g++ -ggdb -Wall -c -o lrx_compiler.o lrx_compiler.cc $(CFLAGS)
+	g++ -ggdb -Wall -c -o lrx_processor.o lrx_processor.cc $(CFLAGS)
+	g++ -ggdb -Wall -o apertium-lrx-comp lrx_comp.cc lrx_compiler.o $(CFLAGS)
+	g++ -ggdb -Wall -o apertium-lrx-proc lrx_proc.cc lrx_processor.o $(CFLAGS)
+	g++ -ggdb -Wall -o apertium-ldx-proc ldx_proc.cc $(CFLAGS)
 
 	g++ -Wall apertium_lex_rule_proc.cc -o apertium-lex-rule-proc $(CFLAGS)
 
