@@ -56,27 +56,43 @@ typedef struct LSRuleExe
 
 } LSRuleExe;
 
+typedef struct SItem
+{
+  wstring sl;
+  set<wstring> tl;
+  wstring blank; // Superblank to the left
+} SItem;
+
 class LRXProcessor
 {
 private:
-  Alphabet alphabet;
-  TransExe transducer;
-  map<int, MatchExe> patterns;
-  map<int, LSRuleExe> rules;
-  set<Node *> anfinals;
-  set<wchar_t> escaped_chars;
+  Alphabet alphabet; // Alphabet of rule transducer
+  TransExe transducer; // The rule transducer  
+  map<int, MatchExe> patterns; // Map of alphabet symbols to regex transducers 
+  map<int, LSRuleExe> rules; // Map of rule ids to rule info (weight, etc.)
+  set<Node *> anfinals; // Final states 
+  set<wchar_t> escaped_chars; // 'Special' characters to escape
   Pool<vector<int> > *pool;
   State *initial_state;
   State *current_state;
  
-  bool traceMode;
-  
+  bool traceMode; // Rule tracing ? 
+  bool outOfWord; // Are we in a word ?
 
+  int readGeneration(FILE *input, FILE *output);
+  void skipUntil(FILE *input, FILE *output, wint_t const character);
+  wstring readFullBlock(FILE *input, wchar_t const delim1, wchar_t const delim2);
   void streamError();
+  wchar_t readEscaped(FILE *input);
+
+  void applyRules(map<int, SItem> sentence, FILE *output);
+
   wstring itow(int i);
   int wtoi(wstring w);
 
 public:
+  static wstring const LRX_PROCESSOR_S_BOUNDARY;
+
   LRXProcessor();
   ~LRXProcessor();
 
