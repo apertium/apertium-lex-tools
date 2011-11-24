@@ -47,25 +47,13 @@ LRXProcessor::wtoi(wstring w)
 
 LRXProcessor::LRXProcessor()
 {
-  // escaped_chars chars
-  escaped_chars.insert(L'[');
-  escaped_chars.insert(L']');
-  escaped_chars.insert(L'{');
-  escaped_chars.insert(L'}');
-  escaped_chars.insert(L'^');
-  escaped_chars.insert(L'$');
-  escaped_chars.insert(L'/');
-  escaped_chars.insert(L'\\');
-  escaped_chars.insert(L'@');
-  escaped_chars.insert(L'<');
-  escaped_chars.insert(L'>');
-
   pool = new Pool<vector<int> >(4, vector<int>(50));
 
   initial_state = new State(pool);
   current_state = new State(pool);
 
   traceMode = false;
+  pos = 0;
 }
 
 LRXProcessor::~LRXProcessor()
@@ -80,12 +68,6 @@ LRXProcessor::setTraceMode(bool m)
 {
   traceMode = m;
 }
-void
-LRXProcessor::streamError()
-{
-  throw Exception("Error: Malformed input stream.");
-}
-
 void
 LRXProcessor::load(FILE *in)
 {
@@ -166,173 +148,15 @@ LRXProcessor::init()
   anfinals.insert(transducer.getFinals().begin(), transducer.getFinals().end());
 }
 
-wchar_t
-LRXProcessor::readEscaped(FILE *input)
-{
-  if(feof(input))
-  {
-    streamError();
-  }
-
-  wchar_t val = static_cast<wchar_t>(fgetwc_unlocked(input));
-
-  if(feof(input) || escaped_chars.find(val) == escaped_chars.end())
-  {
-    streamError();
-  }
-
-  return val;
-}
-
-wstring
-LRXProcessor::readFullBlock(FILE *input, wchar_t const delim1, wchar_t const delim2)
-{
-  wstring result = L"";
-  result += delim1;
-  wchar_t c = delim1;
-
-  while(!feof(input) && c != delim2)
-  {
-    c = static_cast<wchar_t>(fgetwc_unlocked(input));
-    result += c;
-    if(c != L'\\')
-    {
-      continue;
-    }
-    else
-    {
-      result += static_cast<wchar_t>(readEscaped(input));
-    }
-  }
-
-  if(c != delim2)
-  {
-    streamError();
-  }
-
-  return result;
-}
-
-void
-LRXProcessor::skipUntil(FILE *input, FILE *output, wint_t const character)
-{
-  while(true)
-  {
-    wint_t val = fgetwc_unlocked(input);
-    if(feof(input))
-    {
-      return;
-    }
-
-    switch(val)
-    {
-      case L'\\':
-        val = fgetwc_unlocked(input);
-        if(feof(input))
-        {
-          return;
-        }
-        fputwc_unlocked(L'\\', output);
-        fputwc_unlocked(val, output);
-        break;
-
-      case L'\0':
-        fputwc_unlocked(val, output);
-        break;
-
-      default:
-        if(val == character)
-        {
-          return;
-        }
-        else
-        {
-          fputwc_unlocked(val, output);
-        }
-        break;
-    }
-  }
-}
-
-int
-LRXProcessor::readGeneration(FILE *input, FILE *output)
-{
-  wint_t val = fgetwc_unlocked(input);
-
-  if(feof(input))
-  {
-    return 0x7fffffff;
-  }
-
-  if(outOfWord)
-  {
-    if(val == L'^')
-    {
-      val = fgetwc_unlocked(input);
-      if(feof(input))
-      {
-        return 0x7fffffff;
-      }
-    }
-    else if(val == L'\\')
-    {
-      fputwc_unlocked(val, output);
-      val = fgetwc_unlocked(input);
-      if(feof(input))
-      {
-        return 0x7fffffff;
-      }
-      fputwc_unlocked(val,output);
-      skipUntil(input, output, L'^');
-      val = fgetwc_unlocked(input);
-      if(feof(input))
-      {
-        return 0x7fffffff;
-      }
-    }
-    else
-    {
-      fputwc_unlocked(val, output);
-      skipUntil(input, output, L'^');
-      val = fgetwc_unlocked(input);
-      if(feof(input))
-      {
-        return 0x7fffffff;
-      }
-    }
-    outOfWord = false;
-  }
-
-  if(val == L'\\')
-  {
-    val = fgetwc_unlocked(input);
-    return static_cast<int>(val);
-  }
-  else if(val == L'$')
-  {
-    outOfWord = true;
-    return static_cast<int>(L'$');
-  }
-  else if(val == L'[')
-  {
-    fputws_unlocked(readFullBlock(input, L'[', L']').c_str(), output);
-    return readGeneration(input, output);
-  }
-  else
-  {
-    return static_cast<int>(val);
-  }
-
-  return 0x7fffffff;
-}
-
 void 
-LRXProcessor::applyRules(map<int, SItem> sentence, FILE *output)
+LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
 {
   int j = 1;
   int k = 1;
   map< pair<int, int>, vector<int> > rule_spans;
   current_state = initial_state;
+
+  fwprintf(stderr, L"applyRules (%d):\n", sentence.size());
 
   for(map<int, SItem>::iterator it = sentence.begin(); it != sentence.end(); it++)
   {
@@ -359,92 +183,149 @@ LRXProcessor::applyRules(map<int, SItem> sentence, FILE *output)
     j++;
   }
 
-  
-  for(map<int, SItem>::iterator it = sentence.begin(); it != sentence.end(); it++)
-  {
-    fwprintf(output, L"%S^%S", it->second.blank.c_str(), it->second.sl.c_str());
-    set<wstring> tl = it->second.tl;
-    for(set<wstring>::iterator it2 = tl.begin(); it2 != tl.end(); it2++) 
-    { 
-      if(it2 != tl.end()) 
-      {
-        fwprintf(output, L"/");
-      }
-      fwprintf(output, L"%S", it2->c_str());
-    }
-    fwprintf(output, L"$ ");
-  }
-
   return;
 }
+
+void 
+LRXProcessor::readWord(SItem &w, FILE *input, FILE *output)
+{
+  int val = 0;
+  bool first = true;
+  wstring tl = L"";
+
+  val = fgetwc_unlocked(input);
+  while(val != L'$')
+  {
+    if(val == L'\\')
+    {
+      if(first)
+      {
+        w.sl += static_cast<wchar_t>(val);
+        val = fgetwc_unlocked(input);
+        w.sl += static_cast<wchar_t>(val);
+        val = fgetwc_unlocked(input);
+        continue;
+      }
+      else
+      { 
+        tl += static_cast<wchar_t>(val);
+        val = fgetwc_unlocked(input);
+        tl += static_cast<wchar_t>(val);
+        val = fgetwc_unlocked(input);
+        continue;
+      }
+    }
+
+    if(val == L'/' && first)
+    {
+      first = false;
+      val = fgetwc_unlocked(input);
+      continue;
+    }
+    else if(val == L'/')
+    {
+      w.tl.push_back(tl);
+      tl = L"";
+      val = fgetwc_unlocked(input);
+      continue;
+    }
+
+    if(first)
+    {
+      w.sl += static_cast<wchar_t>(val); 
+    }
+    else
+    {
+      tl += static_cast<wchar_t>(val); 
+    }
+
+    val = fgetwc_unlocked(input);
+  }
+  w.tl.push_back(tl);
+}
+
 
 void
 LRXProcessor::process(FILE *input, FILE *output)
 {
   map<int, SItem> sentence;   // pos, item
-  bool seenFirst = false;
-  int pos = 0;
-  int val = 0;
- 
-  wstring sl = L""; // the current SL side
-  wstring tl = L""; // the current SL side
-  set<wstring> tlv;  // the current TL side
+  bool isEscaped = false;
 
-  skipUntil(input, output, L'^');
-  outOfWord = false;
-  pos++;
- 
-  while((val = readGeneration(input, output)) != 0x7fffffff) 
+  sentence.clear();
+
+  int val = fgetwc_unlocked(input);
+  while(!feof(input))
   {
-    //fwprintf(stderr, L"%C\n", val);
-    switch(val)
+    if(val == L'\\')
     {
-      case L'/':
-        if(!seenFirst)
-        {
-          seenFirst = true;
-        }
-        else
-        {
-          tlv.insert(tl);
-        }
-        tl = L"";
-        val = readGeneration(input, output);
-        if(val != L'$')
-        {
-          break;
-        }
-      case L'$':
-        tlv.insert(tl);
-        sentence[pos].sl = sl;
-        sentence[pos].tl = tlv;
-        if(sl.compare(LRX_PROCESSOR_S_BOUNDARY) == 0)
-        {
-          applyRules(sentence, output);
-          sentence.clear();
-          pos = 0;
-        }
-        seenFirst = false;
-        sl = L"";
-        tl = L"";
-        tlv.clear();
-        pos++;
-        break;
-    }  
-    if(!seenFirst && !outOfWord)
-    {
-      sl.append(1, static_cast<wchar_t>(val));
+      isEscaped = true;
+      sentence[pos].blank += static_cast<wchar_t>(val);
+      val = fgetwc_unlocked(input);
+      sentence[pos].blank += static_cast<wchar_t>(val);
+      val = fgetwc_unlocked(input);
+      isEscaped = false;
     }
-    else if(!outOfWord)
+
+    if(val == L'^' && !isEscaped && outOfWord)
+    { 
+      outOfWord = false;
+      readWord(sentence[pos], input, output);
+      pos++;
+    } 
+
+    if(sentence[pos-1].sl.compare(LRX_PROCESSOR_S_BOUNDARY) == 0)
     {
-      tl.append(1, static_cast<wchar_t>(val));
+      //applyRules(sentence, output);
+      for(map<int, SItem>::iterator it = sentence.begin(); it != sentence.end(); it++)
+      { 
+        SItem w = it->second;
+        //fwprintf(stderr, L"sentence[%d]: %S\n", it->first, w.sl.c_str());
+        fputws_unlocked(w.blank.c_str(), output);
+        if(w.sl != L"") 
+        { 
+          fputws_unlocked(L"^", output);
+          fputws_unlocked(w.sl.c_str(), output);
+          for(vector<wstring>::iterator it2 = w.tl.begin(); it2 != w.tl.end(); it2++) 
+          {
+            if(it2 != w.tl.end()) 
+            {
+              fputws_unlocked(L"/", output);
+            }
+            fputws_unlocked(it2->c_str(), output);
+          }
+          fputws_unlocked(L"$", output);
+        }
+      }
+      sentence.clear();
+      pos = 0;
     }
-    else if(outOfWord && val != L'$')
+
+    if(outOfWord)
     {
-      sentence[pos].blank.append(1, static_cast<wchar_t>(val));
+      sentence[pos].blank += static_cast<wchar_t>(val);
     }
+
+    outOfWord = true;
+
+    val = fgetwc_unlocked(input);
+  }      
+  //fwprintf(stderr, L"sentence[%d]: %S\n", pos, sentence[pos].sl.c_str());
+  fputws_unlocked(sentence[pos].blank.c_str(), output);
+  if(sentence[pos].sl != L"") 
+  { 
+    fputws_unlocked(L"^", output);
+    fputws_unlocked(sentence[pos].sl.c_str(), output);
+    for(vector<wstring>::iterator it2 = sentence[pos].tl.begin(); it2 != sentence[pos].tl.end(); it2++) 
+    {
+      if(it2 != sentence[pos].tl.end()) 
+      {
+        fputws_unlocked(L"/", output);
+      }
+      fputws_unlocked(it2->c_str(), output);
+    }
+    fputws_unlocked(L"$", output);
   }
-  
+
   return;
 }
 
