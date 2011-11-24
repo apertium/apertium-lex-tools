@@ -78,7 +78,7 @@ private:
  
   bool traceMode; // Rule tracing ? 
   bool outOfWord; // Are we in a word ?
-  int pos; 
+  int pos; // Current sentence position
 
   void readWord(SItem &w, FILE *input, FILE *output);
   void applyRules(map<int, SItem> &sentence, FILE *output);
