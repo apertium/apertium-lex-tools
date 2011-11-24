@@ -59,7 +59,7 @@ typedef struct LSRuleExe
 typedef struct SItem
 {
   wstring sl;
-  set<wstring> tl;
+  vector<wstring> tl;
   wstring blank; // Superblank to the left
 } SItem;
 
@@ -78,14 +78,10 @@ private:
  
   bool traceMode; // Rule tracing ? 
   bool outOfWord; // Are we in a word ?
+  int pos; 
 
-  int readGeneration(FILE *input, FILE *output);
-  void skipUntil(FILE *input, FILE *output, wint_t const character);
-  wstring readFullBlock(FILE *input, wchar_t const delim1, wchar_t const delim2);
-  void streamError();
-  wchar_t readEscaped(FILE *input);
-
-  void applyRules(map<int, SItem> sentence, FILE *output);
+  void readWord(SItem &w, FILE *input, FILE *output);
+  void applyRules(map<int, SItem> &sentence, FILE *output);
 
   wstring itow(int i);
   int wtoi(wstring w);
