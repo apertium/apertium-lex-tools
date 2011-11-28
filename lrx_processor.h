@@ -29,6 +29,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <list>
+#include <algorithm>
 #include <set>
 
 #include <libxml/xmlreader.h>
@@ -68,7 +69,8 @@ class LRXProcessor
 private:
   Alphabet alphabet; // Alphabet of rule transducer
   TransExe transducer; // The rule transducer  
-  map<int, MatchExe> patterns; // Map of alphabet symbols to regex transducers 
+//  map<int, MatchExe> patterns; // Map of alphabet symbols to regex transducers 
+  map<int, Transducer> patterns; // Map of alphabet symbols to regex transducers 
   map<int, LSRuleExe> rules; // Map of rule ids to rule info (weight, etc.)
   set<Node *> anfinals; // Final states 
   set<wchar_t> escaped_chars; // 'Special' characters to escape
@@ -80,6 +82,7 @@ private:
   bool outOfWord; // Are we in a word ?
   int pos; // Current sentence position
 
+  vector<int> pathsToRules(wstring const path);
   void readWord(SItem &w, FILE *input, FILE *output);
   void applyRules(map<int, SItem> &sentence, FILE *output);
 
