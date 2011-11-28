@@ -91,6 +91,7 @@ LRXProcessor::load(FILE *in)
     int i_name = wtoi(name);
     Transducer t;
     t.read(in);
+/*
     map<int, int> finals;
     for(int i = 0; i < t.size(); i++) 
     { 
@@ -102,6 +103,8 @@ LRXProcessor::load(FILE *in)
     } 
     MatchExe me(t, finals);
     patterns[i_name] = me;
+*/
+    patterns[i_name] = t;
     len--;
   }
 
@@ -148,39 +151,120 @@ LRXProcessor::init()
   anfinals.insert(transducer.getFinals().begin(), transducer.getFinals().end());
 }
 
+vector<int>
+LRXProcessor::pathsToRules(wstring const path)
+{
+  vector<wstring> matched_paths;
+  vector<int> matched_rules;
+ 
+  wstring loc_buf = L"";
+  for(wstring::const_iterator it = path.begin(); it != path.end(); it++)
+  {
+    if(*it == L'/') 
+    { 
+      matched_paths.push_back(loc_buf);
+      loc_buf = L"";
+    }
+    loc_buf = loc_buf + *it;
+  }
+  if(loc_buf.compare(L"") != 0)
+  {
+    matched_paths.push_back(loc_buf);
+  } 
+
+  for(vector<wstring>::iterator it = matched_paths.begin(); it != matched_paths.end(); it++)
+  {
+    wstring wm = *it;
+    wstring id_buf = L"";
+    for(wstring::iterator it2 = wm.end(); it2 != wm.begin(); it2--)
+    {
+      if(*it2 == L'>')
+      { 
+        continue;
+      }
+      if(*it2 == L'<')
+      {
+        break;
+      }
+      id_buf = id_buf + *it2;
+    }
+    if(id_buf.compare(L"") != 0) 
+    { 
+      reverse(id_buf.begin(), id_buf.end());
+      int p_id = wtoi(id_buf);
+      matched_rules.push_back(p_id); 
+    }
+  }
+    
+  return matched_rules;
+}
+
 void 
 LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
 {
-  int j = 1;
-  int k = 1;
   map< pair<int, int>, vector<int> > rule_spans;
-  current_state = initial_state;
+  vector<State> alive_states;
+  vector<State> current_states;
+  alive_states.push_back(*initial_state);
+  current_states.push_back(*initial_state);
 
   fwprintf(stderr, L"applyRules (%d):\n", sentence.size());
 
-  for(map<int, SItem>::iterator it = sentence.begin(); it != sentence.end(); it++)
+  int j = 0; // current range start
+  int k = 0; // current range end
+
+  for(unsigned int i = 0; i < sentence.size(); i++)
+  //for(map<int, SItem>::iterator it = sentence.begin(); it != sentence.end(); it++)
   {
-    vector<int> rules;
-    fwprintf(stderr, L"%d %S %d\n", it->first, it->second.sl.c_str(), it->second.tl.size());
-
-    while(current_state->size() != 0) 
+    SItem s = sentence[i];
+    fwprintf(stderr, L"%d [%d:%d] %S(%d) (A: %d) (C: %d)\n", i, j, k, s.sl.c_str(), s.tl.size(), alive_states.size(), current_states.size());
+/*
+    for(vector<State>::const_iterator it2 = alive_states.begin(); it2 != alive_states.end(); it2++) 
     {
-      if(current_state->isFinal(anfinals))
+*/
+      vector<int> rules;
+      //fwprintf(stderr, L"%d %S %d\n", it->first, it->second.sl.c_str(), it->second.tl.size());
+      //State s = *it2;
+      State is = *initial_state;
+      for(k = j; k < sentence.size(); k++)
       {
-        wstring out = current_state->filterFinals(anfinals, alphabet, escaped_chars);
- 
-        fwprintf(stderr, L"%d->%d : %S\n", j, k, out.c_str());
+        if(is.size() == 0) 
+        { 
+          break;
+        }
+        if(is.isFinal(anfinals))
+        {
+          wstring out = is.filterFinals(anfinals, alphabet, escaped_chars);
   
-        pair<int, int> span = make_pair(j, k);
-        rule_spans[span] = rules;
-        j = k; 
-        rules.clear();
+          fwprintf(stderr, L"%d->%d : %S\n", j, k, out.c_str());
+   
+          pair<int, int> span = make_pair(j, k);
+          rule_spans[span] = pathsToRules(out);
+          //j = k; 
+          //rules.clear();
+        }
+        is.step(sentence[k].sl, patterns, alphabet, stderr);
       }
-
-      current_state->step(sentence[k].sl, patterns, alphabet, stderr);
-      k++;
+      k = j;
+/*
     }
-    j++;
+    current_states.push_back(*initial_state);
+    alive_states = current_states;
+*/
+    j = i;
+  }
+  
+  for(map< pair<int, int>, vector<int> >::iterator it = rule_spans.begin(); it != rule_spans.end(); it++) 
+  {
+    pair<int, int> span = it->first;
+    vector<int> rules = it->second;
+    fwprintf(stderr, L"%d:%d = ", span.first, span.second);
+    for(vector<int>::iterator it2 = rules.begin(); it2 != rules.end(); it2++)
+    {
+      fwprintf(stderr, L"%d ", *it2);
+    }
+    fwprintf(stderr, L"\n");
+    
   }
 
   return;
@@ -275,7 +359,7 @@ LRXProcessor::process(FILE *input, FILE *output)
 
     if(sentence[pos-1].sl.compare(LRX_PROCESSOR_S_BOUNDARY) == 0)
     {
-      //applyRules(sentence, output);
+      applyRules(sentence, output);
       for(map<int, SItem>::iterator it = sentence.begin(); it != sentence.end(); it++)
       { 
         SItem w = it->second;

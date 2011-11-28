@@ -317,7 +317,7 @@ LRXCompiler::procSkip()
   {
     alphabet.includeSymbol(sl_pattern.c_str());
   }
-  current_pattern = current_pattern + sl_pattern;
+  current_pattern = current_pattern + sl_pattern.substr(1, sl_pattern.length()-2); // FIXME: Not sure why -2 here, investigate 
   rules[current_rule_id].sl_context[current_rule_len] = sl_pattern;
   //wcout << L"  " << current_rule_len << L" " << sl_pattern << L":skip(*)" << endl;
 }
