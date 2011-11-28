@@ -85,6 +85,7 @@ private:
   vector<int> pathsToRules(wstring const path);
   void readWord(SItem &w, FILE *input, FILE *output);
   void applyRules(map<int, SItem> &sentence, FILE *output);
+  set< pair<int, int> > bestPath(map<int, set<int> > &trie);
 
   wstring itow(int i);
   int wtoi(wstring w);
