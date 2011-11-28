@@ -210,8 +210,11 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
 
   fwprintf(stderr, L"applyRules (%d):\n", sentence.size());
 
-  int j = 0; // current range start
-  int k = 0; // current range end
+  unsigned int j = 0; // current range start
+  unsigned int k = 1; // current range end
+
+  vector<int> skip;
+  skip.push_back(0);
 
   for(unsigned int i = 0; i < sentence.size(); i++)
   //for(map<int, SItem>::iterator it = sentence.begin(); it != sentence.end(); it++)
@@ -251,24 +254,109 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
     current_states.push_back(*initial_state);
     alive_states = current_states;
 */
+    if(i != j) 
+    {
+      rule_spans[make_pair(j, i)] = skip;
+    }
     j = i;
   }
+
+  int p = 0;
+
+  map<int, set<int> > trie;
   
   for(map< pair<int, int>, vector<int> >::iterator it = rule_spans.begin(); it != rule_spans.end(); it++) 
   {
     pair<int, int> span = it->first;
     vector<int> rules = it->second;
-    fwprintf(stderr, L"%d:%d = ", span.first, span.second);
     for(vector<int>::iterator it2 = rules.begin(); it2 != rules.end(); it2++)
     {
-      fwprintf(stderr, L"%d ", *it2);
+      fwprintf(stderr, L"%d\t%d\t%d\t%d\n", span.first, span.second, *it2, *it2);
+      trie[span.first].insert(span.second);
     }
-    fwprintf(stderr, L"\n");
-    
+    p = it->first.second;
+  }
+  fwprintf(stderr, L"%d\n", p);
+ 
+  // enumerate paths
+  map<int, set< pair <int, int> > > paths;
+  map<int, int> scores;
+  unsigned int numpaths = 0;
+  unsigned int i = 0;
+
+  set< pair <int, int> > path = bestPath(trie);
+
+  // print out paths + scores
+
+  fwprintf(stderr, L"\n");
+  for(map<int, int>::iterator it = scores.begin(); it != scores.end(); it++)
+  {
+    set< pair <int, int> > path = paths[it->first];
+    fwprintf(stderr, L"path[%d] = %d (", it->first, it->second);
+    for(set< pair <int, int> >::iterator it2 = path.begin(); it2 != path.end(); it2++)
+    {
+      fwprintf(stderr, L"%d:%d ", it2->first, it2->second);
+    }
+    fwprintf(stderr, L")\n");
+  }
+}
+
+set< pair<int, int> > 
+LRXProcessor::bestPath(map<int, set<int> > &trie)
+{
+  set< pair<int, int> > path;
+  int current_node = 0;
+  map<int, wstring> paths;
+  paths[0] = L""; 
+  fwprintf(stderr, L"trie: %d\n", trie.size());
+  while(current_node < trie.size()) 
+  {
+    if(trie[current_node].size() == 1)
+    {
+      for(int j = 0; j < paths.size(); j++) 
+      {
+        // for each of the paths, for the single dest node, add it to all
+        for(set<int>::const_iterator it = trie[current_node].begin(); it != trie[current_node].end(); it++)
+        {
+          fwprintf(stderr, L"=1 path[%d] %S\n", j, paths[j].c_str());
+          paths[j] += L" ";
+          paths[j] += itow(*it);
+        }
+      }
+    }
+    else
+    { 
+      int numpaths = paths.size();
+      for(map<int, wstring>::const_iterator it = paths.begin(); it != paths.end(); it++)
+      {
+        int j = it->first;
+        for(int i = 1; i <= trie[current_node].size(); i++) 
+        {
+          fwprintf(stderr, L"= (%d:%d) path[%d] %S\n", numpaths, trie[current_node].size(), j, paths[j].c_str());
+          paths[(numpaths+i)] = paths[j];
+        }
+      }
+      for(int j = 0; j < paths.size(); j++) 
+      {
+        for(set<int>::const_iterator it = trie[current_node].begin(); it != trie[current_node].end(); it++)
+        {
+          fwprintf(stderr, L"=3 path[%d] %S\n", j, paths[j].c_str());
+          paths[j] += L" ";
+          paths[j] += itow(*it);
+        }
+      }
+    }
+    current_node++;
   }
 
-  return;
+  for(map<int, wstring>::iterator it = paths.begin(); it != paths.end(); it++) 
+  {
+    fwprintf(stderr, L"path[%d] %S\n", it->first, it->second.c_str());
+  }
+
+  return path;
 }
+
 
 void 
 LRXProcessor::readWord(SItem &w, FILE *input, FILE *output)
