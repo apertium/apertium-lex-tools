@@ -167,7 +167,7 @@ LRXCompiler::parse(string const &fitxer)
   }
   transducer.minimize();
   //wcout << transducer.size() << L" " << patterns.size() << endl;
-  //transducer.show(alphabet, stderr);
+  transducer.show(alphabet, stderr);
 
   for(map<int, Transducer>::iterator it3 = patterns.begin(); it3 != patterns.end(); it3++) 
   {
