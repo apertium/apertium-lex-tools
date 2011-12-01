@@ -741,5 +741,3 @@ LRXProcessor::process(FILE *input, FILE *output)
 
   return;
 }
-
-
