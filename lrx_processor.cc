@@ -209,17 +209,18 @@ LRXProcessor::pathsToRules(wstring const path)
 void 
 LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
 {
-  map< pair<int, int>, vector<int> > rule_spans;
-  vector<State> current_states;
-  map< pair<int, int>, wstring > pos_rules;
+  // A map containing spans in the sentence and a list of rules which match
+  // these spans
+  map< pair<int, int>, vector<int> > rule_spans; 
+  map< pair<int, int>, wstring > pos_rules; 
+  vector<State> current_states; 
 
   current_states.push_back(*initial_state);
-
-  //fwprintf(stderr, L"applyRules (%d):\n", sentence.size());
 
   unsigned int j = 0; // current range start
   unsigned int k = 1; // current range end
 
+  // The default rule is to just skip
   vector<int> skip;
   skip.push_back(0);
 
@@ -230,27 +231,26 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
     SItem s = sentence[i];
     //fwprintf(stderr, L"%d [%d:%d] %S(%d) (C: %d)\n", i, j, k, s.sl.c_str(), s.tl.size(), current_states.size());
 
-    vector<int> rules;
+    vector<int> rules; // Each time we advance a word in the sentence we reinitialise the list of current matched rules
     State is = *initial_state;
-    for(k = j; k < sentence.size(); k++)
+    for(k = j; k < sentence.size(); k++) // From the current position in the sentence until the end
     {
-      if(is.size() == 0) 
+      if(is.size() == 0) // FIXME: Should this go after isFinal?
       { 
         break;
       }
-      if(is.isFinal(anfinals))
+      if(is.isFinal(anfinals)) // If this is a final state (regardless of if there is more input), then add the match
       {
         wstring out = is.filterFinals(anfinals, alphabet, escaped_chars);
-
         //fwprintf(stderr, L"%d->%d : %S\n", j, k, out.c_str());
  
         pair<int, int> span = make_pair(j, k);
         rule_spans[span] = pathsToRules(out);
-        pos_rules[span] = out;
+        pos_rules[span] = out; 
       }
       is.step(sentence[k].sl, patterns, alphabet, stderr);
     }
-    k = j;
+    k = j; 
 
     if(i != j) // Add the default 'skip' rule
     {
@@ -270,6 +270,7 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
 
   int p = 0;
 
+  // Print out the transducer of matched rules
   for(map< pair<int, int>, vector<int> >::iterator it = rule_spans.begin(); it != rule_spans.end(); it++) 
   {
     pair<int, int> span = it->first;
@@ -280,17 +281,13 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
     }
     p = it->first.second;
   }
-  fwprintf(stderr, L"%d\n", p);
+  fwprintf(stderr, L"%d\n", p); // Final state
  
-  // enumerate paths
-  map<int, set< pair <int, int> > > paths;
-  map<int, int> scores;
-
+  // Find the optimal path
   map< pair <int, int>, int > path = bestPath(rule_spans, sentence.size());
 
-  // print out paths + scores
-
 /*
+  // print out paths + scores
   fwprintf(stderr, L"\n");
   for(map< pair<int, int>, int>::iterator it = path.begin(); it != path.end(); it++)
   {
@@ -300,9 +297,7 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
   }
 */
 
-  // apply rules to sentence!
-
-  
+  // Here is where we apply the rules that best cover the sentence to the sentence
   for(unsigned int i = 0; i < sentence.size(); i++)
   { 
     SItem s = sentence[i];
@@ -511,9 +506,10 @@ LRXProcessor::ruleToOps(wstring rules, int id, int pos)
 }
 
 
-map< pair<int, int>, int >
+map< pair<int, int>, int > // This function needs to be optimised
 LRXProcessor::bestPath(map< pair<int, int>, vector<int> > &rule_spans, unsigned int slen)
 {
+  
   map< pair<int, int>, int > path;
   
   map<wstring, int> scores;
@@ -676,7 +672,7 @@ LRXProcessor::readWord(SItem &w, FILE *input, FILE *output)
 
 
 void
-LRXProcessor::process(FILE *input, FILE *output)
+LRXProcessor::process(FILE *input, FILE *output) 
 {
   map<int, SItem> sentence;   // pos, item
   bool isEscaped = false;
