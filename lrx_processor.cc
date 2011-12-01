@@ -104,6 +104,9 @@ LRXProcessor::load(FILE *in)
     MatchExe me(t, finals);
     patterns[i_name] = me;
 */
+    wstring sym;
+    alphabet.getSymbol(sym, i_name);
+    fwprintf(stderr, L"%d %S %S %d\n", i_name, name.c_str(), sym.c_str(), t.size());
     patterns[i_name] = t;
     len--;
   }
@@ -208,6 +211,7 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
 {
   map< pair<int, int>, vector<int> > rule_spans;
   vector<State> current_states;
+  map< pair<int, int>, wstring > pos_rules;
 
   current_states.push_back(*initial_state);
 
@@ -242,6 +246,7 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
  
         pair<int, int> span = make_pair(j, k);
         rule_spans[span] = pathsToRules(out);
+        pos_rules[span] = out;
       }
       is.step(sentence[k].sl, patterns, alphabet, stderr);
     }
@@ -297,7 +302,7 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
 
   
   for(unsigned int i = 0; i < sentence.size(); i++)
-  {
+  { 
     SItem s = sentence[i];
     fwprintf(stderr, L"%d %S(%d)\n", i, s.sl.c_str(), s.tl.size());
     for(unsigned int j = i; j < sentence.size(); j++)
@@ -308,13 +313,184 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
         int rule = path[p];
         if(rule > 0) 
         {
-          fwprintf(stderr, L"-> rule %d: %d %d %f\n", rule, rules[rule].id, rules[rule].len, rules[rule].weight);
+          int offset = 0;
+          map< pair<int, wstring>, wstring> ops = ruleToOps(pos_rules[p], rule, i);
+ 
+          for(map< pair<int, wstring>, wstring>::iterator it = ops.begin(); it != ops.end(); it++)
+          {
+            pair<int, wstring> oftype = it->first;
+            wstring matcher = it->second ;
+            //fwprintf(stderr, L"-> rule %d: %d %d %f\n", rule, rules[rule].id, rules[rule].len, rules[rule].weight);
+            //fwprintf(stderr, L": %S\n", pos_rules[p].c_str());
+            fwprintf(stderr, L" %d : [%d] %d | %S | %S \n", alphabet(matcher), rule, oftype.first, oftype.second.c_str(), matcher.c_str());
+            if(oftype.second == L"skip")
+            {  
+              continue; 
+            }
+            Transducer t = patterns[alphabet(matcher)]; 
+            vector<wstring> new_tl;
+            for(vector<wstring>::const_iterator it2 = sentence[oftype.first].tl.begin(); it2 != sentence[oftype.first].tl.end(); it2++)
+            {
+              bool matched = false;
+              wstring tlword = *it2;
+              matched = t.recognise(tlword, alphabet, stderr);
+              if(oftype.second == L"select" && matched)
+              {
+                new_tl.push_back(tlword);
+                fwprintf(stderr, L"%d : %d SELECT %S\n", t.size(), matched, tlword.c_str());
+              } 
+              else if(oftype.second == L"remove" && !matched)
+              { 
+                new_tl.push_back(tlword);
+                fwprintf(stderr, L"%d : %d REMOVE %S\n", t.size(), matched, tlword.c_str());
+              }
+              else if(oftype.second == L"select" && !matched)
+              {
+                fwprintf(stderr, L"%d : %d UNSELECT %S\n", t.size(), matched, tlword.c_str());
+                continue;
+              }
+              else
+              {
+                new_tl.push_back(tlword);
+                fwprintf(stderr, L"%d : %d COPY %S\n", t.size(), matched, tlword.c_str());
+              }
+            }
+             
+            if(new_tl.size() > 0)
+            {
+              sentence[oftype.first].tl = new_tl;
+            }
+          }
         } 
       }
     }
   }
-
 }
+
+map< pair<int, wstring>, wstring> 
+LRXProcessor::ruleToOps(wstring rules, int id, int pos)
+{
+  vector<wstring> matched_paths;
+
+  wstring loc_buf = L"";
+  for(wstring::const_iterator it = rules.begin(); it != rules.end(); it++)
+  {
+    if(*it == L'/')
+    {
+      matched_paths.push_back(loc_buf);
+      loc_buf = L"";
+    }
+    loc_buf = loc_buf + *it;
+  }
+  if(loc_buf.compare(L"") != 0)
+  {
+    matched_paths.push_back(loc_buf);
+  }
+
+  map< pair<int, wstring>, wstring> ops;
+  map<int, wstring> offset_op;
+  for(vector<wstring>::iterator it = matched_paths.begin(); it != matched_paths.end(); it++)
+  {
+    // : /<select(season<n>[0-9A-Za-z <>]*)><skip(*)><5>
+    // : /<select(season<n>[0-9A-Za-z <>]*)><skip(*)><1>
+    // : /<select(season<n>[0-9A-Za-z <>]*)><skip(*)><skip(*)><6>
+    // : /<skip(*)><select(station<n>[0-9A-Za-z <>]*)><skip(*)><10>
+
+    wstring m = *it;
+    int pcount = 0; // parenthesis count
+    int acount = 0; // angle bracket (lt/gt) count
+    wstring temp = L"";
+
+    for(wstring::const_iterator it2 = m.begin(); it2 != m.end(); it2++)
+    {
+      if(*it2 == L'<')
+      {
+        acount++;
+      }
+      if(*it2 == L'>')
+      {
+        acount--;
+        if(acount == 0)
+        {
+          temp = temp + *it2;
+          offset_op[pos + pcount] = temp;
+          temp = L"";
+          pcount++;
+        }
+      }
+
+      if(acount > 0)
+      {
+        temp = temp + *it2;
+      }
+    }
+
+    wstring rule_id = offset_op[pos + (pcount - 1)];
+    wstring rid = L"<" + itow(id) + L">";
+    for(map<int, wstring>::iterator it3 = offset_op.begin(); it3 != offset_op.end(); it3++)
+    {
+      wstring pattern = L"";
+      if(rule_id == rid) 
+      {
+        wstring part = it3->second;
+        wstring type = L"skip";
+        bool inPar = false;
+        if(part.find(L"<select") != wstring::npos)
+        {
+          type = L"select";
+          for(wstring::iterator it4 = part.begin(); it4 != part.end(); it4++) 
+          {
+            if(*it4 == L'(') 
+            {
+              inPar = true;
+              continue;
+            }  
+            else if(*it4 == L')')
+            {
+              inPar = false;
+              continue;
+            }
+            if(inPar)
+            {
+              pattern = pattern + *it4;
+            }
+          }
+  
+        }
+        if(part.find(L"<remove") != wstring::npos)
+        {
+          type = L"remove";
+          for(wstring::iterator it4 = part.begin(); it4 != part.end(); it4++) 
+          {
+            if(*it4 == L'(') 
+            {
+              inPar = true;
+              continue;
+            } 
+            else if(*it4 == L')')
+            {
+              inPar = false;
+              continue;
+            }
+  
+            if(inPar)
+            {
+              pattern = pattern + *it4;
+            }
+          }
+  
+        }
+        
+        fwprintf(stderr, L"*%S offset %d: %S\n", rule_id.c_str(), it3->first, it3->second.c_str());
+        //ops[make_pair(it3->first, type)] = pattern;
+        ops[make_pair(it3->first, type)] = part;
+      } 
+    }
+  }
+
+  return ops;
+}
+
 
 map< pair<int, int>, int >
 LRXProcessor::bestPath(map< pair<int, int>, vector<int> > &rule_spans, unsigned int slen)
@@ -322,7 +498,7 @@ LRXProcessor::bestPath(map< pair<int, int>, vector<int> > &rule_spans, unsigned 
   map< pair<int, int>, int > path;
   
   map<wstring, int> scores;
-  map<wstring, int> path_last;
+  map<wstring, unsigned int> path_last;
   scores[L""] = 0; 
   
   for(unsigned int i = 0; i < slen; i++) 
@@ -393,7 +569,6 @@ LRXProcessor::bestPath(map< pair<int, int>, vector<int> > &rule_spans, unsigned 
   int i = 0;
   int j = 0;
   int rule = 0;
-  int s = 0;
   for(wstring::iterator it = current_max.begin(); it != current_max.end(); it++)
   {
     switch(*it)
