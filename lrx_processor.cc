@@ -215,7 +215,7 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
 
   current_states.push_back(*initial_state);
 
-  fwprintf(stderr, L"applyRules (%d):\n", sentence.size());
+  //fwprintf(stderr, L"applyRules (%d):\n", sentence.size());
 
   unsigned int j = 0; // current range start
   unsigned int k = 1; // current range end
@@ -242,7 +242,7 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
       {
         wstring out = is.filterFinals(anfinals, alphabet, escaped_chars);
 
-        fwprintf(stderr, L"%d->%d : %S\n", j, k, out.c_str());
+        //fwprintf(stderr, L"%d->%d : %S\n", j, k, out.c_str());
  
         pair<int, int> span = make_pair(j, k);
         rule_spans[span] = pathsToRules(out);
@@ -324,7 +324,7 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
             wstring matcher = it->second ;
             //fwprintf(stderr, L"-> rule %d: %d %d %f\n", rule, rules[rule].id, rules[rule].len, rules[rule].weight);
             //fwprintf(stderr, L": %S\n", pos_rules[p].c_str());
-            fwprintf(stderr, L" %d : [%d] %d | %S | %S \n", alphabet(matcher), rule, oftype.first, oftype.second.c_str(), matcher.c_str());
+            //fwprintf(stderr, L"%d : [%d] %d | %S | %S \n", alphabet(matcher), rule, oftype.first, oftype.second.c_str(), matcher.c_str());
             if(oftype.second == L"skip")
             {  
               continue; 
@@ -339,16 +339,33 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
               if(oftype.second == L"select" && matched)
               {
                 new_tl.push_back(tlword);
-                fwprintf(stderr, L"%d : %d SELECT %S\n", t.size(), matched, tlword.c_str());
+                if(traceMode)
+                {
+                  fwprintf(stderr, L"SELECT:%d %S\n", rule, tlword.c_str());
+                }
               } 
               else if(oftype.second == L"remove" && !matched)
               { 
                 new_tl.push_back(tlword);
-                fwprintf(stderr, L"%d : %d REMOVE %S\n", t.size(), matched, tlword.c_str());
+                if(traceMode)
+                {
+                  fwprintf(stderr, L"SELECT:%d %S\n", rule, tlword.c_str());
+                }
+              }
+              else if(oftype.second == L"remove" && matched)
+              { 
+                if(traceMode)
+                {
+                  fwprintf(stderr, L"REMOVE:%d %S\n", rule, tlword.c_str());
+                }
+                continue;
               }
               else if(oftype.second == L"select" && !matched)
               {
-                fwprintf(stderr, L"%d : %d UNSELECT %S\n", t.size(), matched, tlword.c_str());
+                if(traceMode)
+                {
+                  fwprintf(stderr, L"REMOVE:%d %S\n", rule, tlword.c_str());
+                }
                 continue;
               }
               else
@@ -607,7 +624,7 @@ LRXProcessor::readWord(SItem &w, FILE *input, FILE *output)
   wstring tl = L"";
 
   val = fgetwc_unlocked(input);
-  while(val != L'$')
+  while(val != L'$' && !feof(input))
   {
     if(val == L'\\')
     {
@@ -692,7 +709,7 @@ LRXProcessor::process(FILE *input, FILE *output)
       for(map<int, SItem>::iterator it = sentence.begin(); it != sentence.end(); it++)
       { 
         SItem w = it->second;
-        //fwprintf(stderr, L"sentence[%d]: %S\n", it->first, w.sl.c_str());
+        fwprintf(stderr, L"sentence[%d]: %S\n", it->first, w.sl.c_str());
         fputws_unlocked(w.blank.c_str(), output);
         if(w.sl != L"") 
         { 
@@ -722,6 +739,7 @@ LRXProcessor::process(FILE *input, FILE *output)
 
     val = fgetwc_unlocked(input);
   }      
+
   //fwprintf(stderr, L"sentence[%d]: %S\n", pos, sentence[pos].sl.c_str());
   fputws_unlocked(sentence[pos].blank.c_str(), output);
   if(sentence[pos].sl != L"") 
