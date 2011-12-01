@@ -82,9 +82,12 @@ private:
   bool outOfWord; // Are we in a word ?
   int pos; // Current sentence position
 
+  map< pair<int, wstring>, wstring> ruleToOps(wstring rules, int id, int pos);
   vector<int> pathsToRules(wstring const path);
   void readWord(SItem &w, FILE *input, FILE *output);
   void applyRules(map<int, SItem> &sentence, FILE *output);
+  
+  // Find the best path from a chart of sentence positions and rule numbers
   map< pair<int, int>, int > bestPath(map< pair<int, int>, vector<int> > &rule_spans, unsigned int len);
 
   wstring itow(int i);
