@@ -106,12 +106,12 @@ LRXProcessor::load(FILE *in)
 */
     wstring sym;
     alphabet.getSymbol(sym, i_name);
-    fwprintf(stderr, L"%d %S %S %d\n", i_name, name.c_str(), sym.c_str(), t.size());
+    //fwprintf(stderr, L"%d %S %S %d\n", i_name, name.c_str(), sym.c_str(), t.size());
     patterns[i_name] = t;
     len--;
   }
 
-  fwprintf(stderr, L"Patterns: %d, Alphabet: %d\n", patterns.size(), alphabet.size());
+  //fwprintf(stderr, L"Patterns: %d, Alphabet: %d\n", patterns.size(), alphabet.size());
 
   // Now read in the main rule pattern transducer
 
@@ -228,7 +228,7 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
   for(unsigned int i = 0; i < sentence.size(); i++)
   {
     SItem s = sentence[i];
-    fwprintf(stderr, L"%d [%d:%d] %S(%d) (C: %d)\n", i, j, k, s.sl.c_str(), s.tl.size(), current_states.size());
+    //fwprintf(stderr, L"%d [%d:%d] %S(%d) (C: %d)\n", i, j, k, s.sl.c_str(), s.tl.size(), current_states.size());
 
     vector<int> rules;
     State is = *initial_state;
@@ -290,6 +290,7 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
 
   // print out paths + scores
 
+/*
   fwprintf(stderr, L"\n");
   for(map< pair<int, int>, int>::iterator it = path.begin(); it != path.end(); it++)
   {
@@ -297,6 +298,7 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
     int rule = it->second;
     fwprintf(stderr, L"%d %d *%d *%d\n", transition.first, transition.second, rule, rule);
   }
+*/
 
   // apply rules to sentence!
 
@@ -304,7 +306,7 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
   for(unsigned int i = 0; i < sentence.size(); i++)
   { 
     SItem s = sentence[i];
-    fwprintf(stderr, L"%d %S(%d)\n", i, s.sl.c_str(), s.tl.size());
+    //fwprintf(stderr, L"%d %S(%d)\n", i, s.sl.c_str(), s.tl.size());
     for(unsigned int j = i; j < sentence.size(); j++)
     {
       pair<int, int> p = make_pair(i, j);
@@ -481,7 +483,7 @@ LRXProcessor::ruleToOps(wstring rules, int id, int pos)
   
         }
         
-        fwprintf(stderr, L"*%S offset %d: %S\n", rule_id.c_str(), it3->first, it3->second.c_str());
+        //fwprintf(stderr, L"*%S offset %d: %S\n", rule_id.c_str(), it3->first, it3->second.c_str());
         //ops[make_pair(it3->first, type)] = pattern;
         ops[make_pair(it3->first, type)] = part;
       } 
@@ -550,7 +552,7 @@ LRXProcessor::bestPath(map< pair<int, int>, vector<int> > &rule_spans, unsigned 
       scores = new_scores;
     }
   }
-  fwprintf(stderr, L"\n\n", scores.size());
+  //fwprintf(stderr, L"\n\n", scores.size());
   
   double max = 1.0 / static_cast<double>(slen);
   wstring current_max = L"";
