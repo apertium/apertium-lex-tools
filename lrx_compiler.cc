@@ -45,6 +45,7 @@ LRXCompiler::LRXCompiler()
   current_rule_id = 0;
   current_rule_len = 0;
   current_context_pos = 0;
+  outputGraph = false;
 }
 
 LRXCompiler::~LRXCompiler()

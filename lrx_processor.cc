@@ -22,6 +22,7 @@
 using namespace std;
 
 wstring const LRXProcessor::LRX_PROCESSOR_S_BOUNDARY = L".<sent>";
+unsigned int const LRXProcessor::LRX_PROCESSOR_MAX_S_LENGTH = 300 ;
 
 wstring
 LRXProcessor::itow(int i)
@@ -213,6 +214,8 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
   // these spans
   map< pair<int, int>, vector<int> > rule_spans; 
   map< pair<int, int>, wstring > pos_rules; 
+
+  // List of current states in the rule transducer
   vector<State> current_states; 
 
   current_states.push_back(*initial_state);
@@ -301,7 +304,7 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
   for(unsigned int i = 0; i < sentence.size(); i++)
   { 
     SItem s = sentence[i];
-    //fwprintf(stderr, L"%d %S(%d)\n", i, s.sl.c_str(), s.tl.size());
+    fwprintf(stderr, L"%d %S(%d)\n", i, s.sl.c_str(), s.tl.size());
     for(unsigned int j = i; j < sentence.size(); j++)
     {
       pair<int, int> p = make_pair(i, j);
@@ -310,16 +313,16 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
         int rule = path[p];
         if(rule > 0) 
         {
-          int offset = 0;
+          //int offset = 0;
           map< pair<int, wstring>, wstring> ops = ruleToOps(pos_rules[p], rule, i);
  
           for(map< pair<int, wstring>, wstring>::iterator it = ops.begin(); it != ops.end(); it++)
           {
             pair<int, wstring> oftype = it->first;
             wstring matcher = it->second ;
-            //fwprintf(stderr, L"-> rule %d: %d %d %f\n", rule, rules[rule].id, rules[rule].len, rules[rule].weight);
-            //fwprintf(stderr, L": %S\n", pos_rules[p].c_str());
-            //fwprintf(stderr, L"%d : [%d] %d | %S | %S \n", alphabet(matcher), rule, oftype.first, oftype.second.c_str(), matcher.c_str());
+            fwprintf(stderr, L"-> rule %d: %d %d %f\n", rule, rules[rule].id, rules[rule].len, rules[rule].weight);
+            fwprintf(stderr, L": %S\n", pos_rules[p].c_str());
+            fwprintf(stderr, L"%d : [%d] %d | %S | %S \n", alphabet(matcher), rule, oftype.first, oftype.second.c_str(), matcher.c_str());
             if(oftype.second == L"skip")
             {  
               continue; 
@@ -515,6 +518,8 @@ LRXProcessor::bestPath(map< pair<int, int>, vector<int> > &rule_spans, unsigned 
   map<wstring, int> scores;
   map<wstring, unsigned int> path_last;
   scores[L""] = 0; 
+
+  fwprintf(stderr, L"slen: %d\n\n", slen);
   
   for(unsigned int i = 0; i < slen; i++) 
   {
@@ -529,6 +534,10 @@ LRXProcessor::bestPath(map< pair<int, int>, vector<int> > &rule_spans, unsigned 
         {
           wstring current_path = it3->first;
           int score = it3->second;
+          /*if(current_rule == 0)
+          { 
+            scores[current_path]--;
+          }*/
           if(rule_spans.find(p) != rule_spans.end())
           {
             wstring transition = itow(i) + L">" + itow(j) + L":" + itow(current_rule);;
@@ -572,6 +581,12 @@ LRXProcessor::bestPath(map< pair<int, int>, vector<int> > &rule_spans, unsigned 
   for(map<wstring, int>::iterator it = scores.begin(); it != scores.end(); it++)
   {
     double score = 1.0 / static_cast<double>(it->second);
+/*
+    if(it->second == 0) 
+    {
+      score = 0.1;
+    }
+*/
     if(score > max)
     {
       max = score;
@@ -579,6 +594,7 @@ LRXProcessor::bestPath(map< pair<int, int>, vector<int> > &rule_spans, unsigned 
     }
     fwprintf(stderr, L"max: %f cur: %f | %d path[%S]\n", max, score, it->second, it->first.c_str());
   }
+  //fwprintf(stderr, L"max: %S\n", current_max.c_str());
 
   wstring t = L"";  
   int i = 0;
@@ -590,7 +606,7 @@ LRXProcessor::bestPath(map< pair<int, int>, vector<int> > &rule_spans, unsigned 
     {
       case L' ':
         rule = wtoi(t);
-        //fwprintf(stderr, L"%d:%d %d\n", i, j, rule);
+        fwprintf(stderr, L"%d:%d %d\n", i, j, rule);
         path[make_pair(i, j)] = rule;
         i = 0; 
         j = 0; 
@@ -608,6 +624,9 @@ LRXProcessor::bestPath(map< pair<int, int>, vector<int> > &rule_spans, unsigned 
         t = t + *it;
     }
   }
+  rule = wtoi(t);
+  fwprintf(stderr, L"%d:%d %d\n", i, j, rule);
+  path[make_pair(i, j)] = rule;
 
   return path; 
 }
@@ -699,7 +718,7 @@ LRXProcessor::process(FILE *input, FILE *output)
       pos++;
     } 
 
-    if(sentence[pos-1].sl.compare(LRX_PROCESSOR_S_BOUNDARY) == 0)
+    if(sentence[pos-1].sl.compare(LRX_PROCESSOR_S_BOUNDARY) == 0 || pos >= LRX_PROCESSOR_MAX_S_LENGTH)
     {
       applyRules(sentence, output);
       for(map<int, SItem>::iterator it = sentence.begin(); it != sentence.end(); it++)

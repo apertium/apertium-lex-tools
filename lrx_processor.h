@@ -80,7 +80,7 @@ private:
  
   bool traceMode; // Rule tracing ? 
   bool outOfWord; // Are we in a word ?
-  int pos; // Current sentence position
+  unsigned int pos; // Current sentence position
 
   map< pair<int, wstring>, wstring> ruleToOps(wstring rules, int id, int pos);
   vector<int> pathsToRules(wstring const path);
@@ -95,6 +95,7 @@ private:
 
 public:
   static wstring const LRX_PROCESSOR_S_BOUNDARY;
+  static unsigned const int LRX_PROCESSOR_MAX_S_LENGTH;
 
   LRXProcessor();
   ~LRXProcessor();
