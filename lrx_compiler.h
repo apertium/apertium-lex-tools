@@ -81,6 +81,8 @@ private:
   int current_rule_len;
   int current_context_pos;
   wstring current_pattern;
+
+  bool outputGraph;
   
   bool allBlanks();
   void skipBlanks(wstring &name);
