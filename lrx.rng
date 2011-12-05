@@ -7,50 +7,17 @@
           <text/>
         </attribute>
       </optional>
-      <choice> 
-        <group>
-          <oneOrMore>
+      <oneOrMore>
+        <element name="match">
+          <attribute name="lemma">
+            <text/>
+          </attribute>
+          <attribute name="tags">
+            <text/>
+          </attribute>
+          <zeroOrMore>
             <choice>
-              <oneOrMore>
-                <element name="skip">
-                  <optional>
-                    <attribute name="lemma">
-                      <text/>
-                    </attribute>
-                    <attribute name="tags">
-                      <text/>
-                    </attribute>
-                  </optional>
-                </element> 
-              </oneOrMore>
-              <oneOrMore>
-                <element name="or">
-                  <oneOrMore>
-                    <element name="skip">
-                      <optional>
-                        <attribute name="lemma">
-                          <text/>
-                        </attribute>
-                        <attribute name="tags">
-                          <text/>
-                        </attribute>
-                      </optional>
-                    </element> 
-                  </oneOrMore>
-                </element>
-              </oneOrMore>
-            </choice>
-          </oneOrMore>
-          <choice>
-            <element name="select">
-              <attribute name="lemma">
-                <text/>
-              </attribute>
-              <attribute name="tags">
-                <text/>
-              </attribute>
-              <oneOrMore>
-                <element name="acception">
+                <element name="select">
                   <attribute name="lemma">
                     <text/>
                   </attribute>
@@ -58,143 +25,7 @@
                     <text/>
                   </attribute>
                 </element> 
-              </oneOrMore>
-            </element> 
-            <element name="remove">
-              <attribute name="lemma">
-                <text/>
-              </attribute>
-              <attribute name="tags">
-                <text/>
-              </attribute>
-              <oneOrMore>
-                <element name="acception">
-                  <attribute name="lemma">
-                    <text/>
-                  </attribute>
-                  <attribute name="tags">
-                    <text/>
-                  </attribute>
-                </element>
-              </oneOrMore>
-            </element>
-          </choice>
-        </group> 
-        <group>
-          <oneOrMore>
-            <choice>
-              <oneOrMore>
-                <element name="skip">
-                  <optional>
-                    <attribute name="lemma">
-                      <text/>
-                    </attribute>
-                    <attribute name="tags">
-                      <text/>
-                    </attribute>
-                  </optional>
-                </element>
-              </oneOrMore>
-              <oneOrMore>
-                <element name="or">
-                  <oneOrMore>
-                    <element name="skip">
-                      <optional>
-                        <attribute name="lemma">
-                          <text/>
-                        </attribute>
-                        <attribute name="tags">
-                          <text/>
-                        </attribute>
-                      </optional>
-                    </element>
-                  </oneOrMore>
-                </element>
-              </oneOrMore>
-            </choice>
-          </oneOrMore>
-          <choice>
-            <element name="select">
-              <attribute name="lemma">
-                <text/>
-              </attribute>
-              <attribute name="tags">
-                <text/>
-              </attribute>
-              <oneOrMore>
-                <element name="acception">
-                  <attribute name="lemma">
-                    <text/>
-                  </attribute>
-                  <attribute name="tags">
-                    <text/>
-                  </attribute>
-                </element>
-              </oneOrMore>
-            </element> 
-            <element name="remove">
-              <attribute name="lemma">
-                <text/>
-              </attribute>
-              <attribute name="tags">
-                <text/>
-              </attribute>
-              <oneOrMore>
-                <element name="acception">
-                  <attribute name="lemma">
-                    <text/>
-                  </attribute>
-                  <attribute name="tags">
-                    <text/>
-                  </attribute>
-                </element>
-              </oneOrMore>
-            </element>
-          </choice>
-          <oneOrMore>
-            <choice>
-              <oneOrMore>
-                <element name="skip">
-                  <optional>
-                    <attribute name="lemma">
-                      <text/>
-                    </attribute>
-                    <attribute name="tags">
-                      <text/>
-                    </attribute>
-                  </optional>
-                </element>
-              </oneOrMore>
-              <oneOrMore>
-                <element name="or">
-                  <oneOrMore>
-                    <element name="skip">
-                      <optional>
-                        <attribute name="lemma">
-                          <text/>
-                        </attribute>
-                        <attribute name="tags">
-                          <text/>
-                        </attribute>
-                      </optional>
-                    </element>
-                  </oneOrMore>
-                </element>
-              </oneOrMore>
-            </choice>
-          </oneOrMore>
-        </group> 
-        <group>
-          <choice>
-            <element name="select">
-              <attribute name="lemma">
-                <text/>
-              </attribute>
-              <attribute name="tags">
-                <text/>
-              </attribute>
-              <oneOrMore>
-                <element name="acception">
+                <element name="remove">
                   <attribute name="lemma">
                     <text/>
                   </attribute>
@@ -202,61 +33,8 @@
                     <text/>
                   </attribute>
                 </element> 
-              </oneOrMore>
-            </element> 
-            <element name="remove">
-              <attribute name="lemma">
-                <text/>
-              </attribute>
-              <attribute name="tags">
-                <text/>
-              </attribute>
-              <oneOrMore>
-                <element name="acception">
-                  <attribute name="lemma">
-                    <text/>
-                  </attribute>
-                  <attribute name="tags">
-                    <text/>
-                  </attribute>
-                </element>
-              </oneOrMore>
-            </element> 
-          </choice>
-          <oneOrMore>
-            <choice>
-              <oneOrMore>
-                <element name="skip">
-                  <optional>
-                    <attribute name="lemma">
-                      <text/>
-                    </attribute>
-                    <attribute name="tags">
-                      <text/>
-                    </attribute>
-                  </optional>
-                </element>
-              </oneOrMore>
-              <oneOrMore>
-                <element name="or">
-                  <oneOrMore>
-                    <element name="skip">
-                      <optional>
-                        <attribute name="lemma">
-                          <text/>
-                        </attribute>
-                        <attribute name="tags">
-                          <text/>
-                        </attribute>
-                      </optional>
-                    </element>
-                  </oneOrMore>
-                </element>
-              </oneOrMore>
             </choice>
-          </oneOrMore>
-        </group> 
-      </choice>
-    </element>  
-  </oneOrMore>
+          </zeroOrMore>
+        </element>
+      </oneOrMore>
 </element>

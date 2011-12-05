@@ -48,14 +48,16 @@ using namespace std;
 
 typedef struct LSRule
 {
-  int id;			// id (e.g. line number) of the rule
+  int line;                     // line number
+  int id;			// id of the rule
   int len;			// length of the pattern (in LUs)
   double weight;		// an arbitrary rule weight
-  wstring type; 		// select|remove
-  int centre; 			// -centre - -pos = relative position
-  map<int, wstring> sl_context; // position,pattern
-  wstring sl_pattern; 		// pattern
+  //wstring type; 		// select|remove
+  //wstring sl_pattern; 		// pattern
   vector<wstring> tl_patterns; 	// patterns
+
+  map<int, vector<wstring> > sl_context; // position,pattern
+  map<int, vector<wstring> >  tl_context;  // 
 
 } LSRule;
 
@@ -88,25 +90,24 @@ private:
   void skipBlanks(wstring &name);
   void procNode();
   void procRule();
-  void procSkip();
+  void procOr();
+  void procMatch();
   void procSelect();
   void procRemove();
-  void procOr();
-  void procAcception();
   wstring attrib(wstring const &name);
   wstring attribsToPattern(wstring lemma, wstring tags);
   wstring operationToPattern(wstring op);
 
   wstring itow(int i);
+  int wtoi(wstring);
 
 
 public:
   static wstring const LRX_COMPILER_RULES_ELEM;
   static wstring const LRX_COMPILER_RULE_ELEM;
-  static wstring const LRX_COMPILER_SKIP_ELEM;
+  static wstring const LRX_COMPILER_MATCH_ELEM;
   static wstring const LRX_COMPILER_SELECT_ELEM;
   static wstring const LRX_COMPILER_REMOVE_ELEM;
-  static wstring const LRX_COMPILER_ACCEPTION_ELEM;
   static wstring const LRX_COMPILER_OR_ELEM;
 
   static wstring const LRX_COMPILER_LEMMA_ATTR;
@@ -127,6 +128,8 @@ public:
   void parse(string const &fitxer);
 
   void write(FILE *fd);
+
+  void setOutputGraph(bool o);
 };
 
 #endif /* __LRX_COMPILER_H__ */

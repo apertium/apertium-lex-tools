@@ -23,10 +23,9 @@ using namespace std;
 
 wstring const LRXCompiler::LRX_COMPILER_RULES_ELEM      = L"rules";
 wstring const LRXCompiler::LRX_COMPILER_RULE_ELEM       = L"rule";
-wstring const LRXCompiler::LRX_COMPILER_SKIP_ELEM       = L"skip";
+wstring const LRXCompiler::LRX_COMPILER_MATCH_ELEM      = L"match";
 wstring const LRXCompiler::LRX_COMPILER_SELECT_ELEM     = L"select";
 wstring const LRXCompiler::LRX_COMPILER_REMOVE_ELEM     = L"remove";
-wstring const LRXCompiler::LRX_COMPILER_ACCEPTION_ELEM  = L"acception";
 wstring const LRXCompiler::LRX_COMPILER_OR_ELEM         = L"or";
 wstring const LRXCompiler::LRX_COMPILER_LEMMA_ATTR      = L"lemma";
 wstring const LRXCompiler::LRX_COMPILER_TAGS_ATTR       = L"tags";
@@ -52,6 +51,13 @@ LRXCompiler::~LRXCompiler()
 {
 }
 
+void
+LRXCompiler::setOutputGraph(bool o)
+{
+  outputGraph = o;
+}
+
+
 wstring
 LRXCompiler::itow(int i)
 {
@@ -61,6 +67,18 @@ LRXCompiler::itow(int i)
   swprintf(buf, 50, L"%d", i);
   wstring id(buf);
   return id;
+}
+
+
+int 
+LRXCompiler::wtoi(wstring w)
+{
+  // Convert a wstring to an int
+  wistringstream wstrm(w);
+  int i_name = -655;
+  wstrm >> i_name;
+
+  return i_name;
 }
 
 void
@@ -91,28 +109,31 @@ LRXCompiler::parse(string const &fitxer)
   for(map<int, LSRule>::iterator it = rules.begin(); it != rules.end(); it++)
   {
     LSRule rule = it->second; 
-    fwprintf(stderr, L"\b\b%d", rule.id);
-    fflush(stderr);
+    //fwprintf(stderr, L"\b\b%d", rule.id);
+    //fflush(stderr);
     int s = transducer.getInitial();
     wstring w_id = itow(rule.id);
+
     if(!alphabet.isSymbolDefined(w_id.c_str()))
     {
       alphabet.includeSymbol(w_id.c_str());
     }
-    for(map<int, wstring>::iterator it3 = rule.sl_context.begin(); it3 != rule.sl_context.end(); it3++) 
+
+    fwprintf(stderr, L"rule %S (line %d) (len %d):\n", w_id.c_str(), rule.line, rule.len);
+    for(map<int, vector<wstring> >::iterator it3 = rule.sl_context.begin(); it3 != rule.sl_context.end(); it3++) 
     {
       int pos = it3->first;
-      wstring pattern = it3->second;
-      if(pos == rule.centre) 
+      vector<wstring> sl_patterns = it3->second;
+
+      if(rule.tl_context[pos].size() > 0 && sl_patterns.size() == 1) 
       {
         int k = s;
-        for(vector<wstring>::iterator it2 = rule.tl_patterns.begin(); it2 != rule.tl_patterns.end(); it2++) 
-        {
-          wstring left = rule.sl_pattern;
-          wstring right = *it2;
-          wstring right_pattern = operationToPattern(*it2); // just the pattern part of the operation
-          wstring left_pattern = pattern.substr(1, left.length()-1); // all tags are in < >
-          //wcerr << rule.id << L" " << pos << L" " << rule.type << L" " << rule.sl_pattern << L":" << right << endl;
+        for(vector<wstring>::iterator it4 = rule.tl_context[pos].begin(); it4 != rule.tl_context[pos].end(); it4++)
+        { 
+          wstring left = sl_patterns[0];
+          wstring right = *it4;
+          wstring right_pattern = operationToPattern(right); // just the pattern part of the operation
+          wstring left_pattern = sl_patterns[0].substr(1, left.length()-1); // all tags are in < >
           s = transducer.insertSingleTransduction(alphabet(alphabet(left.c_str()), alphabet(right.c_str())), k);
           if(patterns.count(alphabet(right.c_str())) < 1)
           {
@@ -132,29 +153,41 @@ LRXCompiler::parse(string const &fitxer)
             t.minimize();
             patterns[alphabet(left.c_str())] = t;
           }
+          fwprintf(stderr, L"  [%d] sl: %S, tl: %S\n", pos, sl_patterns[0].c_str(), it4->c_str()); 
         }
       }
       else
       {
-        //wcerr << rule.id << L" " << pos << L" " << pattern << L":skip " << endl;
-        wstring left = pattern;
-        wstring right = L"<skip(*)>";
-        wstring left_pattern = pattern.substr(1, left.length()-1); // all tags are in < > 
-        RegexpCompiler re;
-        re.initialize(&alphabet);
-        re.compile(left_pattern);
-        if(!alphabet.isSymbolDefined(right.c_str()))
+        int k = s;
+        vector<int> reached_states;
+        for(vector<wstring>::iterator it4 = rule.sl_context[pos].begin(); it4 != rule.sl_context[pos].end(); it4++)
         {
-          alphabet.includeSymbol(right.c_str());
+          wstring left = *it4;
+          wstring right = L"<skip(*)>";
+          wstring left_pattern = left.substr(1, left.length()-1); // all tags are in < > 
+          RegexpCompiler re;
+          re.initialize(&alphabet);
+          re.compile(left_pattern);
+          if(!alphabet.isSymbolDefined(right.c_str()))
+          {
+            alphabet.includeSymbol(right.c_str());
+          }
+          s = transducer.insertSingleTransduction(alphabet(alphabet(left.c_str()), alphabet(right.c_str())), s);
+          reached_states.push_back(s);
+          if(patterns.count(alphabet(left.c_str())) < 1)
+          {
+            Transducer t = re.getTransducer();
+            t.minimize();
+            patterns[alphabet(left.c_str())] = t;
+          }
+          fwprintf(stderr, L"%d %d [%d] sl: %S, tl: skip(*)\n", k, s, pos, it4->c_str()); 
         }
-        s = transducer.insertSingleTransduction(alphabet(alphabet(left.c_str()), alphabet(right.c_str())), s);
-        if(patterns.count(alphabet(left.c_str())) < 1)
-        {
-          Transducer t = re.getTransducer();
-          t.minimize();
-          patterns[alphabet(left.c_str())] = t;
+        for(vector<int>::iterator x = reached_states.begin(); x != reached_states.end(); x++)
+        { 
+          int _s = s; 
+          int _x = *x;
+          transducer.linkStates(_x, _s, 0); 
         }
-
       }
     }
     wstring id_sym = L"<" + w_id + L">";
@@ -162,13 +195,17 @@ LRXCompiler::parse(string const &fitxer)
     {
       alphabet.includeSymbol(id_sym.c_str());
     }
+    
     s = transducer.insertSingleTransduction(alphabet(0, alphabet(id_sym.c_str())), s);
     transducer.setFinal(s);
     //wcout << endl;
   }
   transducer.minimize();
   //wcout << transducer.size() << L" " << patterns.size() << endl;
-  transducer.show(alphabet, stderr);
+  if(outputGraph)
+  {
+    transducer.show(alphabet, stderr);
+  }
 
   for(map<int, Transducer>::iterator it3 = patterns.begin(); it3 != patterns.end(); it3++) 
   {
@@ -278,33 +315,49 @@ LRXCompiler::attribsToPattern(wstring lemma, wstring tags)
 }
 
 void
-LRXCompiler::procAcception()
+LRXCompiler::procRemove()
 {
+
   wstring lemma =this->attrib(LRX_COMPILER_LEMMA_ATTR);
   wstring tags =this->attrib(LRX_COMPILER_TAGS_ATTR);
 
-  if(lemma == L"" && tags == L"")
-  {
-    return;
-  }
-  wstring tl_pattern = L"<" + rules[current_rule_id].type + L"(" + attribsToPattern(lemma, tags) + L")>";
+  int tipo = xmlTextReaderNodeType(reader);
+
+  wstring tl_pattern = L"<remove(" + attribsToPattern(lemma, tags) + L")>";
   if(!alphabet.isSymbolDefined(tl_pattern.c_str()))
   {
     alphabet.includeSymbol(tl_pattern.c_str());
   }
-  rules[current_rule_id].tl_patterns.push_back(tl_pattern);
+  rules[current_rule_id].tl_context[current_rule_len].push_back(tl_pattern);
 
-
-  //wcout << L"    Acception: " << tl_pattern << endl;
+  wcout << L"    Remove[" << tipo << "]: " << tl_pattern << endl;
 }
 
-
 void
-LRXCompiler::procSkip()
+LRXCompiler::procSelect()
 {
+
   wstring lemma =this->attrib(LRX_COMPILER_LEMMA_ATTR);
   wstring tags =this->attrib(LRX_COMPILER_TAGS_ATTR);
+  int tipo = xmlTextReaderNodeType(reader);
 
+  wstring tl_pattern = L"<select(" + attribsToPattern(lemma, tags) + L")>";
+  if(!alphabet.isSymbolDefined(tl_pattern.c_str()))
+  {
+    alphabet.includeSymbol(tl_pattern.c_str());
+  }
+  rules[current_rule_id].tl_context[current_rule_len].push_back(tl_pattern);
+
+  wcout << L"    Select[" << tipo << "]: " << tl_pattern << endl;
+}
+
+void
+LRXCompiler::procMatch()
+{
+  wstring lemma = this->attrib(LRX_COMPILER_LEMMA_ATTR);
+  wstring tags = this->attrib(LRX_COMPILER_TAGS_ATTR);
+  int tipo = xmlTextReaderNodeType(reader);
+  
   wstring sl_pattern = L"";
   if(lemma == L"" && tags == L"")
   {
@@ -312,35 +365,25 @@ LRXCompiler::procSkip()
   }
   else
   {
-    sl_pattern = L"<" + attribsToPattern(lemma, tags) + L">";
+    sl_pattern = L"<" + attribsToPattern(lemma, tags) + L">"; 
   }
+
   if(!alphabet.isSymbolDefined(sl_pattern.c_str()))
   {
     alphabet.includeSymbol(sl_pattern.c_str());
   }
-  current_pattern = current_pattern + sl_pattern.substr(1, sl_pattern.length()-2); // FIXME: Not sure why -2 here, investigate 
-  rules[current_rule_id].sl_context[current_rule_len] = sl_pattern;
-  //wcout << L"  " << current_rule_len << L" " << sl_pattern << L":skip(*)" << endl;
-}
+  //rules[current_rule_id].sl_pattern = sl_pattern;
+  rules[current_rule_id].sl_context[current_rule_len].push_back(sl_pattern);
 
-void
-LRXCompiler::procSelect()
-{
-  wstring lemma =this->attrib(LRX_COMPILER_LEMMA_ATTR);
-  wstring tags =this->attrib(LRX_COMPILER_TAGS_ATTR);
-  rules[current_rule_id].centre = current_rule_len;
+  wcout << L"  Match[" << current_rule_len << L"]: " << sl_pattern << endl;
 
-  wstring sl_pattern = L"<" + attribsToPattern(lemma, tags) + L">"; 
-  if(!alphabet.isSymbolDefined(sl_pattern.c_str()))
+  if(xmlTextReaderIsEmptyElement(reader))
   {
-    alphabet.includeSymbol(sl_pattern.c_str());
+    //wcout << L"  ~Match[" << tipo << L"]: " << endl;
+    return;
   }
-  rules[current_rule_id].sl_pattern = sl_pattern;
-  rules[current_rule_id].centre = current_rule_len;
-  rules[current_rule_id].sl_context[current_rule_len] = sl_pattern;
 
-  //wcout << L"  Select: " << sl_pattern << endl;
-
+  wstring name = L"";
   while(true)
   {
     int ret = xmlTextReaderRead(reader);
@@ -351,21 +394,26 @@ LRXCompiler::procSelect()
       exit(EXIT_FAILURE);
     }
 
-    wstring name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+    name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+    tipo = xmlTextReaderNodeType(reader);
     skipBlanks(name);
 
-    if(name == LRX_COMPILER_ACCEPTION_ELEM)
+    if(name == LRX_COMPILER_SELECT_ELEM)
     {
-      procAcception();
+      procSelect();
     }
-    else if(name == LRX_COMPILER_SELECT_ELEM)
+    else if(name == LRX_COMPILER_REMOVE_ELEM)
     {
-      return;
+      procRemove();
+    }
+    else if(name == LRX_COMPILER_MATCH_ELEM)
+    {
+      break;
     }
     else
     {
       wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-      wcerr << L"): Invalid inclusion of '<" << name << L">' into '<" << LRX_COMPILER_SELECT_ELEM;
+      wcerr << L"): Invalid inclusion of '<" << name << L">' into '<" << LRX_COMPILER_MATCH_ELEM;
       wcerr << L">'." << endl; 
       exit(EXIT_FAILURE);
     }
@@ -373,59 +421,10 @@ LRXCompiler::procSelect()
 }
 
 void
-LRXCompiler::procRemove()
-{
-  wstring lemma =this->attrib(LRX_COMPILER_LEMMA_ATTR);
-  wstring tags =this->attrib(LRX_COMPILER_TAGS_ATTR);
-  rules[current_rule_id].centre = current_rule_len;
-
-  wstring sl_pattern = L"<" + attribsToPattern(lemma, tags) + L">";
-  if(!alphabet.isSymbolDefined(sl_pattern.c_str()))
-  {
-    alphabet.includeSymbol(sl_pattern.c_str());
-  }
-  rules[current_rule_id].sl_pattern = sl_pattern;
-  rules[current_rule_id].centre = current_rule_len;
-  rules[current_rule_id].sl_context[current_rule_len] = sl_pattern;
-
-  //wcout << L"  Remove: " << sl_pattern << endl;
-
-  while(true)
-  {
-    int ret = xmlTextReaderRead(reader);
-    if(ret != 1)
-    {
-      cerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-      cerr << L"): Parse error." << endl;
-      exit(EXIT_FAILURE);
-    }
-
-    wstring name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
-    skipBlanks(name);
-
-    if(name == LRX_COMPILER_ACCEPTION_ELEM)
-    {
-      procAcception();
-    }
-    else if(name == LRX_COMPILER_REMOVE_ELEM)
-    {
-      return;
-    }
-    else
-    {
-      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-      wcerr << L"): Invalid inclusion of '<" << name << L">' into '<" << LRX_COMPILER_REMOVE_ELEM;
-      wcerr << L">'." << endl; 
-      exit(EXIT_FAILURE);
-    }
-  } 
-}
-
-void
 LRXCompiler::procOr()
 {
 
-  current_pattern = L"<(";
+  //current_pattern = L"<(";
   current_rule_len++;
   while(true)
   {
@@ -440,21 +439,24 @@ LRXCompiler::procOr()
     wstring name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
     skipBlanks(name);
 
-    if(name == LRX_COMPILER_SKIP_ELEM)
+    if(name == LRX_COMPILER_MATCH_ELEM)
     {
       //wcout << L"  " ;
-      procSkip();
-      current_pattern = current_pattern + L"|";
+      procMatch();
+      //current_pattern = current_pattern + L"|";
     }
     else if(name == LRX_COMPILER_OR_ELEM)
     {
-      current_pattern = current_pattern.substr(0, current_pattern.length()-1) + L")>";
-      if(!alphabet.isSymbolDefined(current_pattern.c_str()))
-      {
-        alphabet.includeSymbol(current_pattern.c_str());
-      }
+      //current_pattern = current_pattern.substr(0, current_pattern.length()-1) + L")>";
+      //if(!alphabet.isSymbolDefined(current_pattern.c_str()))
+      //{
+      //  alphabet.includeSymbol(current_pattern.c_str());
+      //}
       //wcout << L"  Or: " << current_pattern << endl;
-      rules[current_rule_id].sl_context[current_rule_len] = current_pattern;
+      if(current_pattern != L"")
+      {
+        rules[current_rule_id].sl_context[current_rule_len].push_back(current_pattern);
+      }
       current_pattern = L"";
       return;
     }
@@ -474,10 +476,13 @@ LRXCompiler::procRule()
   wstring comment =this->attrib(LRX_COMPILER_C_ATTR);
   current_context_pos = 0;
 
-  //wcout << L"Rule " << current_rule_id << L":" << endl;
   rules[current_rule_id].id = current_rule_id;
   rules[current_rule_id].weight = LRX_COMPILER_DEFAULT_WEIGHT;
-  
+  rules[current_rule_id].line = xmlTextReaderGetParserLineNumber(reader);
+  int tipo = xmlTextReaderNodeType(reader);
+
+  wcout << L"Rule " << current_rule_id << L" (line " << rules[current_rule_id].line << L"):" << endl;
+ 
   while(true)
   {
     int ret = xmlTextReaderRead(reader);
@@ -491,32 +496,20 @@ LRXCompiler::procRule()
     wstring name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
     skipBlanks(name);
     
-    if(name == LRX_COMPILER_SKIP_ELEM)
+    if(name == LRX_COMPILER_MATCH_ELEM) 
     {      
       current_rule_len++;
-      procSkip();
-    }
-    else if(name == LRX_COMPILER_SELECT_ELEM)
-    {
-      current_rule_len++;
-      rules[current_rule_id].type = LRX_COMPILER_TYPE_SELECT;
-      procSelect();
-    }
-    else if(name == LRX_COMPILER_REMOVE_ELEM)
-    {
-      current_rule_len++;
-      rules[current_rule_id].type = LRX_COMPILER_TYPE_REMOVE;
-      procRemove();
+      procMatch();
     }
     else if(name == LRX_COMPILER_OR_ELEM)
     {
-      //wcout << L"  Or:" << endl;
+      wcout << L"  Or:" << endl;
       procOr();
     }
     else if(name == LRX_COMPILER_RULE_ELEM)
     {
       rules[current_rule_id].len = current_rule_len;
-      //wcout << L" Len: " << rules[current_rule_id].len << L" " << rules[current_rule_id].centre << endl; 
+      wcout << L" Len: " << rules[current_rule_id].len << L" "  << endl; 
       return;
     }
     else
