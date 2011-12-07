@@ -1,5 +1,5 @@
 PREFIX=/home/fran/local
-CFLAGS=-llttoolbox3  -L$(PREFIX)/lib -I$(PREFIX)/include/lttoolbox-3.2 -I. -I/usr/include/libxml2
+CFLAGS=-lxml2 -llttoolbox3  -L$(PREFIX)/lib -I$(PREFIX)/include/lttoolbox-3.2 -I. -I/usr/include/libxml2
 
 all:
 	g++ -ggdb -Wall -c -o lrx_compiler.o lrx_compiler.cc $(CFLAGS)
