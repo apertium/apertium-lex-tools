@@ -1,265 +1,265 @@
 <rules>
   <rule>  
-    <select lemma="prova" tags="n.*">    
-      <acception lemma="event" tags="n.*"/> 
-    </select>  
-    <skip lemma="internacional" tags="adj.*"/>
+    <match lemma="prova" tags="n.*">    
+      <select lemma="event" tags="n.*"/> 
+    </match>  
+    <match lemma="internacional" tags="adj.*"/>
   </rule>
   <rule>  
-    <select lemma="prova" tags="n.*">    
-      <acception lemma="event" tags="n.*"/> 
-    </select>  
-    <skip lemma="de" tags="pr.*"/>
-    <skip lemma="eslàlom" tags="n.*"/>
+    <match lemma="prova" tags="n.*">    
+      <select lemma="event" tags="n.*"/> 
+    </match>  
+    <match lemma="de" tags="pr.*"/>
+    <match lemma="eslàlom" tags="n.*"/>
   </rule>
   <rule>  
-    <select lemma="prova" tags="n.*">    
-      <acception lemma="proof" tags="n.*"/> 
-    </select>  
-    <skip lemma="definitiu" tags="adj.*"/>
+    <match lemma="prova" tags="n.*">    
+      <select lemma="proof" tags="n.*"/> 
+    </match>  
+    <match lemma="definitiu" tags="adj.*"/>
   </rule>
   <rule>  
-    <remove lemma="prova" tags="n.*">    
-      <acception lemma="test" tags="n.*"/> 
-      <acception lemma="event" tags="n.*"/> 
-      <acception lemma="proof" tags="n.*"/> 
-    </remove>  
-    <skip lemma="experimental" tags="adj.*"/>
+    <match lemma="prova" tags="n.*">    
+      <remove lemma="test" tags="n.*"/> 
+      <remove lemma="event" tags="n.*"/> 
+      <remove lemma="proof" tags="n.*"/> 
+    </match>  
+    <match lemma="experimental" tags="adj.*"/>
   </rule>
   <rule>  
-    <remove lemma="prova" tags="n.*">    
-      <acception lemma="test" tags="n.*"/> 
-      <acception lemma="proof" tags="n.*"/> 
-    </remove>  
-    <skip lemma="concret" tags="adj.*"/>
+    <match lemma="prova" tags="n.*">    
+      <remove lemma="test" tags="n.*"/> 
+      <remove lemma="proof" tags="n.*"/> 
+    </match>  
+    <match lemma="concret" tags="adj.*"/>
   </rule>
   <rule>  
-    <remove lemma="prova" tags="n.*">    
-      <acception lemma="test" tags="n.*"/> 
-    </remove>  
-    <skip lemma="que" tags="*"/>
-    <skip lemma="descendir" tags="vblex.*"/>
+    <match lemma="prova" tags="n.*">    
+      <remove lemma="test" tags="n.*"/> 
+    </match>  
+    <match lemma="que" tags="*"/>
+    <match lemma="descendir" tags="vblex.*"/>
   </rule>
   <rule>  
-    <select lemma="prova" tags="n.*">    
-      <acception lemma="evidence" tags="n.*"/> 
-    </select>  
+    <match lemma="prova" tags="n.*">    
+      <select lemma="evidence" tags="n.*"/> 
+    </match>  
     <or>
-      <skip lemma="genètic" tags="adj.*"/>
-      <skip lemma="directe" tags="adj.*"/>
-      <skip lemma="modern" tags="adj.*"/>
-      <skip lemma="arqueològic" tags="adj.*"/>
+      <match lemma="genètic" tags="adj.*"/>
+      <match lemma="directe" tags="adj.*"/>
+      <match lemma="modern" tags="adj.*"/>
+      <match lemma="arqueològic" tags="adj.*"/>
     </or>
   </rule>
   <rule>
-    <select lemma="prova" tags="n.*">    
-      <acception lemma="proof" tags="n.*"/> 
-    </select>  
-    <skip lemma="de" tags="pr.*"/>
-    <skip lemma="hipòtesis" tags="n.*"/>
+    <match lemma="prova" tags="n.*">    
+      <select lemma="proof" tags="n.*"/> 
+    </match>  
+    <match lemma="de" tags="pr.*"/>
+    <match lemma="hipòtesis" tags="n.*"/>
   </rule>
   <rule>  
-    <skip lemma="trobar" tags="vblex.*"/>
-    <remove lemma="prova" tags="n.*">    
-      <acception lemma="test" tags="n.*"/> 
-      <acception lemma="event" tags="n.*"/> 
-    </remove>  
-    <skip lemma="a" tags="pr.*"/>
+    <match lemma="trobar" tags="vblex.*"/>
+    <match lemma="prova" tags="n.*">    
+      <remove lemma="test" tags="n.*"/> 
+      <remove lemma="event" tags="n.*"/> 
+    </match>  
+    <match lemma="a" tags="pr.*"/>
   </rule>
   <rule>
-    <select lemma="prova" tags="n.*">    
-      <acception lemma="test" tags="n.*"/> 
-    </select>  
-    <skip lemma="estadístic" tags="adj.*"/>
+    <match lemma="prova" tags="n.*">    
+      <select lemma="test" tags="n.*"/> 
+    </match>  
+    <match lemma="estadístic" tags="adj.*"/>
   </rule>
   <rule c="el guanyador de cada prova">
-    <skip lemma="guanyador" tags="n.*"/>
-    <skip lemma="de" tags="pr.*"/>
-    <skip/> <!-- det -->
-    <select lemma="prova" tags="n.*">    
-      <acception lemma="event" tags="n.*"/> 
-    </select>  
+    <match lemma="guanyador" tags="n.*"/>
+    <match lemma="de" tags="pr.*"/>
+    <match/> <!-- det -->
+    <match lemma="prova" tags="n.*">    
+      <select lemma="event" tags="n.*"/> 
+    </match>  
   </rule>
   <rule>
-    <skip lemma="tècnica" tags="n.*"/>
-    <skip lemma="de" tags="pr.*"/>
-    <select lemma="prova" tags="n.*">    
-      <acception lemma="testing" tags="n.*"/> 
-    </select>  
+    <match lemma="tècnica" tags="n.*"/>
+    <match lemma="de" tags="pr.*"/>
+    <match lemma="prova" tags="n.*">    
+      <select lemma="testing" tags="n.*"/> 
+    </match>  
   </rule>
   <rule>
-    <select lemma="càrrega" tags="n.*">    
-      <acception lemma="charge" tags="n.*"/> 
-    </select>  
+    <match lemma="càrrega" tags="n.*">    
+      <select lemma="charge" tags="n.*"/> 
+    </match>  
     <or>
-      <skip lemma="negatiu" tags="adj.*"/>
-      <skip lemma="positiu" tags="adj.*"/>
+      <match lemma="negatiu" tags="adj.*"/>
+      <match lemma="positiu" tags="adj.*"/>
     </or>
   </rule>
   <rule>
-    <select lemma="camp" tags="n.*">    
-      <acception lemma="field" tags="n.*"/> 
-    </select>  
-    <skip lemma="elèctric" tags="adj.*"/>
+    <match lemma="camp" tags="n.*">    
+      <select lemma="field" tags="n.*"/> 
+    </match>  
+    <match lemma="elèctric" tags="adj.*"/>
   </rule>
   <rule>
-    <select lemma="joc" tags="n.*">    
-      <acception lemma="game" tags="n.*"/> 
-    </select>  
-    <skip lemma="[Oo]límpic" tags="adj.*"/>
+    <match lemma="joc" tags="n.*">    
+      <select lemma="game" tags="n.*"/> 
+    </match>  
+    <match lemma="[Oo]límpic" tags="adj.*"/>
   </rule>
   <rule>
-    <select lemma="joc" tags="n.*">    
-      <acception lemma="set" tags="n.*"/> 
-    </select>  
-    <skip lemma="de" tags="pr.*"/>
-    <skip lemma="caràcter" tags="n.*"/>
+    <match lemma="joc" tags="n.*">    
+      <select lemma="set" tags="n.*"/> 
+    </match>  
+    <match lemma="de" tags="pr.*"/>
+    <match lemma="caràcter" tags="n.*"/>
   </rule>
   <rule>
-    <remove lemma="pista" tags="n.*">    
-      <acception lemma="hint" tags="n.*"/> 
-      <acception lemma="clue" tags="n.*"/> 
-    </remove>  
-    <skip lemma="més" tags="preadv.*"/>
-    <skip lemma="llarg" tags="adj.*"/>
+    <match lemma="pista" tags="n.*">    
+      <remove lemma="hint" tags="n.*"/> 
+      <remove lemma="clue" tags="n.*"/> 
+    </match>  
+    <match lemma="més" tags="preadv.*"/>
+    <match lemma="llarg" tags="adj.*"/>
   </rule>
   <rule>
-    <skip lemma="aquest" tags="prn.*"/>
-    <skip lemma="per" tags="pr.*"/>
-    <remove lemma="motiu" tags="n.*">    
-      <acception lemma="motif" tags="n.*"/> 
-    </remove>  
+    <match lemma="aquest" tags="prn.*"/>
+    <match lemma="per" tags="pr.*"/>
+    <match lemma="motiu" tags="n.*">    
+      <remove lemma="motif" tags="n.*"/> 
+    </match>  
   </rule>
   <rule>
-    <select lemma="carn" tags="n.*">    
-      <acception lemma="flesh" tags="n.*"/> 
-    </select>  
-    <skip lemma="i" tags="cnjcoo.*"/>
-    <skip lemma="os" tags="n.*"/>
+    <match lemma="carn" tags="n.*">    
+      <select lemma="flesh" tags="n.*"/> 
+    </match>  
+    <match lemma="i" tags="cnjcoo.*"/>
+    <match lemma="os" tags="n.*"/>
   </rule>
   <rule>
-    <select lemma="humit" tags="adj.*">    
-      <acception lemma="wet" tags="adj.*"/> 
-    </select>  
-    <skip/>
-    <skip lemma="sec" tags="adj.*"/>
+    <match lemma="humit" tags="adj.*">    
+      <select lemma="wet" tags="adj.*"/> 
+    </match>  
+    <match/>
+    <match lemma="sec" tags="adj.*"/>
   </rule>
   <rule>
-    <skip lemma="sec" tags="adj.*"/>
-    <skip/>
-    <select lemma="humit" tags="adj.*">    
-      <acception lemma="wet" tags="adj.*"/> 
-    </select>  
+    <match lemma="sec" tags="adj.*"/>
+    <match/>
+    <match lemma="humit" tags="adj.*">    
+      <select lemma="wet" tags="adj.*"/> 
+    </match>  
   </rule>
   <rule>
-    <skip lemma="victòria" tags="n.*"/>
-    <skip/>
-    <select lemma="sobre" tags="pr.*">    
-      <acception lemma="over" tags="pr.*"/> 
-    </select>  
+    <match lemma="victòria" tags="n.*"/>
+    <match/>
+    <match lemma="sobre" tags="pr.*">    
+      <select lemma="over" tags="pr.*"/> 
+    </match>  
   </rule>
   <rule>
-    <select lemma="estació" tags="n.*">    
-      <acception lemma="season" tags="n.*"/> 
-    </select>  
-    <skip/>
-    <skip lemma="plujós" tags="adj.*"/>
+    <match lemma="estació" tags="n.*">    
+      <select lemma="season" tags="n.*"/> 
+    </match>  
+    <match/>
+    <match lemma="plujós" tags="adj.*"/>
   </rule>
   <rule>
-    <select lemma="estació" tags="n.*">    
-      <acception lemma="season" tags="n.*"/> 
-    </select>  
-    <skip lemma="plujós" tags="adj.*"/>
+    <match lemma="estació" tags="n.*">    
+      <select lemma="season" tags="n.*"/> 
+    </match>  
+    <match lemma="plujós" tags="adj.*"/>
   </rule>
   <rule>
-    <select lemma="estació" tags="n.*">    
-      <acception lemma="season" tags="n.*"/> 
-    </select>  
-    <skip lemma="de" tags="pr.*"/>
-    <skip lemma="any" tags="n.*"/>
+    <match lemma="estació" tags="n.*">    
+      <select lemma="season" tags="n.*"/> 
+    </match>  
+    <match lemma="de" tags="pr.*"/>
+    <match lemma="any" tags="n.*"/>
   </rule>
   <rule>
-    <select lemma="estació" tags="n.*">    
-      <acception lemma="station" tags="n.*"/> 
-    </select>  
-    <skip lemma="de" tags="pr.*"/>
+    <match lemma="estació" tags="n.*">    
+      <select lemma="station" tags="n.*"/> 
+    </match>  
+    <match lemma="de" tags="pr.*"/>
     <or>
-      <skip lemma="[Ll]ínia" tags="n.*"/>
-      <skip lemma="televisió" tags="n.*"/>
+      <match lemma="[Ll]ínia" tags="n.*"/>
+      <match lemma="televisió" tags="n.*"/>
     </or>
   </rule>
   <rule>
-    <remove lemma="règim" tags="n.*">    
-      <acception lemma="diet" tags="n.*"/> 
-    </remove>  
+    <match lemma="règim" tags="n.*">    
+      <remove lemma="diet" tags="n.*"/> 
+    </match>  
     <or>
-      <skip lemma="nazi" tags="adj.*"/>
-      <skip lemma="totalitari" tags="adj.*"/>
-      <skip lemma="feixista" tags="adj.*"/>
-      <skip lemma="franquista" tags="adj.*"/>
-      <skip lemma="militar" tags="adj.*"/>
-      <skip lemma="fiscal" tags="adj.*"/>
+      <match lemma="nazi" tags="adj.*"/>
+      <match lemma="totalitari" tags="adj.*"/>
+      <match lemma="feixista" tags="adj.*"/>
+      <match lemma="franquista" tags="adj.*"/>
+      <match lemma="militar" tags="adj.*"/>
+      <match lemma="fiscal" tags="adj.*"/>
     </or>
   </rule>
   <rule>
-    <select lemma="llengua" tags="n.*">    
-      <acception lemma="language" tags="n.*"/> 
-    </select>  
+    <match lemma="llengua" tags="n.*">    
+      <select lemma="language" tags="n.*"/> 
+    </match>  
     <or>
-      <skip lemma="oficial" tags="adj.*"/>
-      <skip lemma="cooficial" tags="adj.*"/>
+      <match lemma="oficial" tags="adj.*"/>
+      <match lemma="cooficial" tags="adj.*"/>
     </or>
   </rule>
   <rule>
-    <skip lemma="el" tags="det.*"/>
-    <select lemma="Terra" tags="n.*">    
-      <acception lemma="Earth" tags="n.*"/> 
-    </select>  
+    <match lemma="el" tags="det.*"/>
+    <match lemma="Terra" tags="n.*">    
+      <select lemma="Earth" tags="n.*"/> 
+    </match>  
   </rule>
   <rule>
-    <skip lemma="especial" tags="adj.*"/>
-    <select lemma="cura" tags="n.*">    
-      <acception lemma="care" tags="n.*"/> 
-    </select>  
+    <match lemma="especial" tags="adj.*"/>
+    <match lemma="cura" tags="n.*">    
+      <select lemma="care" tags="n.*"/> 
+    </match>  
   </rule>
   <rule>
-    <skip lemma="*" tags="det.pos.*"/>
-    <select lemma="dona" tags="n.*">    
-      <acception lemma="wife" tags="n.*"/> 
-    </select>  
+    <match lemma="*" tags="det.pos.*"/>
+    <match lemma="dona" tags="n.*">    
+      <select lemma="wife" tags="n.*"/> 
+    </match>  
   </rule>
   <rule>
-    <skip lemma="el" tags="det.*"/>
-    <select lemma="dona" tags="n.*">    
-      <acception lemma="wife" tags="n.*"/> 
-    </select>  
-    <skip lemma="de" tags="pr.*"/>
+    <match lemma="el" tags="det.*"/>
+    <match lemma="dona" tags="n.*">    
+      <select lemma="wife" tags="n.*"/> 
+    </match>  
+    <match lemma="de" tags="pr.*"/>
   </rule>
   <rule c="la dona dels seus somnis">
-    <select lemma="dona" tags="n.*">    
-      <acception lemma="wife" tags="n.*"/> 
-    </select>  
-    <skip lemma="de" tags="pr.*"/>
-    <skip lemma="*" tags="det.pos.*"/>
-    <skip lemma="somni" tags="n.*"/>
+    <match lemma="dona" tags="n.*">    
+      <select lemma="wife" tags="n.*"/> 
+    </match>  
+    <match lemma="de" tags="pr.*"/>
+    <match lemma="*" tags="det.pos.*"/>
+    <match lemma="somni" tags="n.*"/>
   </rule>
   <rule>
-    <remove lemma="patró" tags="n.*">    
-      <acception lemma="pattern" tags="n.*"/> 
-    </remove>  
-    <skip lemma="*" tags="np.ant.*"/>
+    <match lemma="patró" tags="n.*">    
+      <remove lemma="pattern" tags="n.*"/> 
+    </match>  
+    <match lemma="*" tags="np.ant.*"/>
   </rule>
   <rule>
-    <skip lemma="fer" tags="vblex.*"/>
-    <remove lemma="necesari" tags="adj.*">    
-      <acception lemma="needed" tags="adj.*"/> 
-    </remove>  
+    <match lemma="fer" tags="vblex.*"/>
+    <match lemma="necesari" tags="adj.*">    
+      <remove lemma="needed" tags="adj.*"/> 
+    </match>  
   </rule>
   <rule>
-    <skip lemma="un" tags="det.*"/>
-    <select lemma="estació" tags="n.*">    
-      <acception lemma="station" tags="n.*"/> 
-    </select>  
-    <skip lemma="a" tags="pr.*"/>
+    <match lemma="un" tags="det.*"/>
+    <match lemma="estació" tags="n.*">    
+      <select lemma="station" tags="n.*"/> 
+    </match>  
+    <match lemma="a" tags="pr.*"/>
   </rule>
 </rules>
