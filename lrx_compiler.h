@@ -52,8 +52,7 @@ typedef struct LSRule
   int id;			// id of the rule
   int len;			// length of the pattern (in LUs)
   double weight;		// an arbitrary rule weight
-  //wstring type; 		// select|remove
-  //wstring sl_pattern; 		// pattern
+  int ops;                      // number of (non-skip) operations in the current rule
   vector<wstring> tl_patterns; 	// patterns
 
   map<int, vector<wstring> > sl_context; // position,pattern
@@ -65,6 +64,7 @@ typedef struct LSRuleRecord
 {
   int id;			// id (e.g. line number) of the rule
   int len;			// length of the pattern (in LUs)
+  int ops;			// number of (non-skip) operations
   double weight;		// an arbitrary rule weight
 
 } LSRuleRecord;

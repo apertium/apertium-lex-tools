@@ -53,6 +53,7 @@ typedef struct LSRuleExe
 {
   int id;                       // id (e.g. line number) of the rule
   int len;                      // length of the pattern (in LUs)
+  int ops;                      // number of (non-skip) operations
   double weight;                // an arbitrary rule weight
 
 } LSRuleExe;
