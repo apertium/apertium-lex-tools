@@ -119,7 +119,7 @@ LRXCompiler::parse(string const &fitxer)
       alphabet.includeSymbol(w_id.c_str());
     }
 
-    fwprintf(stderr, L"rule %S (line %d) (len %d):\n", w_id.c_str(), rule.line, rule.len);
+    fwprintf(stderr, L"rule %S (line %d) (len %d) (ops %d):\n", w_id.c_str(), rule.line, rule.len, rule.ops);
     for(map<int, vector<wstring> >::iterator it3 = rule.sl_context.begin(); it3 != rule.sl_context.end(); it3++) 
     {
       int pos = it3->first;
@@ -141,7 +141,7 @@ LRXCompiler::parse(string const &fitxer)
             re.initialize(&alphabet);
             re.compile(right_pattern);
             Transducer t = re.getTransducer();
-            t.minimize();
+            t.determinize(); // We determinise but not minimise
             patterns[alphabet(right.c_str())] = t;
           }
           if(patterns.count(alphabet(left.c_str())) < 1)
@@ -150,7 +150,7 @@ LRXCompiler::parse(string const &fitxer)
             re.initialize(&alphabet);
             re.compile(left_pattern);
             Transducer t = re.getTransducer();
-            t.minimize();
+            t.determinize(); // Determinise, don't minimise
             patterns[alphabet(left.c_str())] = t;
           }
           fwprintf(stderr, L"  [%d] sl: %S, tl: %S\n", pos, sl_patterns[0].c_str(), it4->c_str()); 
@@ -172,23 +172,27 @@ LRXCompiler::parse(string const &fitxer)
           {
             alphabet.includeSymbol(right.c_str());
           }
-          s = transducer.insertSingleTransduction(alphabet(alphabet(left.c_str()), alphabet(right.c_str())), s);
+          s = transducer.insertSingleTransduction(alphabet(alphabet(left.c_str()), alphabet(right.c_str())), k);
           reached_states.push_back(s);
           if(patterns.count(alphabet(left.c_str())) < 1)
           {
             Transducer t = re.getTransducer();
-            t.minimize();
+            t.determinize();
             patterns[alphabet(left.c_str())] = t;
           }
           fwprintf(stderr, L"%d %d [%d] sl: %S, tl: skip(*)\n", k, s, pos, it4->c_str()); 
         }
-        for(vector<int>::iterator x = reached_states.begin(); x != reached_states.end(); x++)
-        { 
-          int _s = s; 
-          int _x = *x;
-          transducer.linkStates(_x, _s, 0); 
+        if(reached_states.size() > 1)
+        {
+          for(vector<int>::iterator x = reached_states.begin(); x != reached_states.end(); x++)
+          { 
+            int _x = *x;
+            //fwprintf(stderr, L"link: %d -> %d\n", _x, s);
+            transducer.linkStates(_x, s, 0); 
+          }
         }
       }
+
     }
     wstring id_sym = L"<" + w_id + L">";
     if(!alphabet.isSymbolDefined(id_sym.c_str()))
@@ -323,6 +327,8 @@ LRXCompiler::procRemove()
 
   int tipo = xmlTextReaderNodeType(reader);
 
+  rules[current_rule_id].ops++;
+
   wstring tl_pattern = L"<remove(" + attribsToPattern(lemma, tags) + L")>";
   if(!alphabet.isSymbolDefined(tl_pattern.c_str()))
   {
@@ -340,6 +346,8 @@ LRXCompiler::procSelect()
   wstring lemma =this->attrib(LRX_COMPILER_LEMMA_ATTR);
   wstring tags =this->attrib(LRX_COMPILER_TAGS_ATTR);
   int tipo = xmlTextReaderNodeType(reader);
+
+  rules[current_rule_id].ops++;
 
   wstring tl_pattern = L"<select(" + attribsToPattern(lemma, tags) + L")>";
   if(!alphabet.isSymbolDefined(tl_pattern.c_str()))
@@ -479,6 +487,7 @@ LRXCompiler::procRule()
   rules[current_rule_id].id = current_rule_id;
   rules[current_rule_id].weight = LRX_COMPILER_DEFAULT_WEIGHT;
   rules[current_rule_id].line = xmlTextReaderGetParserLineNumber(reader);
+  rules[current_rule_id].ops = 0;
   int tipo = xmlTextReaderNodeType(reader);
 
   wcout << L"Rule " << current_rule_id << L" (line " << rules[current_rule_id].line << L"):" << endl;
@@ -618,6 +627,7 @@ LRXCompiler::write(FILE *fst)
     LSRuleRecord record = {  
       it2->second.id, 
       it2->second.len,
+      it2->second.ops,
       it2->second.weight 
     };
     fwrite((void *)&record, 1, sizeof(record), fst);

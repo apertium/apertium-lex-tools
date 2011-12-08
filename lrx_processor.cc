@@ -135,6 +135,7 @@ LRXProcessor::load(FILE *in)
   // skip rule
   rules[0].id = 0;
   rules[0].len = 1;
+  rules[0].ops = 0;
   rules[0].weight = 1.0;
 
   // Now read in the rule records, for lengths/weights
@@ -561,7 +562,7 @@ LRXProcessor::bestPath(map< pair<int, int>, vector<int> > &rule_spans, unsigned 
             }
             else
             {
-              new_scores[new_path] = scores[current_path] + 1;
+              new_scores[new_path] = scores[current_path] + rules[current_rule].ops;
               //fwprintf(stderr, L"+ %d new_path[%S] last[%S] = %d\n", it3->second, new_path.c_str(), current_path.c_str(), path_last[current_path]);
               path_last[new_path] = j;
             }
@@ -580,13 +581,13 @@ LRXProcessor::bestPath(map< pair<int, int>, vector<int> > &rule_spans, unsigned 
   wstring current_max = L"";
   for(map<wstring, int>::iterator it = scores.begin(); it != scores.end(); it++)
   {
-    double score = 1.0 / static_cast<double>(it->second);
-/*
+    double score = static_cast<double>(it->second) / static_cast<double>(slen);
+
     if(it->second == 0) 
     {
-      score = 0.1;
+      score = -1.0;
     }
-*/
+
     if(score > max)
     {
       max = score;
