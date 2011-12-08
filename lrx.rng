@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
-<element name="rules" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+<start>
+<element name="rules">
   <oneOrMore>
     <element name="rule"> 
       <optional>
@@ -7,14 +9,74 @@
           <text/>
         </attribute>
       </optional>
-      <oneOrMore>
+      <optional>
+        <attribute name="name">
+          <text/>
+        </attribute>
+      </optional>
+      <choice>
+        <group>
+          <oneOrMore>
+            <ref name="match"/>
+          </oneOrMore>
+          <zeroOrMore>
+            <element name="or">
+              <oneOrMore>
+                <ref name="match"/>
+              </oneOrMore>
+            </element> 
+          </zeroOrMore>
+        </group>
+        <group>
+          <zeroOrMore>
+            <element name="or">
+              <oneOrMore>
+                <ref name="match"/>
+              </oneOrMore>
+            </element> 
+          </zeroOrMore>
+          <oneOrMore>
+            <ref name="match"/>
+          </oneOrMore>
+        </group>
+        <group>
+          <zeroOrMore>
+            <element name="or">
+              <oneOrMore>
+                <ref name="match"/>
+              </oneOrMore>
+            </element> 
+          </zeroOrMore>
+          <oneOrMore>
+            <ref name="match"/>
+          </oneOrMore>
+          <zeroOrMore>
+            <element name="or">
+              <oneOrMore>
+                <ref name="match"/>
+              </oneOrMore>
+            </element> 
+          </zeroOrMore>
+        </group>
+
+      </choice>
+    </element>
+  </oneOrMore>
+</element>
+</start>
+<define name="match">
+  <oneOrMore>
         <element name="match">
-          <attribute name="lemma">
-            <text/>
-          </attribute>
-          <attribute name="tags">
-            <text/>
-          </attribute>
+          <optional>
+            <attribute name="lemma">
+              <text/>
+            </attribute>
+          </optional>
+          <optional>
+            <attribute name="tags">
+              <text/>
+            </attribute>
+          </optional>
           <zeroOrMore>
             <choice>
                 <element name="select">
@@ -36,5 +98,47 @@
             </choice>
           </zeroOrMore>
         </element>
-      </oneOrMore>
-</element>
+  </oneOrMore>
+</define>
+<define name="match_with_operation">
+  <oneOrMore>
+        <element name="match">
+          <optional>
+            <attribute name="lemma">
+              <text/>
+            </attribute>
+          </optional>
+          <optional>
+            <attribute name="tags">
+              <text/>
+            </attribute>
+          </optional>
+          <choice>
+            <oneOrMore>
+              <choice>
+                <element name="select">
+                  <attribute name="lemma">
+                    <text/>
+                  </attribute>
+                  <attribute name="tags">
+                    <text/>
+                  </attribute>
+                </element> 
+                <oneOrMore>
+                  <element name="remove">
+                    <attribute name="lemma">
+                      <text/>
+                    </attribute>
+                    <attribute name="tags">
+                      <text/>
+                    </attribute>
+                  </element> 
+                </oneOrMore>
+              </choice>
+            </oneOrMore>
+          </choice>
+        </element>
+  </oneOrMore>
+</define>
+
+</grammar>
