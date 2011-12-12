@@ -228,16 +228,17 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
   vector<int> skip;
   skip.push_back(0);
 
+  unsigned int lim = sentence.size();
   // Read all of the possible rule applications into a chart
   // and also populate with default 'skip' transitions
-  for(unsigned int i = 0; i < sentence.size(); i++)
+  for(unsigned int i = 0; i < lim; i++)
   {
     SItem s = sentence[i];
-    //fwprintf(stderr, L"%d [%d:%d] %S(%d) (C: %d)\n", i, j, k, s.sl.c_str(), s.tl.size(), current_states.size());
+    //fwprintf(stderr, L"%d | %d [%d:%d] %S(%d) (C: %d)\n", sentence.size(), i, j, k, s.sl.c_str(), s.tl.size(), current_states.size());
 
     vector<int> rules; // Each time we advance a word in the sentence we reinitialise the list of current matched rules
     State is = *initial_state;
-    for(k = j; k < sentence.size(); k++) // From the current position in the sentence until the end
+    for(k = j; k < lim; k++) // From the current position in the sentence until the end
     {
       if(is.size() == 0) // FIXME: Should this go after isFinal?
       { 
@@ -288,7 +289,7 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
   fwprintf(stderr, L"%d\n", p); // Final state
  
   // Find the optimal path
-  map< pair <int, int>, int > path = bestPath(rule_spans, sentence.size());
+  map< pair <int, int>, int > path = bestPath(rule_spans, lim);
 
 /*
   // print out paths + scores
@@ -302,11 +303,11 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
 */
 
   // Here is where we apply the rules that best cover the sentence to the sentence
-  for(unsigned int i = 0; i < sentence.size(); i++)
+  for(unsigned int i = 0; i < lim; i++)
   { 
     SItem s = sentence[i];
     fwprintf(stderr, L"%d %S(%d)\n", i, s.sl.c_str(), s.tl.size());
-    for(unsigned int j = i; j < sentence.size(); j++)
+    for(unsigned int j = i; j < lim; j++)
     {
       pair<int, int> p = make_pair(i, j);
       if(rule_spans.find(p) != rule_spans.end())
@@ -688,6 +689,7 @@ LRXProcessor::readWord(SItem &w, FILE *input, FILE *output)
     val = fgetwc_unlocked(input);
   }
   w.tl.push_back(tl);
+  
 }
 
 
@@ -725,7 +727,7 @@ LRXProcessor::process(FILE *input, FILE *output)
       for(map<int, SItem>::iterator it = sentence.begin(); it != sentence.end(); it++)
       { 
         SItem w = it->second;
-        fwprintf(stderr, L"sentence[%d]: %S\n", it->first, w.sl.c_str());
+        //fwprintf(stderr, L"sentence[%d]: %S\n", it->first, w.sl.c_str());
         fputws_unlocked(w.blank.c_str(), output);
         if(w.sl != L"") 
         { 
