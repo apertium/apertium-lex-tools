@@ -234,7 +234,10 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
   for(unsigned int i = 0; i < lim; i++)
   {
     SItem s = sentence[i];
-    //fwprintf(stderr, L"%d | %d [%d:%d] %S(%d) (C: %d)\n", sentence.size(), i, j, k, s.sl.c_str(), s.tl.size(), current_states.size());
+    if(traceMode)
+    {
+      fwprintf(stderr, L"%d | %d [%d:%d] %S(%d) (C: %d)\n", sentence.size(), i, j, k, s.sl.c_str(), s.tl.size(), current_states.size());
+    }
 
     vector<int> rules; // Each time we advance a word in the sentence we reinitialise the list of current matched rules
     State is = *initial_state;
@@ -247,8 +250,10 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
       if(is.isFinal(anfinals)) // If this is a final state (regardless of if there is more input), then add the match
       {
         wstring out = is.filterFinals(anfinals, alphabet, escaped_chars);
-        //fwprintf(stderr, L"%d->%d : %S\n", j, k, out.c_str());
- 
+        if(traceMode)
+        {
+          fwprintf(stderr, L"%d->%d : %S\n", j, k, out.c_str());
+        } 
         pair<int, int> span = make_pair(j, k);
         rule_spans[span] = pathsToRules(out);
         pos_rules[span] = out; 
@@ -282,12 +287,18 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
     vector<int> r = it->second;
     for(vector<int>::iterator it2 = r.begin(); it2 != r.end(); it2++)
     {
-      fwprintf(stderr, L"%d\t%d\t%d\t%d\n", span.first, span.second, *it2, *it2);
+      if(traceMode)
+      {
+        fwprintf(stderr, L"%d\t%d\t%d\t%d\n", span.first, span.second, *it2, *it2);
+      }
     }
     p = it->first.second;
   }
-  fwprintf(stderr, L"%d\n", p); // Final state
- 
+  if(traceMode)
+  {
+    fwprintf(stderr, L"%d\n", p); // Final state
+  } 
+
   // Find the optimal path
   map< pair <int, int>, int > path = bestPath(rule_spans, lim);
 
@@ -306,7 +317,10 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
   for(unsigned int i = 0; i < lim; i++)
   { 
     SItem s = sentence[i];
-    fwprintf(stderr, L"%d %S(%d)\n", i, s.sl.c_str(), s.tl.size());
+    if(traceMode) 
+    {
+      fwprintf(stderr, L"%d %S(%d)\n", i, s.sl.c_str(), s.tl.size());
+    }
     for(unsigned int j = i; j < lim; j++)
     {
       pair<int, int> p = make_pair(i, j);
@@ -322,9 +336,12 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
           {
             pair<int, wstring> oftype = it->first;
             wstring matcher = it->second ;
-            fwprintf(stderr, L"-> rule %d: %d %d %f\n", rule, rules[rule].id, rules[rule].len, rules[rule].weight);
-            fwprintf(stderr, L": %S\n", pos_rules[p].c_str());
-            fwprintf(stderr, L"%d : [%d] %d | %S | %S \n", alphabet(matcher), rule, oftype.first, oftype.second.c_str(), matcher.c_str());
+            if(traceMode) 
+            {
+              fwprintf(stderr, L"-> rule %d: %d %d %f\n", rule, rules[rule].id, rules[rule].len, rules[rule].weight);
+              fwprintf(stderr, L": %S\n", pos_rules[p].c_str());
+              fwprintf(stderr, L"%d : [%d] %d | %S | %S \n", alphabet(matcher), rule, oftype.first, oftype.second.c_str(), matcher.c_str());
+            }
             if(oftype.second == L"skip")
             {  
               continue; 
@@ -371,7 +388,10 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
               else
               {
                 new_tl.push_back(tlword);
-                fwprintf(stderr, L"%d : %d COPY %S\n", t.size(), matched, tlword.c_str());
+                if(traceMode)
+                {
+                  fwprintf(stderr, L"%d : %d COPY %S\n", t.size(), matched, tlword.c_str());
+                }
               }
             }
              
@@ -521,7 +541,10 @@ LRXProcessor::bestPath(map< pair<int, int>, vector<int> > &rule_spans, unsigned 
   map<wstring, unsigned int> path_last;
   scores[L""] = 0; 
 
-  fwprintf(stderr, L"slen: %d\n\n", slen);
+  if(traceMode)
+  {
+    fwprintf(stderr, L"slen: %d\n\n", slen);
+  }
   
   for(unsigned int i = 0; i < slen; i++) 
   {
@@ -594,7 +617,10 @@ LRXProcessor::bestPath(map< pair<int, int>, vector<int> > &rule_spans, unsigned 
       max = score;
       current_max = it->first;
     }
-    fwprintf(stderr, L"max: %f cur: %f | %d path[%S]\n", max, score, it->second, it->first.c_str());
+    if(traceMode)
+    {
+      fwprintf(stderr, L"max: %f cur: %f | %d path[%S]\n", max, score, it->second, it->first.c_str());
+    }
   }
   //fwprintf(stderr, L"max: %S\n", current_max.c_str());
 
@@ -608,7 +634,10 @@ LRXProcessor::bestPath(map< pair<int, int>, vector<int> > &rule_spans, unsigned 
     {
       case L' ':
         rule = wtoi(t);
-        fwprintf(stderr, L"%d:%d %d\n", i, j, rule);
+        if(traceMode)
+        {
+          fwprintf(stderr, L"%d:%d %d\n", i, j, rule);
+        }
         path[make_pair(i, j)] = rule;
         i = 0; 
         j = 0; 
@@ -627,7 +656,10 @@ LRXProcessor::bestPath(map< pair<int, int>, vector<int> > &rule_spans, unsigned 
     }
   }
   rule = wtoi(t);
-  fwprintf(stderr, L"%d:%d %d\n", i, j, rule);
+  if(traceMode)
+  {
+    fwprintf(stderr, L"%d:%d %d\n", i, j, rule);
+  }
   path[make_pair(i, j)] = rule;
 
   return path; 
