@@ -601,7 +601,7 @@ LRXProcessor::bestPath(map< pair<int, int>, vector<int> > &rule_spans, unsigned 
   }
   //fwprintf(stderr, L"\n\n", scores.size());
   
-  double max = 1.0 / static_cast<double>(slen);
+  double max = -1.0;
   wstring current_max = L"";
   for(map<wstring, int>::iterator it = scores.begin(); it != scores.end(); it++)
   {
@@ -612,17 +612,22 @@ LRXProcessor::bestPath(map< pair<int, int>, vector<int> > &rule_spans, unsigned 
       score = -1.0;
     }
 
+    if(traceMode)
+    {
+      fwprintf(stderr, L"max: %f cur: %f | %d path[%S] win[%S]\n", max, score, it->second, it->first.c_str(), current_max.c_str());
+    }
+
     if(score > max)
     {
       max = score;
       current_max = it->first;
     }
-    if(traceMode)
-    {
-      fwprintf(stderr, L"max: %f cur: %f | %d path[%S]\n", max, score, it->second, it->first.c_str());
-    }
+
   }
-  //fwprintf(stderr, L"max: %S\n", current_max.c_str());
+  if(traceMode)
+  {
+    fwprintf(stderr, L"max: %S\n", current_max.c_str());
+  }
 
   wstring t = L"";  
   int i = 0;
@@ -636,7 +641,7 @@ LRXProcessor::bestPath(map< pair<int, int>, vector<int> > &rule_spans, unsigned 
         rule = wtoi(t);
         if(traceMode)
         {
-          fwprintf(stderr, L"%d:%d %d\n", i, j, rule);
+          fwprintf(stderr, L"%d:%d %S -> %d\n", i, j, t.c_str(), rule);
         }
         path[make_pair(i, j)] = rule;
         i = 0; 
@@ -658,7 +663,7 @@ LRXProcessor::bestPath(map< pair<int, int>, vector<int> > &rule_spans, unsigned 
   rule = wtoi(t);
   if(traceMode)
   {
-    fwprintf(stderr, L"%d:%d %d\n", i, j, rule);
+    fwprintf(stderr, L"%d:%d %S -> %d\n", i, j, t.c_str(), rule);
   }
   path[make_pair(i, j)] = rule;
 
