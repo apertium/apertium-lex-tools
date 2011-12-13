@@ -82,6 +82,7 @@ private:
   bool traceMode; // Rule tracing ? 
   bool outOfWord; // Are we in a word ?
   unsigned int pos; // Current sentence position
+  unsigned long current_line; // The current input line as determined by num '\n'
 
   map< pair<int, wstring>, wstring> ruleToOps(wstring rules, int id, int pos);
   vector<int> pathsToRules(wstring const path);
