@@ -55,6 +55,7 @@ LRXProcessor::LRXProcessor()
 
   traceMode = false;
   pos = 0;
+  current_line = 1;
 }
 
 LRXProcessor::~LRXProcessor()
@@ -358,31 +359,31 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
                 new_tl.push_back(tlword);
                 if(traceMode)
                 {
-                  fwprintf(stderr, L"SELECT:%d %S\n", rule, tlword.c_str());
+                  fwprintf(stderr, L"%d:SELECT:%d %S\n", current_line, rule, tlword.c_str());
                 }
               } 
               else if(oftype.second == L"remove" && !matched)
               { 
                 new_tl.push_back(tlword);
-                if(traceMode)
-                {
-                  fwprintf(stderr, L"SELECT:%d %S\n", rule, tlword.c_str());
-                }
+                //if(traceMode)
+                //{
+                //  fwprintf(stderr, L"SELECT:%d %S\n", rule, tlword.c_str());
+                //}
               }
               else if(oftype.second == L"remove" && matched)
               { 
                 if(traceMode)
                 {
-                  fwprintf(stderr, L"REMOVE:%d %S\n", rule, tlword.c_str());
+                  fwprintf(stderr, L"%d:REMOVE:%d %S\n", current_line, rule, tlword.c_str());
                 }
                 continue;
               }
               else if(oftype.second == L"select" && !matched)
               {
-                if(traceMode)
-                {
-                  fwprintf(stderr, L"REMOVE:%d %S\n", rule, tlword.c_str());
-                }
+                //if(traceMode)
+                //{
+                //  fwprintf(stderr, L"REMOVE:%d %S\n", rule, tlword.c_str());
+                //}
                 continue;
               }
               else
@@ -605,7 +606,7 @@ LRXProcessor::bestPath(map< pair<int, int>, vector<int> > &rule_spans, unsigned 
   wstring current_max = L"";
   for(map<wstring, int>::iterator it = scores.begin(); it != scores.end(); it++)
   {
-    double score = static_cast<double>(it->second) / static_cast<double>(slen);
+    double score = static_cast<double>(it->second) ; // / static_cast<double>(slen);
 
     if(it->second == 0) 
     {
@@ -793,6 +794,11 @@ LRXProcessor::process(FILE *input, FILE *output)
     outOfWord = true;
 
     val = fgetwc_unlocked(input);
+
+    if(val == L'\n')
+    { 
+      current_line++; 
+    }
   }      
 
   //fwprintf(stderr, L"sentence[%d]: %S\n", pos, sentence[pos].sl.c_str());
