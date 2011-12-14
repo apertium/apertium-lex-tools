@@ -279,24 +279,22 @@ LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
     j = i;
   }
 
-  int p = 0;
-
-  // Print out the transducer of matched rules
-  for(map< pair<int, int>, vector<int> >::iterator it = rule_spans.begin(); it != rule_spans.end(); it++) 
-  {
-    pair<int, int> span = it->first;
-    vector<int> r = it->second;
-    for(vector<int>::iterator it2 = r.begin(); it2 != r.end(); it2++)
-    {
-      if(traceMode)
-      {
-        fwprintf(stderr, L"%d\t%d\t%d\t%d\n", span.first, span.second, *it2, *it2);
-      }
-    }
-    p = it->first.second;
-  }
+  // Print out the sentence transducer of matched rules, each 
+  // state is a word and each transitition is a rule between
+  // words
   if(traceMode)
   {
+    int p = 0; // Final state
+    for(map< pair<int, int>, vector<int> >::iterator it = rule_spans.begin(); it != rule_spans.end(); it++) 
+    {
+      pair<int, int> span = it->first;
+      vector<int> r = it->second;
+      for(vector<int>::iterator it2 = r.begin(); it2 != r.end(); it2++)
+      {
+          fwprintf(stderr, L"%d\t%d\t%d\t%d\n", span.first, span.second, *it2, *it2);
+      }
+      p = it->first.second;
+    }
     fwprintf(stderr, L"%d\n", p); // Final state
   } 
 
