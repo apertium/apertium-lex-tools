@@ -40,6 +40,23 @@
           </oneOrMore>
         </group>
         <group>
+          <oneOrMore>
+            <ref name="match"/>
+          </oneOrMore>
+          <zeroOrMore>
+            <element name="or">
+              <oneOrMore>
+                <ref name="match"/>
+              </oneOrMore>
+            </element> 
+          </zeroOrMore>
+          <oneOrMore>
+            <ref name="match"/>
+          </oneOrMore>
+        </group>
+
+
+        <group>
           <zeroOrMore>
             <element name="or">
               <oneOrMore>
