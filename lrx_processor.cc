@@ -586,7 +586,6 @@ LRXProcessor::process(FILE *input, FILE *output)
 {
   map<int, SItem> sentence;   // pos, item
   bool isEscaped = false;
-
   sentence.clear();
 
   int val = fgetwc_unlocked(input);
@@ -650,6 +649,32 @@ LRXProcessor::process(FILE *input, FILE *output)
       current_line++; 
     }
   }      
+
+  // If there is no .<sent> in the input
+  if(sentence.size() > 0)
+  {
+    applyRulesOptimal(sentence, output);
+    for(map<int, SItem>::iterator it = sentence.begin(); it != sentence.end(); it++)
+    { 
+      SItem w = it->second;
+      fwprintf(stderr, L"sentence[%d]: %S\n", it->first, w.sl.c_str());
+      fputws_unlocked(w.blank.c_str(), output);
+      if(w.sl != L"") 
+      { 
+        fputws_unlocked(L"^", output);
+        fputws_unlocked(w.sl.c_str(), output);
+        for(vector<wstring>::iterator it2 = w.tl.begin(); it2 != w.tl.end(); it2++) 
+        {
+          if(it2 != w.tl.end()) 
+          {
+            fputws_unlocked(L"/", output);
+          }
+          fputws_unlocked(it2->c_str(), output);
+        }
+        fputws_unlocked(L"$", output);
+      }
+    } 
+  }
 
   //fwprintf(stderr, L"sentence[%d]: %S\n", pos, sentence[pos].sl.c_str());
   fputws_unlocked(sentence[pos].blank.c_str(), output);
