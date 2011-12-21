@@ -26,7 +26,9 @@
 #include <cerrno>
 #include <string>
 #include <iostream>
+#include <cmath>
 #include <sstream>
+#include <limits>
 #include <cstdlib>
 #include <list>
 #include <algorithm>
@@ -76,22 +78,18 @@ private:
   set<Node *> anfinals; // Final states 
   set<wchar_t> escaped_chars; // 'Special' characters to escape
   Pool<vector<int> > *pool;
-  State *initial_state;
-  State *current_state;
+  State *initial_state; // Initial state in the rule transducer
  
   bool traceMode; // Rule tracing ? 
   bool outOfWord; // Are we in a word ?
   unsigned int pos; // Current sentence position
   unsigned long current_line; // The current input line as determined by num '\n'
 
-  map< pair<int, wstring>, wstring> ruleToOps(wstring rules, int id, int pos);
+  map< int, pair<int, wstring> > ruleToOpsOptimal(wstring rules, int id, int pos);
   vector<int> pathsToRules(wstring const path);
   void readWord(SItem &w, FILE *input, FILE *output);
-  void applyRules(map<int, SItem> &sentence, FILE *output);
+  void applyRulesOptimal(map<int, SItem> &sentence, FILE *output);
   
-  // Find the best path from a chart of sentence positions and rule numbers
-  map< pair<int, int>, int > bestPath(map< pair<int, int>, vector<int> > &rule_spans, unsigned int len);
-
   wstring itow(int i);
   int wtoi(wstring w);
 

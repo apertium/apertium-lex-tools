@@ -51,16 +51,15 @@ LRXProcessor::LRXProcessor()
   pool = new Pool<vector<int> >(4, vector<int>(50));
 
   initial_state = new State(pool);
-  current_state = new State(pool);
 
   traceMode = false;
+  outOfWord = true;
   pos = 0;
   current_line = 1;
 }
 
 LRXProcessor::~LRXProcessor()
 {
-  delete current_state;
   delete initial_state;
   delete pool;
 }
@@ -209,204 +208,8 @@ LRXProcessor::pathsToRules(wstring const path)
   return matched_rules;
 }
 
-void 
-LRXProcessor::applyRules(map<int, SItem> &sentence, FILE *output)
-{
-  // A map containing spans in the sentence and a list of rules which match
-  // these spans
-  map< pair<int, int>, vector<int> > rule_spans; 
-  map< pair<int, int>, wstring > pos_rules; 
-
-  // List of current states in the rule transducer
-  vector<State> current_states; 
-
-  current_states.push_back(*initial_state);
-
-  unsigned int j = 0; // current range start
-  unsigned int k = 1; // current range end
-
-  // The default rule is to just skip
-  vector<int> skip;
-  skip.push_back(0);
-
-  unsigned int lim = sentence.size();
-  // Read all of the possible rule applications into a chart
-  // and also populate with default 'skip' transitions
-  for(unsigned int i = 0; i < lim; i++)
-  {
-    SItem s = sentence[i];
-    if(traceMode)
-    {
-      fwprintf(stderr, L"%d | %d [%d:%d] %S(%d) (C: %d)\n", sentence.size(), i, j, k, s.sl.c_str(), s.tl.size(), current_states.size());
-    }
-
-    vector<int> rules; // Each time we advance a word in the sentence we reinitialise the list of current matched rules
-    State is = *initial_state;
-    for(k = j; k < lim; k++) // From the current position in the sentence until the end
-    {
-      if(is.size() == 0) // FIXME: Should this go after isFinal?
-      { 
-        break;
-      }
-      if(is.isFinal(anfinals)) // If this is a final state (regardless of if there is more input), then add the match
-      {
-        wstring out = is.filterFinals(anfinals, alphabet, escaped_chars);
-        if(traceMode)
-        {
-          fwprintf(stderr, L"%d->%d : %S\n", j, k, out.c_str());
-        } 
-        pair<int, int> span = make_pair(j, k);
-        rule_spans[span] = pathsToRules(out);
-        pos_rules[span] = out; 
-      }
-      is.step(sentence[k].sl, patterns, alphabet, stderr);
-    }
-    k = j; 
-
-    if(i != j) // Add the default 'skip' rule
-    {
-      pair<int, int> default_span = make_pair(j, i);
-      if(rule_spans.find(default_span) == rule_spans.end()) 
-      {
-        rule_spans[default_span] = skip;
-      } 
-      else
-      {
-        rule_spans[default_span].push_back(0);
-      }
-    }
-
-    j = i;
-  }
-
-  // Print out the sentence transducer of matched rules, each 
-  // state is a word and each transitition is a rule between
-  // words
-  if(traceMode)
-  {
-    int p = 0; // Final state
-    for(map< pair<int, int>, vector<int> >::iterator it = rule_spans.begin(); it != rule_spans.end(); it++) 
-    {
-      pair<int, int> span = it->first;
-      vector<int> r = it->second;
-      for(vector<int>::iterator it2 = r.begin(); it2 != r.end(); it2++)
-      {
-          fwprintf(stderr, L"%d\t%d\t%d\t%d\n", span.first, span.second, *it2, *it2);
-      }
-      p = it->first.second;
-    }
-    fwprintf(stderr, L"%d\n", p); // Final state
-  } 
-
-  // Find the optimal path
-  map< pair <int, int>, int > path = bestPath(rule_spans, lim);
-
-/*
-  // print out paths + scores
-  fwprintf(stderr, L"\n");
-  for(map< pair<int, int>, int>::iterator it = path.begin(); it != path.end(); it++)
-  {
-    pair <int, int> transition = it->first;
-    int rule = it->second;
-    fwprintf(stderr, L"%d %d *%d *%d\n", transition.first, transition.second, rule, rule);
-  }
-*/
-
-  // Here is where we apply the rules that best cover the sentence to the sentence
-  for(unsigned int i = 0; i < lim; i++)
-  { 
-    SItem s = sentence[i];
-    if(traceMode) 
-    {
-      fwprintf(stderr, L"%d %S(%d)\n", i, s.sl.c_str(), s.tl.size());
-    }
-    for(unsigned int j = i; j < lim; j++)
-    {
-      pair<int, int> p = make_pair(i, j);
-      if(rule_spans.find(p) != rule_spans.end())
-      {
-        int rule = path[p];
-        if(rule > 0) 
-        {
-          //int offset = 0;
-          map< pair<int, wstring>, wstring> ops = ruleToOps(pos_rules[p], rule, i);
- 
-          for(map< pair<int, wstring>, wstring>::iterator it = ops.begin(); it != ops.end(); it++)
-          {
-            pair<int, wstring> oftype = it->first;
-            wstring matcher = it->second ;
-            if(traceMode) 
-            {
-              fwprintf(stderr, L"-> rule %d: %d %d %f\n", rule, rules[rule].id, rules[rule].len, rules[rule].weight);
-              fwprintf(stderr, L": %S\n", pos_rules[p].c_str());
-              fwprintf(stderr, L"%d : [%d] %d | %S | %S \n", alphabet(matcher), rule, oftype.first, oftype.second.c_str(), matcher.c_str());
-            }
-            if(oftype.second == L"skip")
-            {  
-              continue; 
-            }
-            Transducer t = patterns[alphabet(matcher)]; 
-            vector<wstring> new_tl;
-            for(vector<wstring>::const_iterator it2 = sentence[oftype.first].tl.begin(); it2 != sentence[oftype.first].tl.end(); it2++)
-            {
-              bool matched = false;
-              wstring tlword = *it2;
-              matched = t.recognise(tlword, alphabet, stderr);
-              if(oftype.second == L"select" && matched)
-              {
-                new_tl.push_back(tlword);
-                if(traceMode)
-                {
-                  fwprintf(stderr, L"%d:SELECT:%d %S\n", current_line, rule, tlword.c_str());
-                }
-              } 
-              else if(oftype.second == L"remove" && !matched)
-              { 
-                new_tl.push_back(tlword);
-                //if(traceMode)
-                //{
-                //  fwprintf(stderr, L"SELECT:%d %S\n", rule, tlword.c_str());
-                //}
-              }
-              else if(oftype.second == L"remove" && matched)
-              { 
-                if(traceMode)
-                {
-                  fwprintf(stderr, L"%d:REMOVE:%d %S\n", current_line, rule, tlword.c_str());
-                }
-                continue;
-              }
-              else if(oftype.second == L"select" && !matched)
-              {
-                //if(traceMode)
-                //{
-                //  fwprintf(stderr, L"REMOVE:%d %S\n", rule, tlword.c_str());
-                //}
-                continue;
-              }
-              else
-              {
-                new_tl.push_back(tlword);
-                if(traceMode)
-                {
-                  fwprintf(stderr, L"%d : %d COPY %S\n", t.size(), matched, tlword.c_str());
-                }
-              }
-            }
-             
-            if(new_tl.size() > 0)
-            {
-              sentence[oftype.first].tl = new_tl;
-            }
-          }
-        } 
-      }
-    }
-  }
-}
-
-map< pair<int, wstring>, wstring> 
-LRXProcessor::ruleToOps(wstring rules, int id, int pos)
+map< int, pair<int, wstring> >
+LRXProcessor::ruleToOpsOptimal(wstring rules, int id, int pos)
 {
   vector<wstring> matched_paths;
 
@@ -425,7 +228,7 @@ LRXProcessor::ruleToOps(wstring rules, int id, int pos)
     matched_paths.push_back(loc_buf);
   }
 
-  map< pair<int, wstring>, wstring> ops;
+  map<int, pair<int, wstring> > ops;
   map<int, wstring> offset_op;
   for(vector<wstring>::iterator it = matched_paths.begin(); it != matched_paths.end(); it++)
   {
@@ -519,154 +322,16 @@ LRXProcessor::ruleToOps(wstring rules, int id, int pos)
   
         }
         
-        //fwprintf(stderr, L"*%S offset %d: %S\n", rule_id.c_str(), it3->first, it3->second.c_str());
+        fwprintf(stderr, L"*%S offset %d: %S\n", rule_id.c_str(), it3->first, it3->second.c_str());
         //ops[make_pair(it3->first, type)] = pattern;
-        ops[make_pair(it3->first, type)] = part;
+        //ops[make_pair(it3->first, type)] = part;
+        //ops[it3->first] = make_pair(type, part);
+        ops[it3->first+1] = make_pair(id, part); 
       } 
     }
   }
 
   return ops;
-}
-
-
-map< pair<int, int>, int > // This function needs to be optimised
-LRXProcessor::bestPath(map< pair<int, int>, vector<int> > &rule_spans, unsigned int slen)
-{
-  
-  map< pair<int, int>, int > path;
-  
-  map<wstring, int> scores;
-  map<wstring, unsigned int> path_last;
-  scores[L""] = 0; 
-
-  if(traceMode)
-  {
-    fwprintf(stderr, L"slen: %d\n\n", slen);
-  }
-  
-  for(unsigned int i = 0; i < slen; i++) 
-  {
-    map<wstring, int> new_scores;
-    for(unsigned int j = i; j < slen; j++)
-    {
-      pair<int, int> p = make_pair(i, j);
-      for(vector<int>::const_iterator it = rule_spans[p].begin(); it != rule_spans[p].end(); it++)
-      {
-        int current_rule = *it;
-        for(map<wstring, int>::const_iterator it3 = scores.begin(); it3 != scores.end(); it3++)
-        {
-          wstring current_path = it3->first;
-          int score = it3->second;
-          /*if(current_rule == 0)
-          { 
-            scores[current_path]--;
-          }*/
-          if(rule_spans.find(p) != rule_spans.end())
-          {
-            wstring transition = itow(i) + L">" + itow(j) + L":" + itow(current_rule);;
-            wstring new_path = L"";
-            if(current_path != L"")
-            {
-              new_path = current_path + L" " + transition;
-            }
-            else
-            { 
-              new_path = transition;
-            }
-  
-            if(i < path_last[current_path])
-            {
-              //fwprintf(stderr, L"SKIP: \n");
-              //fwprintf(stderr, L"  current_path[%S]\n", current_path.c_str());
-              //fwprintf(stderr, L"  new_path[%S]\n", new_path.c_str()); 
-              //fwprintf(stderr, L"  last[%S] = %d\n", current_path.c_str(), path_last[current_path]); 
-              new_scores[current_path] = score;
-            }
-            else
-            {
-              new_scores[new_path] = scores[current_path] + rules[current_rule].ops;
-              //fwprintf(stderr, L"+ %d new_path[%S] last[%S] = %d\n", it3->second, new_path.c_str(), current_path.c_str(), path_last[current_path]);
-              path_last[new_path] = j;
-            }
-          }
-        }
-      }
-    }
-    if(new_scores.size() > 0)
-    {
-      scores = new_scores;
-    }
-  }
-  //fwprintf(stderr, L"\n\n", scores.size());
-  
-  double max = -1.0;
-  wstring current_max = L"";
-  for(map<wstring, int>::iterator it = scores.begin(); it != scores.end(); it++)
-  {
-    double score = static_cast<double>(it->second) ; // / static_cast<double>(slen);
-
-    if(it->second == 0) 
-    {
-      score = -1.0;
-    }
-
-    if(traceMode)
-    {
-      fwprintf(stderr, L"max: %f cur: %f | %d path[%S] win[%S]\n", max, score, it->second, it->first.c_str(), current_max.c_str());
-    }
-
-    if(score > max)
-    {
-      max = score;
-      current_max = it->first;
-    }
-
-  }
-  if(traceMode)
-  {
-    fwprintf(stderr, L"max: %S\n", current_max.c_str());
-  }
-
-  wstring t = L"";  
-  int i = 0;
-  int j = 0;
-  int rule = 0;
-  for(wstring::iterator it = current_max.begin(); it != current_max.end(); it++)
-  {
-    switch(*it)
-    {
-      case L' ':
-        rule = wtoi(t);
-        if(traceMode)
-        {
-          fwprintf(stderr, L"%d:%d %S -> %d\n", i, j, t.c_str(), rule);
-        }
-        path[make_pair(i, j)] = rule;
-        i = 0; 
-        j = 0; 
-        t = L"";
-        break;
-      case L'>':
-        i = wtoi(t);
-        t = L"";
-        break;
-      case L':':
-        j = wtoi(t);
-        t = L"";
-        break;
-      default:
-        t = t + *it;
-    }
-  }
-  rule = wtoi(t);
-  if(traceMode)
-  {
-    fwprintf(stderr, L"%d:%d %S -> %d\n", i, j, t.c_str(), rule);
-  }
-  path[make_pair(i, j)] = rule;
-
-  return path; 
 }
 
 void 
@@ -728,6 +393,193 @@ LRXProcessor::readWord(SItem &w, FILE *input, FILE *output)
   
 }
 
+void
+LRXProcessor::applyRulesOptimal(map<int, SItem> &sentence, FILE *output)
+{ 
+  unsigned int lim = sentence.size();
+
+  map<int, pair<int, vector<State> > > covers ;
+  pair<int, vector<State> > empty_seq;
+
+  covers[-1] = empty_seq;
+  covers[-1].first = 0;
+
+  // A map of pairs of 
+  // e.g. 
+  //      0,1:0  0.0
+  //      0,2:5  1.0
+  //      1,3:2  1.0
+  //      1,2:0  0.0
+  //      2,3:0  0.0
+  //      3,4:0  0.0
+  //      4,5:0  0.0
+  //      5,6:0  0.0
+  //      5,6:10 1.0
+
+  vector<State> alive_states_clean ; 
+  vector<State> alive_states = alive_states_clean ; 
+  alive_states.push_back(*initial_state);
+
+  unsigned int i = 0;
+  for(i = 0; i < lim; i++) // For each input sentence word
+  {
+    SItem w = sentence[i];
+
+    vector<State> new_state;
+    pair<int, vector<State> > new_best_cover;
+    new_best_cover.first = -numeric_limits<int>::max();
+
+    if(traceMode)
+    {
+      fwprintf(stderr, L"s[%d]: %S (best_cover: %d)\n", i, w.sl.c_str(), new_best_cover.first); 
+
+    }
+
+    for(vector<State>::const_iterator it = alive_states.begin(); it != alive_states.end(); it++) // For each currently alive state
+    {
+      State s = *it; 
+      fwprintf(stderr, L"  step: %S\n", w.sl.c_str());  
+      s.step(w.sl, patterns, alphabet, stderr); // Try and step in the rule transducer using the current word
+      if(s.size() > 0) // If the current state has outgoing transitions, add it to the new alive states
+      {
+        new_state.push_back(s); 
+      }
+ 
+      vector<int> found_rules;
+      if(s.isFinal(anfinals)) // If this is a final state (regardless of if there is more input), then add the match
+      {
+        wstring out = s.filterFinals(anfinals, alphabet, escaped_chars);
+        if(traceMode)
+        {
+          fwprintf(stderr, L"%d: %S\n", i, out.c_str());
+        } 
+        found_rules = pathsToRules(out);
+
+        if(found_rules.size() == 0) 
+        {
+          fwprintf(stderr, L"    rule 0: 0\n");
+        }
+        else 
+        {
+          for(vector<int>::iterator it2 = found_rules.begin(); it2 != found_rules.end(); it2++)
+          { 
+            pair<int, vector<State> > newseq = covers[(i - rules[*it2].len)];
+            vector<State> reached;
+            newseq.first = newseq.first + (rules[*it2].ops * rules[*it2].len);
+            if(newseq.first > new_best_cover.first)
+            {
+              fwprintf(stderr, L"    BEST COVER %d > %d (rules[%d].ops = %d)\n", newseq.first, new_best_cover.first, *it2, rules[*it2].ops);
+              State news(pool);
+              news.copy(s);
+              reached.push_back(news);
+              //newseq.second.push_back(news);
+              newseq.second = reached;
+
+              new_best_cover = newseq;
+              covers[(i - rules[*it2].len)] = newseq;
+            }
+            fwprintf(stderr, L"    rule %d: %d (new_best_cover size: %d)\n", *it2, rules[*it2].ops, new_best_cover.second.size());
+          }
+        }
+      }
+    }
+    alive_states = new_state;
+    alive_states.push_back(*initial_state);
+  }
+
+  map<int, pair<int, wstring> > pos_ops ; 
+
+  for(map<int, pair<int, vector<State> > >::iterator it = covers.begin(); it != covers.end(); it++) 
+  {
+    pair<int, vector<State> > best = it->second;
+    fwprintf(stderr, L"covers[%d] best (score: %d, size: %d)\n", it->first, best.first, best.second.size());
+
+    for(vector<State>::iterator it2 = best.second.begin(); it2 != best.second.end(); it2++) 
+    {
+      wstring out = it2->filterFinals(anfinals, alphabet, escaped_chars);
+      vector<int> found_rules = pathsToRules(out);
+      for(vector<int>::iterator it3 = found_rules.begin(); it3 != found_rules.end(); it3++) 
+      {
+        map< int, pair<int, wstring> > ops = ruleToOpsOptimal(out, *it3, it->first);
+        pos_ops.insert(ops.begin(), ops.end());
+        fwprintf(stderr, L"FR: %d\n", ops.size() );
+      }
+      fwprintf(stderr, L"XX: %d, %S\n", best.first, out.c_str());
+    }
+  }
+
+
+  // Apply rules
+
+  for(i = 0; i < lim; i++) // For each input sentence word
+  {
+    SItem w = sentence[i];
+    pair<int, wstring> pos_op = pos_ops[i];
+    int current_rule = pos_op.first;
+    wstring op = pos_op.second; 
+
+    fwprintf(stderr, L"[%d] %S | %S\n", i, w.sl.c_str(), op.c_str());
+    wstring op_type = L"";
+    if(op.find(L"<select") != wstring::npos) 
+    {
+      op_type = L"select";
+    }
+    else if(op.find(L"<remove") != wstring::npos) 
+    { 
+      op_type = L"remove";
+    }
+    else
+    {
+      continue;
+    }
+    Transducer t = patterns[alphabet(op)];
+
+    fwprintf(stderr, L"  => %d \n", t.size());
+
+    vector<wstring> new_tl;
+    for(vector<wstring>::const_iterator it2 = sentence[i].tl.begin(); it2 != sentence[i].tl.end(); it2++)
+    {
+      bool matched = false;
+      wstring tlword = *it2;
+      matched = t.recognise(tlword, alphabet, stderr);
+      fwprintf(stderr, L"T: %d, %S\n", t.size(), tlword.c_str());
+
+      if(op_type == L"select" && matched)
+      {
+        new_tl.push_back(tlword);
+        if(traceMode)
+        {
+          fwprintf(stderr, L"%d:SELECT:%d %S\n", current_line, current_rule, tlword.c_str());
+        }
+      }
+      else if(op_type == L"remove" && !matched)
+      {
+        new_tl.push_back(tlword);
+      }
+      else if(op_type == L"remove" && matched)
+      { 
+        if(traceMode)
+        {
+          fwprintf(stderr, L"%d:REMOVE:%d %S\n", current_line, current_rule, tlword.c_str());
+        }
+        continue;
+      }
+      else if(op_type == L"select" && !matched)
+      {
+        continue;
+      }
+      else
+      {
+        new_tl.push_back(tlword);
+      }
+    }
+
+    if(new_tl.size() > 0)
+    {
+      sentence[i].tl = new_tl;
+    }
+  }
+}
 
 void
 LRXProcessor::process(FILE *input, FILE *output) 
@@ -759,11 +611,11 @@ LRXProcessor::process(FILE *input, FILE *output)
 
     if(sentence[pos-1].sl.compare(LRX_PROCESSOR_S_BOUNDARY) == 0 || pos >= LRX_PROCESSOR_MAX_S_LENGTH)
     {
-      applyRules(sentence, output);
+      applyRulesOptimal(sentence, output);
       for(map<int, SItem>::iterator it = sentence.begin(); it != sentence.end(); it++)
       { 
         SItem w = it->second;
-        //fwprintf(stderr, L"sentence[%d]: %S\n", it->first, w.sl.c_str());
+        fwprintf(stderr, L"sentence[%d]: %S\n", it->first, w.sl.c_str());
         fputws_unlocked(w.blank.c_str(), output);
         if(w.sl != L"") 
         { 

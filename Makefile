@@ -7,6 +7,3 @@ all:
 	g++ -ggdb -Wall -o apertium-lrx-comp lrx_comp.cc lrx_compiler.o $(CFLAGS)
 	g++ -ggdb -Wall -o apertium-lrx-proc lrx_proc.cc lrx_processor.o $(CFLAGS)
 	g++ -ggdb -Wall -o apertium-ldx-proc ldx_proc.cc $(CFLAGS)
-
-	#g++ -Wall apertium_lex_rule_proc.cc -o apertium-lex-rule-proc $(CFLAGS)
-
