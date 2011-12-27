@@ -33,11 +33,13 @@ using namespace std;
 void endProgram(char *name)
 {
   cout << basename(name) << ": process a bilingual stream with a lexical rule transducer" << endl;
-  cout << "USAGE: " << basename(name) << "[-t] fst_file [input_file [output_file]]" << endl;
+  cout << "USAGE: " << basename(name) << "[ -t | -d ] fst_file [input_file [output_file]]" << endl;
 #if HAVE_GETOPT_LONG
   cout << "  -t, --trace:         trace the rules which have been applied" << endl;
+  cout << "  -d, --debug:         print out information about how the rules are run" << endl;
 #else
   cout << "  -t:         trace the rules which have been applied" << endl;
+  cout << "  -d:         print out information about how the rules are run" << endl;
 #endif
   exit(EXIT_FAILURE);
 }
@@ -51,6 +53,7 @@ int main(int argc, char *argv[])
   static struct option long_options[]=
     {
       {"trace",        0, 0, 't'}
+      {"debug",        0, 0, 'd'}
     };
 #endif
 
@@ -58,9 +61,9 @@ int main(int argc, char *argv[])
   {
 #if HAVE_GETOPT_LONG
     int option_index;
-    int c = getopt_long(argc, argv, "t", long_options, &option_index);
+    int c = getopt_long(argc, argv, "td", long_options, &option_index);
 #else
-    int c = getopt(argc, argv, "t");
+    int c = getopt(argc, argv, "td");
 #endif
 
     if(c == -1)
@@ -72,6 +75,9 @@ int main(int argc, char *argv[])
     {
     case 't':
       lrxp.setTraceMode(true);
+      break;
+    case 'd':
+      lrxp.setDebugMode(true);
       break;
     default:
       endProgram(argv[0]);

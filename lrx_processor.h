@@ -81,6 +81,7 @@ private:
   State *initial_state; // Initial state in the rule transducer
  
   bool traceMode; // Rule tracing ? 
+  bool debugMode; // Debug information ?
   bool outOfWord; // Are we in a word ?
   unsigned int pos; // Current sentence position
   unsigned long current_line; // The current input line as determined by num '\n'
@@ -101,6 +102,7 @@ public:
   ~LRXProcessor();
 
   void setTraceMode(bool mode);
+  void setDebugMode(bool mode);
 
   void init();
   void load(FILE *input);

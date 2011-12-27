@@ -53,6 +53,7 @@ LRXProcessor::LRXProcessor()
   initial_state = new State(pool);
 
   traceMode = false;
+  debugMode = false;
   outOfWord = true;
   pos = 0;
   current_line = 1;
@@ -69,6 +70,13 @@ LRXProcessor::setTraceMode(bool m)
 {
   traceMode = m;
 }
+
+void
+LRXProcessor::setDebugMode(bool m)
+{
+  debugMode = m;
+}
+
 void
 LRXProcessor::load(FILE *in)
 {
@@ -112,7 +120,10 @@ LRXProcessor::load(FILE *in)
     len--;
   }
 
-  //fwprintf(stderr, L"Patterns: %d, Alphabet: %d\n", patterns.size(), alphabet.size());
+  if(debugMode)
+  {
+    fwprintf(stderr, L"Patterns: %d, Alphabet: %d\n", patterns.size(), alphabet.size());
+  }
 
   // Now read in the main rule pattern transducer
 
@@ -143,7 +154,10 @@ LRXProcessor::load(FILE *in)
   {
     LSRuleExe rec;
     fread(&rec, sizeof(LSRuleExe), 1, in);
-    //fwprintf(stderr, L"%d len(%d) weight(%f)\n", rec.id, rec.len, rec.weight);
+    if(debugMode) 
+    {
+      fwprintf(stderr, L"%d len(%d) weight(%f)\n", rec.id, rec.len, rec.weight);
+    }
     rules[rec.id] = rec;
   }
 
@@ -322,7 +336,10 @@ LRXProcessor::ruleToOpsOptimal(wstring rules, int id, int pos)
   
         }
         
-        fwprintf(stderr, L"*%S offset %d: %S\n", rule_id.c_str(), it3->first, it3->second.c_str());
+        if(debugMode)
+        {
+          fwprintf(stderr, L"*%S offset %d: %S\n", rule_id.c_str(), it3->first, it3->second.c_str());
+        }
         //ops[make_pair(it3->first, type)] = pattern;
         //ops[make_pair(it3->first, type)] = part;
         //ops[it3->first] = make_pair(type, part);
@@ -429,16 +446,18 @@ LRXProcessor::applyRulesOptimal(map<int, SItem> &sentence, FILE *output)
     pair<int, vector<State> > new_best_cover;
     new_best_cover.first = -numeric_limits<int>::max();
 
-    if(traceMode)
+    if(debugMode)
     {
       fwprintf(stderr, L"s[%d]: %S (best_cover: %d)\n", i, w.sl.c_str(), new_best_cover.first); 
-
     }
 
     for(vector<State>::const_iterator it = alive_states.begin(); it != alive_states.end(); it++) // For each currently alive state
     {
       State s = *it; 
-      fwprintf(stderr, L"  step: %S\n", w.sl.c_str());  
+      if(debugMode)
+      {
+        fwprintf(stderr, L"  step: %S\n", w.sl.c_str());  
+      }
       s.step(w.sl, patterns, alphabet, stderr); // Try and step in the rule transducer using the current word
       if(s.size() > 0) // If the current state has outgoing transitions, add it to the new alive states
       {
@@ -449,7 +468,7 @@ LRXProcessor::applyRulesOptimal(map<int, SItem> &sentence, FILE *output)
       if(s.isFinal(anfinals)) // If this is a final state (regardless of if there is more input), then add the match
       {
         wstring out = s.filterFinals(anfinals, alphabet, escaped_chars);
-        if(traceMode)
+        if(debugMode)
         {
           fwprintf(stderr, L"%d: %S\n", i, out.c_str());
         } 
@@ -457,7 +476,10 @@ LRXProcessor::applyRulesOptimal(map<int, SItem> &sentence, FILE *output)
 
         if(found_rules.size() == 0) 
         {
-          fwprintf(stderr, L"    rule 0: 0\n");
+          if(debugMode)
+          { 
+            fwprintf(stderr, L"    rule 0: 0\n");
+          }
         }
         else 
         {
@@ -468,7 +490,10 @@ LRXProcessor::applyRulesOptimal(map<int, SItem> &sentence, FILE *output)
             newseq.first = newseq.first + (rules[*it2].ops * rules[*it2].len);
             if(newseq.first > new_best_cover.first)
             {
-              fwprintf(stderr, L"    BEST COVER %d > %d (rules[%d].ops = %d)\n", newseq.first, new_best_cover.first, *it2, rules[*it2].ops);
+              if(debugMode) 
+              {
+                fwprintf(stderr, L"    BEST COVER %d > %d (rules[%d].ops = %d)\n", newseq.first, new_best_cover.first, *it2, rules[*it2].ops);
+              }
               State news(pool);
               news.copy(s);
               reached.push_back(news);
@@ -478,7 +503,10 @@ LRXProcessor::applyRulesOptimal(map<int, SItem> &sentence, FILE *output)
               new_best_cover = newseq;
               covers[(i - rules[*it2].len)] = newseq;
             }
-            fwprintf(stderr, L"    rule %d: %d (new_best_cover size: %d)\n", *it2, rules[*it2].ops, new_best_cover.second.size());
+            if(debugMode)
+            {
+              fwprintf(stderr, L"    rule %d: %d (new_best_cover size: %d)\n", *it2, rules[*it2].ops, new_best_cover.second.size());
+            }
           }
         }
       }
@@ -492,7 +520,10 @@ LRXProcessor::applyRulesOptimal(map<int, SItem> &sentence, FILE *output)
   for(map<int, pair<int, vector<State> > >::iterator it = covers.begin(); it != covers.end(); it++) 
   {
     pair<int, vector<State> > best = it->second;
-    fwprintf(stderr, L"covers[%d] best (score: %d, size: %d)\n", it->first, best.first, best.second.size());
+    if(debugMode)
+    {
+      fwprintf(stderr, L"covers[%d] best (score: %d, size: %d)\n", it->first, best.first, best.second.size());
+    }
 
     for(vector<State>::iterator it2 = best.second.begin(); it2 != best.second.end(); it2++) 
     {
@@ -502,9 +533,15 @@ LRXProcessor::applyRulesOptimal(map<int, SItem> &sentence, FILE *output)
       {
         map< int, pair<int, wstring> > ops = ruleToOpsOptimal(out, *it3, it->first);
         pos_ops.insert(ops.begin(), ops.end());
-        fwprintf(stderr, L"FR: %d\n", ops.size() );
+        if(debugMode)
+        {
+          fwprintf(stderr, L"FR: %d\n", ops.size() );
+        }
       }
-      fwprintf(stderr, L"XX: %d, %S\n", best.first, out.c_str());
+      if(debugMode)
+      {
+        fwprintf(stderr, L"XX: %d, %S\n", best.first, out.c_str());
+      }
     }
   }
 
@@ -518,7 +555,10 @@ LRXProcessor::applyRulesOptimal(map<int, SItem> &sentence, FILE *output)
     int current_rule = pos_op.first;
     wstring op = pos_op.second; 
 
-    fwprintf(stderr, L"[%d] %S | %S\n", i, w.sl.c_str(), op.c_str());
+    if(debugMode)
+    {
+      fwprintf(stderr, L"[%d] %S | %S\n", i, w.sl.c_str(), op.c_str());
+    }
     wstring op_type = L"";
     if(op.find(L"<select") != wstring::npos) 
     {
@@ -534,7 +574,10 @@ LRXProcessor::applyRulesOptimal(map<int, SItem> &sentence, FILE *output)
     }
     Transducer t = patterns[alphabet(op)];
 
-    fwprintf(stderr, L"  => %d \n", t.size());
+    if(debugMode)
+    {
+      fwprintf(stderr, L"  => %d \n", t.size());
+    }
 
     vector<wstring> new_tl;
     for(vector<wstring>::const_iterator it2 = sentence[i].tl.begin(); it2 != sentence[i].tl.end(); it2++)
@@ -542,7 +585,10 @@ LRXProcessor::applyRulesOptimal(map<int, SItem> &sentence, FILE *output)
       bool matched = false;
       wstring tlword = *it2;
       matched = t.recognise(tlword, alphabet, stderr);
-      fwprintf(stderr, L"T: %d, %S\n", t.size(), tlword.c_str());
+      if(debugMode)
+      {
+        fwprintf(stderr, L"T: %d, %S\n", t.size(), tlword.c_str());
+      }
 
       if(op_type == L"select" && matched)
       {
@@ -614,7 +660,10 @@ LRXProcessor::process(FILE *input, FILE *output)
       for(map<int, SItem>::iterator it = sentence.begin(); it != sentence.end(); it++)
       { 
         SItem w = it->second;
-        fwprintf(stderr, L"sentence[%d]: %S\n", it->first, w.sl.c_str());
+        if(debugMode)
+        {
+          fwprintf(stderr, L"sentence[%d]: %S\n", it->first, w.sl.c_str());
+        }
         fputws_unlocked(w.blank.c_str(), output);
         if(w.sl != L"") 
         { 
@@ -657,7 +706,10 @@ LRXProcessor::process(FILE *input, FILE *output)
     for(map<int, SItem>::iterator it = sentence.begin(); it != sentence.end(); it++)
     { 
       SItem w = it->second;
-      fwprintf(stderr, L"sentence[%d]: %S\n", it->first, w.sl.c_str());
+      if(debugMode)
+      {
+        fwprintf(stderr, L"sentence[%d]: %S\n", it->first, w.sl.c_str());
+      }
       fputws_unlocked(w.blank.c_str(), output);
       if(w.sl != L"") 
       { 
