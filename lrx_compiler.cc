@@ -109,8 +109,8 @@ LRXCompiler::parse(string const &fitxer)
   for(map<int, LSRule>::iterator it = rules.begin(); it != rules.end(); it++)
   {
     LSRule rule = it->second; 
-    //fwprintf(stderr, L"\b\b%d", rule.id);
-    //fflush(stderr);
+    fwprintf(stderr, L"\b\b\b\b%d", rule.id);
+    fflush(stderr);
     int s = transducer.getInitial();
     wstring w_id = itow(rule.id);
 
@@ -119,7 +119,7 @@ LRXCompiler::parse(string const &fitxer)
       alphabet.includeSymbol(w_id.c_str());
     }
 
-    fwprintf(stderr, L"rule %S (line %d) (len %d) (ops %d):\n", w_id.c_str(), rule.line, rule.len, rule.ops);
+    //fwprintf(stderr, L"rule %S (line %d) (len %d) (ops %d):\n", w_id.c_str(), rule.line, rule.len, rule.ops);
     for(map<int, vector<wstring> >::iterator it3 = rule.sl_context.begin(); it3 != rule.sl_context.end(); it3++) 
     {
       int pos = it3->first;
@@ -153,7 +153,7 @@ LRXCompiler::parse(string const &fitxer)
             t.determinize(); // Determinise, don't minimise
             patterns[alphabet(left.c_str())] = t;
           }
-          fwprintf(stderr, L"  [%d] sl: %S, tl: %S\n", pos, sl_patterns[0].c_str(), it4->c_str()); 
+          //fwprintf(stderr, L"  [%d] sl: %S, tl: %S\n", pos, sl_patterns[0].c_str(), it4->c_str()); 
         }
       }
       else
@@ -180,7 +180,7 @@ LRXCompiler::parse(string const &fitxer)
             t.determinize();
             patterns[alphabet(left.c_str())] = t;
           }
-          fwprintf(stderr, L"%d %d [%d] sl: %S, tl: skip(*)\n", k, s, pos, it4->c_str()); 
+          //fwprintf(stderr, L"%d %d [%d] sl: %S, tl: skip(*)\n", k, s, pos, it4->c_str()); 
         }
         if(reached_states.size() > 1)
         {
@@ -208,6 +208,7 @@ LRXCompiler::parse(string const &fitxer)
   //wcout << transducer.size() << L" " << patterns.size() << endl;
   if(outputGraph)
   {
+    fwprintf(stderr, L"\n\n");
     transducer.show(alphabet, stderr);
   }
 
@@ -336,7 +337,7 @@ LRXCompiler::procRemove()
   }
   rules[current_rule_id].tl_context[current_rule_len].push_back(tl_pattern);
 
-  wcout << L"    Remove[" << tipo << "]: " << tl_pattern << endl;
+  //wcout << L"    Remove[" << tipo << "]: " << tl_pattern << endl;
 }
 
 void
@@ -356,7 +357,7 @@ LRXCompiler::procSelect()
   }
   rules[current_rule_id].tl_context[current_rule_len].push_back(tl_pattern);
 
-  wcout << L"    Select[" << tipo << "]: " << tl_pattern << endl;
+  //wcout << L"    Select[" << tipo << "]: " << tl_pattern << endl;
 }
 
 void
@@ -383,7 +384,7 @@ LRXCompiler::procMatch()
   //rules[current_rule_id].sl_pattern = sl_pattern;
   rules[current_rule_id].sl_context[current_rule_len].push_back(sl_pattern);
 
-  wcout << L"  Match[" << current_rule_len << L"]: " << sl_pattern << endl;
+  //wcout << L"  Match[" << current_rule_len << L"]: " << sl_pattern << endl;
 
   if(xmlTextReaderIsEmptyElement(reader))
   {
@@ -490,7 +491,7 @@ LRXCompiler::procRule()
   rules[current_rule_id].ops = 0;
   int tipo = xmlTextReaderNodeType(reader);
 
-  wcout << L"Rule " << current_rule_id << L" (line " << rules[current_rule_id].line << L"):" << endl;
+  //wcout << L"Rule " << current_rule_id << L" (line " << rules[current_rule_id].line << L"):" << endl;
  
   while(true)
   {
@@ -512,13 +513,13 @@ LRXCompiler::procRule()
     }
     else if(name == LRX_COMPILER_OR_ELEM)
     {
-      wcout << L"  Or:" << endl;
+      //wcout << L"  Or:" << endl;
       procOr();
     }
     else if(name == LRX_COMPILER_RULE_ELEM)
     {
       rules[current_rule_id].len = current_rule_len;
-      wcout << L" Len: " << rules[current_rule_id].len << L" "  << endl; 
+      //wcout << L" Len: " << rules[current_rule_id].len << L" "  << endl; 
       return;
     }
     else
