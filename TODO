@@ -1,0 +1,28 @@
+
+This sentence, gets the wrong rule called (with rules.estació):
+
+[]^Aquest<det><dem><f><sg>/This<det><dem><f><sg>$ ^selva<n><f><sg>/jungle<n><sg>$ ^també<adv>/also<adv>$ ^es<prn><pro><ref><p3><mf><sp>/$ ^anar<vblex><pri><p3><sg>/go<vblex><pri><p3><sg>$ ^veure<vblex><inf>/see<vblex><inf>$ ^destruir<vblex><pp><f><sg>/destroy<vblex><pp><f><sg>$ ^en gran part<adv>/largely<adv>$ ^per<pr>/for<pr>/by<pr>$ ^el<det><def><m><sg>/the<det><def><m><sg>$ ^foc<n><m><sg>/fire<n><sg>$ ^forestal<adj><mf><sg>/forest<adj><sg>$ ^de<pr>/of<pr>/from<pr>$ ^1997<num>/1997<num>$^-<guio>/-<guio>$^1998<num>/1998<num>$^,<cm>/,<cm>$ ^deure<vblex><pp><m><sg>/owe<vblex><pp><m><sg>$ ^a<pr>/at<pr>/to<pr>/in<pr>/upon<pr>/into<pr>/onto<pr>$ ^causa<n><f><pl>/cause<n><pl>$ ^humà<adj><f><pl>/@humà<adj><f><pl>$ ^i<cnjcoo>/and<cnjcoo>$ ^que<cnjsub>/that<cnjsub>$ ^aparentment<adv>/apparently<adv>$ ^anar<vblex><pri><p3><sg>/go<vblex><pri><p3><sg>$ ^coincidir<vblex><inf>/coincide<vblex><inf>/agree<vblex><inf>$ ^amb<pr>/with<pr>$ ^un<det><ind><f><sg>/a<det><ind><sg>$ ^estació<n><f><sg>/season<n><sg>/station<n><sg>$ ^extremadament<adv>/extremely<adv>$ ^sec<adj><f><sg>/dry<adj><sint><f><sg>$ ^per<pr>/for<pr>/by<pr>$ ^efecte<n><m><sg>/effect<n><sg>$ ^de<pr>/of<pr>/from<pr>$ ^El<det><def><m><sg>/The<det><def><m><sg>$ ^*Niño/*Niño$^.<sent>/.<sent>$[]
+
+
+======================================================================================
+
+<!-- In my opinion, it should be crystal clear, and this is not included in the
+present texts, that the EU has autonomous power of decision and that the EU
+countries must be able to decide for themselves on their level of commitment,
+without needing permission from NATO - or should that be the US? Pienso que debe
+quedar muy claro, y eso no ocurre en los textos actuales, que la UE tiene
+capacidad de decisión autónoma y que los países de la UE deben poder decidir
+por sí mismos sobre la intervención sin la autorización de la OTAN, es decir, de
+los EE.UU. -->
+
+	<rule>
+		<match lemma="power" tags="n.*">
+			<select lemma="capacidad" tags="n.*"/>
+		</match>
+		<match lemma="of" tags="pr"/>
+		<match/>
+		<match lemma="decision" tags="*"/>
+	</rule>
+
+^The<det><def><sp>/El<det><def><GD><ND>$ ^power<n><sg>/poder<n><m><sg>/energía<n><f><sg>/potencia<n><f><sg>/facultad<n><f><sg>/capacidad<n><f><sg>/competencia<n><f><sg>$ ^of<pr>/de<pr>$ ^decision<n><sg>/decisión<n><f><sg>$ ^prove<vblex><past>/probar<vblex><past>$ ^to<pr>/a<pr>$ ^be<vbser><inf>/ser<vbser><inf>$ ^*decisivie/*decisivie$^.<sent>/.<sent>$^.<sent>/.<sent>$
+
