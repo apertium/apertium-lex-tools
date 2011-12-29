@@ -26,3 +26,29 @@ los EE.UU. -->
 
 ^The<det><def><sp>/El<det><def><GD><ND>$ ^power<n><sg>/poder<n><m><sg>/energía<n><f><sg>/potencia<n><f><sg>/facultad<n><f><sg>/capacidad<n><f><sg>/competencia<n><f><sg>$ ^of<pr>/de<pr>$ ^decision<n><sg>/decisión<n><f><sg>$ ^prove<vblex><past>/probar<vblex><past>$ ^to<pr>/a<pr>$ ^be<vbser><inf>/ser<vbser><inf>$ ^*decisivie/*decisivie$^.<sent>/.<sent>$^.<sent>/.<sent>$
 
+
+======================================================================================
+
+Input
+
+^Mikä<Pron><Interr><Sg><Ess>/Mii<Pron><Interr><Sg><Ess>$ ^pitää<V><Act><Ind><Prs><Sg1>/berret<V><IV><Ind><Prs><Sg1>/liikot<V><IV><Ind><Prs><Sg1>/doallat<V><TV><Ind><Prs><Sg1>/coakcut<V><IV><Ind><Prs><Sg1>$ ^sinä<Pron><Pers><Sg><Ela>/don<Pron><Pers><Sg2><Sg><Ela>$^.<Punct>/@.<Punct>$
+
+
+<rules>
+  <rule>
+    <match lemma="pitää" tags="V.*">
+      <select lemma="liikot" tags="V.*"/>
+    </match>
+    <match lemma="sinä" tags="Pron.Pers.Sg.*"/>
+  </rule>
+
+  <rule>
+    <match lemma="pitää" tags="V.*">
+      <select lemma="doallat" tags="V.*"/>
+    </match>
+  </rule>
+
+
+</rules>
+
+
