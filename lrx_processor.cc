@@ -626,6 +626,7 @@ LRXProcessor::applyRulesOptimal(map<int, SItem> &sentence, FILE *output)
       sentence[i].tl = new_tl;
     }
   }
+  sentence.erase(-1);
 }
 
 void
@@ -665,9 +666,10 @@ LRXProcessor::process(FILE *input, FILE *output)
         {
           fwprintf(stderr, L"sentence[%d]: %S\n", it->first, w.sl.c_str());
         }
-        fputws_unlocked(w.blank.c_str(), output);
         if(w.sl != L"") 
         { 
+          fputws_unlocked(w.blank.c_str(), output);
+          w.blank = L"";
           fputws_unlocked(L"^", output);
           fputws_unlocked(w.sl.c_str(), output);
           for(vector<wstring>::iterator it2 = w.tl.begin(); it2 != w.tl.end(); it2++) 
@@ -701,19 +703,21 @@ LRXProcessor::process(FILE *input, FILE *output)
   }      
 
   // If there is no .<sent> in the input
+  //if(sentence.count(-1) == 0 && sentence.size() > 0)
   if(sentence.size() > 0)
   {
     applyRulesOptimal(sentence, output);
-    for(map<int, SItem>::iterator it = sentence.begin(); it != sentence.end(); it++)
+    for(map<int, SItem>::const_iterator it = sentence.begin(); it != sentence.end(); it++)
     { 
       SItem w = it->second;
       if(debugMode)
       {
-        fwprintf(stderr, L"sentence[%d]: %S\n", it->first, w.sl.c_str());
+        fwprintf(stderr, L"(nosent) sentence[%d]: %S\n", it->first, w.sl.c_str());
       }
-      fputws_unlocked(w.blank.c_str(), output);
       if(w.sl != L"") 
       { 
+        fputws_unlocked(w.blank.c_str(), output);
+        w.blank = L"";
         fputws_unlocked(L"^", output);
         fputws_unlocked(w.sl.c_str(), output);
         for(vector<wstring>::iterator it2 = w.tl.begin(); it2 != w.tl.end(); it2++) 
