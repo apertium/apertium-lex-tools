@@ -6,7 +6,7 @@ m4_define([required_lttoolbox_version], [3.2.0])
 
 AC_INIT([apertium-lex-tools], [0.1.0], [ftyers@prompsit.com])
 AM_INIT_AUTOMAKE([apertium-lex-tools], [0.1.0], no-define)
-AC_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADER([lrx_config.h])
 
 AC_PROG_CXX
 AM_SANITY_CHECK
@@ -32,6 +32,8 @@ AC_SUBST(LIBXML_LIBS)
 AC_CHECK_LIB(xml2, xmlReaderForFile)
 
 AC_CHECK_FUNCS([setlocale strdup getopt_long])
+
+AC_CHECK_DECLS([fread_unlocked, fwrite_unlocked, fgetc_unlocked, fputc_unlocked, fputs_unlocked, getopt_long, fgetwc_unlocked, fputwc_unlocked, fgetws_unlocked, fputws_unlocked])
 
 CPPFLAGS="$CPPFLAGS $CFLAGS $APERTIUM_CFLAGS $LIBXML_CFLAGS"
 LIBS="$LIBS $APERTIUM_LIBS $LIBXML_LIBS -lz"
