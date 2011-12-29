@@ -18,6 +18,8 @@
  */
 
 #include <lrx_compiler.h>
+#include <lrx_config.h>
+
 
 using namespace std;
 
@@ -326,7 +328,7 @@ LRXCompiler::procRemove()
   wstring lemma =this->attrib(LRX_COMPILER_LEMMA_ATTR);
   wstring tags =this->attrib(LRX_COMPILER_TAGS_ATTR);
 
-  int tipo = xmlTextReaderNodeType(reader);
+  //int tipo = xmlTextReaderNodeType(reader);
 
   rules[current_rule_id].ops++;
 
@@ -346,7 +348,7 @@ LRXCompiler::procSelect()
 
   wstring lemma =this->attrib(LRX_COMPILER_LEMMA_ATTR);
   wstring tags =this->attrib(LRX_COMPILER_TAGS_ATTR);
-  int tipo = xmlTextReaderNodeType(reader);
+  //int tipo = xmlTextReaderNodeType(reader);
 
   rules[current_rule_id].ops++;
 
@@ -365,7 +367,7 @@ LRXCompiler::procMatch()
 {
   wstring lemma = this->attrib(LRX_COMPILER_LEMMA_ATTR);
   wstring tags = this->attrib(LRX_COMPILER_TAGS_ATTR);
-  int tipo = xmlTextReaderNodeType(reader);
+  //int tipo = xmlTextReaderNodeType(reader);
   
   wstring sl_pattern = L"";
   if(lemma == L"" && tags == L"")
@@ -404,7 +406,7 @@ LRXCompiler::procMatch()
     }
 
     name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
-    tipo = xmlTextReaderNodeType(reader);
+    //tipo = xmlTextReaderNodeType(reader);
     skipBlanks(name);
 
     if(name == LRX_COMPILER_SELECT_ELEM)
@@ -489,7 +491,7 @@ LRXCompiler::procRule()
   rules[current_rule_id].weight = LRX_COMPILER_DEFAULT_WEIGHT;
   rules[current_rule_id].line = xmlTextReaderGetParserLineNumber(reader);
   rules[current_rule_id].ops = 0;
-  int tipo = xmlTextReaderNodeType(reader);
+  //int tipo = xmlTextReaderNodeType(reader);
 
   //wcout << L"Rule " << current_rule_id << L" (line " << rules[current_rule_id].line << L"):" << endl;
  
