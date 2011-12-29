@@ -33,7 +33,7 @@ wstring const LRXCompiler::LRX_COMPILER_LEMMA_ATTR      = L"lemma";
 wstring const LRXCompiler::LRX_COMPILER_TAGS_ATTR       = L"tags";
 wstring const LRXCompiler::LRX_COMPILER_C_ATTR          = L"c";
 
-wstring const LRXCompiler::LRX_COMPILER_ASTERISK        = L"[0-9A-Za-z <>@\\+]*";
+wstring const LRXCompiler::LRX_COMPILER_ASTERISK        = L"[0-9A-Za-zä <>@\\+]*";
 
 wstring const LRXCompiler::LRX_COMPILER_TYPE_SELECT     = L"select";
 wstring const LRXCompiler::LRX_COMPILER_TYPE_REMOVE     = L"remove";
