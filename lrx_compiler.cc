@@ -272,6 +272,14 @@ LRXCompiler::attribsToPattern(wstring lemma, wstring tags)
   // final full stop then put '>' otherwise put '><'
   int fs = 0; 
  
+  if(lemma.size() == 0)
+  {
+    tl_pattern += LRX_COMPILER_ASTERISK;
+  }
+  else
+  {
+    tl_pattern = L"";
+  }
   for(wstring::iterator it = lemma.begin(); it != lemma.end(); it++) 
   {
     if(*it == L'*')
