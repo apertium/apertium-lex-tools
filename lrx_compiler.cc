@@ -33,7 +33,8 @@ wstring const LRXCompiler::LRX_COMPILER_LEMMA_ATTR      = L"lemma";
 wstring const LRXCompiler::LRX_COMPILER_TAGS_ATTR       = L"tags";
 wstring const LRXCompiler::LRX_COMPILER_C_ATTR          = L"c";
 
-wstring const LRXCompiler::LRX_COMPILER_ASTERISK        = L"[0-9A-Za-zä <>@\\+]*";
+//wstring const LRXCompiler::LRX_COMPILER_ASTERISK        = L"[0-9A-Za-zÀ-Þà-ÿĀ-Žā-žА-Фа-ф <>@\\+]*";
+wstring const LRXCompiler::LRX_COMPILER_ASTERISK        = L"[0-9A-Za-zà-ÿ <>@←→\\+]*";
 
 wstring const LRXCompiler::LRX_COMPILER_TYPE_SELECT     = L"select";
 wstring const LRXCompiler::LRX_COMPILER_TYPE_REMOVE     = L"remove";
@@ -280,6 +281,7 @@ LRXCompiler::attribsToPattern(wstring lemma, wstring tags)
   {
     tl_pattern = L"";
   }
+
   for(wstring::iterator it = lemma.begin(); it != lemma.end(); it++) 
   {
     if(*it == L'*')
@@ -293,7 +295,14 @@ LRXCompiler::attribsToPattern(wstring lemma, wstring tags)
   }
 
   tl_pattern = tl_pattern + L"<";
+ 
+  if(tags.size() == 0)
+  {
+    tl_pattern += LRX_COMPILER_ASTERISK;
+    return tl_pattern;
+  }
 
+/*
   for(wstring::iterator it = tags.begin(); it != tags.end(); it++) 
   {
     if(*it == L'.')
@@ -301,20 +310,21 @@ LRXCompiler::attribsToPattern(wstring lemma, wstring tags)
       fs++;
     }
   }
-  
+  */
   for(wstring::iterator it = tags.begin(); it != tags.end(); it++) 
   {
     if(*it == L'.')
     {
-      fs--;
+      //fs--;
+/*
       if(fs == 0)
       {
-        tl_pattern += L">";
+        tl_pattern += L"<";
       }
       else
-      {
+      {*/
         tl_pattern += L"><";
-      }
+      /*}*/
     }
     else if(*it == L'*')
     {

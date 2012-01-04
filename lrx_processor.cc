@@ -228,6 +228,15 @@ LRXProcessor::ruleToOpsOptimal(wstring rules, int id, int pos)
 {
   vector<wstring> matched_paths;
 
+  if(debugMode)
+  {
+    fwprintf(stderr, L"ruleToOpsOptimal: %d {%d} %S\n", id, pos, rules.c_str());
+  }
+
+  /* Example input:
+   *  /<select(liikot<V><[0-9A-Za-zà-ÿ <>@\+]*)><skip(*)><2>/<select(liikot<V><[0-9A-Za-zà-ÿ <>@\+]*)><skip(*)><1>
+   */
+
   wstring loc_buf = L"";
   for(wstring::const_iterator it = rules.begin(); it != rules.end(); it++)
   {
@@ -243,6 +252,7 @@ LRXProcessor::ruleToOpsOptimal(wstring rules, int id, int pos)
     matched_paths.push_back(loc_buf);
   }
 
+
   map<int, pair<int, wstring> > ops;
   map<int, wstring> offset_op;
   for(vector<wstring>::iterator it = matched_paths.begin(); it != matched_paths.end(); it++)
@@ -251,14 +261,35 @@ LRXProcessor::ruleToOpsOptimal(wstring rules, int id, int pos)
     // : /<select(season<n>[0-9A-Za-z <>]*)><skip(*)><1>
     // : /<select(season<n>[0-9A-Za-z <>]*)><skip(*)><skip(*)><6>
     // : /<skip(*)><select(station<n>[0-9A-Za-z <>]*)><skip(*)><10>
-
+    // : /<select(liikot<V><[0-9A-Za-zà-ÿ <>@\+]*)><skip(*)><1>
     wstring m = *it;
+
+    if(m == L"") 
+    {
+      continue;
+    }
+
     int pcount = 0; // parenthesis count
     int acount = 0; // angle bracket (lt/gt) count
     wstring temp = L"";
-
+    bool skip = false;
+    // Watch out here for unbalanced angle brackets
     for(wstring::const_iterator it2 = m.begin(); it2 != m.end(); it2++)
     {
+      if(*it2 == L'(') 
+      {
+        skip = true;
+      }
+      if(*it2 == L')') 
+      {
+        skip = false;
+      }
+      if(skip) 
+      {
+        temp = temp + *it2;
+        continue;
+      } 
+
       if(*it2 == L'<')
       {
         acount++;
@@ -286,6 +317,7 @@ LRXProcessor::ruleToOpsOptimal(wstring rules, int id, int pos)
     for(map<int, wstring>::iterator it3 = offset_op.begin(); it3 != offset_op.end(); it3++)
     {
       wstring pattern = L"";
+
       if(rule_id == rid) 
       {
         wstring part = it3->second;
@@ -533,17 +565,21 @@ LRXProcessor::applyRulesOptimal(map<int, SItem> &sentence, FILE *output)
       for(vector<int>::iterator it3 = found_rules.begin(); it3 != found_rules.end(); it3++) 
       {
         map< int, pair<int, wstring> > ops = ruleToOpsOptimal(out, *it3, it->first);
-        pos_ops.insert(ops.begin(), ops.end());
         if(debugMode)
         {
           fwprintf(stderr, L"FR: %d\n", ops.size() );
         }
+        pos_ops.insert(ops.begin(), ops.end());
       }
       if(debugMode)
       {
         fwprintf(stderr, L"XX: %d, %S\n", best.first, out.c_str());
       }
     }
+  }
+  if(debugMode)
+  {
+    fwprintf(stderr, L"pos_ops: %d\n", pos_ops.size());
   }
 
 
@@ -558,7 +594,7 @@ LRXProcessor::applyRulesOptimal(map<int, SItem> &sentence, FILE *output)
 
     if(debugMode)
     {
-      fwprintf(stderr, L"[%d] %S | %S\n", i, w.sl.c_str(), op.c_str());
+      fwprintf(stderr, L"%d [%d] %S | %S\n", pos_ops.size(), i, w.sl.c_str(), op.c_str());
     }
     wstring op_type = L"";
     if(op.find(L"<select") != wstring::npos) 
