@@ -112,7 +112,7 @@ LRXCompiler::parse(string const &fitxer)
   for(map<int, LSRule>::iterator it = rules.begin(); it != rules.end(); it++)
   {
     LSRule rule = it->second; 
-    fwprintf(stderr, L"\b\b\b\b%d", rule.id);
+    fwprintf(stderr, L"\b\b\b\b\b\b\b%d", rule.id);
     fflush(stderr);
     int s = transducer.getInitial();
     wstring w_id = itow(rule.id);
