@@ -491,7 +491,9 @@ LRXProcessor::applyRulesOptimal(map<int, SItem> &sentence, FILE *output)
       {
         fwprintf(stderr, L"  step: %S\n", w.sl.c_str());  
       }
-      s.step(w.sl, patterns, alphabet, stderr); // Try and step in the rule transducer using the current word
+      wstring slword_lower = w.sl;
+      transform(slword_lower.begin(), slword_lower.end(), slword_lower.begin(), towlower);
+      s.step(slword_lower, patterns, alphabet, stderr); // Try and step in the rule transducer using the lowercased current word
       if(s.size() > 0) // If the current state has outgoing transitions, add it to the new alive states
       {
         new_state.push_back(s); 
@@ -621,10 +623,12 @@ LRXProcessor::applyRulesOptimal(map<int, SItem> &sentence, FILE *output)
     {
       bool matched = false;
       wstring tlword = *it2;
-      matched = t.recognise(tlword, alphabet, stderr);
+      wstring tlword_lower = tlword;
+      transform(tlword_lower.begin(), tlword_lower.end(), tlword_lower.begin(), towlower);
+      matched = t.recognise(tlword_lower, alphabet, stderr);
       if(debugMode)
       {
-        fwprintf(stderr, L"T: %d, %S\n", t.size(), tlword.c_str());
+        fwprintf(stderr, L"T: %d, %S\n", t.size(), tlword_lower.c_str());
       }
 
       if(op_type == L"select" && matched)
