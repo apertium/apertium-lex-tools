@@ -22,10 +22,9 @@ def process_biltrans_unit(lu, sents): #{
 	state = 0;
 	sl = '';
 	tl = {};
-	for c in lu: #{
-		if c == '^' or c == '$': #{
-			continue;
-		#}
+	for c in lu[1:-1]: #{ 
+		#^worth<n><sg>/valor<n><m><sg>$ ^\$<mon>/\$<mon>$^20<num>/20<num>$^*m/*m$ 
+		#print c , sl , tl;
 		if c == '/': #{
 			state = state + 1;
 			if state not in tl: #{
@@ -48,6 +47,11 @@ def process_biltrans_unit(lu, sents): #{
 		#}
 	else: #{
 		for path in sents: #{
+			if state not in tl: #{
+				print >> sys.stderr, 'ERROR: ';
+				print >> sys.stderr, sl ; 
+				print >> sys.stderr, tl ; 
+			#}
 			new_paths[path] = sents[path] + '^' + sl + tl[state] + '$';
 		#}
 	#}
@@ -56,15 +60,25 @@ def process_biltrans_unit(lu, sents): #{
 	return new_paths;
 #}
 
+escaped = False;
+
 while c: #{
+	if c == '\\': #{
+		escaped = True;
+		lu = lu + c;
+		c = sys.stdin.read(1);
+	#}
 	if c == '^': #{
 		reading_word = True;
 	#}
-	if c == '$': #{
+	if c == '$' and escaped == False: #{
 		lu = lu + c;
 		output_sentences = process_biltrans_unit(lu, output_sentences);
 		reading_word = False;
 		lu = '';		
+	#}
+	if c != '\\' and escaped == True: #{
+		escaped = False;
 	#}
 	if c.isspace(): #{
 		if c == '\n': #{
