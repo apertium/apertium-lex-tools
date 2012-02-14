@@ -144,7 +144,7 @@ LRXCompiler::parse(string const &fitxer)
             re.initialize(&alphabet);
             re.compile(right_pattern);
             Transducer t = re.getTransducer();
-            t.determinize(); // We determinise but not minimise
+           // t.determinize(); // We determinise but not minimise
             patterns[alphabet(right.c_str())] = t;
           }
           if(patterns.count(alphabet(left.c_str())) < 1)
@@ -153,7 +153,7 @@ LRXCompiler::parse(string const &fitxer)
             re.initialize(&alphabet);
             re.compile(left_pattern);
             Transducer t = re.getTransducer();
-            t.determinize(); // Determinise, don't minimise
+           // t.determinize(); // Determinise, don't minimise
             patterns[alphabet(left.c_str())] = t;
           }
           //fwprintf(stderr, L"  [%d] sl: %S, tl: %S\n", pos, sl_patterns[0].c_str(), it4->c_str()); 
@@ -180,7 +180,7 @@ LRXCompiler::parse(string const &fitxer)
           if(patterns.count(alphabet(left.c_str())) < 1)
           {
             Transducer t = re.getTransducer();
-            t.determinize();
+            //t.determinize();
             patterns[alphabet(left.c_str())] = t;
           }
           //fwprintf(stderr, L"%d %d [%d] sl: %S, tl: skip(*)\n", k, s, pos, it4->c_str()); 
