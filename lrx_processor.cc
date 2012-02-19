@@ -49,9 +49,10 @@ LRXProcessor::wtoi(wstring w)
 
 LRXProcessor::LRXProcessor()
 {
-  pool = new Pool<vector<int> >(4, vector<int>(50));
+  //pool = new Pool<vector<int> >(4, vector<int>(50));
 
-  initial_state = new State(pool);
+  //initial_state = new State(pool);
+  initial_state = new State();
 
   traceMode = false;
   debugMode = false;
@@ -63,7 +64,7 @@ LRXProcessor::LRXProcessor()
 LRXProcessor::~LRXProcessor()
 {
   delete initial_state;
-  delete pool;
+//  delete pool;
 }
 
 void
@@ -529,8 +530,10 @@ LRXProcessor::applyRulesOptimal(map<int, SItem> &sentence, FILE *output)
               {
                 fwprintf(stderr, L"    BEST COVER %d > %d (rules[%d].ops = %d)\n", newseq.first, new_best_cover.first, *it2, rules[*it2].ops);
               }
-              State news(pool);
-              news.copy(s);
+              //State news(pool);
+              State news;
+              //news.copy(s);
+              news = s;
               reached.push_back(news);
               //newseq.second.push_back(news);
               newseq.second = reached;

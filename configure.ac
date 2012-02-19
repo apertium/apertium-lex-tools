@@ -13,6 +13,10 @@ AM_SANITY_CHECK
 AC_LANG_CPLUSPLUS
 
 
+AC_ARG_ENABLE(debug,
+              [  --enable-debug  Enable "-g -Wall" compiler options],
+              [CXXFLAGS="-g -Wall";CFLAGS="-g -Wall"])
+
 PKG_CHECK_MODULES([LTTOOLBOX], [lttoolbox-3.2 >= required_lttoolbox_version])
 
 AC_SUBST(LTTOOLBOX_CFLAGS)
