@@ -42,7 +42,6 @@
 #include <lttoolbox/xml_parse_util.h>
 #include <lttoolbox/alphabet.h>
 #include <lttoolbox/exception.h>
-#include <lttoolbox/pool.h>
 #include <lttoolbox/compression.h>
 #include <lttoolbox/regexp_compiler.h>
 #include <lttoolbox/state.h>
@@ -77,7 +76,6 @@ private:
   map<int, LSRuleExe> rules; // Map of rule ids to rule info (weight, etc.)
   set<Node *> anfinals; // Final states 
   set<wchar_t> escaped_chars; // 'Special' characters to escape
-  Pool<vector<int> > *pool;
   State *initial_state; // Initial state in the rule transducer
  
   bool traceMode; // Rule tracing ? 
