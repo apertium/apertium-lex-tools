@@ -152,6 +152,7 @@ for line in file(sys.argv[2]).readlines(): #{
 for sl in ngrams: #{
 
 	for ngram in ngrams[sl]: #{
+		total = 0;
 		max_freq = -1;	
 		current_tl = '';
 		for tl in ngrams[sl][ngram]: #{
@@ -159,11 +160,23 @@ for sl in ngrams: #{
 				max_freq = ngrams[sl][ngram][tl];
 				current_tl = tl;
 			#}
+			total = total + ngrams[sl][ngram][tl];
 		#}
-		if current_tl not in sl_tl_defaults[sl]: #{
-			print '+' + sl + '\t' + ngram + '\t' + tl + '\t' + str(ngrams[sl][ngram][current_tl]);
-		else: #{
-			print '-' + sl + '\t' + ngram + '\t' + tl + '\t' + str(ngrams[sl][ngram][current_tl]);
+		for tl in ngrams[sl][ngram]: #{
+			if tl == current_tl and tl not in sl_tl_defaults[sl] and total != max_freq: #{
+				mf = max_freq / 2;
+				if (total - max_freq) < mf:  #{
+					print '@', total, max_freq, ngrams[sl][ngram][tl], '\t' + sl + '\t' + ngram + '\t' + tl + '\t' + str(ngrams[sl][ngram][current_tl]);
+				else: #{	
+					print '+', total, max_freq, ngrams[sl][ngram][tl], '\t' +  sl + '\t' + ngram + '\t' + tl + '\t' + str(ngrams[sl][ngram][current_tl]);
+				#}
+				continue;
+			#}
+			if tl == current_tl and tl not in sl_tl_defaults[sl] and total == max_freq: #{
+				print '~', total, max_freq, ngrams[sl][ngram][tl], '\t'+ sl + '\t' + ngram + '\t' + tl + '\t' + str(ngrams[sl][ngram][current_tl]);
+				continue;
+			#}
+			print '-', total, max_freq, ngrams[sl][ngram][tl], '\t'+ sl + '\t' + ngram + '\t' + tl + '\t' + str(ngrams[sl][ngram][tl]);
 		#}
 	#}
 #}
