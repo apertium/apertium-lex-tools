@@ -199,8 +199,9 @@ while lines: #{
 		#  valid.
 		if len(lu_src[i][1]) > 1 and len(lu_ref[i][1]) != len(lu_src[i][1]) and lu_ref[i][1] != lu_src[i][1]: #{
 			num_ambig_lus = num_ambig_lus + 1;
-			#if debug:
-			#	print '>>' , len(lu_tst[i][1]) , len(lu_src[i][1]) ,  lu_tst[i][1][0] , lu_ref[i][1] , '+++' , lu_src[i][1];
+			if debug:
+				print '>>' , len(lu_tst[i][1]) , len(lu_src[i][1]) ,  lu_tst[i][1][0] , lu_ref[i][1] , '+++' , lu_src[i][1];
+				print 'XX', lu_tst[i][1][0] , 'XX ' , lu_ref[i][1];
 			if lu_tst[i][1][0] not in lu_ref[i][1]: #{
 				num_fallos = num_fallos + 1;
 				if debug: 
