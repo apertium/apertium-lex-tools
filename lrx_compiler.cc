@@ -654,6 +654,7 @@ LRXCompiler::write(FILE *fst)
     fwrite((void *)&record, 1, sizeof(record), fst);
   }
 
+  fwprintf(stderr, L"%d@%d %d\n", transducer.size(), transducer.numberOfTransitions(), transducer.getStateSize(transducer.getInitial()));
   fwprintf(stderr, L"Written %d rules, %d patterns.\n", rules.size(), patterns.size());
 
   return;
