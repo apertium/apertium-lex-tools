@@ -59,6 +59,12 @@ typedef struct LSRuleExe
 
 } LSRuleExe;
 
+typedef struct LSSymExe
+{
+  int sym;
+  wchar_t c;
+} LSSymExe;
+
 typedef struct SItem
 {
   wstring sl;
@@ -77,6 +83,8 @@ private:
   set<Node *> anfinals; // Final states 
   set<wchar_t> escaped_chars; // 'Special' characters to escape
   State *initial_state; // Initial state in the rule transducer
+
+  map<int, wchar_t> symbol_first; 
  
   bool traceMode; // Rule tracing ? 
   bool debugMode; // Debug information ?
