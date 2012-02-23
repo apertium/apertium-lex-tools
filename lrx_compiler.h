@@ -69,6 +69,12 @@ typedef struct LSRuleRecord
 
 } LSRuleRecord;
 
+typedef struct LSSymRecord
+{
+  int sym;
+  wchar_t c;
+} LSSymRecord;
+
 class LRXCompiler
 {
 private:
@@ -77,6 +83,9 @@ private:
   Transducer transducer;  
   map<int, Transducer> patterns;
   map<int, LSRule> rules;
+
+  /* This is a map of symbols (e.g. pattern ids) to their first letter */
+  map<int, wchar_t> symbol_first;  
 
   int current_line;
   int current_rule_id;

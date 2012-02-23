@@ -404,6 +404,17 @@ LRXCompiler::procMatch()
   //rules[current_rule_id].sl_pattern = sl_pattern;
   rules[current_rule_id].sl_context[current_rule_len].push_back(sl_pattern);
 
+  // add to symbol_letter
+
+  if(lemma.length() > 0) 
+  {
+    symbol_first[alphabet(sl_pattern)] = lemma.at(0);
+  }
+  else
+  {
+    symbol_first[alphabet(sl_pattern)] = L'*';
+  }
+
   //wcout << L"  Match[" << current_rule_len << L"]: " << sl_pattern << endl;
 
   if(xmlTextReaderIsEmptyElement(reader))
@@ -632,6 +643,7 @@ void
 LRXCompiler::write(FILE *fst)
 {
   alphabet.write(fst);
+
   Compression::multibyte_write(patterns.size(), fst);
   for(map<int, Transducer>::iterator it = patterns.begin(); it != patterns.end(); it++) 
   {
@@ -642,6 +654,19 @@ LRXCompiler::write(FILE *fst)
   } 
   Compression::wstring_write(L"main", fst);
   transducer.write(fst);
+
+  size_t l = symbol_first.size();
+  fwrite(&l, 1, sizeof(size_t), fst);
+
+  for(map<int, wchar_t>::iterator x = symbol_first.begin(); x != symbol_first.end(); x++)
+  {
+    LSSymRecord record = {
+      x->first,
+      x->second
+    };
+    fwrite((void *)&record, 1, sizeof(record), fst);
+    fwprintf(stderr, L"%d[0] = %C\n", x->first, x->second);
+  }
 
   for(map<int, LSRule>::iterator it2 = rules.begin(); it2 != rules.end(); it2++) 
   {

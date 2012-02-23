@@ -106,7 +106,7 @@
     <match lemma="joc" tags="n.*">    
       <select lemma="game" tags="n.*"/> 
     </match>  
-    <match lemma="[Oo]límpic" tags="adj.*"/>
+    <match lemma="olímpic" tags="adj.*"/>
   </rule>
   <rule>
     <match lemma="joc" tags="n.*">    

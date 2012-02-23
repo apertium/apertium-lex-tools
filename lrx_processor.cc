@@ -145,6 +145,21 @@ LRXProcessor::load(FILE *in)
 
   transducer.read(in, alphabet);
 
+  // Here we read in the map of pattern symbol -> first letter
+  size_t num_sym_records;
+  fread(&num_sym_records, sizeof(size_t), 1, in);
+
+  for(unsigned int i = 0; i < num_sym_records; i++)
+  {
+    LSSymExe rec;
+    fread(&rec, sizeof(LSSymExe), 1, in);
+    symbol_first[rec.sym] = rec.c; 
+    if(debugMode)
+    {
+      fwprintf(stderr, L"sym_rec: %d[0] = %C\n", rec.sym, rec.c);
+    }
+  }
+
   // skip rule
   rules[0].id = 0;
   rules[0].len = 1;
@@ -494,7 +509,7 @@ LRXProcessor::applyRulesOptimal(map<int, SItem> &sentence, FILE *output)
       }
       wstring slword_lower = w.sl;
       transform(slword_lower.begin(), slword_lower.end(), slword_lower.begin(), towlower);
-      s.step(slword_lower, patterns, alphabet, stderr); // Try and step in the rule transducer using the lowercased current word
+      s.step(slword_lower, patterns, symbol_first, alphabet, stderr); // Try and step in the rule transducer using the lowercased current word
       if(s.size() > 0) // If the current state has outgoing transitions, add it to the new alive states
       {
         new_state.push_back(s); 
