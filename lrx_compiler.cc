@@ -40,6 +40,7 @@ wstring const LRXCompiler::LRX_COMPILER_TYPE_SELECT     = L"select";
 wstring const LRXCompiler::LRX_COMPILER_TYPE_REMOVE     = L"remove";
 
 double const  LRXCompiler::LRX_COMPILER_DEFAULT_WEIGHT   = 1.0;
+int    const  LRXCompiler::LRX_COMPILER_HEAVY = 5;
 
 LRXCompiler::LRXCompiler()
 {
@@ -108,12 +109,12 @@ LRXCompiler::parse(string const &fitxer)
 
   // At this point we've read the XML file into the rule structures, and now
   // we process the rules structures into the necessary transducers
-
+  int last = 0;
   for(map<int, LSRule>::iterator it = rules.begin(); it != rules.end(); it++)
   {
     LSRule rule = it->second; 
-    fwprintf(stderr, L"\b\b\b\b\b\b\b%d", rule.id);
-    fflush(stderr);
+    //fwprintf(stderr, L"\b\b\b\b\b\b\b%d", rule.id);
+    //fflush(stderr);
     int s = transducer.getInitial();
     wstring w_id = itow(rule.id);
 
@@ -195,8 +196,9 @@ LRXCompiler::parse(string const &fitxer)
           }
         }
       }
-
+      last = s;
     }
+
     wstring id_sym = L"<" + w_id + L">";
     if(!alphabet.isSymbolDefined(id_sym.c_str()))
     {
@@ -207,7 +209,23 @@ LRXCompiler::parse(string const &fitxer)
     transducer.setFinal(s);
     //wcout << endl;
   }
+
   transducer.minimize();
+
+/*
+  for(unsigned int i = 0; i < last; i++) 
+  {
+    int heaviness = transducer.getStateSize(i);
+    if(heaviness > LRXCompiler::LRX_COMPILER_HEAVY) 
+    {
+      fwprintf(stderr, L"state %d; fanning %d\n", i, heaviness);
+      State 
+      pair<wchar_t, set<int> > what_am_i; 
+      heavy_states[i] 
+    }
+  }
+*/
+
   //wcout << transducer.size() << L" " << patterns.size() << endl;
   if(outputGraph)
   {
@@ -215,12 +233,14 @@ LRXCompiler::parse(string const &fitxer)
     transducer.show(alphabet, stderr);
   }
 
+/*
   for(map<int, Transducer>::iterator it3 = patterns.begin(); it3 != patterns.end(); it3++) 
   {
     wstring sym;
     alphabet.getSymbol(sym, it3->first, false);
-    //wcout << it3->first << L" " << it3->second.size() << L" " << sym << endl;
+    wcout << it3->first << L" " << it3->second.size() << L" " << sym << endl;
   }
+*/
   wcout << endl;
 
   xmlFreeTextReader(reader);
@@ -665,7 +685,7 @@ LRXCompiler::write(FILE *fst)
       x->second
     };
     fwrite((void *)&record, 1, sizeof(record), fst);
-    fwprintf(stderr, L"%d[0] = %C\n", x->first, x->second);
+//    fwprintf(stderr, L"%d[0] = %C\n", x->first, x->second);
   }
 
   for(map<int, LSRule>::iterator it2 = rules.begin(); it2 != rules.end(); it2++) 

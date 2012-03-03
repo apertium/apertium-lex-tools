@@ -87,6 +87,9 @@ private:
   /* This is a map of symbols (e.g. pattern ids) to their first letter */
   map<int, wchar_t> symbol_first;  
 
+  /* <orig, <letter, states>> */
+  map<int, map<wchar_t, set<int> > > heavy_states;
+
   int current_line;
   int current_rule_id;
   int current_rule_len;
@@ -129,6 +132,7 @@ public:
   static wstring const LRX_COMPILER_ASTERISK;
 
   static double  const LRX_COMPILER_DEFAULT_WEIGHT;
+  static int     const LRX_COMPILER_HEAVY;
 
   LRXCompiler();
 
