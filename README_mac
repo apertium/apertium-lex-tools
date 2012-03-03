@@ -1,0 +1,12 @@
+Macintosh users:
+
+In the file lrx_processor.cc, remove all strings
+
+fputws_unlocked
+
+with
+
+fputws
+
+Then it will compile.
+
