@@ -85,6 +85,7 @@ private:
   State *initial_state; // Initial state in the rule transducer
 
   map<int, wchar_t> symbol_first; 
+  map<wchar_t, set<int> > first_symbol; 
  
   bool traceMode; // Rule tracing ? 
   bool debugMode; // Debug information ?
@@ -92,8 +93,12 @@ private:
   unsigned int pos; // Current sentence position
   unsigned long current_line; // The current input line as determined by num '\n'
 
-  map< int, pair<int, wstring> > ruleToOpsOptimal(wstring rules, int id, int pos);
-  vector<int> pathsToRules(wstring const path);
+  map< int, pair<int, wstring> > ruleToOpsOptimalOld(wstring rules, int id, int pos);
+  vector<int> pathsToRulesOld(wstring const path);
+
+  map< int, pair<int, wstring> > ruleToOpsOptimal(vector<wstring> &rules, int id, int pos);
+  vector<int> pathsToRules(vector<wstring> &paths);
+
   void readWord(SItem &w, FILE *input, FILE *output);
   void applyRulesOptimal(map<int, SItem> &sentence, FILE *output);
   

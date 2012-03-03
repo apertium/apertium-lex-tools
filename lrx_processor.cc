@@ -154,6 +154,7 @@ LRXProcessor::load(FILE *in)
     LSSymExe rec;
     fread(&rec, sizeof(LSSymExe), 1, in);
     symbol_first[rec.sym] = rec.c; 
+    first_symbol[rec.c].insert(rec.sym);
     if(debugMode)
     {
       fwprintf(stderr, L"sym_rec: %d[0] = %C\n", rec.sym, rec.c);
@@ -192,27 +193,11 @@ LRXProcessor::init()
 }
 
 vector<int>
-LRXProcessor::pathsToRules(wstring const path)
+LRXProcessor::pathsToRules(vector<wstring> &paths)
 {
-  vector<wstring> matched_paths;
   vector<int> matched_rules;
- 
-  wstring loc_buf = L"";
-  for(wstring::const_iterator it = path.begin(); it != path.end(); it++)
-  {
-    if(*it == L'/') 
-    { 
-      matched_paths.push_back(loc_buf);
-      loc_buf = L"";
-    }
-    loc_buf = loc_buf + *it;
-  }
-  if(loc_buf.compare(L"") != 0)
-  {
-    matched_paths.push_back(loc_buf);
-  } 
 
-  for(vector<wstring>::iterator it = matched_paths.begin(); it != matched_paths.end(); it++)
+  for(vector<wstring>::const_iterator it = paths.begin(); it != paths.end(); it++)
   {
     wstring wm = *it;
     wstring id_buf = L"";
@@ -240,38 +225,20 @@ LRXProcessor::pathsToRules(wstring const path)
 }
 
 map< int, pair<int, wstring> >
-LRXProcessor::ruleToOpsOptimal(wstring rules, int id, int pos)
+LRXProcessor::ruleToOpsOptimal(vector<wstring> &rules, int id, int pos)
 {
-  vector<wstring> matched_paths;
-
   if(debugMode)
   {
-    fwprintf(stderr, L"ruleToOpsOptimal: %d {%d} %S\n", id, pos, rules.c_str());
+    fwprintf(stderr, L"ruleToOpsOptimal: %d {%d} %d\n", id, pos, rules.size());
   }
 
   /* Example input:
    *  /<select(liikot<V><[0-9A-Za-zà-ÿ <>@\+]*)><skip(*)><2>/<select(liikot<V><[0-9A-Za-zà-ÿ <>@\+]*)><skip(*)><1>
    */
 
-  wstring loc_buf = L"";
-  for(wstring::const_iterator it = rules.begin(); it != rules.end(); it++)
-  {
-    if(*it == L'/')
-    {
-      matched_paths.push_back(loc_buf);
-      loc_buf = L"";
-    }
-    loc_buf = loc_buf + *it;
-  }
-  if(loc_buf.compare(L"") != 0)
-  {
-    matched_paths.push_back(loc_buf);
-  }
-
-
   map<int, pair<int, wstring> > ops;
   map<int, wstring> offset_op;
-  for(vector<wstring>::iterator it = matched_paths.begin(); it != matched_paths.end(); it++)
+  for(vector<wstring>::const_iterator it = rules.begin(); it != rules.end(); it++)
   {
     // : /<select(season<n>[0-9A-Za-z <>]*)><skip(*)><5>
     // : /<select(season<n>[0-9A-Za-z <>]*)><skip(*)><1>
@@ -509,7 +476,7 @@ LRXProcessor::applyRulesOptimal(map<int, SItem> &sentence, FILE *output)
       }
       wstring slword_lower = w.sl;
       transform(slword_lower.begin(), slword_lower.end(), slword_lower.begin(), towlower);
-      s.step(slword_lower, patterns, symbol_first, alphabet, stderr); // Try and step in the rule transducer using the lowercased current word
+      s.step(slword_lower, patterns, symbol_first, first_symbol, alphabet, stderr); // Try and step in the rule transducer using the lowercased current word
       if(s.size() > 0) // If the current state has outgoing transitions, add it to the new alive states
       {
         new_state.push_back(s); 
@@ -518,12 +485,19 @@ LRXProcessor::applyRulesOptimal(map<int, SItem> &sentence, FILE *output)
       vector<int> found_rules;
       if(s.isFinal(anfinals)) // If this is a final state (regardless of if there is more input), then add the match
       {
-        wstring out = s.filterFinals(anfinals, alphabet, escaped_chars);
+        vector<wstring> outpaths = s.filterFinalsLRX(anfinals, alphabet, escaped_chars);
+        //wstring out = s.filterFinals(anfinals, alphabet, escaped_chars);
         if(debugMode)
         {
-          fwprintf(stderr, L"%d: %S\n", i, out.c_str());
+          //fwprintf(stderr, L"\n%d: %S\n", i, out.c_str());
+          fwprintf(stderr, L"s.filterFinals: %d: \n", outpaths.size());
+          for(vector<wstring>::iterator itx = outpaths.begin(); itx != outpaths.end(); itx++)
+          {
+            fwprintf(stderr, L"  (~) %S\n", itx->c_str());
+          }
         } 
-        found_rules = pathsToRules(out);
+        //found_rules = pathsToRulesOld(out);
+        found_rules = pathsToRules(outpaths);
 
         if(found_rules.size() == 0) 
         {
@@ -580,11 +554,12 @@ LRXProcessor::applyRulesOptimal(map<int, SItem> &sentence, FILE *output)
 
     for(vector<State>::iterator it2 = best.second.begin(); it2 != best.second.end(); it2++) 
     {
-      wstring out = it2->filterFinals(anfinals, alphabet, escaped_chars);
-      vector<int> found_rules = pathsToRules(out);
+      //wstring out = it2->filterFinals(anfinals, alphabet, escaped_chars);
+      vector<wstring> outpaths = it2->filterFinalsLRX(anfinals, alphabet, escaped_chars);
+      vector<int> found_rules = pathsToRules(outpaths);
       for(vector<int>::iterator it3 = found_rules.begin(); it3 != found_rules.end(); it3++) 
       {
-        map< int, pair<int, wstring> > ops = ruleToOpsOptimal(out, *it3, it->first);
+        map< int, pair<int, wstring> > ops = ruleToOpsOptimal(outpaths, *it3, it->first);
         if(debugMode)
         {
           fwprintf(stderr, L"FR: %d\n", ops.size() );
@@ -593,7 +568,7 @@ LRXProcessor::applyRulesOptimal(map<int, SItem> &sentence, FILE *output)
       }
       if(debugMode)
       {
-        fwprintf(stderr, L"XX: %d, %S\n", best.first, out.c_str());
+        fwprintf(stderr, L"XX: %d, %d\n", best.first, outpaths.size());
       }
     }
   }
