@@ -38,7 +38,6 @@
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/xml_parse_util.h>
 #include <lttoolbox/alphabet.h>
-#include <lttoolbox/pool.h>
 #include <lttoolbox/compression.h>
 #include <lttoolbox/regexp_compiler.h>
 #include <lttoolbox/state.h>
