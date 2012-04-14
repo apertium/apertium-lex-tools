@@ -47,6 +47,7 @@
 #include <lttoolbox/state.h>
 #include <lttoolbox/match_exe.h>
 #include <lttoolbox/trans_exe.h>
+#include <lttoolbox/my_stdio.h>
 
 using namespace std;
 
