@@ -42,6 +42,7 @@
 #include <lttoolbox/regexp_compiler.h>
 #include <lttoolbox/state.h>
 #include <lttoolbox/trans_exe.h>
+#include <lttoolbox/my_stdio.h>
 
 using namespace std;
 
