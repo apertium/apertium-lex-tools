@@ -12,7 +12,7 @@ sl = '';
 default = '';
 for line in d.readlines(): #{
 	line = line.strip();
-	if line.count('bet>') > 0 or  line.count('ionary>') > 0 or line.count('sdef') > 0 or line.count('ection>') > 0: #{
+	if line.count('bet>') > 0 or line.count('<sec') > 0 or  line.count('ionary>') > 0 or line.count('sdef') > 0 or line.count('ection>') > 0: #{
 		print(line);
 	#}
 
