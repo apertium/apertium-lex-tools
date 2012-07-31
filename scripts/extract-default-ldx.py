@@ -30,7 +30,7 @@ for line in d.readlines(): #{
 		#}
 	#}
 	
-	if line.count('slr="1') > 0 and poss_ambig == 1: #{
+	if line.count('slr="') > 0 and line.count('1"') > 0 and poss_ambig == 1: #{
 		if sentit == 'lr': #{
 			nsl = line.split('<l>')[1].split('</l>')[0];
 		elif sentit == 'rl': #{
