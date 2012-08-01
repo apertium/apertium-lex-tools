@@ -3,10 +3,14 @@
 # -*- encoding: utf-8 -*-
 
 import sys, codecs, copy, commands;
+from operator import mul
 
 sys.stdin  = codecs.getreader('utf-8')(sys.stdin);
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout);
 sys.stderr = codecs.getwriter('utf-8')(sys.stderr);
+
+t = 0
+lineno = 0
 
 def process_biltrans_unit(lu): #{
 
@@ -30,14 +34,13 @@ def process_biltrans_unit(lu): #{
 	return (sl, tl);
 #}
 
-def parse_input():
-	string = sys.stdin.readline().rstrip();
+def parse_input(line):
 	sentence = []
 	escaped = False;
 	reading_word = False;
 	lu = ''
 
-	for c in string: #{
+	for c in line: #{
 		if c == '\\': #{
 			escaped = True;
 			lu = lu + c;
@@ -67,18 +70,17 @@ def parse_input():
 	#}sys.stdout.writesys.stdout.write
 	return sentence
 #}
-
-t = 0
 def process(sentence, start, out): #{
 	global t
-	if start >= len(sentence):
-		print '.[][' + str(t) + '][].'
+	global lineno
+	if start >= len(sentence): #{
+		sys.stdout.write ('.[][' + str(lineno) + " " + str(t) + '][].	')
 		for s in out:
-			sys.stdout.write(s + " ");
+			sys.stdout.write("^" + s + "$ ");
 		print ''
 		t += 1
 		return;
-	
+	#}
 	tokens = sentence[start]
 	for token in tokens: #{
 		out.append(token)
@@ -86,6 +88,24 @@ def process(sentence, start, out): #{
 		del out[-1]
 	#}
 #}
-tokens = parse_input()
-process(tokens, 0, [])
+
+while True:
+	lineno
+	string = sys.stdin.readline().rstrip();
+	if string == "":
+		break;
+	
+	tokens = parse_input(string)
+	# print map(len, tokens)
+	# print reduce(mul, map(len, tokens))
+
+	process(tokens, 0, [])
+	lineno += 1
+	t = 0
+
+
+
+
+
+
 

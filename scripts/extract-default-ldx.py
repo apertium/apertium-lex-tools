@@ -19,6 +19,7 @@ for line in d.readlines(): #{
 	if line.count('c="') > 0 and line.count('0"') > 0 and poss_ambig == 1: #{
 		poss_ambig = 0;	
 	#}
+
 	if line.count('c="') > 0 and line.count('0"') > 0 and poss_ambig == 0: #{
 		poss_ambig = 1;	
 		if sentit == 'lr': #{
