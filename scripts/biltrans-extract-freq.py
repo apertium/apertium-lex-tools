@@ -32,8 +32,8 @@ while reading: #{
 		continue;
 	#}
 
-	am_row = am_line.split('\t')[1].replace('$^', '$ ^').split('$ ^');
-	dm_row = dm_line.split('\t')[1].replace('$^', '$ ^').split('$ ^');
+	am_row = am_line.split('\t')[1].replace('$^', '$ ^')[1:-1].split('$ ^');
+	dm_row = dm_line.split('\t')[1].replace('$^', '$ ^')[1:-1].split('$ ^');
 
 	limit = len(am_row);
 	for i in range(0, limit): #{
