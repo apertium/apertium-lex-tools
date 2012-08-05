@@ -14,7 +14,7 @@ for line in inf.readlines(): #{
 		outl = '^' + outl + '$';
 		outl = outl.replace('~', ' ');
 
-		print row[0] + '\t' + outl;
+		print(row[0] + '\t' + outl);
 	#}
 	if line.count('-----------------------------') > 0: #{
 		count = 0;
