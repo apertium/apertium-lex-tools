@@ -32,13 +32,13 @@ while reading: #{
 		continue;
 	#}
 
-	am_row = am_line.split('\t')[1].split('$ ^');
-	dm_row = dm_line.split('\t')[1].split('$ ^');
+	am_row = am_line.split('\t')[1].replace('$^', '$ ^').split('$ ^');
+	dm_row = dm_line.split('\t')[1].replace('$^', '$ ^').split('$ ^');
 
 	limit = len(am_row);
 	for i in range(0, limit): #{
 		if am_row[i].count('/') > 1: #{
-			print(am_row[i] , dm_row[i]); 
+			#print(am_row[i] , dm_row[i]); 
 			sl = am_row[i].split('/')[0].replace(' ', '~');
 			tl = dm_row[i].split('/')[1].replace(' ', '~');
 			if sl.count('><') > 0: #{
