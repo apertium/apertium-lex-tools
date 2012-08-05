@@ -5,7 +5,7 @@
 import sys, codecs, copy;
 
 inf = open(sys.argv[1]);
-count = 0;
+count = 1;
 for line in inf.readlines(): #{
 	if count == 2: #{
 		row = line.strip().split('\t');
