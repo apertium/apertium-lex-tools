@@ -73,7 +73,10 @@ while c: #{
 	#}
 	if c == '$' and escaped == False: #{
 		lu = lu + c;
-		output_sentences = process_biltrans_unit(lu, output_sentences);
+		new_paths = process_biltrans_unit(lu, output_sentences);
+		del output_sentences;
+		output_sentences = new_paths;
+		print >> sys.stderr, 'output_sentences: ', len(output_sentences);
 		reading_word = False;
 		lu = '';		
 	#}

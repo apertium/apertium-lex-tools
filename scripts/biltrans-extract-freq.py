@@ -41,6 +41,12 @@ while reading: #{
 			print(am_row[i] , dm_row[i]); 
 			sl = am_row[i].split('/')[0].replace(' ', '~');
 			tl = dm_row[i].split('/')[1].replace(' ', '~');
+			if sl.count('><') > 0: #{
+				sl = sl.split('><')[0] + '>';
+			#}
+			if tl.count('><') > 0: #{
+				tl = tl.split('><')[0] + '>';
+			#}
 			if sl not in sl_tl: #{
 				sl_tl[sl] = {};
 			#}
@@ -59,7 +65,6 @@ for sl in sl_tl: #{
 	for tl in newtl: #{
 		if first: #{
 			print(sl_tl[sl][tl] , sl , tl , '@');
-			defaults[sl] = tl;
 			first = False
 		else: #{
 			print(sl_tl[sl][tl] , sl , tl);
