@@ -8,11 +8,17 @@ import sys, codecs, copy;
 #        a) Frequency lexicon
 #        b) Biltrans output
 #        c) Disambiguated biltrans output  
+#	 d) Crispiness threshold
 
 MAX_NGRAMS = 3;
 
 cur_line = 0;
 crisphold = 3.0 ;
+
+if len(sys.argv) == 5: #{
+	crisphold = float(sys.argv[4]);
+	print('crisp:', crisphold, file=sys.stderr);
+#}
 
 sl_tl_defaults = {}; 
 sl_tl = {};
