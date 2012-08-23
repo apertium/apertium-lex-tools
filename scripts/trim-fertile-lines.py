@@ -53,7 +53,8 @@ while c: #{
 			if sent_count < MAX_SENT: #{
 				print(outline.strip());
 			else: #{
-				print('Line ' + str(lineno) + ' has ' + str(sent_count) + ' translations, discarding.', file=sys.stderr);
+				#print('Line ' + str(lineno) + ' has ' + str(sent_count) + ' translations, discarding.', file=sys.stderr);
+				print(str(lineno), file=sys.stderr);
 			#}
 			lineno = lineno + 1;
 			sent_count = 1;
