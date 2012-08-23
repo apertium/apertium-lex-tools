@@ -22,13 +22,14 @@ sys.stderr = codecs.getwriter('utf-8')(sys.stderr);
 #5 	0-0 4-2 5-3 8-1 9-5 10-6 12-7 13-8 14-9 15-10
 #-------------------------------------------------------------------------------
 
-if len(sys.argv) < 2: #{
-	print 'count-patterns.py <lex> <extracted>';
+if len(sys.argv) < 3: #{
+	print 'count-patterns.py <lex> <extracted> <crispiness threshold>';
 	sys.exit(-1);
 #}
 
 MAX_NGRAMS = 3;
 
+crisphold = float(sys.argv[3]);
 cur_line = 0;
 
 sl_tl_defaults = {}; 
@@ -77,7 +78,11 @@ for line in file(sys.argv[2]).readlines(): #{
 					#}
 					tlword = cur_tl_row[al_tl].lower().split('>')[0] + '>';
 					slword = slword.lower().split('>')[0] + '>';
-
+					
+					if slword not in sl_tl_defaults: #{
+						print >>sys.stderr, 'WARNING: "' + slword + '" not in sl_tl_defaults, skipping';
+						continue;
+					#}
 					if tlword !=  sl_tl_defaults[slword]: #{
 						print >>sys.stderr, '+' , slword , sl_tl_defaults[slword] , tlword;
 					else: #{
@@ -162,21 +167,57 @@ for sl in ngrams: #{
 			#}
 			total = total + ngrams[sl][ngram][tl];
 		#}
+
+		#> If for each of the rules we include
+		#> the amount of time the translation is seen with that pattern over the
+		#> total, we get a number we can try as a threshold. e.g. > 0.6 >0.7 >0.8
+		#> etc.  (>0.6 would be the same as 2/3 of the time the alternative
+		#> translation is seen with that ngram, and 1/3 of the time the default
+		#> translation is). I think this would be easier to explain than the magic
+		#> number I came up with.
+		#
+		#I see this as a way to define how "crispy" the decisions are. I think it 
+		#would be better to express this as a ratio: the ratio of the times the 
+		#alternative translation is seen to the number of times the defaullt 
+		#translation is seen with that n-gram.
+		#
+		#It would be "2" in this case: the alternative is seen twice as often as 
+		#the default.
+		
 		for tl in ngrams[sl][ngram]: #{
-			if tl == current_tl and tl not in sl_tl_defaults[sl] and total != max_freq: #{
-				mf = max_freq / 2;
-				if (total - max_freq) < mf:  #{
-					print '@', total, max_freq, ngrams[sl][ngram][tl], '\t' + sl + '\t' + ngram + '\t' + tl + '\t' + str(ngrams[sl][ngram][current_tl]);
-				else: #{	
-					print '+', total, max_freq, ngrams[sl][ngram][tl], '\t' +  sl + '\t' + ngram + '\t' + tl + '\t' + str(ngrams[sl][ngram][current_tl]);
-				#}
-				continue;
+			crispiness = 0.0;
+			default = sl_tl_defaults[sl];
+			alt_crisp = float(ngrams[sl][ngram][tl]) / float(total);
+			def_crisp = 1.0;
+			if default in ngrams[sl][ngram]: #{
+				def_crisp = float(ngrams[sl][ngram][default] / float(total));
 			#}
-			if tl == current_tl and tl not in sl_tl_defaults[sl] and total == max_freq: #{
-				print '~', total, max_freq, ngrams[sl][ngram][tl], '\t'+ sl + '\t' + ngram + '\t' + tl + '\t' + str(ngrams[sl][ngram][current_tl]);
-				continue;
+			weight = float(ngrams[sl][ngram][tl]) / float(total);
+			crispiness = alt_crisp/def_crisp;
+
+			#print '%%%' , crispiness , alt_crisp , def_crisp , tl , default , ngrams[sl][ngram] ; 
+			
+			if crispiness < crisphold: #{
+				print '-', crispiness , weight , total, max_freq, ngrams[sl][ngram][tl], '\t'+ sl + '\t' + ngram + '\t' + tl + '\t' + str(ngrams[sl][ngram][tl]);
+			else: #{
+
+				print '+', crispiness , weight , total, max_freq, ngrams[sl][ngram][tl], '\t' +  sl + '\t' + ngram + '\t' + tl + '\t' + str(ngrams[sl][ngram][current_tl]);
 			#}
-			print '-', total, max_freq, ngrams[sl][ngram][tl], '\t'+ sl + '\t' + ngram + '\t' + tl + '\t' + str(ngrams[sl][ngram][tl]);
+
+#			if tl == current_tl and tl not in sl_tl_defaults[sl] and total != max_freq: #{
+#				mf = max_freq / 2;
+#				if (total - max_freq) < mf:  #{
+#					print '@', weight, total, max_freq, ngrams[sl][ngram][tl], '\t' + sl + '\t' + ngram + '\t' + tl + '\t' + str(ngrams[sl][ngram][current_tl]);
+#				else: #{	
+#					print '+', weight, total, max_freq, ngrams[sl][ngram][tl], '\t' +  sl + '\t' + ngram + '\t' + tl + '\t' + str(ngrams[sl][ngram][current_tl]);
+#				#}
+#				continue;
+#			#}
+#			if tl == current_tl and tl not in sl_tl_defaults[sl] and total == max_freq: #{
+#				print '~', weight, total, max_freq, ngrams[sl][ngram][tl], '\t'+ sl + '\t' + ngram + '\t' + tl + '\t' + str(ngrams[sl][ngram][current_tl]);
+#				continue;
+#			#}
+#			print '-', weight, total, max_freq, ngrams[sl][ngram][tl], '\t'+ sl + '\t' + ngram + '\t' + tl + '\t' + str(ngrams[sl][ngram][tl]);
 		#}
 	#}
 #}
