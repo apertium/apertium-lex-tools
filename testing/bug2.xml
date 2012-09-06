@@ -1,0 +1,5 @@
+<rules>
+<rule comment="103"><match lemma="област"><select lemma="area"/></match></rule>
+<rule comment="44"><match lemma="граничен"><select lemma="border"/></match></rule>
+<rule comment="32"><match lemma="пограничен"><select lemma="border"/></match></rule>
+</rules>
