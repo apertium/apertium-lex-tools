@@ -1165,6 +1165,66 @@ en_table = {
 	u'<web>' : u'<web>',
 };
 
+sme_table = {
+	u'<V><TV>':u'<V><TV>',
+	u'<V><IV>':u'<V><IV>',
+	u'<V><TV><Inf>':u'<V><TV><Inf>',
+	u'<V><IV><Inf>':u'<V><IV><Inf>',
+	u'<V><TV><Ger>':u'<V><TV><Ger>',
+	u'<V><IV><Ger>':u'<V><IV><Ger>',
+	u'<V><TV><Actio>':u'<V><TV><Actio>',
+	u'<V><IV><Actio>':u'<V><IV><Actio>',
+	u'<V><TV><PrfPrc>':u'<V><TV><PrfPrc>',
+	u'<V><IV><PrfPrc>':u'<V><IV><PrfPrc>',
+	u'<V><TV><PrsPrc>':u'<V><TV><PrsPrc>',
+	u'<V><IV><PrsPrc>':u'<V><IV><PrsPrc>',
+	u'<N>':u'<N>',
+	u'<N><ACR>':u'<N><ACR>',
+	u'<N><Prop>':u'<N><Prop>',
+	u'<N><Prop><Obj>':u'<N><Prop><Obj>',
+	u'<N><Prop><Sur>':u'<N><Prop><Sur>',
+	u'<N><Prop><Fem>':u'<N><Prop><Fem>',
+	u'<N><Prop><Mal>':u'<N><Prop><Mal>',
+	u'<N><Prop><Org>':u'<N><Prop><Org>',
+	u'<N><Prop><Org>':u'<N><Prop><Plc>',
+	u'<Adj>':u'<Adj>',
+	u'<CC>':u'<CC>',
+	u'<CS>':u'<CS>',
+	u'<Pcle>':u'<Pcle>',
+	u'<Qst>':u'<Qst>',
+	u'<Adv>':u'<Adv>',
+	u'<Interj>':u'<Interj>',
+	u'<Adp>':u'<Adp>',
+	u'<Po>':u'<Po>',
+	u'<Pr>':u'<Pr>',
+	u'<Pron>':u'<Pron>',
+	u'<Pron><Interr>':u'<Pron><Interr>',
+	u'<Pron><Rel>':u'<Pron><Rel>',
+	u'<Pron><Refl>':u'<Pron><Refl>',
+	u'<Pron><Indef>':u'<Pron><Indef>',
+	u'<Pron><Recipr>':u'<Pron><Recipr>',
+	u'<Pron><Dem>':u'<Pron><Dem>',
+	u'<Num>':u'<Num>',
+	u'<CLB>':u'<CLB>',
+};
+
+def in_table(tags, table):
+	"""Assumes any tag sequence not in `table' can be shortened to
+	one there."""
+	if tags in table:
+		return table[tags];
+	else:
+		ltag = tags.split(u'><');
+		for i in range(len(ltag)-1, 0, -1):
+			shorter = u'><'.join(ltag[0:i])+'>';
+			if shorter in table:
+				table[tags]=table[shorter]; # cache it
+				return table[shorter];
+	raise Exception("Unknown tagging!");
+			
+	
+
+
 table = {};
 
 if len(sys.argv) != 2: #{
@@ -1173,11 +1233,13 @@ if len(sys.argv) != 2: #{
 #}
 
 if sys.argv[1] == 'en': #{
-	table = en_table; 
+	table = en_table;
 elif sys.argv[1] == 'es': #{
-	table = es_table; 
+	table = es_table;
 elif sys.argv[1] == 'mk': #{
-	table = mk_table; 
+	table = mk_table;
+elif sys.argv[1] == 'sme': #{
+	table = sme_table;
 else: #{
 	print 'process-tagger-output.py <lang>';
 	sys.exit();
@@ -1206,7 +1268,7 @@ def processWord(c): #{
 		c = sys.stdin.read(1);
 	#}
 	
-	sys.stdout.write(lemma.replace(' ', '~') + table[tags] + ' ');
+	sys.stdout.write(lemma.replace(' ', '~') + in_table(tags, table) + ' ');
 #}
 
 while c: #{
