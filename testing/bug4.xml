@@ -1,0 +1,3 @@
+<rules>
+  <rule><match lemma="недела" tags="n.f.*"><select lemma="Sunday" tags="n.*"/></match></rule>
+</rules>
