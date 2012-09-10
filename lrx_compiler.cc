@@ -34,7 +34,7 @@ wstring const LRXCompiler::LRX_COMPILER_TAGS_ATTR       = L"tags";
 wstring const LRXCompiler::LRX_COMPILER_C_ATTR          = L"c";
 
 //wstring const LRXCompiler::LRX_COMPILER_ASTERISK        = L"[0-9A-Za-zÀ-Þà-ÿĀ-Žā-žА-Фа-ф <>@\\+]*";
-wstring const LRXCompiler::LRX_COMPILER_ASTERISK        = L"[0-9A-Za-zà-ÿ <>@←→\\+]*";
+wstring const LRXCompiler::LRX_COMPILER_ASTERISK        = L"[0-9A-Za-zà-ÿ <>@←→\\+]+";
 
 wstring const LRXCompiler::LRX_COMPILER_TYPE_SELECT     = L"select";
 wstring const LRXCompiler::LRX_COMPILER_TYPE_REMOVE     = L"remove";
@@ -146,6 +146,7 @@ LRXCompiler::parse(string const &fitxer)
             re.compile(right_pattern);
             Transducer t = re.getTransducer();
            // t.determinize(); // We determinise but not minimise
+           // t.minimize(); 
             patterns[alphabet(right.c_str())] = t;
           }
           if(patterns.count(alphabet(left.c_str())) < 1)
@@ -155,6 +156,7 @@ LRXCompiler::parse(string const &fitxer)
             re.compile(left_pattern);
             Transducer t = re.getTransducer();
            // t.determinize(); // Determinise, don't minimise
+           // t.minimize(); 
             patterns[alphabet(left.c_str())] = t;
           }
           //fwprintf(stderr, L"  [%d] sl: %S, tl: %S\n", pos, sl_patterns[0].c_str(), it4->c_str()); 
@@ -182,6 +184,7 @@ LRXCompiler::parse(string const &fitxer)
           {
             Transducer t = re.getTransducer();
             //t.determinize();
+            // t.minimize(); 
             patterns[alphabet(left.c_str())] = t;
           }
           //fwprintf(stderr, L"%d %d [%d] sl: %S, tl: skip(*)\n", k, s, pos, it4->c_str()); 
