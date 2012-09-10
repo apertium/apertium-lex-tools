@@ -240,12 +240,18 @@ LRXProcessor::ruleToOpsOptimal(vector<wstring> &rules, int id, int pos)
   map<int, wstring> offset_op;
   for(vector<wstring>::const_iterator it = rules.begin(); it != rules.end(); it++)
   {
+    // For each of these:
     // : /<select(season<n>[0-9A-Za-z <>]*)><skip(*)><5>
     // : /<select(season<n>[0-9A-Za-z <>]*)><skip(*)><1>
     // : /<select(season<n>[0-9A-Za-z <>]*)><skip(*)><skip(*)><6>
     // : /<skip(*)><select(station<n>[0-9A-Za-z <>]*)><skip(*)><10>
     // : /<select(liikot<V><[0-9A-Za-zà-ÿ <>@\+]*)><skip(*)><1>
     wstring m = *it;
+
+    if(debugMode) 
+    {
+      fwprintf(stderr, L"  m = %S\n", m.c_str());
+    }
 
     if(m == L"") 
     {
@@ -284,6 +290,10 @@ LRXProcessor::ruleToOpsOptimal(vector<wstring> &rules, int id, int pos)
         {
           temp = temp + *it2;
           offset_op[pos + pcount] = temp;
+          if(debugMode) 
+          {
+            fwprintf(stderr, L"    offset_op[%d] = %S\n", pos + pcount, temp.c_str());
+          }
           temp = L"";
           pcount++;
         }
@@ -297,9 +307,16 @@ LRXProcessor::ruleToOpsOptimal(vector<wstring> &rules, int id, int pos)
 
     wstring rule_id = offset_op[pos + (pcount - 1)];
     wstring rid = L"<" + itow(id) + L">";
+    map<int, wstring>::iterator penultimate = offset_op.end();
+    penultimate--;
     for(map<int, wstring>::iterator it3 = offset_op.begin(); it3 != offset_op.end(); it3++)
     {
       wstring pattern = L"";
+      
+      if(it3 == penultimate)
+      {
+        continue;
+      }
 
       if(rule_id == rid) 
       {
@@ -309,49 +326,30 @@ LRXProcessor::ruleToOpsOptimal(vector<wstring> &rules, int id, int pos)
         if(part.find(L"<select") != wstring::npos)
         {
           type = L"select";
-          for(wstring::iterator it4 = part.begin(); it4 != part.end(); it4++) 
-          {
-            if(*it4 == L'(') 
-            {
-              inPar = true;
-              continue;
-            }  
-            else if(*it4 == L')')
-            {
-              inPar = false;
-              continue;
-            }
-            if(inPar)
-            {
-              pattern = pattern + *it4;
-            }
-          }
-  
         }
         if(part.find(L"<remove") != wstring::npos)
         {
           type = L"remove";
-          for(wstring::iterator it4 = part.begin(); it4 != part.end(); it4++) 
-          {
-            if(*it4 == L'(') 
-            {
-              inPar = true;
-              continue;
-            } 
-            else if(*it4 == L')')
-            {
-              inPar = false;
-              continue;
-            }
-  
-            if(inPar)
-            {
-              pattern = pattern + *it4;
-            }
-          }
-  
         }
-        
+        for(wstring::iterator it4 = part.begin(); it4 != part.end(); it4++) 
+        {
+          if(*it4 == L'(') 
+          {
+            inPar = true;
+            continue;
+          } 
+          else if(*it4 == L')')
+          {
+            inPar = false;
+            continue;
+          }
+
+          if(inPar)
+          {
+            pattern = pattern + *it4;
+          }
+        }
+  
         if(debugMode)
         {
           fwprintf(stderr, L"*%S offset %d: %S\n", rule_id.c_str(), it3->first, it3->second.c_str());
@@ -486,10 +484,10 @@ LRXProcessor::applyRulesOptimal(map<int, SItem> &sentence, FILE *output)
       if(s.isFinal(anfinals)) // If this is a final state (regardless of if there is more input), then add the match
       {
         vector<wstring> outpaths = s.filterFinalsLRX(anfinals, alphabet, escaped_chars);
-        //wstring out = s.filterFinals(anfinals, alphabet, escaped_chars);
+        wstring out = s.filterFinals(anfinals, alphabet, escaped_chars);
         if(debugMode)
         {
-          //fwprintf(stderr, L"\n%d: %S\n", i, out.c_str());
+          fwprintf(stderr, L"\n%d: %S\n", i, out.c_str());
           fwprintf(stderr, L"s.filterFinals: %d: \n", outpaths.size());
           for(vector<wstring>::iterator itx = outpaths.begin(); itx != outpaths.end(); itx++)
           {
@@ -549,6 +547,7 @@ LRXProcessor::applyRulesOptimal(map<int, SItem> &sentence, FILE *output)
     pair<int, vector<State> > best = it->second;
     if(debugMode)
     {
+      fwprintf(stderr, L"============================================================\n");
       fwprintf(stderr, L"covers[%d] best (score: %d, size: %d)\n", it->first, best.first, best.second.size());
     }
 
@@ -562,19 +561,25 @@ LRXProcessor::applyRulesOptimal(map<int, SItem> &sentence, FILE *output)
         map< int, pair<int, wstring> > ops = ruleToOpsOptimal(outpaths, *it3, it->first);
         if(debugMode)
         {
-          fwprintf(stderr, L"FR: %d\n", ops.size() );
+          fwprintf(stderr, L"FoundRules: %d\n", ops.size() );
         }
         pos_ops.insert(ops.begin(), ops.end());
       }
       if(debugMode)
       {
-        fwprintf(stderr, L"XX: %d, %d\n", best.first, outpaths.size());
+        fwprintf(stderr, L"best,outpaths: %d, %d\n", best.first, outpaths.size());
       }
     }
   }
   if(debugMode)
   {
+    fwprintf(stderr, L"============================================================\n");
     fwprintf(stderr, L"pos_ops: %d\n", pos_ops.size());
+    for(map<int, pair<int, wstring> >::iterator it = pos_ops.begin(); it != pos_ops.end(); it++)
+    {
+      fwprintf(stderr, L"  -  %d %d %S\n", it->first, pos_ops[it->first].first, pos_ops[it->first].second.c_str());
+    }
+    fwprintf(stderr, L"============================================================\n");
   }
 
 
@@ -589,7 +594,7 @@ LRXProcessor::applyRulesOptimal(map<int, SItem> &sentence, FILE *output)
 
     if(debugMode)
     {
-      fwprintf(stderr, L"%d [%d] %S | %S\n", pos_ops.size(), i, w.sl.c_str(), op.c_str());
+      fwprintf(stderr, L"[%d] (ops: %d) <%d> %S | %S\n", i, pos_ops.size(), current_rule, w.sl.c_str(), op.c_str());
     }
     wstring op_type = L"";
     if(op.find(L"<select") != wstring::npos) 
