@@ -1166,6 +1166,8 @@ en_table = {
 };
 
 sme_table = {
+	u'<ShCmp>':u'<ShCmp>',
+	u'<Cmp>':u'<Cmp>',
 	u'<V><TV>':u'<V><TV>',
 	u'<V><IV>':u'<V><IV>',
 	u'<V><TV><Inf>':u'<V><TV><Inf>',
@@ -1178,6 +1180,7 @@ sme_table = {
 	u'<V><IV><PrfPrc>':u'<V><IV><PrfPrc>',
 	u'<V><TV><PrsPrc>':u'<V><TV><PrsPrc>',
 	u'<V><IV><PrsPrc>':u'<V><IV><PrsPrc>',
+	u'<V>':u'<V>',
 	u'<N>':u'<N>',
 	u'<N><ACR>':u'<N><ACR>',
 	u'<N><Prop>':u'<N><Prop>',
@@ -1187,7 +1190,7 @@ sme_table = {
 	u'<N><Prop><Mal>':u'<N><Prop><Mal>',
 	u'<N><Prop><Org>':u'<N><Prop><Org>',
 	u'<N><Prop><Org>':u'<N><Prop><Plc>',
-	u'<Adj>':u'<Adj>',
+	u'<A>':u'<A>',
 	u'<CC>':u'<CC>',
 	u'<CS>':u'<CS>',
 	u'<Pcle>':u'<Pcle>',
@@ -1206,6 +1209,34 @@ sme_table = {
 	u'<Pron><Dem>':u'<Pron><Dem>',
 	u'<Num>':u'<Num>',
 	u'<CLB>':u'<CLB>',
+}
+
+nob_table = {
+
+	u'<abbr>' : u'<abbr>',
+	u'<adj>' : u'<adj>',
+	u'<adv>' : u'<adv>',
+	u'<apos>' : u'<apos>',
+	u'<cm>' : u'<cm>',
+	u'<cnjcoo>' : u'<cnjcoo>',
+	u'<cnjsub>' : u'<cnjsub>',
+	u'<guio>' : u'<guio>',
+	u'<ij>' : u'<ij>',
+	u'<lpar>' : u'<lpar>',
+	u'<n>' : u'<n>',
+	u'<np>' : u'<np>',
+	u'<num>' : u'<num>',
+	u'<part>' : u'<part>',
+	u'<pr>' : u'<pr>',
+	u'<pref>' : u'<pref>',
+	u'<det>' : u'<det>',
+	u'<prn>' : u'<prn>',
+	u'<rpar>' : u'<rpar>',
+	u'<sent>' : u'<sent>',
+	u'<vbhaver>' : u'<vbhaver>',
+	u'<vblex>' : u'<vblex>',
+	u'<vbmod>' : u'<vbmod>',
+	u'<vbser>' : u'<vbser>',
 };
 
 def in_table(tags, table):
@@ -1220,6 +1251,7 @@ def in_table(tags, table):
 			if shorter in table:
 				table[tags]=table[shorter]; # cache it
 				return table[shorter];
+	print >>sys.stderr, tags
 	raise Exception("Unknown tagging!");
 			
 	
@@ -1228,8 +1260,8 @@ def in_table(tags, table):
 table = {};
 
 if len(sys.argv) != 2: #{
-	print 'process-tagger-output.py <lang>';
-	sys.exit();
+	print >>sys.stderr, 'process-tagger-output.py <lang>';
+	sys.exit(1);
 #}
 
 if sys.argv[1] == 'en': #{
@@ -1240,9 +1272,11 @@ elif sys.argv[1] == 'mk': #{
 	table = mk_table;
 elif sys.argv[1] == 'sme': #{
 	table = sme_table;
+elif sys.argv[1] == 'nob': #{
+	table = nob_table;
 else: #{
-	print 'process-tagger-output.py <lang>';
-	sys.exit();
+	print >>sys.stderr, 'process-tagger-output.py <lang>';
+	sys.exit(1);
 #}
 
 def processWord(c): #{
