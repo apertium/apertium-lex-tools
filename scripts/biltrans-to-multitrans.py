@@ -87,7 +87,7 @@ while c: #{
 		if c == '\n': #{
 			i = 0;
 			for sentence in output_sentences: #{
-				print '.[][' + str(lineno) + ' ' + str(i) + '].[]' , output_sentences[sentence];
+				print '.[][' + str(lineno) + ' ' + str(i) + '].[]\t' , output_sentences[sentence];
 				i = i + 1;
 			#}
 			lineno = lineno + 1;

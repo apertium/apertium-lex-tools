@@ -1,12 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # coding=utf-8
 # -*- encoding: utf-8 -*-
 
-import sys, codecs, copy, commands;
-
-sys.stdin  = codecs.getreader('utf-8')(sys.stdin);
-sys.stdout = codecs.getwriter('utf-8')(sys.stdout);
-sys.stderr = codecs.getwriter('utf-8')(sys.stderr);
+import sys;
 
 #+nature<n>	service<n> nature<n>	carácter<n>	3
 #+nature<n>	The<def><def> imperialist<adj> nature<n>	carácter<n>	1
@@ -17,15 +13,17 @@ sys.stderr = codecs.getwriter('utf-8')(sys.stderr);
 
 infile = '';
 
-if len(sys.argv) == 1: #{
-	infile = sys.stdin;	
-else: #{
-	infile = file(sys.argv[1]);
+if len(sys.argv) < 3: #{
+	print('ngrams-to-rules.py <ngrams> <threshold>');
+	sys.exit(-1);
 #}
+
+infile = open(sys.argv[1]);
+threshold = float(sys.argv[2]);
 
 permitted_tags = ['n', 'vblex', 'adj', 'n.*', 'vblex.*', 'adj.*'];
 
-print '<rules>';
+print('<rules>');
 lineno = 1;
 ruleno = 0;
 for line in infile.readlines(): #{
@@ -38,8 +36,11 @@ for line in infile.readlines(): #{
 	#line = line.decode('utf-8').strip();
 
 
+	#+ 0.571428571429 14 8 8 	troiñ<vblex>		tourner<vblex>	8
 	row = line.split('\t');
 
+	tipus = row[0].split(' ')[0];
+	weight = row[0].split(' ')[1];
 	sl = row[1].strip().lower();
 	tl = row[3];
 	tl_lema = tl.split('<')[0].lower();
@@ -47,9 +48,19 @@ for line in infile.readlines(): #{
 	freq = row[4];
 	pattern = row[2].split(' ');
 
+	if row[2].count('<guio>') > 0 or row[2].count('<sent>') > 0 or row[2].count('<cm>') > 0: #{
+		print('PUNCTUATION_IN_PATTERN', line, file=sys.stderr);
+		continue;
+	#}
+
+	if tipus == '-' or tipus == '~': #{
+		print('DEFAULT_READING', line, file=sys.stderr);
+		continue;
+	#}
+
 	# Hacks
 	if len(pattern[0].strip()) == 0: #{
-		print >> sys.stderr, 'ZERO_PATTERN' , line;
+		print('ZERO_PATTERN' , line, file=sys.stderr);
 		continue;
 	#}
 
@@ -60,29 +71,33 @@ for line in infile.readlines(): #{
 		#}
 	#}
 	if inpattern == False:  #{
-		print >> sys.stderr, 'SL_NOT_IN_PATTERN' , line;
+		print('SL_NOT_IN_PATTERN' , line, file=sys.stderr);
 		continue;
 	#}
 
 	if tl_tags.count('adj') > 0 and sl.count('adj')  < 1: #{
-		print >>sys.stderr, "TAG_MISMATCH" , line;
+		print("TAG_MISMATCH" , line, file=sys.stderr);
 		continue;
 	#}
 	if tl_tags.count('vbmod') > 0 and sl.count('vbmod')  < 1: #{
-		print >>sys.stderr, "TAG_MISMATCH" , line;
+		print("TAG_MISMATCH" , line, file=sys.stderr);
 		continue;
 	#}
 
 	if tl_tags not in permitted_tags: #{
-		print >>sys.stderr, "TAG_NOT_PERMITTED" , tl_tags , '||' , line;
+		print("TAG_NOT_PERMITTED" , tl_tags , '||' , line, file=sys.stderr);
 		continue;
 	#}
 
+	if float(weight) < float(threshold): #{
+		print("UNDER_THRESHOLD", weight, "<", threshold, "||",  line, file=sys.stderr);
+		continue;
+	#}
 
 	sel = False;
 	ruleno = ruleno + 1;
 	lineno = lineno + 1;
-	print '  <rule c="' + str(ruleno) + ' ' + str(lineno) + ': ' + freq + '">';
+	print('  <rule c="' + str(ruleno) + ' ' + str(lineno) + ': ' + freq + '" weight="' + weight + '">');
 	for word in pattern: #{
 		sl_lema = word.split('<')[0].lower();
 		if word.count('><') > 0: #{
@@ -107,7 +122,7 @@ for line in infile.readlines(): #{
 		if sl_tags == 'det.pos.*' or sl_tags == 'det.ord.*': #{
 			sl_lema = '';
 		#}
-		if sl_tags == 'np.loc.*' or sl_tags == 'np.ant.*' or sl_tags == 'np.cog.*': #{
+		if sl_tags == 'np.top.*' or sl_tags == 'np.loc.*' or sl_tags == 'np.ant.*' or sl_tags == 'np.cog.*': #{
 			sl_lema = '';
 		#}
 		if sl_tags == 'num.percent': #{
@@ -134,25 +149,25 @@ for line in infile.readlines(): #{
 		if word.lower().count(sl) > 0: #{
 			lineno = lineno + 1;
 			if sl_lema == '': #{
-				print '    <match tags="' + sl_tags + '"><select lemma="' + tl_lema + '" tags="' + tl_tags + '"/></match>';
+				print('    <match tags="' + sl_tags + '"><select lemma="' + tl_lema + '" tags="' + tl_tags + '"/></match>');
 			else: #{
-				print '    <match lemma="' + sl_lema + '" tags="' + sl_tags + '"><select lemma="' + tl_lema + '" tags="' + tl_tags + '"/></match>';
+				print('    <match lemma="' + sl_lema + '" tags="' + sl_tags + '"><select lemma="' + tl_lema + '" tags="' + tl_tags + '"/></match>');
 			#}
 			sel = True;
 		else: #{
 			lineno = lineno + 1;
 			if sl_lema == '': #{	
-				print '    <match tags="' + sl_tags + '"/>';
+				print('    <match tags="' + sl_tags + '"/>');
 			else: #{
-				print '    <match lemma="' + sl_lema + '" tags="' + sl_tags + '"/>';
+				print('    <match lemma="' + sl_lema + '" tags="' + sl_tags + '"/>');
 			#}
 		#}
 	#}
 	if sel == False: #{
-		print '  </rule> <!-- Warning: No select operation -->';
+		print('  </rule> <!-- Warning: No select operation -->');
 	else: #{
-		print '  </rule>';
+		print('  </rule>');
 	#}
 	lineno = lineno + 1;
 #}
-print '</rules>';
+print('</rules>');
