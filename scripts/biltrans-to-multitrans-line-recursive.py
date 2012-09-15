@@ -89,7 +89,7 @@ def process(sentence, start, out): #{
 	#}
 #}
 
-while True:
+while True: #{
 	lineno
 	string = sys.stdin.readline().rstrip();
 	if string == "":
@@ -102,10 +102,4 @@ while True:
 	process(tokens, 0, [])
 	lineno += 1
 	t = 0
-
-
-
-
-
-
-
+#}
