@@ -61,7 +61,8 @@ def process_biltrans_unit(lu, sents): #{
 #}
 
 escaped = False;
-
+seen_newline = True;
+cur_id = '';
 while c: #{
 	if c == '\\': #{
 		escaped = True;
@@ -76,7 +77,6 @@ while c: #{
 		new_paths = process_biltrans_unit(lu, output_sentences);
 		del output_sentences;
 		output_sentences = new_paths;
-		print >> sys.stderr, 'output_sentences: ', len(output_sentences);
 		reading_word = False;
 		lu = '';		
 	#}
@@ -84,16 +84,21 @@ while c: #{
 		escaped = False;
 	#}
 	if c.isspace(): #{
+		seen_newline = False;
 		if c == '\n': #{
+			print >> sys.stderr, 'output_sentences: ', len(output_sentences);
 			i = 0;
 			for sentence in output_sentences: #{
-				print '.[][' + str(lineno) + ' ' + str(i) + '].[]\t' , output_sentences[sentence];
+				#print '.[][' + str(lineno) + ' ' + str(i) + ' ' + cur_id +'].[]\t' , output_sentences[sentence];
+				print '.[][' + cur_id + ' ' + str(i) + '].[]\t' , output_sentences[sentence];
 				i = i + 1;
 			#}
 			lineno = lineno + 1;
 
 			output_sentences = {};
 			output_sentences[''] = '';
+			seen_newline = True;
+			cur_id = '';
 			
 		elif reading_word == False: #{
 			for sentence in output_sentences: #{
@@ -103,6 +108,9 @@ while c: #{
 	#}
 	if reading_word: #{
 		lu = lu + c;
+	#}
+	if seen_newline and c != '\n': #{
+		cur_id = cur_id + c;
 	#}
 	c = sys.stdin.read(1);
 #}
