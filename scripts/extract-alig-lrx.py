@@ -25,11 +25,22 @@ for line in d.readlines(): #{
 		tl_lem = tl_lem.replace('-', '\\-').replace('~', ' ').replace('&', '&amp;');
 		sl_tag = sl.replace('><', '.').split('<')[1].strip('>');
 		tl_tag = tl.replace('><', '.').split('<')[1].strip('>');
-		rule = '<rule comment="' + fq + '">';
+
+		cmb = '';
+		cma = '';
+		if sl_tag not in ['adj', 'vblex', 'n']: #{
+			cmb = '<!--';
+			cma = '-->';	
+		else: #{
+			cma = '';
+			cmb = '';
+		#}
+
+		rule = cmb + '<rule comment="' + fq + '">';
 		#rule = rule + '<match lemma="' + sl_lem + '" tags="' + sl_tag + '"><select lemma="' + tl_lem + '" tags="' + tl_tag + '"/>';	
 		rule = rule + '<match lemma="' + sl_lem + '"><select lemma="' + tl_lem + '"/>';	
 		rule = rule + '</match>';
-		rule = rule + '</rule>';
+		rule = rule + '</rule>' + cma;
 		
 		print(rule);
 	#}
