@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Universitat d'Alacant 
+ * Copyright (C) 2011--2012 Universitat d'Alacant 
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -51,64 +51,33 @@
 
 using namespace std;
 
-typedef struct LSRuleExe
-{
-  int id;                       // id (e.g. line number) of the rule
-  int len;                      // length of the pattern (in LUs)
-  int ops;                      // number of (non-skip) operations
-  double weight;                // an arbitrary rule weight
-
-} LSRuleExe;
-
-typedef struct LSSymExe
-{
-  int sym;
-  wchar_t c;
-} LSSymExe;
-
-typedef struct SItem
-{
-  wstring sl;
-  vector<wstring> tl;
-  wstring blank; // Superblank to the left
-} SItem;
 
 class LRXProcessor
 {
 private:
-  Alphabet alphabet; // Alphabet of rule transducer
-  TransExe transducer; // The rule transducer  
-//  map<int, MatchExe> patterns; // Map of alphabet symbols to regex transducers 
-  map<int, Transducer> patterns; // Map of alphabet symbols to regex transducers 
-  map<int, LSRuleExe> rules; // Map of rule ids to rule info (weight, etc.)
-  set<Node *> anfinals; // Final states 
-  set<wchar_t> escaped_chars; // 'Special' characters to escape
-  State *initial_state; // Initial state in the rule transducer
 
-  map<int, wchar_t> symbol_first; 
-  map<wchar_t, set<int> > first_symbol; 
- 
-  bool traceMode; // Rule tracing ? 
-  bool debugMode; // Debug information ?
-  bool outOfWord; // Are we in a word ?
-  unsigned int pos; // Current sentence position
-  unsigned long current_line; // The current input line as determined by num '\n'
+  Alphabet alphabet;
+  TransExe transducer;
+  map<wstring, TransExe> recognisers;
 
-  map< int, pair<int, wstring> > ruleToOpsOptimalOld(wstring rules, int id, int pos);
-  vector<int> pathsToRulesOld(wstring const path);
+  set<Node *> anfinals;
+  set<wchar_t> escaped_chars;
+  State *initial_state;
 
-  map< int, pair<int, wstring> > ruleToOpsOptimal(vector<wstring> &rules, int id, int pos);
-  vector<int> pathsToRules(vector<wstring> &paths);
+  bool traceMode;
+  bool debugMode;
+  bool outOfWord;
 
-  void readWord(SItem &w, FILE *input, FILE *output);
-  void applyRulesOptimal(map<int, SItem> &sentence, FILE *output);
-  
-  wstring itow(int i);
-  int wtoi(wstring w);
+  unsigned int pos; 
+  unsigned long lineno;
+
+  bool recognisePattern(const wstring lu, const wstring op);
+  wstring readFullBlock(FILE *input, wchar_t const delim1, wchar_t const delim2);
 
 public:
-  static wstring const LRX_PROCESSOR_S_BOUNDARY;
-  static unsigned const int LRX_PROCESSOR_MAX_S_LENGTH;
+  static wstring const LRX_PROCESSOR_TAG_SELECT;
+  static wstring const LRX_PROCESSOR_TAG_REMOVE;
+  static wstring const LRX_PROCESSOR_TAG_SKIP;
 
   LRXProcessor();
   ~LRXProcessor();
