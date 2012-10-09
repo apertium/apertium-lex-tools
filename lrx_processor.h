@@ -59,6 +59,7 @@ private:
   Alphabet alphabet;
   TransExe transducer;
   map<wstring, TransExe> recognisers;
+  map<wstring, double> weights;
 
   set<Node *> anfinals;
   set<wchar_t> escaped_chars;
@@ -71,6 +72,7 @@ private:
   unsigned int pos; 
   unsigned long lineno;
 
+  wstring itow(int i);
   bool recognisePattern(const wstring lu, const wstring op);
   wstring readFullBlock(FILE *input, wchar_t const delim1, wchar_t const delim2);
 

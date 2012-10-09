@@ -223,7 +223,11 @@ LRXCompiler::procRule()
     weight = LRX_COMPILER_DEFAULT_WEIGHT ;
   }
 
+
+
   currentRuleId++;
+  wstring ruleId = L"<" + itow(currentRuleId) + L">";
+  weights[currentRuleId] = weight;
 
   if(debugMode)
   {
@@ -255,7 +259,6 @@ LRXCompiler::procRule()
     else if(name == LRX_COMPILER_RULE_ELEM)
     {
       currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<$>"), alphabet(L"<$>")), currentState);
-      wstring ruleId = L"<" + itow(currentRuleId) + L">";
       if(!alphabet.isSymbolDefined(ruleId.c_str()))
       { 
         alphabet.includeSymbol(ruleId.c_str());
@@ -700,6 +703,7 @@ LRXCompiler::procRemove()
   return;
 }
 
+
 void
 LRXCompiler::write(FILE *fst)
 {
@@ -724,5 +728,23 @@ LRXCompiler::write(FILE *fst)
   }
   transducer.write(fst);
 
-  fwprintf(stderr, L"%d@%d %d\n", transducer.size(), transducer.numberOfTransitions(), transducer.getStateSize(transducer.getInitial()));
+  struct weight {
+        int id;
+        double pisu;
+  };
+
+  for(map<int, double>::iterator it = weights.begin(); it != weights.end(); it++) 
+  {
+    if(debugMode)
+    {
+      fwprintf(stderr, L"%.4f %d\n", it->second, it->first);
+    } 
+    weight record = {it->first, it->second};
+    fwrite((void *)&record, 1, sizeof(weight), fst);
+  } 
+
+  if(!outputGraph)
+  {
+    fwprintf(stderr, L"%d: %d@%d\n", currentRuleId, transducer.size(), transducer.numberOfTransitions());
+  }
 }
