@@ -104,6 +104,7 @@ LRXProcessor::load(FILE *in)
 
   transducer.read(in, alphabet);
 
+  // Now read in weights
   struct weight {
         int id;
         double pisu;
@@ -251,12 +252,12 @@ LRXProcessor::process(FILE *input, FILE *output)
   map<int, vector<wstring> > tl; // map of vectors of TL translations
   map<int, wstring > blanks; // map of the superblanks
 
-  map<int, pair<int, vector<State> > > covers ;
-  pair<int, vector<State> > empty_seq;
+  map<int, pair<double, vector<State> > > covers ;
+  pair<double, vector<State> > empty_seq;
   map<pair<int, int>, vector<State> > spans ;
 
   covers[-1] = empty_seq;
-  covers[-1].first = 0;
+  covers[-1].first = 1.0;
 
   vector<State> alive_states_clean ;
   vector<State> alive_states = alive_states_clean ;
@@ -314,7 +315,7 @@ LRXProcessor::process(FILE *input, FILE *output)
       }
 
       vector<State> new_state; // alive_states_new 
-      pair<int, vector<State> > new_best_cover;
+      pair<double, vector<State> > new_best_cover;
       new_best_cover.first = -numeric_limits<int>::max();
 
       vector<int> matched_rules;
@@ -368,19 +369,19 @@ LRXProcessor::process(FILE *input, FILE *output)
             spans[make_pair((pos-path.size()), pos)].push_back(s);
 
             // M[i-ChunkLength(c)]
-            pair<int, vector<State> > newseq = covers[(pos - path.size())];
-            newseq.first = newseq.first + path.size();
+            pair<double, vector<State> > newseq = covers[(pos - path.size())];
+            newseq.first = newseq.first + path.size() ;
 
             if(newseq.first > new_best_cover.first)
             {
               State new_state;
               new_state = s;
               reached.push_back(new_state);
-              map<int, pair<int, vector<State> > >::iterator k;
+              map<int, pair<double, vector<State> > >::iterator k;
               for(k = covers.begin(); k != covers.end(); k++)
               {
                 vector<State>::iterator l;
-                pair<int, vector<State> > p = k->second;
+                pair<double, vector<State> > p = k->second;
                 for(l = p.second.begin(); l != p.second.end(); l++)
                 {
                   if(debugMode)
@@ -403,7 +404,7 @@ LRXProcessor::process(FILE *input, FILE *output)
               covers[pos] = newseq;
               if(debugMode)
               {
-                fwprintf(stderr, L"++ FINALS(%d) covers[%d] [%d, %d] BEST: %d > %d\n", newseq.second.size(), (pos - path.size()), pos, path.size(), newseq.first, new_best_cover.first);
+                fwprintf(stderr, L"++ FINALS(%d) covers[%d] [%d, %d] BEST: %.4f > %.4f\n", newseq.second.size(), (pos - path.size()), pos, path.size(), newseq.first, new_best_cover.first);
               }
             }
 
@@ -430,12 +431,12 @@ LRXProcessor::process(FILE *input, FILE *output)
           fwprintf(stderr, L"FLUSH:\n");
         }
 
-        map<int, pair<int, vector<State> > >::iterator it;
+        map<int, pair<double, vector<State> > >::iterator it;
         map<int, pair<wstring, wstring> > operations;
 
         for(it = covers.begin(); it != covers.end(); it++)
         {
-          pair<int, vector<State> > best = it->second;
+          pair<double, vector<State> > best = it->second;
           if(debugMode)
           {
             fwprintf(stderr, L"===================================================\n");
@@ -705,12 +706,12 @@ LRXProcessor::process(FILE *input, FILE *output)
     fwprintf(stderr, L"FLUSH:\n");
   }
 
-  map<int, pair<int, vector<State> > >::iterator it;
+  map<int, pair<double, vector<State> > >::iterator it;
   map<int, pair<wstring, wstring> > operations;
 
   for(it = covers.begin(); it != covers.end(); it++)
   {
-    pair<int, vector<State> > best = it->second;
+    pair<double, vector<State> > best = it->second;
     if(debugMode)
     {
       fwprintf(stderr, L"===================================================\n");
