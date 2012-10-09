@@ -55,7 +55,7 @@ private:
   Transducer transducer;  
 
   map<wstring, Transducer> recognisers; // keyed on pattern
-  map<wstring, double> weights; // keyed on rule id
+  map<int, double> weights; // keyed on rule id
 
   int initialState;
   int lastState;

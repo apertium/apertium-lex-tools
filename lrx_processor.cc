@@ -26,6 +26,18 @@ wstring const LRXProcessor::LRX_PROCESSOR_TAG_SELECT     = L"<select>";
 wstring const LRXProcessor::LRX_PROCESSOR_TAG_REMOVE     = L"<remove>";
 wstring const LRXProcessor::LRX_PROCESSOR_TAG_SKIP       = L"<skip>";
 
+wstring
+LRXProcessor::itow(int i)
+{
+  // Convert an int to a wstring
+  wchar_t buf[50];
+  memset(buf, '\0', sizeof(buf));
+  swprintf(buf, 50, L"%d", i);
+  wstring id(buf);
+  return id;
+}
+
+
 LRXProcessor::LRXProcessor()
 {
 
@@ -91,6 +103,26 @@ LRXProcessor::load(FILE *in)
   }
 
   transducer.read(in, alphabet);
+
+  struct weight {
+        int id;
+        double pisu;
+  };
+
+  while(!feof(in))
+  {
+    weight record; 
+    fread(&record, sizeof(weight), 1, in);
+
+    wstring sid = L"<" + itow(record.id) + L">";
+    weights[sid] = record.pisu;
+
+    if(debugMode) 
+    {
+      fwprintf(stderr, L"%S %d weight(%.4f)\n", sid.c_str(), record.id, record.pisu);
+    }
+
+  }
 
   return;
 }
