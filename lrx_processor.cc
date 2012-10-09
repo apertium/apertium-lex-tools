@@ -629,7 +629,7 @@ LRXProcessor::process(FILE *input, FILE *output)
           {
             fwprintf(stderr, L"  step: %C\n", val);
           }
-          s.step(val, alphabet(L"<ANY_CHAR>"));
+          s.step_case(val, alphabet(L"<ANY_CHAR>"), false);
         }
         if(s.size() > 0) // If the current state has outgoing transitions, add it to the new alive states
         {
