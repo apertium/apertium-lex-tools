@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Universitat d'Alacant 
+ * Copyright (C) 2011--2012 Universitat d'Alacant 
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -26,6 +26,7 @@
 #include <cerrno>
 #include <string>
 #include <iostream>
+#include <limits>
 #include <sstream>
 #include <cstdlib>
 #include <list>
@@ -46,73 +47,41 @@
 
 using namespace std;
 
-typedef struct LSRule
-{
-  int line;                     // line number
-  int id;			// id of the rule
-  int len;			// length of the pattern (in LUs)
-  double weight;		// an arbitrary rule weight
-  int ops;                      // number of (non-skip) operations in the current rule
-  vector<wstring> tl_patterns; 	// patterns
-
-  map<int, vector<wstring> > sl_context; // position,pattern
-  map<int, vector<wstring> >  tl_context;  // 
-
-} LSRule;
-
-typedef struct LSRuleRecord
-{
-  int id;			// id (e.g. line number) of the rule
-  int len;			// length of the pattern (in LUs)
-  int ops;			// number of (non-skip) operations
-  double weight;		// an arbitrary rule weight
-
-} LSRuleRecord;
-
-typedef struct LSSymRecord
-{
-  int sym;
-  wchar_t c;
-} LSSymRecord;
-
 class LRXCompiler
 {
 private:
   xmlTextReaderPtr reader;
   Alphabet alphabet;
   Transducer transducer;  
-  map<int, Transducer> patterns;
-  map<int, LSRule> rules;
 
-  /* This is a map of symbols (e.g. pattern ids) to their first letter */
-  map<int, wchar_t> symbol_first;  
+  map<wstring, Transducer> recognisers; // keyed on pattern
+  map<wstring, double> weights; // keyed on rule id
 
-  /* <orig, <letter, states>> */
-  map<int, map<wchar_t, set<int> > > heavy_states;
+  int initialState;
+  int lastState;
+  int currentState;
 
-  int current_line;
-  int current_rule_id;
-  int current_rule_len;
-  int current_context_pos;
-  wstring current_pattern;
+  int currentRuleId;
 
+  bool debugMode;
   bool outputGraph;
-  
   bool allBlanks();
+
   void skipBlanks(wstring &name);
   void procNode();
+  void procList();
+  void procListMatch();
   void procRule();
   void procOr();
   void procMatch();
   void procSelect();
   void procRemove();
+
   wstring attrib(wstring const &name);
-  wstring attribsToPattern(wstring lemma, wstring tags);
-  wstring operationToPattern(wstring op);
 
   wstring itow(int i);
   int wtoi(wstring);
-
+  double wtod(wstring);
 
 public:
   static wstring const LRX_COMPILER_RULES_ELEM;
@@ -124,15 +93,16 @@ public:
 
   static wstring const LRX_COMPILER_LEMMA_ATTR;
   static wstring const LRX_COMPILER_TAGS_ATTR;
-  static wstring const LRX_COMPILER_C_ATTR;
+  static wstring const LRX_COMPILER_COMMENT_ATTR;
+  static wstring const LRX_COMPILER_NAME_ATTR;
+  static wstring const LRX_COMPILER_WEIGHT_ATTR;
 
   static wstring const LRX_COMPILER_TYPE_SELECT;
   static wstring const LRX_COMPILER_TYPE_REMOVE;
-
-  static wstring const LRX_COMPILER_ASTERISK;
+  static wstring const LRX_COMPILER_TYPE_SKIP;
 
   static double  const LRX_COMPILER_DEFAULT_WEIGHT;
-  static int     const LRX_COMPILER_HEAVY;
+
 
   LRXCompiler();
 
@@ -143,6 +113,9 @@ public:
   void write(FILE *fd);
 
   void setOutputGraph(bool o);
+  void setDebugMode(bool o);
+
 };
 
 #endif /* __LRX_COMPILER_H__ */
+

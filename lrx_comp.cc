@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Universitat d'Alacant 
+ * Copyright (C) 2011--2012 Universitat d'Alacant 
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -19,7 +19,7 @@
 
 #include <lrx_compiler.h>
 
-#define PACKAGE_VERSION "0.1.0"
+#define PACKAGE_VERSION "0.2.0"
 
 using namespace std;
 
@@ -54,6 +54,12 @@ int main (int argc, char **argv)
     {
       compiler.setOutputGraph(true);
     }
+    if(strcmp(argv[1], "-d") == 0 || strcmp(argv[1], "--debug") == 0)
+    {
+      compiler.setOutputGraph(true);
+      compiler.setDebugMode(true);
+    }
+
     compiler.parse(argv[2]);
     FILE *output = fopen(argv[3], "wb");
     compiler.write(output);
