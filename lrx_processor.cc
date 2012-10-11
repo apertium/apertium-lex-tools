@@ -172,6 +172,12 @@ LRXProcessor::recognisePattern(const wstring lu, const wstring op)
   {
     fwprintf(stderr, L"================================================\n");
   }
+  
+  if(recognisers.count(op) < 1) 
+  {
+    fwprintf(stderr, L"WARNING: Recogniser size 0 for key %S, skipping...\n", op.c_str());
+    return false;
+  }
 
   State *first_state = new State();
   first_state->init(recognisers[op].getInitial());
@@ -188,6 +194,11 @@ LRXProcessor::recognisePattern(const wstring lu, const wstring op)
     if(debugMode)
     {
       fwprintf(stderr, L"alive: %d\n", cur.size());
+    }
+    if(cur.size() < 1)  // I think that any time we have 0 alive states, 
+                        // we can say that the string is unrecognised
+    {
+      return false;
     }
     if(*it == L'<')
     {
