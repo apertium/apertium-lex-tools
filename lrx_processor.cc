@@ -698,7 +698,10 @@ LRXProcessor::process(FILE *input, FILE *output)
     // Reading a superblank
     if(outOfWord)
     {
-      blanks[pos] = blanks[pos] + static_cast<wchar_t>(val);
+      if(!feof(input))
+      {
+        blanks[pos] = blanks[pos] + static_cast<wchar_t>(val);
+      }
       if(debugMode)
       {
         //fwprintf(stderr, L"blanks[%d] = %S\n", pos, blanks[pos].c_str());
