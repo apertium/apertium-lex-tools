@@ -36,8 +36,9 @@ template<class T> ostream &operator<<(ostream&out,const vector<T>&x)
   copy(x.begin(),x.end(),ostream_iterator<T>(out," "));return out<<endl;
 }
 
-struct Z{
-  D k,q,l;Z(D a=0,D b=-1,D c=0):k(a),q(c),l((b<0)?1:log(b)){};
+struct Z {
+  double k, q, l;
+  Z(double a = 0, double b = -1, double c = 0): k(a), q(c), l((b < 0) ? 1 : log(b)){};
 };
 
 ostream& operator << (ostream &o, const Z &x)
@@ -74,17 +75,19 @@ struct event {
   }
 };
 
-int main(int argc,char**av)
+int main(int argc, char **av)
 {
   string s;
-  vector<pair<event,double> >E;
+  vector<pair<event,double> > E;
   bool lN=0;
   D TRN=0.0, TST=0.0;
   bool qt=0, initmu=0;
-  vector<pair<string,D> > s2f;vector<Z> z;
+  vector<pair<string,D> > s2f; 
+  vector<Z> z;
   ifstream *muf=0;
   int mfc=-2, kfl=0;
-  size_t st=0, C=0, it=0, maxIt=1000, ts=0, noF=0, Es, I, N=100000000;
+  size_t st=0; // State in input file
+  size_t C=0, it=0, maxIt=1000, ts=0, noF=0, Es, I, N=100000000;
   D ssi=0.0;
   D d, l=1e30, old_l, w=0.0, dSmoothN=0.0, minBetter=0.01, lt=0.0, wt=0.0, F=0.0;
 
@@ -104,25 +107,30 @@ int main(int argc,char**av)
     else if(si=="-smooth") ssi=1.0/pow(atof(av[++i]),2);
     else if(si=="-kw"||si=="-kr") kfl=1+(si=="-kr");
     else if(si=="-initmu") initmu=1;
-    else if(av[i][0]=='-'){
+    else if(av[i][0]=='-')
+    {
       cerr << "\nUsage: " << av[0] << "[-v|-V|-red n|-iter n|-dN d|-lNorm"
 	"|-deltaPP dpp][mu]\n none: GIS \n -red: count-based feature sel"
 	"ection\n   mu: test pp\n-iter: number of iterations\n  -dN: smoothing "
-	"of event counts\n-lNorm: length normalization\n-deltaPP: end criterion"
+	"of event counts\n-lNorm: length normalisation\n-deltaPP: end criterion"
 	"minimal change of perplexity\n-kw: write K file\n-kr: read K file\n";
-      return 0;}
-    else muf=new ifstream(av[i]);
+      return 0;
+    }
+    else 
+    { 
+      muf = new ifstream(av[i]);
+    }
   }
   {hash_map<string,int,hash_str> f2s;event e;size_t curY=0;double wi=1.0;
   s2f.push_back(pair<string,D>("@@@CORRECTIVE-FEATURE@@@",0.0));
   z.push_back(Z());
   f2s["@@@CORRECTIVE-FEATURE@@@"]=0;
-  if(muf)
+  if(muf) // Only called when scoring
   {
     while(*muf >> s >> d)
     {
       cerr << *muf << endl;
-      size_t p= (!f2s.count(s)) ? (f2s[s]=s2f.size()) : (f2s[s]);
+      size_t p= (!f2s.count(s)) ? (f2s[s] = s2f.size()) : (f2s[s]);
       Z k(0, kfl ? 1 : d , 0); 
       pair<string,D> sd(s,0.0);
       if(p<s2f.size())
@@ -150,14 +158,19 @@ int main(int argc,char**av)
   assert(s2f.size()==f2s.size());
   assert(s2f.size()==z.size());
 
-  while(cin >> s)
+  while(cin >> s) // Read in the training input
     switch(st)
     {
-    case 0: C=atoi(s.c_str());st=1;break;
+    case 0: 
+      C = atoi(s.c_str());
+      st = 1;
+      break;
+
     case 1: if(s=="TEST"){N=E.size();}else{e.f.resize(C);e.fs.resize(C);
       e.y=atoi(s.c_str());curY=0;st=2;wi=1.0;e.Ny.resize(C);
       for(size_t c=0;c<C;++c)e.Ny[c]=(c==e.y)?(1.0-dSmoothN):(dSmoothN/(C-1));}
       break;
+           // $ means read an absolute count, # means new column separator
     case 2:if(s=="#")st=3;else if(s=="@")st=4;else if(s=="$")st=5;else abort();
       break;
     case 3: case 4:
@@ -179,12 +192,19 @@ int main(int argc,char**av)
     }
   Es=E.size();ts=max(int(Es-N),0);N=Es-ts;I=s2f.size();
   cerr<<"I: "<<I<<" F: "<<F<<endl;assert(f2s.size()==s2f.size());}
-  vector<D> p(C);assert(z.size()==1||z.size()==I);z.resize(I);
+  vector<D> p(C);
+  assert(z.size()==1||z.size()==I);
+  z.resize(I);
   if(initmu==0&&muf&&kfl!=2){N=0;ts=E.size();}
-  for(size_t n=0;n<Es;++n){event&en=E[n].first;((n<N)?TRN:TST)+=E[n].second;
-    for(size_t c=0;c<C;++c){
+  for(size_t n=0;n<Es;++n)
+  {
+    event &en = E[n].first; ((n<N)?TRN:TST) += E[n].second;
+    for(size_t c=0;c<C;++c)
+    {
       if(lN)for(size_t k=0;k<en.f[c].size();++k)en.f[c][k].second/=en.fs[c];
-      else en.f[c].push_back(make_pair(0,F-en.fs[c]));}}
+      else en.f[c].push_back(make_pair(0,F-en.fs[c]));
+    }
+  }
   if(lN)F=1.0;
   if( mfc!= -2){cout << C;
   for(size_t n=0;n<Es;++n){const event&en=E[n].first;
@@ -200,35 +220,63 @@ int main(int argc,char**av)
       {cout<<s2f[i].first<<" "<<z[i].k <<endl;}exit(0);}
     for(size_t i=0;i<I;++i)if(!z[i].k)noF++;
     if(noF&&N)cerr<<"I': "<<I-noF<<endl;
-    if(v>1)cerr << "Expected feature counts: " << z;
+    if(v>1)
+    {
+      cerr << "Expected feature counts: " << z;
+    }
 
-    do { 
-      old_l=l;l=0.0;w=0.0;lt=0.0;wt=0.0;double wx=0.0,wtx=0.0,lx=0,ltx=0;
-      for(size_t i=0;i<I;++i)z[i].q=0;
-      for(size_t i=0;i<Es;++i){const event&ei=E[i].first;double wi=E[i].second;
+    do 
+    { 
+      old_l=l;
+      l=0.0;
+      w=0.0;
+      lt=0.0;
+      wt=0.0;
+      double wx=0.0, wtx=0.0, lx=0, ltx=0;
+
+      for(size_t i=0;i<I;++i){z[i].q=0;}
+
+      for(size_t i=0;i<Es;++i)
+      {const event&ei=E[i].first;double wi=E[i].second;
       size_t pos0=0;for(pos0=0;pos0<ei.Ny.size();pos0++)if(ei.Ny[pos0]==0)break;
       ei.computeProb(z,p);
       vector<D>::const_iterator me=max_element(p.begin(),p.end());
-      if(!N){cout<<me-p.begin() << " " << p;}
-      if(i<N){
-	for(size_t j=0;j<C;++j){const vfea&eifj=ei.f[j];D pj=p[j]*wi;
-	for(vfea::const_iterator k=eifj.begin();k!=eifj.end();++k)
-	  z[k->first].q+=pj*k->second;}}
+      if(!N)
+      {
+        cout << me - p.begin() << " " << p;
+      }
+      if(i < N)
+      {
+	for(size_t j=0;j<C;++j)
+        {
+          const vfea &eifj = ei.f[j]; 
+          D pj = p[j] * wi;
+          for(vfea::const_iterator k=eifj.begin();k!=eifj.end();++k)
+          {
+	     z[k->first].q+=pj*k->second;
+          }
+        }
+      }
       ((i<N)?l:lt)-=wi*log(p[ei.y]);
+
       for(size_t y=0;y<C;++y)((i<N)?lx:ltx)-=ei.Ny[y]*wi*log(p[y]);
       ((i<N)?w:wt)+=wi*((p.begin()+ei.y)!=me);
-      ((i<N)?wx:wtx)+=wi*(ei.Ny[me-p.begin()]==0.0&&(p.begin()+ei.y)!=me);}
+      ((i<N)?wx:wtx)+=wi*(ei.Ny[me-p.begin()]==0.0&&(p.begin()+ei.y)!=me);
+      }
     for(size_t i=0;i<I;++i){Z&x=z[i];
       if(x.k){double dl=(log(x.k)-log(x.q))/F,ddl=1.0;
         if(ssi!=0.0)for(int iter=0;iter<20&&ddl>1e-10;++iter,dl-=ddl)
 	  {double h=x.q*exp(dl*F);ddl=(h+(x.l+dl)*ssi-x.k)/(h*F+ssi);}
 	x.l+=dl;}}
-    if(v>1)cerr<<it<< ". "<<" KLQ:"<<z<< " " << p<<"\n";
+    if(v>1){cerr<<it<< ". "<<" KLQ:"<<z<< " " << p<<"\n";}
     if(TRN&&!qt){cerr<<it<<". "<<"pp: "<<exp(l/TRN)<<" er: "<<w/TRN<<" erx: " 
 		    << wx/TRN << " ppx: " << exp(lx/TRN);if(!TST)cerr<<endl;}
-    if(TST){cerr<<" "<<"tst-pp: "<<exp(lt/TST)<<" tst-er: "<<wt/TST
-	       <<" tst-erx: "<< wtx/TST<<" tst-ppx: "<<exp(ltx/TST)<<endl;}
-    } while(fabs(exp(l/TRN)-exp(old_l/TRN))>minBetter&&it++<maxIt&&N);
+    if(TST)
+    {
+      cerr<<" "<<"tst-pp: "<<exp(lt/TST)<<" tst-er: "<<wt/TST
+	       <<" tst-erx: "<< wtx/TST<<" tst-ppx: "<<exp(ltx/TST)<<endl;
+    }
+    } while(fabs(exp(l/TRN) - exp(old_l/TRN)) > minBetter && it++ < maxIt && N);
 
     if(N)
     {
