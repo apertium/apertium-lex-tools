@@ -33,11 +33,13 @@ using namespace std;
 void endProgram(char *name)
 {
   cout << basename(name) << ": process a bilingual stream with a lexical rule transducer" << endl;
-  cout << "USAGE: " << basename(name) << "[ -t | -d ] fst_file [input_file [output_file]]" << endl;
+  cout << "USAGE: " << basename(name) << "[ -t | -d | -m ] fst_file [input_file [output_file]]" << endl;
 #if HAVE_GETOPT_LONG
+  cout << "  -m, --max-ent:       run the rules using weights as lambdas" << endl; 
   cout << "  -t, --trace:         trace the rules which have been applied" << endl;
   cout << "  -d, --debug:         print out information about how the rules are run" << endl;
 #else
+  cout << "  -m:         run the rules using weights as lambdas" << endl;
   cout << "  -t:         trace the rules which have been applied" << endl;
   cout << "  -d:         print out information about how the rules are run" << endl;
 #endif
@@ -48,11 +50,13 @@ void endProgram(char *name)
 int main(int argc, char *argv[])
 {
   LRXProcessor lrxp;
+  bool useMaxEnt = false;
 
 #if HAVE_GETOPT_LONG
   static struct option long_options[]=
     {
       {"trace",        0, 0, 't'}
+      {"max-ent",      0, 0, 'm'}
       {"debug",        0, 0, 'd'}
     };
 #endif
@@ -61,9 +65,9 @@ int main(int argc, char *argv[])
   {
 #if HAVE_GETOPT_LONG
     int option_index;
-    int c = getopt_long(argc, argv, "td", long_options, &option_index);
+    int c = getopt_long(argc, argv, "mtd", long_options, &option_index);
 #else
-    int c = getopt(argc, argv, "td");
+    int c = getopt(argc, argv, "mtd");
 #endif
 
     if(c == -1)
@@ -73,6 +77,9 @@ int main(int argc, char *argv[])
 
     switch(c)
     {
+    case 'm':
+      useMaxEnt = true;
+      break;
     case 't':
       lrxp.setTraceMode(true);
       break;
@@ -149,8 +156,14 @@ int main(int argc, char *argv[])
 #endif
 
   lrxp.init();
-  lrxp.process(input, output);
-
+  if(useMaxEnt) 
+  {
+    lrxp.processME(input, output);
+  }
+  else
+  {
+    lrxp.process(input, output);
+  }
   fclose(input);
   fclose(output);
   return EXIT_SUCCESS;
