@@ -35,6 +35,16 @@ sl_tl_defaults = {};
 sl_tl = {};
 ngrams = {};
 
+meevents = {}; # events[slword][counter] = [feat, feat, feat];
+meoutcomes = {}; # meoutcomes[slword][counter] = tlword;
+event_counter = 0;
+
+features = {}; # features[(slword, ['a', 'list'], tlword)] = 3
+feature_counter = 0;
+
+indexes = {};
+trad_counter = {}; 
+
 for line in file(sys.argv[1]).readlines(): #{
 	if len(line) < 1: #{
 		continue;
@@ -45,11 +55,18 @@ for line in file(sys.argv[1]).readlines(): #{
 	if sl not in sl_tl: #{
 		sl_tl[sl] = [];
 	#}
+	if sl not in trad_counter: #{
+		trad_counter[sl] = 0;
+	#}
 	if line.count('@') > 0: #{
 		sl_tl_defaults[sl] = tl;
 		sl_tl[sl].append(tl);
+		indexes[(sl, tl)] = trad_counter[sl];
+		trad_counter[sl] = trad_counter[sl] + 1;
 	else: #{
 		sl_tl[sl].append(tl);
+		indexes[(sl, tl)] = trad_counter[sl];
+		trad_counter[sl] = trad_counter[sl] + 1;
 	#}
 #}
 
@@ -127,17 +144,47 @@ for line in file(sys.argv[2]).readlines(): #{
 						ngrams[slword][postgram][tlword] = ngrams[slword][postgram][tlword] + 1;
 						ngrams[slword][roundgram][tlword] = ngrams[slword][roundgram][tlword] + 1;
 					#}
+					#print ',' , len(ngrams[slword]);
+					if slword not in meevents: #{
+						meevents[slword] = {};
+					#}
+					if slword not in meoutcomes: #{
+						meoutcomes[slword] = {};
+					#}
+					if event_counter not in meevents: #{
+						meevents[slword][event_counter] = [];
+					#}
+					if event_counter not in meoutcomes: #{
+						meoutcomes[slword][event_counter] = '';
+					#}
+					for ni in ngrams[slword]: #{
+						if ni not in features: #{
+							feature_counter = feature_counter + 1;
+							features[ni] = feature_counter;
+						#}
+						meevents[slword][event_counter].append(features[ni]);
+						#meevents[slword][event_counter].append(feat);
+						meoutcomes[slword][event_counter] = tlword;
+						
+					#}
+#					for f in features: #{
+#						print >>sys.stderr, features[f] , f;
+#					#}
+
 				#}
 
 #				for j in range(0, MAX_NGRAMS): #{
 #					print cur_sl_row[i-j:i+1];
 #					print cur_sl_row[i:i+j];
 #				#}
+				#print ngrams[slword];
 			#}	
 			i = i + 1;
+
 		#}
 
 		cur_line = 0;
+		event_counter = event_counter + 1;
 		#print line;	
 		continue;
 	#}	
@@ -157,48 +204,25 @@ for line in file(sys.argv[2]).readlines(): #{
 	cur_line = cur_line + 1;
 #}
 
-for sl in ngrams: #{
-	sl_tl[sl] = set(sl_tl[sl]);
-	if len(sl_tl[sl]) < 2: #{
+for feature in features: #{
+	print >> sys.stderr, features[feature] , '\t' , feature;
+#}
+
+for slword in meevents: #{
+	if len(sl_tl[slword]) < 2: #{
 		continue;
 	#}
-	print len(sl_tl[sl]);
-
-	tl_num = {};
-	j = 0;
-	for tl in sl_tl[sl]: #{
-		tl_num[tl] = j;	
-		j = j + 1;
-	#}
-
-	for ngram in ngrams[sl]: #{
-		
-		if ngram.strip() == '': #{
-			continue;
-		#}
-		for tl in ngrams[sl][ngram]: #{
-			if tl not in sl_tl[sl]: #{
-				print >> sys.stderr, '!!!' , tl , ' not in ' , sl_tl[sl]; 
-				continue;
+	print '= ' + slword + ' ============================';
+	print len(sl_tl[slword]);
+	for event in meevents[slword]: #{
+		outline = str(indexes[(slword, meoutcomes[slword][event])]) + ' # ';
+		for j in range(0,  len(sl_tl[slword])): #{
+			for feature in meevents[slword][event]: #{
+				outline = outline + str(feature) + ':' + str(j) + ' ';
 			#}
-			event = '';
-			event = sl + ',' + tl + ' || ' + str(tl_num[tl]) + '  #  ';
-			for i in sl_tl[sl]: #{
-				newngram = '';
-				for w in ngram.split(' '): #{
-					if w == sl: #{
-						newngram = newngram + '_' + w + '=' + i;
-					else: #{
-						newngram = newngram + '_' + w;
-					#}
-				#}
-				event = event + newngram.strip() + '  #  ';
-				print >> sys.stderr, '??', sl , '|',  tl , '|', newngram ,'|', event;
-			#}	
-			for j in range(0, ngrams[sl][ngram][tl]): #{
-				print event;
-			#}
+			outline = outline + ' # '
 		#}
+		print outline;
 	#}
-	print '@@@@';
 #}
+
