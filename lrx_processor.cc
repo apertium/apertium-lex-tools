@@ -120,7 +120,7 @@ LRXProcessor::load(FILE *in)
 
     if(debugMode) 
     {
-      fwprintf(stderr, L"%S %d weight(%.4f)\n", sid.c_str(), record.id, record.pisu);
+      //fwprintf(stderr, L"%S %d weight(%.4f)\n", sid.c_str(), record.id, record.pisu);
     }
 
   }
@@ -885,6 +885,430 @@ LRXProcessor::process(FILE *input, FILE *output)
     {
       fwprintf(stdout, L"%d", spos);
     }
+  }
+
+  fwprintf(stdout, L"%S", blanks[pos].c_str());
+}
+
+void
+LRXProcessor::processME(FILE *input, FILE *output)
+{
+  bool isEscaped = false;
+
+  map<int, wstring > sl; // map of SL words
+  map<int, vector<wstring> > tl; // map of vectors of TL translations
+  map<int, wstring > blanks; // map of the superblanks
+
+  map<int, map<wstring, double> > scores; //
+
+  vector<State> alive_states_clean ;
+  vector<State> alive_states = alive_states_clean ;
+  alive_states.push_back(*initial_state);
+
+  while(!feof(input))
+  {
+    int val = fgetwc_unlocked(input);
+
+    // We're starting to read a new lexical form
+    if(val == L'^' && !isEscaped && outOfWord)
+    {
+      outOfWord = false;
+      continue;
+    }
+
+    // We've seen the surface form
+    if(val == L'/' && !isEscaped && !outOfWord)
+    {
+      // Read in target equivalences 
+      wstring trad = L"";
+      val = fgetwc_unlocked(input);
+      while(val != L'$')
+      {
+        if(val != L'$')
+        {
+          trad += static_cast<wchar_t>(val);
+        }
+        if(val == L'/')
+        {
+          tl[pos].push_back(trad.substr(0, trad.length()-1));
+          trad = L"";
+        }
+        val = fgetwc_unlocked(input);
+      }
+      tl[pos].push_back(trad);
+
+      if(debugMode)
+      {
+        for(vector<wstring>::iterator it = tl[pos].begin(); it != tl[pos].end(); it++)
+        {
+          fwprintf(stderr, L"trad[%d]: %S\n", pos, it->c_str());
+        }
+      }
+    }
+
+    if((feof(input) || val == L'$') && !isEscaped && !outOfWord)
+    {
+      if(debugMode)
+      {
+        fwprintf(stderr, L"[POS] %d: [sl %d ; tl %d ; bl %d]: %S\n", pos, sl[pos].size(), tl[pos].size(), blanks[pos].size(), sl[pos].c_str());
+      }
+      vector<State> new_state; // alive_states_new 
+
+      // \forall s \in A
+      for(vector<State>::const_iterator it = alive_states.begin(); it != alive_states.end(); it++)
+      {
+        State s = *it;
+        // \IF \exists c \in Q : \delta(s, sent[i]) = c
+        s.step(alphabet(L"<$>"));
+
+        // A \gets A \cup {c}
+        if(s.size() > 0) // If the current state has outgoing transitions, 
+                         // add it to the new alive states
+        {
+          new_state.push_back(s);
+        }
+        s.step(alphabet(L"<$>"));
+
+        // \IF c \in F
+        if(s.isFinal(anfinals))
+        {
+          // We've reached a final state, so we need to evaluate the rule we've matched
+          if(debugMode)
+          {
+            wstring out = s.filterFinals(anfinals, alphabet, escaped_chars);
+            fwprintf(stderr, L"    filter_finals: %S\n", out.c_str());
+          }
+
+          set<pair<wstring, vector<wstring> > > outpaths;
+          outpaths = s.filterFinalsLRX(anfinals, alphabet, escaped_chars, false, false, 0);
+
+          set<pair<wstring, vector<wstring> > >::iterator it;
+          for(it = outpaths.begin(); it != outpaths.end(); it++)
+          {
+            vector<State> reached;
+
+            vector<wstring> path = (*it).second;
+            wstring id = (*it).first;
+
+            int j = pos - (path.size() - 1);
+
+            if(debugMode) 
+            {
+              fwprintf(stderr, L"id:      %S: (lambda: %.5f)\n", id.c_str(), weights[id.c_str()]);
+            }
+            for(vector<wstring>::iterator it2 = path.begin(); it2 != path.end(); it2++)
+            {
+              if(debugMode) 
+              {
+                fwprintf(stderr, L"op:        %S\n", it2->c_str());
+              }
+              if(*it2 != LRX_PROCESSOR_TAG_SKIP)
+              {
+                if(scores[j].count(*it2) == 0)
+                {
+                  scores[j][*it2] = 0.0;
+                }
+                scores[j][*it2] += weights[id.c_str()];
+                if(debugMode) 
+                {
+                  fwprintf(stderr, L"#[%d]SCORE %.5f / %S\n", j, scores[j][*it2], it2->c_str());
+                }
+              }
+              j++;
+            }
+            //fwprintf(stderr, L"#SPAN[%d, %d]\n", (pos-path.size()), pos);
+          }
+        }
+      }
+      alive_states = new_state;
+      alive_states.push_back(*initial_state);
+
+      if(debugMode)
+      {
+        fwprintf(stderr, L"#CURRENT_ALIVE: %d\n", alive_states.size());
+      }
+
+      if(alive_states.size() == 1)
+      {
+        // If we have only a single alive state, it means no rules are 
+        // active, and we can flush the buffers.
+
+        if(debugMode)
+        {
+          fwprintf(stderr, L"FLUSH:\n");
+        }
+
+
+        // Here we actually apply the rules that we've matched
+
+        unsigned int spos = 0;
+        for(spos = 0; spos <= pos; spos++)
+        {
+          if(sl[spos] == L"")
+          {
+            continue;
+          }
+
+          fwprintf(stdout, L"%S^%S/", blanks[spos].c_str(), sl[spos].c_str());
+
+          vector<wstring>::iterator ti;
+          vector<wstring>::iterator penum = tl[spos].end(); penum--;
+
+          if(tl[spos].size() > 1)
+          {
+            //--
+            double l_max = 0.0;
+            wstring ti_max;
+            for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
+            {
+
+                map<wstring, double>::iterator si;
+                for(si = scores[spos].begin(); si != scores[spos].end(); si++) 
+                {
+                  if(debugMode) 
+                  {
+                    fwprintf(stderr, L">>> %d -> %S -> %.5f\n", spos, si->first.c_str(), si->second);
+                  }
+                  bool matched = false;
+                  matched = recognisePattern(*ti, si->first);
+                  if(si->second > l_max && matched) 
+                  { 
+                    l_max = si->second;
+                    ti_max = *ti;
+                  }
+                }
+            }
+
+            if(l_max > 0.0)  // If we actually got a winner
+            {
+              if(traceMode || debugMode)
+              {
+                //fwprintf(stderr, L"%d: %d: %S -> %S (%d)\n", lineno, spos, sl[spos].c_str(), ti->c_str(), scores[spos].size());
+                //fwprintf(stderr, L"MAX: %.5f = %S\n", l_max, ti_max.c_str());
+                fwprintf(stderr, L"%d:SELECT:%.5f:%S:%S\n", lineno, l_max, sl[spos].c_str(), ti_max.c_str());
+              }
+              fwprintf(stdout, L"%S", ti_max.c_str());
+            }
+            else
+            {
+              for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
+              {
+                fwprintf(stdout, L"%S", ti->c_str());
+                if(ti != penum)
+                {
+                  fwprintf(stdout, L"/");
+                }
+              }
+            }
+          }
+          else
+          {
+            for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
+            {
+              fwprintf(stdout, L"%S", ti->c_str());
+              if(ti != penum)
+              {
+                fwprintf(stdout, L"/");
+              }
+            }
+          }
+
+          fwprintf(stdout, L"$");
+          if(debugMode)
+          {
+            fwprintf(stdout, L"%d", spos);
+          }
+
+
+        }
+
+        pos = 0;
+        tl.clear();
+        sl.clear();
+        blanks.clear();
+        scores.clear();
+        //spans.clear();
+      }
+
+      pos++;
+      if(debugMode)
+      {
+        fwprintf(stderr, L"==> new pos: %d\n", pos);
+      }
+
+      outOfWord = true;
+      continue;
+    }
+
+    // We're reading a tag
+    if(val == L'<' && !isEscaped && !outOfWord)
+    {
+      wstring tag = L"";
+      tag = readFullBlock(input, L'<', L'>');
+      sl[pos] = sl[pos] + tag;
+      val = static_cast<int>(alphabet(tag));
+      if(val == 0)
+      {
+        val = static_cast<int>(alphabet(L"<ANY_TAG>"));
+      }
+      if(debugMode)
+      {
+        fwprintf(stderr, L"tag %S: %d\n", tag.c_str(), val);
+      }
+    }
+
+    if(!outOfWord)
+    {
+      if(debugMode)
+      {
+        fwprintf(stderr, L"outOfWord = false\n");
+      }
+
+      vector<State> new_state;
+      wstring res = L"";
+      for(vector<State>::const_iterator it = alive_states.begin(); it != alive_states.end(); it++)
+      {
+        res = L"";
+        State s = *it;
+        if(val < 0)
+        {
+          alphabet.getSymbol(res, val,  false);
+          if(debugMode) 
+          {
+            fwprintf(stderr, L"  step: %S\n", res.c_str());
+          }
+          s.step(val, alphabet(L"<ANY_TAG>"));
+        }
+        else
+        {
+          if(debugMode)
+          {
+            fwprintf(stderr, L"  step: %C\n", val);
+          }
+          s.step_case(val, alphabet(L"<ANY_CHAR>"), false);
+        }
+        if(s.size() > 0) // If the current state has outgoing transitions, add it to the new alive states
+        {
+          new_state.push_back(s);
+        }
+      }
+      if(debugMode)
+      {
+        fwprintf(stderr, L"new_state: %d\n", new_state.size());
+      }
+      alive_states = new_state;
+      alive_states.push_back(*initial_state);
+
+    }
+
+    // We're still reading a surface form
+    if(val > 0 && val != L'$' && !isEscaped && !outOfWord)
+    {
+      sl[pos] = sl[pos] + static_cast<wchar_t>(val);
+    }
+
+    // Reading a superblank
+    if(outOfWord)
+    {
+      if(!feof(input))
+      {
+        blanks[pos] = blanks[pos] + static_cast<wchar_t>(val);
+      }
+      if(debugMode)
+      {
+        //fwprintf(stderr, L"blanks[%d] = %S\n", pos, blanks[pos].c_str());
+      }
+    }
+
+    // Increment the current line number (for rule tracing)
+    if(val == L'\n')
+    {
+      lineno++;
+    }
+
+  }
+
+  // Here we actually apply the rules that we've matched
+
+  unsigned int spos = 0;
+  for(spos = 0; spos <= pos; spos++)
+  {
+    if(sl[spos] == L"")
+          {
+            continue;
+          }
+
+          fwprintf(stdout, L"%S^%S/", blanks[spos].c_str(), sl[spos].c_str());
+
+          vector<wstring>::iterator ti;
+          vector<wstring>::iterator penum = tl[spos].end(); penum--;
+
+          if(tl[spos].size() > 1)
+          {
+            //--
+            double l_max = 0.0;
+            wstring ti_max;
+            for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
+            {
+
+                map<wstring, double>::iterator si;
+                for(si = scores[spos].begin(); si != scores[spos].end(); si++) 
+                {
+                  if(debugMode) 
+                  {
+                    fwprintf(stderr, L">>> %d -> %S -> %.5f\n", spos, si->first.c_str(), si->second);
+                  }
+                  bool matched = false;
+                  matched = recognisePattern(*ti, si->first);
+                  if(si->second > l_max && matched) 
+                  { 
+                    l_max = si->second;
+                    ti_max = *ti;
+                  }
+                }
+            }
+
+            if(l_max > 0.0)  // If we actually got a winner
+            {
+              if(traceMode || debugMode)
+              {
+                //fwprintf(stderr, L"%d: %d: %S -> %S (%d)\n", lineno, spos, sl[spos].c_str(), ti->c_str(), scores[spos].size());
+                //fwprintf(stderr, L"MAX: %.5f = %S\n", l_max, ti_max.c_str());
+                fwprintf(stderr, L"%d:SELECT:%.5f:%S:%S\n", lineno, l_max, sl[spos].c_str(), ti_max.c_str());
+              }
+              fwprintf(stdout, L"%S", ti_max.c_str());
+            }
+            else
+            {
+              for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
+              {
+                fwprintf(stdout, L"%S", ti->c_str());
+                if(ti != penum)
+                {
+                  fwprintf(stdout, L"/");
+                }
+              }
+            }
+          }
+          else
+          {
+            for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
+            {
+              fwprintf(stdout, L"%S", ti->c_str());
+              if(ti != penum)
+              {
+                fwprintf(stdout, L"/");
+              }
+            }
+          }
+
+          fwprintf(stdout, L"$");
+          if(debugMode)
+          {
+            fwprintf(stdout, L"%d", spos);
+          }
+
+
   }
 
   fwprintf(stdout, L"%S", blanks[pos].c_str());

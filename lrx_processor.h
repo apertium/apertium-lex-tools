@@ -90,6 +90,7 @@ public:
   void init();
   void load(FILE *input);
   void process(FILE *input, FILE *output);
+  void processME(FILE *input, FILE *output);
 
 };
 
