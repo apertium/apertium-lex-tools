@@ -54,9 +54,9 @@ for line in open(sys.argv[1]).readlines(): #{
 	row = line.split(' ');
 	sl = row[1];
 	tl = row[2];
-        if sl not in trad_counter: #{
-                trad_counter[sl] = 0;
-        #}
+	if sl not in trad_counter: #{
+		trad_counter[sl] = 0;
+	#}
 	if line.count('@') > 0: #{
 		print(sl, tl, file=sys.stderr);
 		sl_tl_defaults[sl] = tl;
