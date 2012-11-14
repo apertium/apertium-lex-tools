@@ -221,11 +221,11 @@ while reading: #{
 			break;
 		#}
 		current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
-                event_counter = event_counter + 1;
+		event_counter = event_counter + 1;
 	#}
 #}
 
 for feature in features: #{
-        print(features[feature] , '\t' , feature, file=sys.stderr);
+	print(features[feature] , '\t' , feature, file=sys.stderr);
 #}
 
