@@ -548,6 +548,7 @@ LRXProcessor::process(FILE *input, FILE *output)
           if(tipus == LRX_PROCESSOR_TAG_SELECT && tl[spos].size() > 1) 
           {
             bool matched = true;
+            bool selected = false;
             for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
             {
               matched = recognisePattern(*ti, op);
@@ -558,7 +559,19 @@ LRXProcessor::process(FILE *input, FILE *output)
                   fwprintf(stderr, L"%d:SELECT%S:%S:%S\n", lineno, operations[spos].first.c_str(), sl[spos].c_str(), op.c_str());
                 }
                 fwprintf(stdout, L"%S", ti->c_str());
+                selected = true;
                 break;
+              }
+            }
+            if(!selected)
+            {
+              for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
+              {
+                fwprintf(stdout, L"%S", ti->c_str());
+                if(ti != penum)
+                {
+                  fwprintf(stdout, L"/");
+                }
               }
             }
           }
