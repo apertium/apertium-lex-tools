@@ -25,19 +25,10 @@ import sys, codecs, copy;
 #.[][56011 0].[] ^un<det><ind><sp>/un<det><ind><GD><ND>$ ^digarez<n><m><sg>/excuse<n><f><sg>$ ^da<pr>/à<pr>$ ^distreiñ<vblex><inf>/revenir<vblex><inf>$ ^war<pr>/sur<pr>$ ^e<det><pos><m><sp>/son<det><pos><GD><ND>$ ^doare<n><m><sg>/manière<n><f><sg>$ ^ober<vblex><inf>/faire<vblex><inf>$ ^.<sent>/.<sent>$^.<sent>/.<sent>$ 0.9917274061    |@|
 #.[][56011 1].[] ^un<det><ind><sp>/un<det><ind><GD><ND>$ ^digarez<n><m><sg>/occasion<n><f><sg>$ ^da<pr>/à<pr>$ ^distreiñ<vblex><inf>/revenir<vblex><inf>$ ^war<pr>/sur<pr>$ ^e<det><pos><m><sp>/son<det><pos><GD><ND>$ ^doare<n><m><sg>/manière<n><f><sg>$ ^ober<vblex><inf>/faire<vblex><inf>$ ^.<sent>/.<sent>$^.<sent>/.<sent>$       0.0082725939    ||
 
-#	 d) Crispiness threshold
-
 MAX_NGRAMS = 3; # Max = 5-grams
 
 cur_line = 0;
-crisphold = 3.0 ; # Default
-#only_max = True;
-only_max = False;
 
-if len(sys.argv) == 5: #{
-	crisphold = float(sys.argv[4]);
-	print('crisp:', crisphold, file=sys.stderr);
-#}
 
 sl_tl_defaults = {}; 
 sl_tl = {};
