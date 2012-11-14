@@ -189,7 +189,7 @@ while reading: #{
 					#}
 					meevents[sl][event_counter].append(features[ni]);
 					#meevents[sl][event_counter].append(feat);
-					meoutcomes[sl][event_counter] = tl;
+					meoutcomes[sl][event_counter] = (tl, frac_count);
 
 				#}
 				del ngrams;
@@ -198,14 +198,15 @@ while reading: #{
 					continue;
 				#}
 				for event in meevents[sl]: #{
-					outline = str(indexes[(sl, meoutcomes[sl][event])]) + ' # ';
+					outline = str(indexes[(sl, meoutcomes[sl][event][0])]) + ' $ ' ;
+					outline = outline + str(meoutcomes[sl][event][1]) + ' # ';
 					for j in range(0,  len(sl_tl[sl])): #{
 						for feature in meevents[sl][event]: #{
 							outline = outline + str(feature) + ':' + str(j) + ' ';
 						#}
 						outline = outline + ' # '
 					#}
-					print sl , '\t', len(sl_tl[sl]),'\t', outline;
+					print(sl , '\t', len(sl_tl[sl]),'\t', outline);
 				#}
 				del meevents;
 				del meoutcomes;
@@ -225,6 +226,6 @@ while reading: #{
 #}
 
 for feature in features: #{
-        print >> sys.stderr, features[feature] , '\t' , feature;
+        print(features[feature] , '\t' , feature, file=sys.stderr);
 #}
 
