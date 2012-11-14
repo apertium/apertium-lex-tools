@@ -103,6 +103,10 @@ for line in file(sys.argv[2]).readlines(): #{
 						print >>sys.stderr, 'WARNING: "' + slword + '" not in sl_tl_defaults, skipping';
 						continue;
 					#}
+					if (slword, tlword) not in indexes: #{
+						print >>sys.stderr, 'WARNING: pair (%s, %s) not found in index' % (slword, tlword);
+						continue;
+					#}
 #					if tlword !=  sl_tl_defaults[slword]: #{
 #						print >>sys.stderr, '+' , slword , sl_tl_defaults[slword] , tlword;
 #					else: #{
@@ -167,6 +171,26 @@ for line in file(sys.argv[2]).readlines(): #{
 						meoutcomes[slword][event_counter] = tlword;
 						
 					#}
+					del ngrams;
+					ngrams = {};
+					if len(sl_tl[slword]) < 2: #{
+						continue;
+					#}
+					for event in meevents[slword]: #{
+						outline = str(indexes[(slword, meoutcomes[slword][event])]) + ' # ';
+						for j in range(0,  len(sl_tl[slword])): #{
+							for feature in meevents[slword][event]: #{
+								outline = outline + str(feature) + ':' + str(j) + ' ';
+							#}
+							outline = outline + ' # '
+						#}
+						print slword , '\t', len(sl_tl[slword]),'\t', outline;
+					#}
+					del meevents;
+					del meoutcomes;
+					meevents = {};
+					meoutcomes = {};
+
 #					for f in features: #{
 #						print >>sys.stderr, features[f] , f;
 #					#}
@@ -208,12 +232,12 @@ for feature in features: #{
 	print >> sys.stderr, features[feature] , '\t' , feature;
 #}
 
+sys.exit(-1);
+
 for slword in meevents: #{
 	if len(sl_tl[slword]) < 2: #{
 		continue;
 	#}
-	print '= ' + slword + ' ============================';
-	print len(sl_tl[slword]);
 	for event in meevents[slword]: #{
 		outline = str(indexes[(slword, meoutcomes[slword][event])]) + ' # ';
 		for j in range(0,  len(sl_tl[slword])): #{
@@ -222,7 +246,6 @@ for slword in meevents: #{
 			#}
 			outline = outline + ' # '
 		#}
-		print outline;
+		print slword , '\t', len(sl_tl[slword]),'\t', outline;
 	#}
 #}
-
