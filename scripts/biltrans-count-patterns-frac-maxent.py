@@ -48,6 +48,7 @@ trad_counter = {};
 # First read in the frequency defaults
 
 for line in open(sys.argv[1]).readlines(): #{
+	line = line.strip();
 	if len(line) < 1: #{
 		continue;
 	#}
@@ -192,11 +193,15 @@ while reading: #{
 					#}
 					meevents[sl][event_counter].append(features[ni]);
 					#meevents[sl][event_counter].append(feat);
-					meoutcomes[sl][event_counter] = (tl, frac_count);
+					#meoutcomes[sl][event_counter] = (tl, frac_count);
+					meoutcomes[sl][event_counter] = (tl, int(frac_count * 10000));
 
 				#}
 				del ngrams;
 				ngrams = {};
+				if sl not in sl_tl:  #{
+					continue;
+				#}
 				if len(sl_tl[sl]) < 2: #{
 					continue;
 				#}
