@@ -31,8 +31,9 @@ MAX_NGRAMS = 3; # Max = 5-grams
 
 cur_line = 0;
 crisphold = 3.0 ; # Default
-#only_max = True;
-only_max = False;
+only_max = True;
+#only_max = False;
+cache_counts = open('/tmp/cache_counts.log', 'w+');
 
 if len(sys.argv) == 5: #{
 	crisphold = float(sys.argv[4]);
@@ -52,24 +53,35 @@ for line in open(sys.argv[1]).readlines(): #{
 	row = line.split(' ');
 	sl = row[1];
 	tl = row[2];
+	fr = float(row[0]);
+	if line.count('@') and fr == 0.0: #{
+		print('!!! Prolly something went wrong here, the default has a freq of 0.0', file=sys.stderr);
+		print('    %s => %s = %.10f' % (sl, tl, fr), file=sys.stderr);
+	#}
 	if line.count('@') > 0: #{
-		print(sl, tl, file=sys.stderr);
+		print('default:', sl, tl, file=sys.stderr);
 		sl_tl_defaults[sl] = tl;
 	else: #{
 		sl_tl[sl] = tl;
 	#}
+	
 #}
+
+print('Reading...', file=sys.stderr);
+sys.stderr.flush();
 
 am_file = open(sys.argv[2]); # File with ambiguous biltrans output
 dm_file = open(sys.argv[3]); # File with disambiguated biltrans output
 reading = True;
-
 
 current_am_line_id = -1;
 current_dm_line_id = -1;
 
 dm_line = dm_file.readline();
 current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
+
+am_counter = 0;
+dm_counter = 0;
 
 
 while reading: #{
@@ -82,6 +94,15 @@ while reading: #{
 
 	current_am_line_id = int(am_line.split('\t')[0]);
 
+#	# to skip lines in the frac corpus if we have a sub-corpus
+#	if current_dm_line_id != current_am_line_id: #{
+#		print('line_id_mismatch: %d != %d' % (current_am_line_id, current_dm_line_id), file=sys.stderr);
+#		while current_dm_line_id != current_am_line_id: #{
+#			dm_line = dm_file.readline();
+#			current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);       
+#			print('skipping %d ...' % (current_dm_line_id), file=sys.stderr);
+#		#}
+#	#}
 	while current_dm_line_id == current_am_line_id: #{
 
 
@@ -153,10 +174,15 @@ while reading: #{
 					if tl not in ngrams[sl][roundgram]: #{
 						ngrams[sl][roundgram][tl] = 0.0;
 					#}
-	
 					ngrams[sl][pregram][tl] = ngrams[sl][pregram][tl] + frac_count;
 					ngrams[sl][postgram][tl] = ngrams[sl][postgram][tl] + frac_count;
 					ngrams[sl][roundgram][tl] = ngrams[sl][roundgram][tl] + frac_count;
+	
+#					print('=> %s\t[%.10f] %s' % (tl, ngrams[sl][pregram][tl], pregram), file=sys.stderr);
+#					print('=> %s\t[%.10f] %s' % (tl, ngrams[sl][roundgram][tl], roundgram), file=sys.stderr);
+#					print('=> %s\t[%.10f] %s' % (tl, ngrams[sl][postgram][tl], postgram), file=sys.stderr);
+	
+
 				#}
 			#}
 		#}
@@ -168,8 +194,27 @@ while reading: #{
 		#}
 		current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
 
+		dm_counter += 1;
+	#}
+	am_counter += 1;
+
+	if am_counter % 10000 == 0: #{
+		print('=> %d SL and %d TL lines [id: %d] [ngrams: %d].' % (am_counter, dm_counter, current_am_line_id, len(ngrams)), file=sys.stderr);
+		sys.stderr.flush();
 	#}
 #}
+
+print('Caching counts...', file=sys.stderr);
+for sl in ngrams: #{
+
+	for ngram in ngrams[sl]: #{
+
+		for tl in ngrams[sl][ngram]: #{
+			print('%.10f\t%s\t%s\t%s' % (ngrams[sl][ngram][tl], ngram, sl, tl), file=cache_counts);		
+		#}
+	#}
+#}
+print('\n', file=sys.stderr);
 
 for sl in ngrams: #{
 
@@ -205,12 +250,11 @@ for sl in ngrams: #{
 		if only_max == True: #{
 			crispiness = 0.0;
 			default = sl_tl_defaults[sl];	
-			if default == max_tl: #{
-				print('default=max_tl', default, max_tl, '\t', ngram, file=sys.stderr);
-			else:#{
-				print('default!=max_tl', default, max_tl, '\t', ngram, file=sys.stderr);
-
-			#}
+#			if default == max_tl: #{
+#				print('default=max_tl', default, max_tl, '\t', ngram, file=sys.stderr);
+#			else:#{
+#				print('default!=max_tl', default, max_tl, '\t', ngram, file=sys.stderr);
+#			#}
 			alt_crisp = float(ngrams[sl][ngram][max_tl]) / float(total);
 			def_crisp = 1.0;
 			if default in ngrams[sl][ngram]: #{
