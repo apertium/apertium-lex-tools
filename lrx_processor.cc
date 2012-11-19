@@ -191,10 +191,12 @@ LRXProcessor::recognisePattern(const wstring lu, const wstring op)
   int val = 0;
   for(wstring::const_iterator it = lu.begin(); it != lu.end(); it++)
   {
+/*
     if(debugMode)
     {
       fwprintf(stderr, L"alive: %d\n", cur.size());
     }
+*/
     if(cur.size() < 1)  // I think that any time we have 0 alive states, 
                         // we can say that the string is unrecognised
     {
@@ -215,11 +217,13 @@ LRXProcessor::recognisePattern(const wstring lu, const wstring op)
       {
         val = static_cast<int>(alphabet(L"<ANY_TAG>"));
       }
+/*
       if(debugMode)
       {
         fwprintf(stderr, L":: tag %S: %d\n", tag.c_str(), val);
         fwprintf(stderr, L"  step: %S\n", tag.c_str());
       }
+*/
       cur.step(val, alphabet(L"<ANY_TAG>"));
       readingTag = false;
       continue;
@@ -231,20 +235,23 @@ LRXProcessor::recognisePattern(const wstring lu, const wstring op)
     else
     {
       int val = static_cast<int>(*it);
+/*
       if(debugMode)
       {
         fwprintf(stderr, L"  step: %C\n", val);
       }
+*/
       //cur.step(val, a(L"<ANY_CHAR>"));
       cur.step(val);
     }
   }
 
+/*
   if(debugMode)
   {
     fwprintf(stderr, L">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
   }
-
+*/
   if(cur.isFinal(end_states))
   {
     return true;
@@ -968,6 +975,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
       vector<State> new_state; // alive_states_new 
 
       // \forall s \in A
+      set<wstring> seen_ids;
       for(vector<State>::const_iterator it = alive_states.begin(); it != alive_states.end(); it++)
       {
         State s = *it;
@@ -1002,6 +1010,12 @@ LRXProcessor::processME(FILE *input, FILE *output)
 
             vector<wstring> path = (*it).second;
             wstring id = (*it).first;
+ 
+            if(seen_ids.find(id) != seen_ids.end()) 
+            {
+              continue;
+            }
+            seen_ids.insert(id);
 
             int j = pos - (path.size() - 1);
 
@@ -1038,8 +1052,15 @@ LRXProcessor::processME(FILE *input, FILE *output)
 
       if(debugMode)
       {
+        fwprintf(stderr, L"seen:");
+        for(set<wstring>::iterator it = seen_ids.begin(); it != seen_ids.end(); it++) 
+        {
+          fwprintf(stderr, L" %S ", it->c_str());
+        }
+        fwprintf(stderr, L"\n");
         fwprintf(stderr, L"#CURRENT_ALIVE: %d\n", alive_states.size());
       }
+      seen_ids.clear();
 
       if(alive_states.size() == 1)
       {
