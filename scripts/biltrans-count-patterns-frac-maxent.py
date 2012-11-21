@@ -2,7 +2,7 @@
 # coding=utf-8
 # -*- encoding: utf-8 -*-
 
-import sys, codecs, copy;
+import sys, codecs, copy, math;
 
 # Input:
 #	a) Frequency lexicon
@@ -44,6 +44,9 @@ feature_counter = 0;
 indexes = {};
 trad_counter = {};
 
+am_counter = 0;
+dm_counter = 0;
+
 
 # First read in the frequency defaults
 
@@ -58,15 +61,29 @@ for line in open(sys.argv[1]).readlines(): #{
 	if sl not in trad_counter: #{
 		trad_counter[sl] = 0;
 	#}
+	if sl not in sl_tl: #{
+		sl_tl[sl] = [];
+	#}
 	if line.count('@') > 0: #{
-		print(sl, tl, file=sys.stderr);
 		sl_tl_defaults[sl] = tl;
+		sl_tl[sl].append(tl);
 		indexes[(sl, tl)] = trad_counter[sl];
 		trad_counter[sl] = trad_counter[sl] + 1;
 	else: #{
-		sl_tl[sl] = tl;
+		sl_tl[sl].append(tl);
 		indexes[(sl, tl)] = trad_counter[sl];
 		trad_counter[sl] = trad_counter[sl] + 1;
+	#}
+#}
+
+for sl in sl_tl: #{
+	sl_tl[sl] = set(sl_tl[sl]);
+	for tl in sl_tl[sl]: #{
+		if tl == sl_tl_defaults[sl]: #{
+			print('-', trad_counter[sl], indexes[(sl, tl)], sl, tl + '*', file=sys.stderr);
+		else: #{
+			print('-', trad_counter[sl], indexes[(sl, tl)], sl, tl, file=sys.stderr);
+		#}
 	#}
 #}
 
@@ -122,7 +139,19 @@ while reading: #{
 			cur_sl_row.append(sl);
 		#}
 
-		frac_count = float(dm_line.split('\t')[2]);
+		#frac_count = float(dm_line.split('\t')[2]);
+
+		frac_count = 0.0;
+		s_fc = dm_line.split('\t')[2].strip();
+		if s_fc == '' or len(s_fc) == 0: #{
+			print('%d %d :: %d %d :: Frac count is not floatable' % (am_counter, dm_counter, current_am_line_id, current_dm_line_id), file=sys.stderr);
+		#}
+		frac_count = float(s_fc);
+		if math.isnan(frac_count): #{ 
+			print('%d %d :: %d %d :: Frac count is not a number' % (am_counter, dm_counter, current_am_line_id, current_dm_line_id), file=sys.stderr);
+			frac_count = 0.0;
+		#}
+
 	
 		limit = len(am_row);
 		for i in range(0, limit): #{
@@ -230,7 +259,12 @@ while reading: #{
 		#}
 		current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
 		event_counter = event_counter + 1;
+
+		dm_counter += 1;
+
 	#}
+	am_counter += 1;
+
 #}
 
 for feature in features: #{
