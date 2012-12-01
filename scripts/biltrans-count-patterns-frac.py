@@ -105,7 +105,6 @@ while reading: #{
 #	#}
 	while current_dm_line_id == current_am_line_id: #{
 
-
 		if am_line.count('$ ^') != dm_line.count('$ ^'): #{
 			print('Mismatch in number of LUs between analysis and training', file=sys.stderr);
 			print('\t' + am_line, file=sys.stderr);
