@@ -203,6 +203,9 @@ while lines: #{
 		#  the reference, it should not be considered ambiguous as both are
 		#  valid.
 		if len(lu_src[i][1]) > 1 and len(lu_ref[i][1]) != len(lu_src[i][1]) and lu_ref[i][1] != lu_src[i][1]: #{
+#			>> 2 3 station<n><sg> [u'station<n><sg>'] +++ [u'station<n><sg>', u'season<n><sg>', u'ski resort<n><sg>']
+#			XX station<n><sg> XX  [u'station<n><sg>']
+
 			num_ambig_lus = num_ambig_lus + 1;
 			if debug:
 				print('>>' , len(lu_tst[i][1]) , len(lu_src[i][1]) ,  lu_tst[i][1][0] , lu_ref[i][1] , '+++' , lu_src[i][1]);
@@ -231,6 +234,10 @@ while lines: #{
 	total_fallos = total_fallos + num_fallos;
 #}
 
+if total_fallos == 0 or total_ambig_lus == 0: #{
+	print('what: ' , total_fallos ,total_ambig_lus);
+	print("Check you haven't tried to use the source as a reference");
+#}
 err = float(total_fallos)/float(total_ambig_lus)*100;
 errh = str(err).split('.')[0];
 errt = ''.join(str(err).split('.')[1][0:1]);
