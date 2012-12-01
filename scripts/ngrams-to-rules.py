@@ -27,8 +27,8 @@ print('<rules>');
 lineno = 1;
 ruleno = 0;
 for line in infile.readlines(): #{
-#	print '\n';
-#	print line
+#	print('\n';
+#	print(line
 	if len(line) < 2: #{
 		continue;
 	#}

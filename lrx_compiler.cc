@@ -383,7 +383,7 @@ LRXCompiler::procMatch()
         {
           fwprintf(stderr, L"        tag: %S\n", tag.c_str());
         }
-        if(tag == L"*")
+        if(tag == L"<*>")
         {
           currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"), 0), currentState);
         }
@@ -520,7 +520,7 @@ LRXCompiler::procSelect()
         {
           fwprintf(stderr, L"        tag: %S\n", tag.c_str());
         }
-        if(tag == L"*")
+        if(tag == L"<*>")
         {
           currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_TAG>")), currentState);
           localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"),0), localCurrentState);
@@ -633,7 +633,7 @@ LRXCompiler::procRemove()
         {
           fwprintf(stderr, L"        tag: %S\n", tag.c_str());
         }
-        if(tag == L"*")
+        if(tag == L"<*>")
         {
           currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_TAG>")), currentState);
           localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"),0), localCurrentState);

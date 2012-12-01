@@ -70,7 +70,7 @@ for line in file(sys.argv[1]).readlines(): #{
 					#}
 					sl_tl[slword][tlword] = sl_tl[slword][tlword] + 1;
 
-#					print '+' , slword , tlword , sl_tl[slword][tlword];
+					print '+' , slword , tlword , sl_tl[slword][tlword];
 				#}
 
 #				for j in range(0, MAX_NGRAMS): #{
