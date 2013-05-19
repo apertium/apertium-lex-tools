@@ -1,0 +1,1 @@
+^eskualde<n>/región<n><f><ND>/comarca<n><f><ND>$ ^a<det><art><sg>/el<det><def><GD><sg>$ ^*zeharo/*zeharo$ ^menderatu<vblex><pp>/someter<vblex><pp>/dominar<vblex><pp>/tener dominio<vblex><pp>$ ^ukan<vbsint><pii><NR_HU><NK_HK>/tener<vblex><pii><NR_HU><NK_HK>$ ^Israel<np><loc>/Israel<np><loc>$ ^k<post>/$ ^eta<cnjcoo>/y<cnjcoo>$ ^.<sent>/.<sent>$

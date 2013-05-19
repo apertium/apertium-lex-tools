@@ -1,0 +1,5 @@
+<rules>
+  <rule>
+    <match lemma="մարդ" tags="n.aa.*.*.*.px1sg"><select lemma="husband" tags="n.*"/></match>
+  </rule>
+</rules>

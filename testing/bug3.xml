@@ -1,0 +1,5 @@
+<rules>
+  <rule><match lemma="цел" tags="n.f.*"><select lemma="target" tags="n.*"/></match></rule>
+  <rule><match lemma="цел"><select lemma="entire"/></match></rule>
+
+</rules>
