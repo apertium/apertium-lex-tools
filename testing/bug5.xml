@@ -1,0 +1,13 @@
+<rules>
+  <rule weight="1.0">
+    <match lemma="el"/>
+    <match lemma="estació" tags="n.f.*"><select lemma="season" tags="n.*"/></match>
+    <match tags="adv"/>
+    <or>
+      <match lemma="sec"/>
+      <match lemma="plujós"/>
+      <match lemma="humit"/>
+    </or>
+  </rule>
+
+</rules>
