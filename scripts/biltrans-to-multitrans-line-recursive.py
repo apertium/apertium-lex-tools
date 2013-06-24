@@ -74,7 +74,7 @@ def process(sentence, start, out): #{
 	global t
 	global lineno
 	if start >= len(sentence): #{
-		sys.stdout.write ('.[][' + str(lineno) + " " + str(t) + '][].	')
+		sys.stdout.write ('.[][' + str(lineno) + " " + str(t) + '].[]\t')
 		for s in out:
 			sys.stdout.write("^" + s + "$ ");
 		print ''

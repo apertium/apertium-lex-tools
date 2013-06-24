@@ -2,7 +2,7 @@
 # coding=utf-8
 # -*- encoding: utf-8 -*-
 
-import sys, codecs, copy, re;
+import sys, codecs, copy;
 
 # Input:
 #        a) Frequency lexicon

@@ -37,7 +37,7 @@ for line in open(ldf).readlines(): #{
 	ngid = int(row[1].split(':')[0]);
 	ngram = ngrams[ngid];
 
-	trad = row[1].split(':')[1];
+	trad = row[1].split(':')[0];
 	token = row[0]
 	print(token, '\t', l, '\t', trad, '\t', ngram);
 #}

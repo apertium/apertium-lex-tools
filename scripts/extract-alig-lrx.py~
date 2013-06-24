@@ -8,7 +8,7 @@ d = open(sys.argv[1]);
 
 print('<rules>');
 for line in d.readlines(): #{
-#	print (line)
+	print (line)
 	sys.stdout.flush();
 	if line[-2] == '@': #{
 		row = line.split(' ');
