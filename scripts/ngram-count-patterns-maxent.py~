@@ -177,7 +177,7 @@ for line in file(sys.argv[2]).readlines(): #{
 						continue;
 					#}
 					for event in meevents[slword]: #{
-						outline = str(indexes[(slword, meoutcomes[slword][event])]) + ' # ';
+						outline = str(indexes[(slword, meoutcomes[slword][event])]) + ' $ ';
 						for j in range(0,  len(sl_tl[slword])): #{
 							for feature in meevents[slword][event]: #{
 								outline = outline + str(feature) + ':' + str(j) + ' ';

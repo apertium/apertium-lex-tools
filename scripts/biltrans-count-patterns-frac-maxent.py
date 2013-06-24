@@ -2,7 +2,7 @@
 # coding=utf-8
 # -*- encoding: utf-8 -*-
 
-import sys, codecs, copy, math;
+import sys, codecs, copy, math, re, common;
 
 # Input:
 #	a) Frequency lexicon
@@ -26,9 +26,7 @@ import sys, codecs, copy, math;
 #.[][56011 1].[] ^un<det><ind><sp>/un<det><ind><GD><ND>$ ^digarez<n><m><sg>/occasion<n><f><sg>$ ^da<pr>/à<pr>$ ^distreiñ<vblex><inf>/revenir<vblex><inf>$ ^war<pr>/sur<pr>$ ^e<det><pos><m><sp>/son<det><pos><GD><ND>$ ^doare<n><m><sg>/manière<n><f><sg>$ ^ober<vblex><inf>/faire<vblex><inf>$ ^.<sent>/.<sent>$^.<sent>/.<sent>$       0.0082725939    ||
 
 MAX_NGRAMS = 3; # Max = 5-grams
-
 cur_line = 0;
-
 
 sl_tl_defaults = {}; 
 sl_tl = {};
@@ -76,13 +74,13 @@ for line in open(sys.argv[1]).readlines(): #{
 	#}
 #}
 
-for sl in sl_tl: #{
-	sl_tl[sl] = set(sl_tl[sl]);
-	for tl in sl_tl[sl]: #{
-		if tl == sl_tl_defaults[sl]: #{
-			print('-', trad_counter[sl], indexes[(sl, tl)], sl, tl + '*', file=sys.stderr);
-		else: #{
-			print('-', trad_counter[sl], indexes[(sl, tl)], sl, tl, file=sys.stderr);
+#for sl in sl_tl: #{
+#	sl_tl[sl] = set(sl_tl[sl]);
+#	for tl in sl_tl[sl]: #{
+#		if tl == sl_tl_defaults[sl]: #{
+#			print('-', trad_counter[sl], indexes[(sl, tl)], sl, tl + '*', file=sys.stderr);
+#		else: #{
+#			print('-', trad_counter[sl], indexes[(sl, tl)], sl, tl, file=sys.stderr);
 		#}
 	#}
 #}
@@ -106,19 +104,23 @@ while reading: #{
 		continue;
 	#}
 
-	current_am_line_id = int(am_line.split('\t')[0]);
+	current_am_line_id += 1
 
 	# to skip lines in the frac corpus if we have a sub-corpus
-	if current_dm_line_id != current_am_line_id: #{
-		while current_dm_line_id != current_am_line_id: #{
-			dm_line = dm_file.readline();
-			current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
+#	if current_dm_line_id != current_am_line_id: #{
+#		while current_dm_line_id != current_am_line_id: #{
+#			dm_line = dm_file.readline();
+#			try:
+#				current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
+#			except:
+#				break
+
 		#}
 	#}
 
 	while current_dm_line_id == current_am_line_id: #{
 
-		if am_line.count('$ ^') != dm_line.count('$ ^'): #{
+		if len(rsep.findall(am_line)) != len(rsep.findall(dm_line)): #{
 			print('Mismatch in number of LUs between analysis and training', file=sys.stderr);
 			print('\t' + am_line, file=sys.stderr);
 			print('\t' + dm_line, file=sys.stderr);
@@ -126,9 +128,10 @@ while reading: #{
 			continue;
 		#}
 	
-	
-		am_row = am_line.split('\t')[1].replace('$^', '$ ^')[1:-1].split('$ ^');
-		dm_row = dm_line.split('\t')[1].replace('$^', '$ ^')[1:-1].split('$ ^');
+		
+		am_row = common.tokenize_biltrans_line(am_line);
+		dm_row = common.tokenize_biltrans_line(dm_line);
+
 		#print(dm_row, file=sys.stderr)
 		cur_sl_row = [];
 		for lu in am_row: #{
@@ -140,17 +143,24 @@ while reading: #{
 		#}
 
 		#frac_count = float(dm_line.split('\t')[2]);
-
-		frac_count = 0.0;
-		s_fc = dm_line.split('\t')[2].strip();
-		if s_fc == '' or len(s_fc) == 0: #{
-			print('%d %d :: %d %d :: Frac count is not floatable' % (am_counter, dm_counter, current_am_line_id, current_dm_line_id), file=sys.stderr);
-		#}
-		frac_count = float(s_fc);
-		if math.isnan(frac_count): #{ 
-			print('%d %d :: %d %d :: Frac count is not a number' % (am_counter, dm_counter, current_am_line_id, current_dm_line_id), file=sys.stderr);
+		try:
 			frac_count = 0.0;
-		#}
+			s_fc = dm_line.split('\t')[2].strip();
+			if s_fc == '' or len(s_fc) == 0: #{
+				break;
+				print('%d %d :: %d %d :: Frac count is not floatable' % (am_counter, dm_counter, current_am_line_id, current_dm_line_id), file=sys.stderr);
+			#}
+
+			frac_count = float(s_fc);
+		
+			if math.isnan(frac_count): #{ 
+				break;
+				print('%d %d :: %d %d :: Frac count is not a number' % (am_counter, dm_counter, current_am_line_id, current_dm_line_id), file=sys.stderr);
+
+				frac_count = 0.0;
+			#}
+		except:
+			pass
 
 	
 		limit = len(am_row);
@@ -234,14 +244,15 @@ while reading: #{
 				if len(sl_tl[sl]) < 2: #{
 					continue;
 				#}
+
 				for event in meevents[sl]: #{
 					outline = str(indexes[(sl, meoutcomes[sl][event][0])]) + ' $ ' ;
-					outline = outline + str(meoutcomes[sl][event][1]) + ' # ';
+					outline = outline + str(meoutcomes[sl][event][1]) + '  #  ';
 					for j in range(0,  len(sl_tl[sl])): #{
 						for feature in meevents[sl][event]: #{
 							outline = outline + str(feature) + ':' + str(j) + ' ';
 						#}
-						outline = outline + ' # '
+						outline = outline + ' #  '
 					#}
 					print(sl , '\t', len(sl_tl[sl]),'\t', outline);
 				#}
@@ -257,6 +268,7 @@ while reading: #{
 			reading = False;
 			break;
 		#}
+
 		current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
 		event_counter = event_counter + 1;
 

@@ -179,6 +179,7 @@ while reading: #{
 					if tl not in ngrams[sl][roundgram]: #{
 						ngrams[sl][roundgram][tl] = 0.0;
 					#}
+					print(tl);
 					ngrams[sl][pregram][tl] = ngrams[sl][pregram][tl] + frac_count;
 					ngrams[sl][postgram][tl] = ngrams[sl][postgram][tl] + frac_count;
 					ngrams[sl][roundgram][tl] = ngrams[sl][roundgram][tl] + frac_count;

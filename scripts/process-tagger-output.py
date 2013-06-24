@@ -1252,7 +1252,8 @@ def in_table(tags, table):
 				table[tags]=table[shorter]; # cache it
 				return table[shorter];
 	print >>sys.stderr, tags
-	raise Exception("Unknown tagging!");
+	return tags
+	# raise Exception("Unknown tagging!");
 			
 	
 
@@ -1270,6 +1271,8 @@ elif sys.argv[1] == 'es': #{
 	table = es_table;
 elif sys.argv[1] == 'mk': #{
 	table = mk_table;
+elif sys.argv[1] == 'sh': #{
+	table = sh_table;
 elif sys.argv[1] == 'sme': #{
 	table = sme_table;
 elif sys.argv[1] == 'nob': #{

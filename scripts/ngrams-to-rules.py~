@@ -43,7 +43,7 @@ for line in infile.readlines(): #{
 		row.insert(0, '');
 
 #	tipus = row[0].split(' ')[0];
-	weight = row[0].split(' ')[1];
+	weight = row[0].split(' ')[0];
 	sl = row[1].strip().lower();
 	tl = row[3];
 	tl_lema = tl.split('<')[0].lower();
