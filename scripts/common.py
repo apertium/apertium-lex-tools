@@ -103,10 +103,11 @@ def trim_tags(sl, tls):
 		if len(tl[1]) > 0:
 			new_tl[1].append(tl[1][0]);
 			
-		for i in range(1, len(tls)):
+		for i in range(1, len(tl[1])):
 			if tl[1][i] not in tag_intersection:
 				new_tl[1].append(tl[1][i])
-			
+		
+		new_tl = new_tl[0] + '<' + '><'.join(new_tl[1]) + '>';
 		new_tls.append(new_tl);
 
 	flag_all = True;
@@ -116,7 +117,8 @@ def trim_tags(sl, tls):
 		tag = sl[1][i];
 		if tag not in tag_intersection:
 			new_sl[1].append(tag)
-				
+			
+	new_sl = new_sl[0] + '<' + '><'.join(new_sl[1]) + '>';
 
 	return (new_sl, new_tls);
 		
@@ -125,12 +127,8 @@ def parse_token(ptr, line):
 	(ptr, sl) = parse_sl(ptr, line);
 	(ptr, tls) = parse_tls(ptr+1, line);
 	(sl, tls) = trim_tags(sl, tls);
-	print sl[0] + ' ' + ' '.join(sl[1])
-	for tl in tls:
-		print '\t' + tl[0] + ' ' + ' '.join(tl[1])
-
-
-	return (ptr, sl);
+	
+	return (ptr, sl, tls);
 		
 
 def tokenize_biltrans_line(line):
@@ -140,8 +138,8 @@ def tokenize_biltrans_line(line):
 	for ptr in range(0, len(line)):
 		c = line[ptr];
 		if c == '^' and not escaped:
-			(ptr, token) = parse_token(ptr+1, line)
-			out.append(token);
+			(ptr, sl, tls) = parse_token(ptr+1, line)
+			out.append((sl, tls));
 		elif c == '\\':
 			escaped = True;
 		elif escaped:

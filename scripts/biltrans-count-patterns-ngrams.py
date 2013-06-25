@@ -149,15 +149,6 @@ while reading: #{
 			continue;
 		#}
 
-		#print(dm_row, file=sys.stderr)
-		cur_sl_row = [];
-		for lu in am_row: #{
-			sl = lu.split('/')[0];
-			if sl.count('><') > 0: #{
-				sl = sl.split('><')[0] + '>';
-			#}
-			cur_sl_row.append(sl);
-		#}
 
 		frac_count = 0.0;
 		s_fc = dm_line.split('\t')[2].strip();
@@ -174,24 +165,13 @@ while reading: #{
 		#}
 
 		limit = len(am_row);
+		cur_sl_row = [x[0] for x in am_row];
+
 		for i in range(0, limit): #{
-			if am_row[i].count('/') > 1: #{
-				#print(am_row[i] , dm_row[i]); 
-				sl = am_row[i].split('/')[0].replace(' ', '~');
-				tl = dm_row[i].split('/')[1].replace(' ', '~');
-				if sl.count('><') > 0: #{
-					sl = sl.split('><')[0] + '>';
-				#}
-				if tl.count('><') > 0: #{
-					tl = tl.split('><')[0] + '>';
-				#}
-	
-#				if tl !=  sl_tl_defaults[sl]: #{
-#					print('+' , sl , sl_tl_defaults[sl] , tl, file=sys.stderr);
-#				else: #{
-#					print('-' , sl , sl_tl_defaults[sl] , tl, file=sys.stderr);
-#				#}
-	
+			if len(am_row[i][1]) > 0: #{
+				
+				sl = am_row[i][0]
+				tl = dm_row[i][1][0]
 				for j in range(1, MAX_NGRAMS): #{
 					pregram = ' '.join(cur_sl_row[i-j:i+1]);
 					postgram = ' '.join(cur_sl_row[i:i+j+1]);
