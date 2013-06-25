@@ -3,6 +3,7 @@
 # -*- encoding: utf-8 -*-
 
 import sys, codecs, copy, re
+import common
 
 # Input:
 #        a) Biltrans output
@@ -38,8 +39,10 @@ while reading: #{
 #	current_am_line_id = int(am_line.split('\t')[0]);
 #	print (str(current_am_line_id) + " " + str(current_dm_line_id))
 	while current_dm_line_id == current_am_line_id: #{
+		am_row = common.tokenize_biltrans_line(am_line);
+		dm_row = common.tokenize_biltrans_line(dm_line);
 
-		if len(rsep.findall(am_line)) != len(rsep.findall(dm_line)): #{
+		if len(am_row) != len(dm_row): #{
 			print('Mismatch in number of LUs between analysis and training', file=sys.stderr);
 			print('\t' + am_line, file=sys.stderr);
 			print('\t' + dm_line, file=sys.stderr);
@@ -47,16 +50,9 @@ while reading: #{
 			print('\t' + am_line, file=sys.stderr);
 			print('\t' + dm_line, file=sys.stderr);
 
-			print(str(rsep.findall(am_line)) + '\n' + str(rsep.findall(dm_line)), file=sys.stderr);
 			continue;
 		#}
 
-#		am_row = am_line.split('\t')[1].replace('$^', '$ ^')[1:-1].split('$ ^');
-#		dm_row = dm_line.split('\t')[1].replace('$^', '$ ^')[1:-1].split('$ ^');
-
-		am_row = re.sub(r'\$[^\^]*\^', '$ ^', re.sub(r'^[^\^]*', '', am_line.split('\t')[1]))[1:-1].split('$ ^');
-		dm_row = re.sub(r'\$[^\^]*\^', '$ ^', re.sub(r'^[^\^]*', '', dm_line.split('\t')[1]))[1:-1].split('$ ^');
-		
 		try:
 			frac_count = float(dm_line.split('\t')[2]);
 		except:

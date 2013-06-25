@@ -3,6 +3,7 @@
 # -*- encoding: utf-8 -*-
 
 import sys, codecs, copy, re;
+import common;
 
 # Input:
 #        a) Frequency lexicon
@@ -77,8 +78,6 @@ reading = True;
 current_am_line_id = -1;
 current_dm_line_id = -1;
 
-rsep = re.compile('\$[^\^]*\^');
-
 dm_line = dm_file.readline();
 current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
 
@@ -107,7 +106,10 @@ while reading: #{
 #	#}
 	while current_dm_line_id == current_am_line_id: #{
 
-		if len(rsep.findall(am_line)) != len(rsep.findall(dm_line)): #{
+		am_row = common.tokenize_biltrans_line(am_line);
+		dm_row = common.tokenize_biltrans_line(dm_line);
+
+		if len(am_row) != len(dm_row): #{
 			print('Mismatch in number of LUs between analysis and training', file=sys.stderr);
 			print('\t' + am_line, file=sys.stderr);
 			print('\t' + dm_line, file=sys.stderr);
@@ -115,10 +117,6 @@ while reading: #{
 			continue;
 		#}
 	
-	
-		am_row = am_line.split('\t')[1].replace('$^', '$ ^')[1:-1].split('$ ^');
-		dm_row = dm_line.split('\t')[1].replace('$^', '$ ^')[1:-1].split('$ ^');
-		#print(dm_row, file=sys.stderr)
 		cur_sl_row = [];
 		for lu in am_row: #{
 			sl = lu.split('/')[0];

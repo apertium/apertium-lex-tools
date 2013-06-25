@@ -2,7 +2,7 @@
 # coding=utf-8
 # -*- encoding: utf-8 -*-
 
-import sys, codecs, copy, math, re;
+import sys, codecs, copy, math, re, common;
 
 # Input:
 #        a) Frequency lexicon
@@ -115,12 +115,7 @@ while reading: #{
 		reading = False;
 		continue;
 	#}
-
-#	current_am_line_id = int(am_line.split('\t')[0]);
 	current_am_line_id += 1
-	am_line = re.sub('\$\W+\^', '$ ^', am_line);
-	am_line = clean_line(am_line).replace('$^', '$ ^');
-
 
 #	# to skip lines in the frac corpus if we have a sub-corpus
 	if current_dm_line_id != current_am_line_id: #{
@@ -133,9 +128,12 @@ while reading: #{
 	#}
 	while current_dm_line_id == current_am_line_id: #{
 
-		if am_line.count('$ ^') != dm_line.count('$ ^'): #{
-			amc = am_line.count('$ ^');
-			dmc = dm_line.count('$ ^');
+		am_row = common.tokenize_biltrans_line(am_line);
+		dm_row = common.tokenize_biltrans_line(dm_line);
+
+		if len(am_row) != len(dm_row): #{
+			amc = len(am_row);
+			dmc = len(dm_row);
 			print('Mismatch in number of LUs between analysis and training', file=sys.stderr);
 			print('am(',amc,'):\t' + am_line, file=sys.stderr);
 			print('dm(',dmc,'):\t' + dm_line, file=sys.stderr);
@@ -150,9 +148,6 @@ while reading: #{
 
 			continue;
 		#}
-
-		am_row = am_line.split('\t')[1].replace('$^', '$ ^')[1:-1].split('$ ^');
-		dm_row = dm_line.split('\t')[1].replace('$^', '$ ^')[1:-1].split('$ ^');
 
 		#print(dm_row, file=sys.stderr)
 		cur_sl_row = [];
