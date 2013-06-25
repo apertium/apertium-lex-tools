@@ -3,6 +3,7 @@
 # -*- encoding: utf-8 -*-
 
 import sys, codecs, copy;
+import common;
 
 # Input:
 #        a) Biltrans output
@@ -24,16 +25,16 @@ while reading: #{
 		continue;
 	#}
 
-	if am_line.count('$ ^') != dm_line.count('$ ^'): #{
+	am_row = common.tokenize_biltrans_line(am_line);
+	dm_row = common.tokenize_biltrans_line(dm_line);
+
+	if len(am_row) != len(dm_row): #{
 		print('Mismatch in number of LUs between analysis and training', file=sys.stderr);
 		print('\t' + am_line, file=sys.stderr);
 		print('\t' + dm_line, file=sys.stderr);
 		print('...skipping', file=sys.stderr);
 		continue;
 	#}
-
-	am_row = am_line.split('\t')[1].replace('$^', '$ ^')[1:-1].split('$ ^');
-	dm_row = dm_line.split('\t')[1].replace('$^', '$ ^')[1:-1].split('$ ^');
 
 	limit = len(am_row);
 	for i in range(0, limit): #{
