@@ -107,7 +107,6 @@ current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
 am_counter = 0;
 dm_counter = 0;
 
-
 while reading: #{
 	am_line = am_file.readline();
 
@@ -130,6 +129,7 @@ while reading: #{
 
 		am_row = common.tokenize_biltrans_line(am_line);
 		dm_row = common.tokenize_biltrans_line(dm_line);
+
 
 		if len(am_row) != len(dm_row): #{
 			amc = len(am_row);
@@ -168,10 +168,11 @@ while reading: #{
 		cur_sl_row = [x[0] for x in am_row];
 
 		for i in range(0, limit): #{
-			if len(am_row[i][1]) > 0: #{
+			if len(am_row[i][1]) > 1: #{
 				
 				sl = am_row[i][0]
 				tl = dm_row[i][1][0]
+
 				for j in range(1, MAX_NGRAMS): #{
 					pregram = ' '.join(cur_sl_row[i-j:i+1]);
 					postgram = ' '.join(cur_sl_row[i:i+j+1]);

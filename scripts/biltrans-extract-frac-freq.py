@@ -25,7 +25,6 @@ current_dm_line_id = -1;
 
 rsep = re.compile('\$[^\^]*\^');
 
-
 dm_line = dm_file.readline();
 current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
 while reading: #{
@@ -41,6 +40,7 @@ while reading: #{
 	while current_dm_line_id == current_am_line_id: #{
 		am_row = common.tokenize_biltrans_line(am_line);
 		dm_row = common.tokenize_biltrans_line(dm_line);
+
 
 		if len(am_row) != len(dm_row): #{
 			print('Mismatch in number of LUs between analysis and training', file=sys.stderr);
@@ -60,16 +60,11 @@ while reading: #{
 
 		limit = len(am_row);
 		for i in range(0, limit): #{
-			if am_row[i].count('/') > 0: #{
-				#print(am_row[i] , dm_row[i]); 
-				sl = am_row[i].split('/')[0].replace(' ', '~');
-				tl = dm_row[i].split('/')[1].replace(' ', '~');
-				if sl.count('><') > 0: #{
-					sl = sl.split('><')[0] + '>';
-				#}
-				if tl.count('><') > 0: #{
-					tl = tl.split('><')[0] + '>';
-				#}
+			if len(am_row[i][1]) > 1: #{
+				
+				sl = am_row[i][0]
+				tl = dm_row[i][1][0]
+
 				if sl not in sl_tl: #{
 					sl_tl[sl] = {};
 				#}
@@ -83,7 +78,7 @@ while reading: #{
 		dm_line = dm_file.readline();
 
 		if dm_line == '': #{
-			print('breaking');
+			print('breaking', file=sys.stderr);
 			reading = False;
 			break;
 		#}
