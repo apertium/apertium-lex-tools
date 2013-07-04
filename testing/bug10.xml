@@ -1,0 +1,6 @@
+<rules>
+  <rule>
+    <match lemma="" tags="n" /><match lemma="kazati"><select lemma="рече"/></match>
+  </rule>
+
+</rules>

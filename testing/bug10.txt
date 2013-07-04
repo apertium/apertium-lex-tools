@@ -1,0 +1,1 @@
+^b<n>/b<n>$ ^kazati<vblex><perf><iv><lp><m><sg>/каже<vblex><perf><tv><lp><m><sg>/рече<vblex><perf><tv><lp><m><sg>$ ^b<n>/b<n>$ ^kazati<vblex><perf><iv><lp><m><sg>/каже<vblex><perf><tv><lp><m><sg>/рече<vblex><perf><tv><lp><m><sg>$ ^b<n>/b<n>$ ^kazati<vblex><perf><iv><lp><m><sg>/каже<vblex><perf><tv><lp><m><sg>/рече<vblex><perf><tv><lp><m><sg>$ ^.<sent>/.<sent>$
