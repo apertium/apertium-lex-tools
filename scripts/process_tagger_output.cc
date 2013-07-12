@@ -14,9 +14,9 @@
 
 using namespace std;
 
-int findTag(vector<wstring> tags, wstring tag) {
-	for (int i = 0; i < tags.size(); i++) {
-		if (tags[i] == tag)
+int find(vector<wstring> xs, wstring x) {
+	for (int i = 0; i < xs.size(); i++) {
+		if (xs[i] == x)
 			return i;
 	}
 	return -1;
@@ -111,7 +111,7 @@ void processTaggerOutput(FSTProcessor *bilingual) {
 				escaped = false;
 			}
 		} else if (state == 1) {
-			if(c == '$' && !escaped) {
+			if(c == L'$' && !escaped) {
 
 				vector<wstring> sourceTags = parseTags(buffer);
 				wstring target = bilingual->biltrans(buffer + L"$", true);
@@ -122,8 +122,8 @@ void processTaggerOutput(FSTProcessor *bilingual) {
 
 				for (int i = 0; i < sourceTags.size(); i++) {
 					wstring sourceTag = sourceTags[i];
-					int idx_1 = findTag(targetTags, sourceTag);
-					int idx_2 = findTag(trimmedTags, sourceTag);
+					int idx_1 = find(targetTags, sourceTag);
+					int idx_2 = find(trimmedTags, sourceTag);
 					if (idx_1 == idx_2){
 						newTags.push_back(sourceTag);
 					}
@@ -150,6 +150,7 @@ void processTaggerOutput(FSTProcessor *bilingual) {
 
 			} else if (c == '\\' && !escaped) {
 				escaped = true;
+				buffer += c;
 			} else {
 				buffer += c;
 				escaped = false;

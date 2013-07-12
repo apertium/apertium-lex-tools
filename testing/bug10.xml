@@ -1,6 +1,7 @@
 <rules>
   <rule>
-    <match lemma="" tags="n" /><match lemma="kazati"><select lemma="рече"/></match>
+	<match lemma="i"/><match lemma="kazati"><select lemma="рече"/></match>
+	<match lemma="ali"/><match lemma="kazati"><select lemma="каже"/></match>
   </rule>
 
 </rules>

@@ -60,10 +60,10 @@ while reading: #{
 
 		limit = len(am_row);
 		for i in range(0, limit): #{
-			if len(am_row[i][1]) > 1: #{
+			if len(am_row[i]['tls']) > 1: #{
 				
-				sl = am_row[i][0]
-				tl = dm_row[i][1][0]
+				sl = am_row[i]['sl']
+				tl = dm_row[i]['tls'][0]
 
 				if sl not in sl_tl: #{
 					sl_tl[sl] = {};
