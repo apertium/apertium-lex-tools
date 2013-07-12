@@ -60,7 +60,7 @@ while c: #{
 	if c.isspace(): #{
 		if c == '\n': #{
 			if sent_count >= MIN_SENT and sent_count < MAX_SENT: #{
-				print(outline.strip());
+				print(str(sent_count) + " " + outline.strip());
 			else: #{
 				#print('Line ' + str(lineno) + ' has ' + str(sent_count) + ' translations, discarding.', file=sys.stderr);
 				print(str(lineno), file=sys.stderr);

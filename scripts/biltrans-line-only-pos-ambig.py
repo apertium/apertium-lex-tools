@@ -30,6 +30,7 @@ def process_line(l): #{
 			if w.count('/') > 1 and word_in_pos == True: #{
 				return True;
 			#}
+			
 			w = '';
 			in_word = False;
 		#}
@@ -56,4 +57,6 @@ for line in infile.readlines(): #{
 	if output == True: #{
 		print(line.strip());
 	#}
+#	else:
+#		print(line.strip(), file=sys.stderr);
 #}

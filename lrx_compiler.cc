@@ -349,6 +349,10 @@ LRXCompiler::procMatch()
     fwprintf(stderr, L"      match: %S, %S\n", lemma.c_str(), tags.c_str());
   }
 
+  if(lemma == L"*") {
+    lemma = L"";
+  }
+
   if(lemma == L"") 
   {
     if(debugMode)

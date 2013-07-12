@@ -128,7 +128,11 @@ def parse_token(ptr, line):
 	(ptr, tls) = parse_tls(ptr+1, line);
 	(sl, tls) = trim_tags(sl, tls);
 	
-	return (ptr, sl, tls);
+	token = {};
+	token['sl'] = sl;
+	token['tls'] = tls;
+
+	return (ptr, token);
 		
 
 def tokenize_biltrans_line(line):
@@ -138,8 +142,8 @@ def tokenize_biltrans_line(line):
 	for ptr in range(0, len(line)):
 		c = line[ptr];
 		if c == '^' and not escaped:
-			(ptr, sl, tls) = parse_token(ptr+1, line)
-			out.append((sl, tls));
+			(ptr, token) = parse_token(ptr+1, line)
+			out.append(token);
 		elif c == '\\':
 			escaped = True;
 		elif escaped:
