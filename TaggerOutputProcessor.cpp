@@ -1,21 +1,12 @@
 #include "TaggerOutputProcessor.h"
 
 TaggerOutputProcessor::TaggerOutputProcessor() {
+	this->sn = 0;
 	LtLocale::tryToSetLocale();
 }
 
 TaggerOutputProcessor::~TaggerOutputProcessor() {
 
-}
-
-void TaggerOutputProcessor::printBiltransSentence(vector<BiltransToken> s) {
-	for(int i = 0; i < s.size(); i++) {
-		wcout << s[i].toString(true);
-		if (i != s.size() - 1) {
-			wcout << L" ";
-		}
-	}
-	wcout << endl;
 }
 
 int TaggerOutputProcessor::find(vector<wstring> xs, wstring x) {
@@ -27,31 +18,6 @@ int TaggerOutputProcessor::find(vector<wstring> xs, wstring x) {
 
 }
 
-FSTProcessor TaggerOutputProcessor::loadBilingual(string path) {
-	FSTProcessor bilingual;
-
-	FILE *f_bin = fopen(path.c_str(), "r");
-
-	bilingual.load(f_bin);
-
-	fclose(f_bin);
-	bilingual.initBiltrans();
-	return bilingual;
-}
-
-BiltransToken TaggerOutputProcessor::parseBiltransToken(wstring bt) {
-
-	BiltransToken token;
-	vector<wstring> tokens = wsplit(bt, L'/');
-	
-	token.sourceToken = parseTaggerToken(tokens[0]);
-
-	for (int i = 1; i < tokens.size(); i++) {
-		token.targetTokens.push_back(parseTaggerToken(tokens[i]));
-	}
-	return token;
-
-}
 
 TaggerToken TaggerOutputProcessor::parseTaggerToken(wstring str) {
 	TaggerToken token;
@@ -135,11 +101,10 @@ wstring TaggerOutputProcessor::getLemma(wstring token) {
 	return buffer;
 }
 
-vector<vector<TaggerToken> > TaggerOutputProcessor::parseTaggerOutput() {
+void TaggerOutputProcessor::processTaggerOutput() {
 
 	wstring buffer;
 	vector<TaggerToken> sentence;
-	vector<vector<TaggerToken> > sentences; 
 	bool escaped = false;
 	int state = 0; // outside
 	wchar_t c;
@@ -148,12 +113,7 @@ vector<vector<TaggerToken> > TaggerOutputProcessor::parseTaggerOutput() {
 			break;
 		}
 		if(c == L'\n') {
-			if (buffer.size() > 0) {
-				sentence.push_back(parseTaggerToken(buffer));
-			}
-			if (sentence.size() > 0) {
-				sentences.push_back(sentence);
-			}
+			processSentence(sentence);
 			sentence.clear();
 			buffer.clear();
 		}
@@ -179,5 +139,4 @@ vector<vector<TaggerToken> > TaggerOutputProcessor::parseTaggerOutput() {
 			}
 		}
 	}
-	return sentences;
 }
