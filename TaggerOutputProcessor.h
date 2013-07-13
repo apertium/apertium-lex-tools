@@ -33,42 +33,23 @@ public:
 	}
 };
 
-class BiltransToken {
-public:
-	TaggerToken sourceToken;	
-	vector<TaggerToken> targetTokens;
-	
-	wstring toString(bool delimiter) {
-		wstring out = sourceToken.toString(false);
-		for(int i = 0; i < targetTokens.size(); i++) {
-			out += L'/' + targetTokens[i].toString(false);
-		}
-		if (delimiter) {
-			out = L"^" + out + L"$";
-		}
-		return out;
-	}
-};
-
 class TaggerOutputProcessor {
 protected:
-	vector<vector<TaggerToken> > parseTaggerOutput();
+	int sn;
+
 	vector<wstring> parseTags(wstring token);
 	vector<wstring> wsplit(wstring wstr, wchar_t delim);
 	TaggerToken parseTaggerToken(wstring buffer);
-	BiltransToken parseBiltransToken(wstring bt);
-
-	void printBiltransSentence(vector<BiltransToken> s);
 	
 	int find(vector<wstring> xs, wstring x);
 	wstring getLemma(wstring token);
 
-	FSTProcessor loadBilingual(string path);
+	virtual void processSentence(vector<TaggerToken>) =0;
 public:
 	TaggerOutputProcessor();
 	~TaggerOutputProcessor();
 	
-	virtual void processTaggerOutput() =0;
+	void processTaggerOutput();
 
 };
 
