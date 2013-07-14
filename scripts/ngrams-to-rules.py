@@ -47,7 +47,7 @@ for line in infile.readlines(): #{
 	sl = row[1].strip().lower();
 	tl = row[3];
 	tl_lema = tl.split('<')[0].lower();
-	tl_tags = '<'.join(tl.split('<')[1:]).replace('><', '.').replace('>', '.*');
+	tl_tags = '<'.join(tl.split('<')[1:]).replace('><', '.').replace('>', '');
 
 	freq = row[4];
 	pattern = row[2].split(' ');
@@ -100,40 +100,14 @@ for line in infile.readlines(): #{
 	print('  <rule c="' + str(ruleno) + ' ' + str(lineno) + ': ' + freq + '" weight="' + weight + '">');
 	for word in pattern: #{
 		sl_lema = word.split('<')[0].lower();
+		if (sl_lema[0] == '*'):
+			continue;
+
 		if word.count('><') > 0: #{
 			sl_tags = '<'.join(word.split('<')[1:]).replace('><', '.').replace('>', '');
 		else: #{
 			sl_tags = '<'.join(word.split('<')[1:]).strip('<>');
 		#}
-
-		# ======================================================================= #
-		if sl_tags.count('.') > 0 or sl_tags == 'vblex':  #{
-			sl_tags = sl_tags + '.*';
-		#}
-
-		if sl_tags == 'n': #{
-			sl_tags = sl_tags.replace('n', 'n.*');
-		#}
-		sl_tags = sl_tags.replace('.inf', '').replace('.pp', '').replace('.ger','');
-		tl_tags = tl_tags.replace('.inf', '').replace('.pp', '').replace('.ger','');
-		if sl_tags == 'num': #{
-			sl_lema = '';
-		#}
-		if sl_tags == 'det.pos.*' or sl_tags == 'det.ord.*': #{
-			sl_lema = '';
-		#}
-		if sl_tags == 'np.top.*' or sl_tags == 'np.loc.*' or sl_tags == 'np.ant.*' or sl_tags == 'np.cog.*': #{
-			sl_lema = '';
-		#}
-		if sl_tags == 'num.percent': #{
-			sl_lema = '';
-			sl_tags = 'num.percent';
-		#}
-		if sl_tags == 'det.ind.*' and sl_lema == 'a': #{
-			sl_tags = 'det.ind.sg';
-		#}
-		if sl_tags == 'det.def.*' and sl_lema == 'the': #{
-			sl_tags = 'det.def.sg';
 
 		# ======================================================================= #
 

@@ -39,7 +39,7 @@ BiltransToken Multitrans::parseBiltransToken(wstring bt) {
 void Multitrans::printBiltransSentence(int n, vector<BiltransToken> s) {
 	wcout << n << "\t";
 	for(int i = 0; i < s.size(); i++) {
-		wcout << s[i].toString(true);
+		wcout << getTrimmedToken(s[i]).toString(true);
 		if (i != s.size() - 1) {
 			wcout << L" ";
 		}
@@ -74,18 +74,28 @@ BiltransToken Multitrans::getTrimmedToken(BiltransToken trimmed) {
 	}
 	BiltransToken newToken = parseBiltransToken(
 								trimmed.sourceToken.toString(false) + L"/" + str);
+
+	if(this->trimmed) {
+		for(int i = 0; i < trimmed.targetTokens.size(); i++ ) {
+			if(trimmed.targetTokens[i].tags.size() < 
+			   newToken.targetTokens[i].tags.size()) {
+				trimmed.targetTokens[i].tags.push_back(L"*");
+			}
+		}
+	}
 	vector<wstring> newTags;
-	
-
-
+	bool sourceTrimmed = false;
 	for(int i = 0; i < trimmed.sourceToken.tags.size(); i++) {
 		wstring tag = trimmed.sourceToken.tags[i];
 		if (find(trimmed.targetTokens[0].tags, tag) ==
 			find(newToken.targetTokens[0].tags, tag)) {
 			newTags.push_back(tag);
+			sourceTrimmed = true;
 		}
 	}
-
+	if(sourceTrimmed && this->trimmed) {
+		newTags.push_back(L"*");
+	}
 	trimmed.sourceToken.tags = newTags;
 	trimmed.targetTokens = trimmed.targetTokens;
 
@@ -111,7 +121,7 @@ void Multitrans::biltransToMultitrans(int sn, int &tn, int idx,
 		base = getTrimmedToken(s[idx]).sourceToken.toString(false) + L"/";
 	}
 	for(int i = 0; i < n; i++) {
-		wstring token = base + s[idx].targetTokens[i].toString(false) + L"$";
+		wstring token = L"^" + base + s[idx].targetTokens[i].toString(false) + L"$";
 		if(idx != s.size() - 1) {
 			token += L" ";
 		}

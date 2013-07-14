@@ -1,4 +1,7 @@
-#!/bin/python
+#!/usr/bin/python3
+# coding=utf-8
+# -*- encoding: utf-8 -*-
+
 
 import re
 
@@ -10,6 +13,7 @@ def parse_tags(ptr, line):
 	
 	while True:
 		c = line[ptr];
+
 		if c == '$' or c == '/':
 			return (ptr-1, tags);
 		elif c == '>':
@@ -89,36 +93,15 @@ def parse_tls(ptr, line):
 		ptr += 1;
 
 
-def trim_tags(sl, tls):
+def toBiltransToken(sl, tls):
 	new_tls = []
 	new_sl = (sl[0], [])
 
-	tagslist = [set(sl[1])]
 	for tl in tls:
-		tagslist.append(set(tl[1]));
-	tag_intersection = set.intersection(*tagslist)
-
-	for tl in tls:
-		new_tl = (tl[0], []);
-		if len(tl[1]) > 0:
-			new_tl[1].append(tl[1][0]);
-			
-		for i in range(1, len(tl[1])):
-			if tl[1][i] not in tag_intersection:
-				new_tl[1].append(tl[1][i])
-		
-		new_tl = new_tl[0] + '<' + '><'.join(new_tl[1]) + '>';
+		new_tl = tl[0] + '<' + '><'.join(tl[1]) + '>';
 		new_tls.append(new_tl);
 
-	flag_all = True;
-	if len(sl[1]) > 0:
-		new_sl[1].append(sl[1][0]);
-	for i in range(1, len(sl[1])):
-		tag = sl[1][i];
-		if tag not in tag_intersection:
-			new_sl[1].append(tag)
-			
-	new_sl = new_sl[0] + '<' + '><'.join(new_sl[1]) + '>';
+	new_sl = sl[0] + '<' + '><'.join(sl[1]) + '>';
 
 	return (new_sl, new_tls);
 		
@@ -126,8 +109,8 @@ def trim_tags(sl, tls):
 def parse_token(ptr, line):
 	(ptr, sl) = parse_sl(ptr, line);
 	(ptr, tls) = parse_tls(ptr+1, line);
-	(sl, tls) = trim_tags(sl, tls);
-	
+	(sl, tls) = toBiltransToken(sl, tls);
+
 	token = {};
 	token['sl'] = sl;
 	token['tls'] = tls;
@@ -186,3 +169,5 @@ def tokenize_biltrans_line2(line):
 def clean_biltrans_line(line):
 	line = re_start.sub('', line);
 	return line
+
+

@@ -114,7 +114,7 @@ while reading: #{
 		reading = False;
 		continue;
 	#}
-	current_am_line_id += 1
+	current_am_line_id = int(am_line.split("\t")[0]);
 
 #	# to skip lines in the frac corpus if we have a sub-corpus
 	if current_dm_line_id != current_am_line_id: #{
@@ -129,7 +129,6 @@ while reading: #{
 
 		am_row = common.tokenize_biltrans_line(am_line);
 		dm_row = common.tokenize_biltrans_line(dm_line);
-
 
 		if len(am_row) != len(dm_row): #{
 			amc = len(am_row);
@@ -165,13 +164,13 @@ while reading: #{
 		#}
 
 		limit = len(am_row);
-		cur_sl_row = [x[0] for x in am_row];
+		cur_sl_row = [x['sl'] for x in am_row];
 
 		for i in range(0, limit): #{
-			if len(am_row[i][1]) > 1: #{
+			if len(am_row[i]['tls']) > 1: #{
 				
-				sl = am_row[i][0]
-				tl = dm_row[i][1][0]
+				sl = am_row[i]['sl']
+				tl = dm_row[i]['tls'][0]
 
 				for j in range(1, MAX_NGRAMS): #{
 					pregram = ' '.join(cur_sl_row[i-j:i+1]);
