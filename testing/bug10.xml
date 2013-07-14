@@ -1,7 +1,6 @@
 <rules>
   <rule>
-	<match lemma="i"/><match lemma="kazati"><select lemma="рече"/></match>
-	<match lemma="ali"/><match lemma="kazati"><select lemma="каже"/></match>
+	<match lemma="kazati" tags="vblex.*"><select lemma="рече"/></match>
   </rule>
 
 </rules>

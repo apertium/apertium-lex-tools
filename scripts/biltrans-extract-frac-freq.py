@@ -28,13 +28,12 @@ rsep = re.compile('\$[^\^]*\^');
 dm_line = dm_file.readline();
 current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
 while reading: #{
-	current_am_line_id += 1
 	am_line = am_file.readline();
 	if am_line == '': #{
-
 		reading = False;
 		continue;
 	#}
+	current_am_line_id = int(am_line.split("\t")[0])
 #	current_am_line_id = int(am_line.split('\t')[0]);
 #	print (str(current_am_line_id) + " " + str(current_dm_line_id))
 	while current_dm_line_id == current_am_line_id: #{
