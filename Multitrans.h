@@ -24,12 +24,15 @@ class Multitrans : public TaggerOutputProcessor {
 private:
 	FSTProcessor bilingual;
 	string path;
+
 	bool trimmed;
+	bool filter;
 	string mode;
 
 	bool isPosAmbig(BiltransToken token);	
 	
-	BiltransToken getTrimmedToken(BiltransToken token);
+	BiltransToken getTrimmedToken(wstring str);
+	BiltransToken getFullToken(wstring str);
 	
 	void biltransToMultitrans(int sn, int &tn, int idx, 
 			vector<BiltransToken> s, wstring buffer);
@@ -43,7 +46,7 @@ private:
 	void processSentence(vector<TaggerToken> s);
 
 public:
-	Multitrans(string path, string mode, bool trimmed);
+	Multitrans(string path, string mode, bool trimmed, bool filter);
 	~Multitrans();
 
 	int calculateFertility(vector<BiltransToken> sent);
