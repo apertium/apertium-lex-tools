@@ -37,6 +37,8 @@ private:
 	BiltransToken parseBiltransToken(wstring bt);
 	
 	void printBiltransSentence(int i, vector<BiltransToken> s);
+
+	void trimTaggerOutput(vector<BiltransToken> s);
 	
 	void processSentence(vector<TaggerToken> s);
 
@@ -49,3 +51,4 @@ public:
 };
 
 #endif
+

@@ -129,6 +129,16 @@ void Multitrans::biltransToMultitrans(int sn, int &tn, int idx,
 	}
 }
 
+void Multitrans::trimTaggerOutput(vector<BiltransToken> sentence) {
+	for(int i = 0; i < sentence.size(); i++) {
+		BiltransToken token = getTrimmedToken(sentence[i]);
+		wcout << token.sourceToken.toString(true);
+		if (i != sentence.size() -1) {
+			wcout << L" ";
+		}
+	}
+}
+
 void Multitrans::processSentence(vector<TaggerToken> sentence) {
 
 	vector<BiltransToken> outputSentence;
@@ -167,15 +177,16 @@ void Multitrans::processSentence(vector<TaggerToken> sentence) {
 	}
 	double coverage = (100.0 - numberOfUnknown * 100.0 / sentence.size());
 
-	if(fertility >= 2 && fertility <= 10000 && coverage >= 90.0) {
-		wstring outBuffer = L"";
-		int tn = 0;
+	if (mode == "-p") {
+		trimTaggerOutput(outputSentence);
+	} else if(fertility >= 2 && fertility <= 10000 && coverage >= 90.0) {
 		if(mode == "-b") {
 			printBiltransSentence(this->sn, outputSentence);
 		} else if (mode == "-m") {
+			wstring outBuffer = L"";
+			int tn = 0;
 			biltransToMultitrans(this->sn, tn, 0, outputSentence, outBuffer);
-
-		}
+		} 
 	}
 	this->sn ++;
 	

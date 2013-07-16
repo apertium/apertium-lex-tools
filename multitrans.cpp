@@ -7,6 +7,7 @@ void printError(char *name) {
 	wcout << "Modes: " << endl;
 	wcout << "  --biltrans | -b" << endl;
 	wcout << "  --multitrans | -m" << endl;
+	wcout << "  --trim-tagger-output | -p" << endl;
 }
 
 int main(int argc, char** argv) {
@@ -22,8 +23,10 @@ int main(int argc, char** argv) {
 		mode = "-b";
 	} else if (mode == "--multitrans") {
 		mode = "-m";
-	} 
-	if(mode != "-b" && mode != "-m") {
+	} else if (mode == "--trim-tagger-output") {
+		mode = "-p";
+	}
+	if(mode != "-b" && mode != "-m" && mode != "-p") {
 		printError(argv[0]);
 		exit(1);
 	}
@@ -32,6 +35,8 @@ int main(int argc, char** argv) {
 	if (argc == 4) {
 		string option(argv[3]);
 		trimmed = (option == "--trimmed" || option == "-t");
+	} else if (mode == "-p") {
+		trimmed = true;
 	}
 	Multitrans mt(path, mode, trimmed);
 	mt.processTaggerOutput();
