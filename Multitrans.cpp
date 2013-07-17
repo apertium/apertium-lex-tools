@@ -159,13 +159,14 @@ void Multitrans::biltransToMultitrans(int sn, int &tn, int idx,
 	}
 }
 
-void Multitrans::trimTaggerOutput(vector<BiltransToken> sentence) {
+void Multitrans::printTaggerOutput(vector<BiltransToken> sentence) {
 	for(int i = 0; i < sentence.size(); i++) {
 		wcout << sentence[i].sourceToken.toString(true);
 		if (i != sentence.size() -1) {
 			wcout << L" ";
 		}
 	}
+	wcout << endl;
 }
 
 void Multitrans::processSentence(vector<TaggerToken> sentence) {
@@ -207,7 +208,7 @@ void Multitrans::processSentence(vector<TaggerToken> sentence) {
 
 	if (flag) {
 		if (mode == "-p") {
-			trimTaggerOutput(outputSentence);
+			printTaggerOutput(outputSentence);
 		} else if(mode == "-b") {
 			printBiltransSentence(this->sn, outputSentence);
 		} else if (mode == "-m") {

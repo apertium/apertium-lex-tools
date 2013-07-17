@@ -108,7 +108,8 @@ while reading: #{
 				# Check to see if the TL possibilities are found in the lexical 
 				# transfer output.
 				if tlw not in r['bts']['tls']:
-					print (tlw, "not found for", tran);
+					print (tlw, "not found for", tran, file=sys.stderr);
+					generate_entry(tran, tlw);
 			
 		#}
 

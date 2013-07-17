@@ -34,16 +34,18 @@ private:
 	BiltransToken getTrimmedToken(wstring str);
 	BiltransToken getFullToken(wstring str);
 	
-	void biltransToMultitrans(int sn, int &tn, int idx, 
-			vector<BiltransToken> s, wstring buffer);
-	
 	BiltransToken parseBiltransToken(wstring bt);
 	
+	void processSentence(vector<TaggerToken> s);
+
 	void printBiltransSentence(int i, vector<BiltransToken> s);
 
-	void trimTaggerOutput(vector<BiltransToken> s);
+	void printTaggerOutput(vector<BiltransToken> s);
 	
-	void processSentence(vector<TaggerToken> s);
+	void biltransToMultitrans(int sn, int &tn, int idx, 
+			vector<BiltransToken> s, wstring buffer);
+
+	
 
 public:
 	Multitrans(string path, string mode, bool trimmed, bool filter);
