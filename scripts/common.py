@@ -35,7 +35,7 @@ def parse_sl(ptr, line):
 		c = line[ptr];
 		if c == '\\':
 			escaped = True;
-		elif c == '/' and not escaped:
+		elif (c == '/' or c == '$') and not escaped:
 			return (ptr, out);
 		elif c == '<' and not escaped:
 			(ptr, tags) = parse_tags(ptr+1, line);
@@ -106,7 +106,7 @@ def toBiltransToken(sl, tls):
 	return (new_sl, new_tls);
 		
 
-def parse_token(ptr, line):
+def parse_biltrans_token(ptr, line):
 	(ptr, sl) = parse_sl(ptr, line);
 	(ptr, tls) = parse_tls(ptr+1, line);
 	(sl, tls) = toBiltransToken(sl, tls);
@@ -117,6 +117,11 @@ def parse_token(ptr, line):
 
 	return (ptr, token);
 		
+def parse_tagger_token(ptr, line):
+	(ptr, sl) = parse_sl(ptr, line);
+	sl = sl[0] + '<' + '><'.join(sl[1]) + '>'	
+
+	return (ptr, sl);
 
 def tokenize_biltrans_line(line):
 
@@ -125,7 +130,7 @@ def tokenize_biltrans_line(line):
 	for ptr in range(0, len(line)):
 		c = line[ptr];
 		if c == '^' and not escaped:
-			(ptr, token) = parse_token(ptr+1, line)
+			(ptr, token) = parse_biltrans_token(ptr+1, line)
 			out.append(token);
 		elif c == '\\':
 			escaped = True;
@@ -133,6 +138,23 @@ def tokenize_biltrans_line(line):
 			escaped = False;
 
 	return out
+
+def tokenize_tagger_line(line):
+
+	out = []
+	escaped = False;
+	for ptr in range(0, len(line)):
+		c = line[ptr];
+		if c == '^' and not escaped:
+			(ptr, token) = parse_tagger_token(ptr+1, line)
+			out.append(token);
+		elif c == '\\':
+			escaped = True;
+		elif escaped:
+			escaped = False;
+
+	return out
+
 
 def tokenize_biltrans_line2(line):
 	line = clean_biltrans_line(line)[1:-1];
