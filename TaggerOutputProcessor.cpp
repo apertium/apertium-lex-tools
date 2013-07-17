@@ -73,7 +73,7 @@ vector<wstring> TaggerOutputProcessor::wsplit(wstring wstr, wchar_t delim) {
 	wstring buffer;
 
 	for(int i = 0; i < wstr.size(); i++) {
-		if(wstr[i] == delim) {
+		if(wstr[i] == delim && (i == 0 || wstr[i-1] != L'\\')) {
 			tokens.push_back(buffer);
 			buffer = L"";
 		} else {
