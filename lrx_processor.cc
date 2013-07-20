@@ -1263,7 +1263,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
           fwprintf(stderr, L"FLUSH:\n");
         }
 
-
+//
         // Here we actually apply the rules that we've matched
 
         unsigned int spos = 0;
