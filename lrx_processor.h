@@ -51,6 +51,27 @@
 
 using namespace std;
 
+class BiltransToken {
+public:
+	bool isEOF = false;
+	wstring source;
+	wstring blanks;
+	vector<wstring> target;
+
+	wstring toString(bool delim) {
+		wstring out = source;
+		for(int i = 0; i < target.size(); i++) {
+			out += L'/' + target[i];
+		}
+		if (delim && (source.size() > 0 || target.size() > 0)) {
+			out = blanks + L'^' + out + L'$';
+		} else {
+			out = blanks + out;
+		}
+		return out;	
+	}
+};
+
 
 class LRXProcessor
 {
@@ -60,6 +81,10 @@ private:
   TransExe transducer;
   map<wstring, TransExe> recognisers;
   map<wstring, double> weights;
+
+  map<int, BiltransToken> bts;
+
+  vector<State> alive_states;
 
   set<Node *> anfinals;
   set<wchar_t> escaped_chars;
@@ -75,6 +100,12 @@ private:
   wstring itow(int i);
   bool recognisePattern(const wstring lu, const wstring op);
   wstring readFullBlock(FILE *input, wchar_t const delim1, wchar_t const delim2);
+
+  BiltransToken readBiltransToken(FILE *input = stdin);
+
+  void makeTransition(int);
+  void filterFinals();
+  void evaluateRules();
 
 public:
   static wstring const LRX_PROCESSOR_TAG_SELECT;

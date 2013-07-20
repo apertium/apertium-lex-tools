@@ -7,7 +7,14 @@ class BiltransToken {
 public:
 	TaggerToken sourceToken;	
 	vector<TaggerToken> targetTokens;
+	wstring blanks;
+
+	bool isEOF;
 	
+	BiltransToken() {
+		isEOF = false;
+	}
+
 	wstring toString(bool delimiter) {
 		wstring out = sourceToken.toString(false);
 		for(int i = 0; i < targetTokens.size(); i++) {
