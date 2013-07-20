@@ -2,5 +2,7 @@
   <rule>
 	<match lemma="kazati" tags="vblex.*"><select lemma="рече"/></match>
   </rule>
-
+  <rule weight="3">
+	<match  tags="*"/><match lemma="kazati" tags="vblex.*"><select lemma="каже"/></match><match lemma="." tags="sent"/>
+  </rule>
 </rules>
