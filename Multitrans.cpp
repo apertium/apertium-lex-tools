@@ -37,17 +37,6 @@ BiltransToken Multitrans::parseBiltransToken(wstring bt) {
 
 }
 
-void Multitrans::printBiltransSentence(int n, vector<BiltransToken> s) {
-	wcout << n << "\t";
-	for(int i = 0; i < s.size(); i++) {
-		wcout << s[i].toString(true);
-		if (i != s.size() - 1) {
-			wcout << L" ";
-		}
-	}
-	wcout << endl;
-}
-
 bool Multitrans::isPosAmbig(BiltransToken bt) {
 
 	bool isPos;
@@ -158,8 +147,19 @@ void Multitrans::biltransToMultitrans(int sn, int &tn, int idx,
 		biltransToMultitrans(sn, tn, idx+1, s, buffer + token);	
 	}
 }
+void Multitrans::printBiltransSentence(int n, vector<BiltransToken> s) {
+	wcout << n << "\t";
+	for(int i = 0; i < s.size(); i++) {
+		wcout << s[i].toString(true);
+		if (i != s.size() - 1) {
+			wcout << L" ";
+		}
+	}
+	wcout << endl;
+}
 
-void Multitrans::printTaggerOutput(vector<BiltransToken> sentence) {
+void Multitrans::printTaggerOutput(int n, vector<BiltransToken> sentence) {
+	wcout << n << "\t";
 	for(int i = 0; i < sentence.size(); i++) {
 		wcout << sentence[i].sourceToken.toString(true);
 		if (i != sentence.size() -1) {
@@ -208,7 +208,7 @@ void Multitrans::processSentence(vector<TaggerToken> sentence) {
 
 	if (flag) {
 		if (mode == "-p") {
-			printTaggerOutput(outputSentence);
+			printTaggerOutput(this->sn, outputSentence);
 		} else if(mode == "-b") {
 			printBiltransSentence(this->sn, outputSentence);
 		} else if (mode == "-m") {

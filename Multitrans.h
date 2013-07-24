@@ -47,7 +47,7 @@ private:
 
 	void printBiltransSentence(int i, vector<BiltransToken> s);
 
-	void printTaggerOutput(vector<BiltransToken> s);
+	void printTaggerOutput(int i, vector<BiltransToken> s);
 	
 	void biltransToMultitrans(int sn, int &tn, int idx, 
 			vector<BiltransToken> s, wstring buffer);
