@@ -89,7 +89,7 @@ for line in infile.readlines(): #{
 		continue;
 	#}
 
-	if float(freq) < float(threshold): #{
+	if float(weight) < float(threshold): #{
 		print("UNDER_THRESHOLD", weight, "<", threshold, "||",  line, file=sys.stderr);
 		continue;
 	#}

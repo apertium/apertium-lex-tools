@@ -105,9 +105,7 @@ for sl in ngrams: #{
 		#}
 
 		default = sl_tl_defaults[sl];	
-		if default == max_tl:
-			continue;
-
+		
 		if max_tl not in ngrams[sl][ngram] or default not in ngrams[sl][ngram]: #{
 			print('Some shit went down..', file=sys.stderr);
 			print('= %s\t%s\t%s' % (sl, ngram, max_tl), file=sys.stderr);
