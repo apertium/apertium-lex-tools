@@ -309,11 +309,11 @@ vector<double> parseArgs(int argc, char **argv) {
 }
 
 void printError(char* name) {
-    wcerr<<"Error: Wrong number of parameters"<<endl;
-    wcerr<<"Usage: "<<name<<" lm_file mode [-m | --probability-mass-threshold]"<<endl;
-    wcerr<<"modes:" << endl;
-    wcerr<<"\t -s | --standard"<<endl;
-    wcerr<<"\t -f | --fractional-counts"<<endl;
+    cout<<"Error: Wrong number of parameters"<<endl;
+    cout<<"Usage: "<<name<<" lm_file mode [-m | --probability-mass-threshold]"<<endl;
+    cout<<"modes:" << endl;
+    cout<<"\t -s | --standard"<<endl;
+    cout<<"\t -f | --fractional-counts"<<endl;
     exit(EXIT_FAILURE);
 }
 
@@ -329,6 +329,7 @@ int main(int argc, char ** argv) {
 
     if (argc != 3 && argc != 5) {
         printError(argv[0]);
+		exit(1);
     }
 	
 	vector<double> params = parseArgs(argc, argv);
