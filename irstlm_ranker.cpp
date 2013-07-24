@@ -1,7 +1,7 @@
 #include "irstlm_ranker.h"
 using namespace std;
 
-IrstlmRanker::IrstlmRanker(const string &filePath) {
+IrstlmRanker::IrstlmRanker(const string &filePath, vector<double> params) {
     bool val = this->load(filePath, 1.0);
 
     if(!val) {
@@ -9,20 +9,51 @@ IrstlmRanker::IrstlmRanker(const string &filePath) {
         cerr << filePath <<"'"<<endl;
         exit(EXIT_FAILURE);
     }
+	this->lowerBound = params[0];
+	this->upperBound = params[1];
+	this->filter = params[2];
 
     cout.precision(10);
     wcout.precision(10);
 
-    current_line = "-1";
+	lineno = 0;
+	sublineno = 0;
+	maxlineno = 0;
+    current_line = -1;
     current_max = -65534.0;
-    maxlineno = "0";
-    total = 0.0;
-
 }
 
 IrstlmRanker::~IrstlmRanker() {
 
 }
+
+
+void IrstlmRanker::reset() {
+    current_max = -65534.0;
+    maxlineno = 0;
+    sublineno = 0;
+    current_line = lineno;
+    batch.clear();
+    scores.clear();
+}
+
+vector<string> IrstlmRanker::parseLine(string line) {
+    string buf;
+    stringstream ss(line);
+    vector<string> tokens;
+    int count = 0;
+    while (ss >> buf) {
+        if (count == 0) {
+            buf = buf.substr(4, buf.length());
+        } else if (count == 1) {
+            buf = buf.substr(0, buf.length()-4);
+        }
+        tokens.push_back(buf);
+        count++;
+    }
+    return tokens;
+}
+
 
 double IrstlmRanker::score(const string &frame, double &pp) {
     string buf;
@@ -70,7 +101,6 @@ double IrstlmRanker::score(const string &frame, double &pp) {
         delete m_lmtb_ng;
 
         sprob += prob;
-        cerr << "_" << m_nGramOrder << ": " << buffer_str << " " << prob << endl;
     }
 
     //Perplexity
@@ -117,51 +147,64 @@ bool IrstlmRanker::load(const string &filePath, float weight) {
     return true;
 }
 
-int IrstlmRanker::standard() {
-    while (!cin.eof()) {
-        string line;
-        getline(cin, line);
-        if (line.length()>0) {
-            double pp;
-            double log_prob = score(line, pp);
-            cout<< log_prob<< "\t||\t" << line <<endl;
-        }
-    }
-    return EXIT_SUCCESS;
-}
-
-void IrstlmRanker::printScores(map<string, string> batch, map<string, double> scores)
+void IrstlmRanker::printScores(vector<string> batch, vector<double> scores, double total)
 {
-    map<string, string>::iterator it = batch.begin();
-    for(; it != batch.end(); it++)
+    vector<string>::iterator it = batch.begin();
+    for(int i = 0; i < batch.size(); i++)
     {
-        double score = scores[it->first];
-        string line = batch[it->first];
-        cout << fixed << score / total << "\t|";
-		
-        if(it->first == maxlineno) {
+        double score = scores[i] / total;
+        string line = batch[i];
+		bool outside = this->filter && 
+			(score > this->upperBound || score < this->lowerBound);
+		bool inside = this->filter && !outside;
+
+        cout << fixed << score << "\t|";
+		if (outside) {
+			cout << "-|\t|";
+		} else if (inside) {
+			cout << "+|\t|";
+		}
+        if(i == maxlineno) {
            cout << "@";
         }
         cout << "|\t" << line << endl;
     }
 }
 
+
+int IrstlmRanker::standard() {
+	maxline = -1;
+    while (!cin.eof()) {
+        string line;
+        getline(cin, line);
+        if (line.length()>0) {
+            double pp;
+            double log_prob = score(line, pp);
+            batch.push_back(line);
+			scores.push_back(log_prob);
+        }
+    }
+	printScores(batch, scores, 1.0);
+    return EXIT_SUCCESS;
+}
+
+
 int IrstlmRanker::fractional() {
 	cout.precision(10);
+	double total = 0.0;
     while (!cin.eof()) {
         string line;
         getline(cin, line);
         if (line.length()>0) {
             vector<string> tokens = parseLine(line);
-            lineno = tokens[0];
-            sublineno = tokens[1];
-            if(current_line == "-1")
+            lineno = atoi(tokens[0].c_str());
+            if(current_line == -1)
             {
                 current_line = lineno;
             }
             if(current_line != lineno)
             {
-                printScores(batch, scores);
+                printScores(batch, scores, total);
                 reset();
 				total = 0.0;
             }
@@ -176,57 +219,31 @@ int IrstlmRanker::fractional() {
                 maxlineno = sublineno;
             }
 
-            batch[sublineno] = line;
-            scores[sublineno] = log_prob;
+			batch.push_back(line);
+            scores.push_back(log_prob);
+			sublineno ++;
         }
     }
-    printScores(batch, scores);
+    printScores(batch, scores, total);
 
     return EXIT_SUCCESS;
 }
 
-vector<string> IrstlmRanker::parseLine(string line) {
-    string buf;
-    stringstream ss(line);
-    vector<string> tokens;
-    int count = 0;
-    while (ss >> buf) {
-        if (count == 0) {
-            buf = buf.substr(4, buf.length());
-        } else if (count == 1) {
-            buf = buf.substr(0, buf.length()-4);
-        }
-        tokens.push_back(buf);
-        count++;
-    }
-    return tokens;
-}
-
-void IrstlmRanker::reset() {
-    current_max = -65534.0;
-    maxlineno = "0";
-    sublineno = "0";
-    current_line = lineno;
-    batch.clear();
-    scores.clear();
-}
-
 int IrstlmRanker::max() {
-    total = 1.0;
+    double total = 1.0;
     while (!cin.eof()) {
         string line;
         getline(cin, line);
         if (line.length()>0) {
             vector<string> tokens = parseLine(line);
-            lineno = tokens[0];
-            sublineno = tokens[1];
-            if(current_line == "-1")
+            lineno = atoi(tokens[0].c_str());
+            if(current_line == -1)
             {
                 current_line = lineno;
             }
             if(current_line != lineno)
             {
-                printScores(batch, scores);
+                printScores(batch, scores, total);
                 reset();
             }
             double pp;
@@ -238,30 +255,33 @@ int IrstlmRanker::max() {
                 maxlineno = sublineno;
             }
 
-            batch[sublineno] = line;
-            scores[sublineno] = log_prob;
+            batch.push_back(line);
+            scores.push_back(log_prob);
+			sublineno ++;
         }
     }
-    printScores(batch, scores);
+    printScores(batch, scores, total);
     return EXIT_SUCCESS;
 }
 
 int IrstlmRanker::totals() {
     double total = 0.0;
     int numlines = 0;
+	maxlineno = -1;
     while (!cin.eof()) {
         string line;
         getline(cin, line);
-        cerr << "@: " << line << endl;
+
         if (line.length()>0) {
             double pp;
             double log_prob = score(line, pp);
-            cout<< log_prob<< "\t||\t" << line <<endl;
-
+			batch.push_back(line);
+			scores.push_back(log_prob);
             total += log_prob ;
             numlines++;
         }
     }
+	printScores(batch, scores, 1.0);
     cout << "log_total: " << total << endl;
     cout << "prob_total: " << exp10(total) << endl;
     cout << "log_avg: " << total/numlines << endl;
@@ -269,11 +289,36 @@ int IrstlmRanker::totals() {
 
     return EXIT_SUCCESS;
 }
+// === MAIN === //
 
+vector<double> parseArgs(int argc, char **argv) {
+
+	vector<double> params;
+
+	params.push_back(std::numeric_limits<double>::min()); 
+	params.push_back(std::numeric_limits<double>::max());
+	params.push_back(0);
+
+
+	for(int i = 3; i < argc; i++) {
+		if(strcmp(argv[i], "-l") == 0) {
+			params[0] = atof(argv[i+1]);
+			params[2] = 1;
+			i++;
+		} if(strcmp(argv[i], "-u") == 0) {
+			params[1] = atof(argv[i+1]);
+			params[2] = 1;
+			i++;
+		} 
+	}
+	cerr << "ASD"<< endl;
+	return params;
+	
+}
 
 void printError(char* name) {
     wcerr<<"Error: Wrong number of parameters"<<endl;
-    wcerr<<"Usage: "<<name<<" lm_file mode"<<endl;
+    wcerr<<"Usage: "<<name<<" lm_file mode [lower bound] [upper bound]"<<endl;
     wcerr<<"modes:" << endl;
     wcerr<<"\t -s | --standard"<<endl;
     wcerr<<"\t -f | --fractional-counts"<<endl;
@@ -281,25 +326,29 @@ void printError(char* name) {
     wcerr<<"\t -m | --max-count"<<endl;
     exit(EXIT_FAILURE);
 }
+
 int main(int argc, char ** argv) {
 
-// Is this really necessary?
-// I don't know :)
+	// Is this really necessary?
+	// I don't know :)
+
     if(setlocale(LC_CTYPE, "") == NULL) {
         wcerr << L"Warning: unsupported locale, fallback to \"C\"" << endl;
         setlocale(LC_ALL, "C");
     }
 
-    if (argc != 3) {
+    if (argc < 3 && argc > 7) {
         printError(argv[0]);
     }
-    IrstlmRanker irstlm_ranker(argv[1]);
+	
+	vector<double> params = parseArgs(argc, argv);
+
+    IrstlmRanker irstlm_ranker(argv[1], params);
     string mode(argv[2]);
     if (mode == "--standard" || mode == "-s") {
         irstlm_ranker.standard();
     } else if (mode == "--fractional-counts" || mode == "-f") {
         irstlm_ranker.fractional();
-        //irstlm_ranker = new IrstlmRankerFractional(argv[1]);
     } else if (mode == "--total-counts" || mode == "-t") {
         irstlm_ranker.totals();
     } else if (mode == "--max-count" || mode == "-m") {

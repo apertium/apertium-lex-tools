@@ -11,6 +11,8 @@
 #include <deque>
 #include <map>
 
+#include <limits>
+
 #include "lmContainer.h"
 #include "lmmacro.h"
 #include "lmtable.h"
@@ -21,14 +23,19 @@ class lmmacro;  // irst lm for macro tags
 class IrstlmRanker {
 private:
 
-	string current_line;
+	double lowerBound;
+	double upperBound;	
+	double filter;
+
+    vector<double> scores;
+    vector<string> batch;
+
+	int current_line;
+    int maxlineno;
+	int lineno;
+	int sublineno;
+
     double current_max;
-    map<string, double> scores;
-    map<string, string> batch;
-    string maxlineno;
-	string lineno;
-	string sublineno;
-    double total;
 
 protected:
 	lmContainer        *m_lmtb;
@@ -38,12 +45,12 @@ protected:
 	int            m_lmtb_dub;           // dictionary upperbound
 
 	float          m_weight; // scoring weight.
-	std::string         m_filePath; // for debugging purposes.
+	std::string    m_filePath; // for debugging purposes.
 	size_t         m_nGramOrder; // max n-gram length contained in this LM.
 
 	vector<std::string> parseLine(std::string);
-	void printScores(map<string, string> batch, 
-					 map<string, double> scores);
+	void printScores(vector<string> batch, 
+					 vector<double> scores, double total);
 
 	void reset();
 
@@ -52,7 +59,7 @@ protected:
 	double score(const std::string &frame, double &pp);	
 
 public:
-	IrstlmRanker(const string &filePath);	
+	IrstlmRanker(const string &filePath, vector<double> params);	
 	~IrstlmRanker();
 	
 	int standard();
