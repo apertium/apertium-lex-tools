@@ -23,11 +23,12 @@ class lmmacro;  // irst lm for macro tags
 class IrstlmRanker {
 private:
 
-	double lowerBound;
-	double upperBound;	
-	double filter;
+	double totalProbabilityMass;
 
-    vector<double> scores;
+    vector<double> logScores;
+    vector<double> probs;
+	vector<int> sortedIndex;	
+
     vector<string> batch;
 
 	int current_line;
@@ -35,6 +36,7 @@ private:
 	int lineno;
 	int sublineno;
 
+	double norm;
     double current_max;
 
 protected:
@@ -49,10 +51,12 @@ protected:
 	size_t         m_nGramOrder; // max n-gram length contained in this LM.
 
 	vector<std::string> parseLine(std::string);
-	void printScores(vector<string> batch, 
-					 vector<double> scores, double total);
-
+	void printScores(vector<double> scores);
+	void insertSortedIndex(double prob);
+	
 	void reset();
+	void normalizeProbabilities();
+	
 
 	std::string trim(const std::string& o);
 	bool load(const std::string &filePath, float weight);
@@ -64,8 +68,6 @@ public:
 	
 	int standard();
 	int fractional();
-	int max();
-	int totals();
 };
 
 #endif
