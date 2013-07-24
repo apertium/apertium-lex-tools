@@ -137,15 +137,17 @@ void IrstlmRanker::printScores(map<string, string> batch, map<string, double> sc
     {
         double score = scores[it->first];
         string line = batch[it->first];
-        cout << fixed << score << "\t|";
+        cout << fixed << score / total << "\t|";
+		
         if(it->first == maxlineno) {
-            cout << "@";
+           cout << "@";
         }
         cout << "|\t" << line << endl;
     }
 }
 
 int IrstlmRanker::fractional() {
+	cout.precision(10);
     while (!cin.eof()) {
         string line;
         getline(cin, line);
@@ -161,13 +163,11 @@ int IrstlmRanker::fractional() {
             {
                 printScores(batch, scores);
                 reset();
+				total = 0.0;
             }
 
             double pp;
             double log_prob = exp10(score(line, pp));
-
-//			cout << score("<s> " + line + " </s>", pp) << endl;
-//			cout << exp10(score("<s> " + line + " </s>", pp)) << endl;
 
             total = total + log_prob;
             if(log_prob > current_max)
