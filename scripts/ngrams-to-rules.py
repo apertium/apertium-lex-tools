@@ -89,14 +89,20 @@ for line in infile.readlines(): #{
 		continue;
 	#}
 
-	if float(weight) < float(threshold): #{
+	if float(weight) <= float(threshold): #{
 		print("UNDER_THRESHOLD", weight, "<", threshold, "||",  line, file=sys.stderr);
 		continue;
 	#}
 
+	if any([x.startswith("*") for x in pattern]): #{
+		print("UNKNOWN_WORD_IN_PATTERN" , pattern, file=sys.stderr);
+		continue;
+	#}
+	
 	sel = False;
 	ruleno = ruleno + 1;
 	lineno = lineno + 1;
+	
 	print('  <rule c="' + str(ruleno) + ' ' + str(lineno) + ': ' + freq + '" weight="' + weight + '">');
 	for word in pattern: #{
 		sl_lema = word.split('<')[0].lower();

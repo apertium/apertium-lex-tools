@@ -64,8 +64,8 @@ while reading: #{
 		#}
 
 		row = pt_line.split('|||');
-		sl = common.tokenize_tagger_line(row[0]);
-		tl = common.tokenize_tagger_line(row[1]);
+		sl = common.tokenize_tagger_line(row[1]);
+		tl = common.tokenize_tagger_line(row[0]);
 		alignments = row[2].strip();
 		bt = common.tokenize_biltrans_line(bt_line);
 
@@ -84,13 +84,14 @@ while reading: #{
 		i = 0;
 		for j in alignments.split(' '): #{
 			ament = j.split('-');
-			if int(ament[1]) > len(tl): #{
+			if int(ament[0]) > len(tl): #{
 				continue;
 			#}
-			slw = sl[int(ament[0])]
-			translations[slw] = {}
-			translations[slw]['tls'] = tl[int(ament[1])]
-			translations[slw]['bts'] = bt[int(ament[0])]
+			slw = sl[int(ament[1])]
+			if slw not in translations:
+				translations[slw] = {}
+			translations[slw]['tls'] = tl[int(ament[0])]
+			translations[slw]['bts'] = bt[int(ament[1])]
 		#}
 
 	#	for tr in translations:

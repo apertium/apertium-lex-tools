@@ -3,6 +3,7 @@
 # -*- encoding: utf-8 -*-
 
 import sys, codecs, copy, commands;
+import common
 
 sys.stdin  = codecs.getreader('utf-8')(sys.stdin);
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout);
@@ -41,36 +42,34 @@ if len(sys.argv) < 2: #{
 
 for line in file(sys.argv[1]).readlines(): #{
 	line = line.strip().decode('utf-8');	
+
 	if line[0] == '-': #{
-#		print len(cur_sl_row), len(cur_tl_row), len(cur_bt_row), len(cur_al_row);	
-#		print cur_sl_row;
-#		print cur_bt_row;
-#		print cur_tl_row;
-#		print cur_al_row;
-#
 		# Read the corpus, make a note of all ambiguous words, their frequency and their possible translations
 		#
 		# sl_tl[sl_word][tl_word] = tl_freq
 		i = 0;
 		for slword in cur_sl_row: #{
-			if cur_bt_row[i].count('/') > 1: #{
+			if len(cur_bt_row[i]['tls']) > 1: #{
 				for al in cur_al_row: #{
-					al_sl = int(al.split('-')[1]);
-					al_tl = int(al.split('-')[0]);
-					if al_sl != i: #{
-						continue;
-					#}
-					tlword = cur_tl_row[al_tl].lower().split('>')[0] + '>';
-					slword = slword.lower().split('>')[0] + '>';
-					if slword not in sl_tl: #{
-						sl_tl[slword] = {};
-					#}
-					if tlword not in sl_tl[slword]: #{
-						sl_tl[slword][tlword] = 0;
-					#}
-					sl_tl[slword][tlword] = sl_tl[slword][tlword] + 1;
+					try:
+						al_sl = int(al.split('-')[1]);
+						al_tl = int(al.split('-')[0]);
+						if al_sl != i: #{
+							continue;
+						#}
+						tlword = cur_tl_row[al_tl];
+						slword = slword.lower();
+						if slword not in sl_tl: #{
+							sl_tl[slword] = {};
+						#}
+						if tlword not in sl_tl[slword]: #{
+							sl_tl[slword][tlword] = 0;
+						#}
+						sl_tl[slword][tlword] = sl_tl[slword][tlword] + 1;
 
-					print '+' , slword , tlword , sl_tl[slword][tlword];
+						print '+' , slword , tlword , sl_tl[slword][tlword];
+					except:
+						pass
 				#}
 
 #				for j in range(0, MAX_NGRAMS): #{
@@ -89,13 +88,13 @@ for line in file(sys.argv[1]).readlines(): #{
 	line = line.split('\t')[1];
 
 	if cur_line == 0: #{
-		cur_sl_row = line.split(' ');
+		cur_sl_row = common.tokenize_tagger_line(line);
 	elif cur_line == 1: #{
-		cur_bt_row = line.split(' ');
+		cur_bt_row = common.tokenize_biltrans_line(line);
 	elif cur_line == 2: #{
-		cur_tl_row = line.split(' ');
+		cur_tl_row = common.tokenize_tagger_line(line);
 	elif cur_line == 3:  #{
-		cur_al_row = line.split(' ');
+		cur_al_row = line.split(' ')[:-1];
 	#}
 
 	cur_line = cur_line + 1;
