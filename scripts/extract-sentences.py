@@ -36,16 +36,17 @@ while reading: #{
 	pt_line = phrase_table.readline().strip();	
 	bt_line = biltrans_out.readline().strip();
 
-
-	if bt_line == '' and pt_line == '': #{
+	if not bt_line.strip() or not pt_line.strip(): #{
 		reading = False;
+		break
 	#}
-	row = pt_line.split('|||');
+	row = pt_line.split(' ||| ');
 	bt = common.tokenize_biltrans_line(bt_line);
-	sl = common.tokenize_tagger_line(row[0]);
-	tl = common.tokenize_tagger_line(row[1]);
+	sl = common.tokenize_tagger_line(row[1]);
+	tl = common.tokenize_tagger_line(row[0]);
 		
 	if not ambiguous(bt): #{
+		print ("line", lineno, "not ambiguous", file=sys.stderr);
 		continue;
 	#}
 	if len(sl) < 2 and len(tl) < 2: #{
@@ -55,6 +56,7 @@ while reading: #{
 
 	# Check that the number of words in the lexical transfer, and in the phrasetable matches up
 	if len(sl) != len(bt): #{
+		print ("len(sl) != len(bt)", file=sys.stderr);
 		continue;
 	#}
 
@@ -65,9 +67,9 @@ while reading: #{
 	# 0-0 1-1 2-2 5-3
 
 
-	print(lineno, '\t' + row[0]);
-	print(lineno, '\t' + bt_line);
 	print(lineno, '\t' + row[1]);
+	print(lineno, '\t' + bt_line);
+	print(lineno, '\t' + row[0]);
 	print(lineno, '\t' + row[2]);
 	print('-------------------------------------------------------------------------------');
 	total_valid = total_valid + 1;
