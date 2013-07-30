@@ -1,0 +1,5 @@
+<rules>
+  <rule>
+    <match lemma="son" tags="pron.*"><select lemma="dïhte" tags="pron.*"/></match>
+  </rule>
+</rules>
