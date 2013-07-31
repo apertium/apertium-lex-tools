@@ -2,6 +2,7 @@
 
 bool trim = false;
 bool filter = false;
+bool number_lines = false;
 
 string path;
 string mode;
@@ -17,11 +18,12 @@ void printError(char *name) {
 	wcout << "Options: " << endl;
 	wcout << "  --filter-lines | -f" << endl;
 	wcout << "  --trim-lines | -t" << endl;
+	wcout << "  --number-lines | -n" << endl;
 
 }
 
 void parseArguments(int argc, char **argv) {
-	if (argc < 3 || argc > 5) {
+	if (argc < 3 || argc > 6) {
 		printError(argv[0]);
 		exit(1);
 	}
@@ -45,6 +47,8 @@ void parseArguments(int argc, char **argv) {
 			trim = true;
 		} else if (strcmp(argv[i], "-f") == 0 || strcmp(argv[i], "-filter-lines") == 0) {
 			filter = true;
+		} else if (strcmp(argv[i], "-n") == 0 || strcmp(argv[i], "-number-lines") == 0) {
+			number_lines = true;
 		}
 	}
 }
@@ -54,6 +58,6 @@ int main(int argc, char** argv) {
 
 	parseArguments(argc, argv);
 
-	Multitrans mt(path, mode, trim, filter);
+	Multitrans mt(path, mode, trim, filter, number_lines);
 	mt.processTaggerOutput();
 }

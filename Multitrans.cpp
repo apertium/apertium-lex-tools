@@ -1,16 +1,18 @@
 #include "Multitrans.h"
 
-Multitrans::Multitrans(string path, string mode, bool trimmed, bool filter) {
+Multitrans::Multitrans(string path, string mode, bool trimmed, bool filter, bool number_lines) {
 	this->trimmed = trimmed;
 	this->filter = filter;
+	this->number_lines = number_lines;
+
 	this->path = path;
 	this->mode = mode;
 
 	FILE *f_bin = fopen(path.c_str(), "r");
 	bilingual.load(f_bin);
-
 	fclose(f_bin);
 	bilingual.initBiltrans();
+	bilingual.setDictionaryCaseMode(true);
 }
 Multitrans::~Multitrans() {}
 
@@ -148,7 +150,9 @@ void Multitrans::biltransToMultitrans(int sn, int &tn, int idx,
 	}
 }
 void Multitrans::printBiltransSentence(int n, vector<BiltransToken> s) {
-	wcout << n << "\t";
+	if (number_lines) {
+		wcout << n << "\t";
+	}
 	for(int i = 0; i < s.size(); i++) {
 		wcout << s[i].toString(true);
 		if (i != s.size() - 1) {
@@ -159,7 +163,10 @@ void Multitrans::printBiltransSentence(int n, vector<BiltransToken> s) {
 }
 
 void Multitrans::printTaggerOutput(int n, vector<BiltransToken> sentence) {
-	wcout << n << "\t";
+	if (number_lines) {
+		wcout << n << "\t";
+	}
+
 	for(int i = 0; i < sentence.size(); i++) {
 		wcout << sentence[i].sourceToken.toString(true);
 		if (i != sentence.size() -1) {

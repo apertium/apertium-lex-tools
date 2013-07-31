@@ -12,7 +12,7 @@ sys.stderr = codecs.getwriter('utf-8')(sys.stderr);
 
 # sl_tl[sl_word][tl_word] = tl_freq
 
-# Then we want to make a list of n-grams around the source words, with which target word they want, and the freq.
+# Then we want to make a list ofpython $SCRIPTS/ngram-count-patterns-maxent.py $TRAIN/$CORPUS.lex.$SL-$TL $TRAIN/$CORPUS.candidates.$SL-$TL 2>ngrams > events n-grams around the source words, with which target word they want, and the freq.
 
 # ngrams[ngram][tl_word] = freq
 
@@ -96,8 +96,8 @@ for line in file(sys.argv[2]).readlines(): #{
 					if al_sl != i: #{
 						continue;
 					#}
-					tlword = cur_tl_row[al_tl].lower().split('>')[0] + '>';
-					slword = slword.lower().split('>')[0] + '>';
+					tlword = cur_tl_row[al_tl].lower();
+					slword = slword.lower();
 					
 					if slword not in sl_tl_defaults: #{
 #						print >>sys.stderr, 'WARNING: "' + slword + '" not in sl_tl_defaults, skipping';
