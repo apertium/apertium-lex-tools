@@ -34,6 +34,8 @@ private:
 
 	bool trimmed;
 	bool filter;
+	bool number_lines;
+
 	string mode;
 
 	bool isPosAmbig(BiltransToken token);	
@@ -55,7 +57,7 @@ private:
 	
 
 public:
-	Multitrans(string path, string mode, bool trimmed, bool filter);
+	Multitrans(string path, string mode, bool trimmed, bool filter, bool number_lines);
 	~Multitrans();
 
 	int calculateFertility(vector<BiltransToken> sent);

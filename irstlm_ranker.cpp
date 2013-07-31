@@ -310,7 +310,7 @@ vector<double> parseArgs(int argc, char **argv) {
 
 void printError(char* name) {
     cout<<"Error: Wrong number of parameters"<<endl;
-    cout<<"Usage: "<<name<<" lm_file mode [-m | --probability-mass-threshold]"<<endl;
+    cout<<"Usage: "<<name<<" <lm_file> <mode> [-m | --probability-mass-threshold]"<<endl;
     cout<<"modes:" << endl;
     cout<<"\t -s | --standard"<<endl;
     cout<<"\t -f | --fractional-counts"<<endl;
