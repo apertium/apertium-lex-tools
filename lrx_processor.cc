@@ -42,8 +42,6 @@ LRXProcessor::LRXProcessor()
 {
 
   initial_state = new State();
-  vector<State> alive_states_clean;
-  alive_states = alive_states_clean;
 
   lineno = 1; // Used for rule tracing
   pos = 0;
@@ -51,8 +49,6 @@ LRXProcessor::LRXProcessor()
   traceMode = false;
   debugMode = false;
   outOfWord = true;
-
-  
 }
 
 LRXProcessor::~LRXProcessor()
@@ -914,207 +910,20 @@ LRXProcessor::process(FILE *input, FILE *output)
   fwprintf(stdout, L"%S", blanks[pos].c_str());
 }
 
-BiltransToken LRXProcessor::readBiltransToken(FILE *input) {
-	
-	bool isEscaped = false;
-	BiltransToken bt;
-	while(!feof(input))
-	{
-		int val = fgetwc_unlocked(input);
-
-		// We're starting to read a new lexical form
-		if(val == L'^' && !isEscaped && outOfWord)
-		{
-		  outOfWord = false;
-		  continue;
-		}
-
-		// We've seen the surface form
-		if(val == L'/' && !isEscaped && !outOfWord)
-		{
-		  // Read in target equivalences 
-			wstring trad = L"";
-			val = fgetwc_unlocked(input);
-			while(val != L'$')
-			{
-				if(val != L'$')
-				{
-					trad += static_cast<wchar_t>(val);
-				}
-				if(val == L'/')
-				{
-					bt.target.push_back(trad.substr(0, trad.length()-1));
-					trad = L"";
-				}
-				val = fgetwc_unlocked(input);
-			}
-			bt.target.push_back(trad);
-			if(debugMode)
-			{
-				for(vector<wstring>::iterator it = bt.target.begin(); 
-					it != bt.target.end(); it++)
-				{
-					fwprintf(stderr, L"trad[%d]: %S\n", pos, it->c_str());
-				}
-			}
-		} 
-		// reading a tag
-		if(val == L'<' && !isEscaped && !outOfWord) {
-			wstring tag = L"";
-			tag = readFullBlock(input, L'<', L'>');
-			bt.source += tag;
-			val = static_cast<int>(alphabet(tag));
-			if(val == 0)
-			{
-				val = static_cast<int>(alphabet(L"<ANY_TAG>"));
-			}
-			if(debugMode)
-			{
-				fwprintf(stderr, L"tag %S: %d\n", tag.c_str(), val);
-			}
-		}
-		
-		// We're still reading a surface form
-		if(val > 0 && val != L'$' && !isEscaped && !outOfWord)
-		{
-		  bt.source += static_cast<wchar_t>(val);
-		}
-
-		if (!outOfWord) {
-			makeTransition(val);
-		}
-
-		// Reading a superblank
-		if(outOfWord)
-		{
-		  if(!feof(input))
-		  {
-		    bt.blanks += static_cast<wchar_t>(val);
-		  }
-		  if(debugMode)
-		  {
-		    fwprintf(stderr, L"blanks[%d] = %S\n", pos, bt.blanks.c_str());
-		  }
-		}
-
-		// Increment the current line number (for rule tracing)
-		if(val == L'\n')
-		{
-		  this->lineno++;
-		}
-		if (feof(input)) {
-			bt.isEOF = true;
-		}
-		if((feof(input) || val == L'$') && !isEscaped && !outOfWord)
-		{
-			if(debugMode && feof(input))
-			{
-				fwprintf(stderr, L"[POS] %d: [sl %d ; tl %d ; bl %d]: %S\n", pos, bt.source.size(), 
-						bt.target.size(), bt.blanks.size(), bt.source.c_str());
-			}
-			outOfWord = true;
-			break;
-		}
-		this->pos++;
-	}
-	return bt;
-}
-
-void LRXProcessor::makeTransition(int val) {
-	
-	if(debugMode)
-	{
-		fwprintf(stderr, L"outOfWord = false\n");
-	}
-
-	vector<State> new_state;
-	wstring res = L"";
-
-	vector<State>::const_iterator it = this->alive_states.begin();
-	for(; it != this->alive_states.end(); it++)
-	{
-		res = L"";
-		State s = *it;
-		if(val < 0)
-		{
-			alphabet.getSymbol(res, val,  false);
-			if(debugMode) 
-			{
-				fwprintf(stderr, L"  step: %S\n", res.c_str());
-			}
-			s.step(val, alphabet(L"<ANY_TAG>"));
-		}
-		else
-		{
-			if(debugMode)
-  			{
-    			fwprintf(stderr, L"  step: %C\n", val);
-  			}
-  			s.step_case(val, alphabet(L"<ANY_CHAR>"), false);
-		}
-		if(s.size() > 0) // If the current state has outgoing transitions, add it to the new alive states
-		{
-			new_state.push_back(s);
-		}
-	}
-	if(debugMode)
-	{
-		fwprintf(stderr, L"new_state: %d\n", new_state.size());
-	}
-	new_state.push_back(*initial_state);
-	this->alive_states = new_state;
-}
-
-void LRXProcessor::evaluateRules() {
-	
-}
-
-void LRXProcessor::filterFinals() {
-	vector<State> new_state;
-	for(vector<State>::const_iterator it = alive_states.begin(); it != alive_states.end(); it++)
-	{
-        State s = *it;
-        // \IF \exists c \in Q : \delta(s, sent[i]) = c
-        s.step(alphabet(L"<$>"));
-
-        // A \gets A \cup {c}
-        if(s.size() > 0) // If the current state has outgoing transitions, 
-                         // add it to the new alive states
-        {
-          new_state.push_back(s);
-        }
-        s.step(alphabet(L"<$>"));
-	}
-	alive_states = new_state;
-    alive_states.push_back(*initial_state);
-}
-
 void
 LRXProcessor::processME(FILE *input, FILE *output)
 {
-
-  // Read in tokens
-
-  alive_states.push_back(*initial_state);
-  wcerr << alive_states.size() << endl;
-  while(true) {
-	BiltransToken bt = readBiltransToken();
-	wcout << bt.toString(true) << endl;
-	if(bt.isEOF) {
-		break;
-	}
-	filterFinals();
-
-  }
   bool isEscaped = false;
-
-
 
   map<int, wstring > sl; // map of SL words
   map<int, vector<wstring> > tl; // map of vectors of TL translations
   map<int, wstring > blanks; // map of the superblanks
 
   map<int, map<wstring, double> > scores; //
+
+  vector<State> alive_states_clean ;
+  vector<State> alive_states = alive_states_clean ;
+  alive_states.push_back(*initial_state);
 
   while(!feof(input))
   {
@@ -1263,7 +1072,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
           fwprintf(stderr, L"FLUSH:\n");
         }
 
-//
+
         // Here we actually apply the rules that we've matched
 
         unsigned int spos = 0;
