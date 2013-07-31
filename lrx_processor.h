@@ -50,7 +50,7 @@
 #include <lttoolbox/my_stdio.h>
 
 using namespace std;
-
+/*
 class BiltransToken {
 public:
 	bool isEOF = false;
@@ -72,7 +72,7 @@ public:
 	}
 };
 
-
+*/
 class LRXProcessor
 {
 private:
