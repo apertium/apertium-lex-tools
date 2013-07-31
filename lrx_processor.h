@@ -82,7 +82,7 @@ private:
   map<wstring, TransExe> recognisers;
   map<wstring, double> weights;
 
-  map<int, BiltransToken> bts;
+//  map<int, BiltransToken> bts;
 
   vector<State> alive_states;
 
@@ -101,7 +101,7 @@ private:
   bool recognisePattern(const wstring lu, const wstring op);
   wstring readFullBlock(FILE *input, wchar_t const delim1, wchar_t const delim2);
 
-  BiltransToken readBiltransToken(FILE *input = stdin);
+//  BiltransToken readBiltransToken(FILE *input = stdin);
 
   void makeTransition(int);
   void filterFinals();
