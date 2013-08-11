@@ -84,7 +84,7 @@ for line in infile.readlines(): #{
 		continue;
 	#}
 
-	if tl_tags not in permitted_tags: #{
+	if tl_tags.split('.')[0] not in permitted_tags: #{
 		print("TAG_NOT_PERMITTED" , tl_tags , '||' , line, file=sys.stderr);
 		continue;
 	#}
@@ -102,7 +102,7 @@ for line in infile.readlines(): #{
 	sel = False;
 	ruleno = ruleno + 1;
 	lineno = lineno + 1;
-	
+
 	print('  <rule c="' + str(ruleno) + ' ' + str(lineno) + ': ' + freq + '" weight="' + weight + '">');
 	for word in pattern: #{
 		sl_lema = word.split('<')[0].lower();

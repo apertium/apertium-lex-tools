@@ -96,6 +96,7 @@ for line in file(sys.argv[2]).readlines(): #{
 					if al_sl != i: #{
 						continue;
 					#}
+
 					tlword = cur_tl_row[al_tl].lower();
 					slword = slword.lower();
 					
@@ -158,7 +159,7 @@ for line in file(sys.argv[2]).readlines(): #{
 					if event_counter not in meevents: #{
 						meevents[slword][event_counter] = [];
 					#}
-					if event_counter not in meoutcomes: #{
+					if event_counter not in meoutcomes[slword]: #{
 						meoutcomes[slword][event_counter] = '';
 					#}
 					for ni in ngrams[slword]: #{

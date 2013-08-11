@@ -129,6 +129,7 @@ for sl in ngrams: #{
 			crispiness = alt_crisp/def_crisp;
 
 			print('- %.10f %.10f %.10f %.10f %.10f %.10f\t%s\t%s\t%s\t%.10f' % (crispiness, weight, total, ngrams[sl][ngram][default] , max_freq, ngrams[sl][ngram][max_tl], sl, ngram, max_tl, ngrams[sl][ngram][max_tl]));
+#			print('- %.10f \t%s\t%s\t%s\t%.10f' % (crispiness, sl, ngram, max_tl, ngrams[sl][ngram][max_tl]));
 
 			if crispiness > max_crispiness: #{
 				max_crispiness = crispiness;

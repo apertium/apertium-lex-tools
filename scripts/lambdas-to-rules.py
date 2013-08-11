@@ -1,5 +1,8 @@
 import sys;
 
+def wrap (x):
+	return '^' + x + '$'
+
 sl_tl_defaults = {}; 
 sl_tl = {};
 
@@ -12,8 +15,8 @@ for line in open(sys.argv[1]).readlines(): #{
 		continue;
 	#}
 	row = line.split(' ');
-	sl = row[1].strip();
-	tl = row[2].strip();
+	sl = wrap(row[1].strip());
+	tl = wrap(row[2].strip());
 	if sl not in sl_tl: #{
 		sl_tl[sl] = [];
 	#}

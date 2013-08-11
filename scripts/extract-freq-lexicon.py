@@ -26,7 +26,7 @@ sys.stderr = codecs.getwriter('utf-8')(sys.stderr);
 MAX_NGRAMS = 3;
 
 cur_line = 0;
-
+lineno = 0;
 sl_tl = {};
 ngrams = {};
 
@@ -42,7 +42,7 @@ if len(sys.argv) < 2: #{
 
 for line in file(sys.argv[1]).readlines(): #{
 	line = line.strip().decode('utf-8');	
-
+	lineno += 1
 	if line[0] == '-': #{
 		# Read the corpus, make a note of all ambiguous words, their frequency and their possible translations
 		#
@@ -51,25 +51,23 @@ for line in file(sys.argv[1]).readlines(): #{
 		for slword in cur_sl_row: #{
 			if len(cur_bt_row[i]['tls']) > 1: #{
 				for al in cur_al_row: #{
-					try:
-						al_sl = int(al.split('-')[1]);
-						al_tl = int(al.split('-')[0]);
-						if al_sl != i: #{
-							continue;
-						#}
-						tlword = cur_tl_row[al_tl];
-						slword = slword.lower();
-						if slword not in sl_tl: #{
-							sl_tl[slword] = {};
-						#}
-						if tlword not in sl_tl[slword]: #{
-							sl_tl[slword][tlword] = 0;
-						#}
-						sl_tl[slword][tlword] = sl_tl[slword][tlword] + 1;
+					al_sl = int(al.split('-')[1]);
+					al_tl = int(al.split('-')[0]);
+					if al_sl != i: #{
+						continue;
+					#}
 
-						print '+' , slword , tlword , sl_tl[slword][tlword];
-					except:
-						pass
+					tlword = cur_tl_row[al_tl];
+					slword = slword;
+					if slword not in sl_tl: #{
+						sl_tl[slword] = {};
+					#}
+					if tlword not in sl_tl[slword]: #{
+						sl_tl[slword][tlword] = 0;
+					#}
+					sl_tl[slword][tlword] = sl_tl[slword][tlword] + 1;
+
+					# print '+' , slword , tlword , sl_tl[slword][tlword], lineno;
 				#}
 
 #				for j in range(0, MAX_NGRAMS): #{
