@@ -3,7 +3,7 @@
 # -*- encoding: utf-8 -*-
 
 import sys, codecs, copy, commands;
-
+import common
 sys.stdin  = codecs.getreader('utf-8')(sys.stdin);
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout);
 sys.stderr = codecs.getwriter('utf-8')(sys.stderr);
@@ -69,30 +69,33 @@ for line in file(sys.argv[2]).readlines(): #{
 		# sl_tl[sl_word][tl_word] = tl_freq
 		i = 0;
 		for slword in cur_sl_row: #{
-			if cur_bt_row[i].count('/') > 1: #{
+			if len(cur_bt_row[i]['tls']) > 1: #{
 				for al in cur_al_row: #{
 					al_sl = int(al.split('-')[1]);
 					al_tl = int(al.split('-')[0]);
 					if al_sl != i: #{
 						continue;
 					#}
-					tlword = cur_tl_row[al_tl].lower().split('>')[0] + '>';
-					slword = slword.lower().split('>')[0] + '>';
-					
+					tlword = cur_tl_row[al_tl];
+					slword = slword;
+
+					if slword.startswith("parlementaire<adj>") and tlword.startswith("comisi"):
+						print >>sys.stderr, "TESTING: ", ' '.join(cur_tl_row)
+						print >>sys.stderr, "TESTING: ", ' '.join(cur_sl_row)
+
+						print >>sys.stderr, "TESTING: ", slword, tlword, al
+
 					if slword not in sl_tl_defaults: #{
 						print >>sys.stderr, 'WARNING: "' + slword + '" not in sl_tl_defaults, skipping';
 						continue;
 					#}
-					if tlword !=  sl_tl_defaults[slword]: #{
-						print >>sys.stderr, '+' , slword , sl_tl_defaults[slword] , tlword;
-					else: #{
-						print >>sys.stderr, '-' , slword , sl_tl_defaults[slword] , tlword;
+#					if tlword !=  sl_tl_defaults[slword]: #{
+#						print >>sys.stderr, '+' , slword , sl_tl_defaults[slword] , tlword;
+#					else: #{
+#						print >>sys.stderr, '-' , slword , sl_tl_defaults[slword] , tlword;
 					#}
-					print >>sys.stderr, cur_sl_row;
+#					print >>sys.stderr, cur_sl_row;
 					for j in range(1, MAX_NGRAMS): #{
-						print >>sys.stderr, cur_sl_row[i] , cur_sl_row[i-j:i+1]
-						print >>sys.stderr, cur_sl_row[i] , cur_sl_row[i:i+j+1]
-						print >>sys.stderr, cur_sl_row[i] , cur_sl_row[i-j:i+j+1]
 
 						pregram = ' '.join(cur_sl_row[i-j:i+1]);
 						postgram = ' '.join(cur_sl_row[i:i+j+1]);
@@ -125,7 +128,6 @@ for line in file(sys.argv[2]).readlines(): #{
 						ngrams[slword][roundgram][tlword] = ngrams[slword][roundgram][tlword] + 1;
 					#}
 				#}
-
 #				for j in range(0, MAX_NGRAMS): #{
 #					print cur_sl_row[i-j:i+1];
 #					print cur_sl_row[i:i+j];
@@ -142,11 +144,11 @@ for line in file(sys.argv[2]).readlines(): #{
 	line = line.split('\t')[1];
 
 	if cur_line == 0: #{
-		cur_sl_row = line.split(' ');
+		cur_sl_row = common.tokenize_tagger_line(line)
 	elif cur_line == 1: #{
-		cur_bt_row = line.split(' ');
+		cur_bt_row = common.tokenize_biltrans_line(line)
 	elif cur_line == 2: #{
-		cur_tl_row = line.split(' ');
+		cur_tl_row = common.tokenize_tagger_line(line)
 	elif cur_line == 3:  #{
 		cur_al_row = line.split(' ');
 	#}

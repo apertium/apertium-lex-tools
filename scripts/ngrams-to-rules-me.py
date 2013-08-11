@@ -3,6 +3,7 @@
 # -*- encoding: utf-8 -*-
 
 import sys;
+import common;
 
 #+nature<n>	service<n> nature<n>	carácter<n>	3
 #+nature<n>	The<def><def> imperialist<adj> nature<n>	carácter<n>	1
@@ -25,7 +26,7 @@ if len(sys.argv) < 2: #{
 infile = open(sys.argv[1]);
 	
 
-permitted_tags = ['n', 'vblex', 'adj', 'n.*', 'vblex.*', 'adj.*'];
+permitted_tags = ['n', 'vblex', 'adj'];
 
 print('<rules>');
 lineno = 1;
@@ -45,12 +46,12 @@ for line in infile.readlines(): #{
 
 	tipus = row[0].split(' ')[0];
 	weight = row[0].replace('  ', ' ').split(' ')[1];
-	sl = row[1].strip().lower();
-	tl = row[3];
+	sl = row[1].strip().lower()[1:-1];
+	tl = row[3][1:-1];
 	tl_lema = tl.split('<')[0].lower();
-	tl_tags = '<'.join(tl.split('<')[1:]).replace('><', '.').replace('>', '.*');
+	tl_tags = ''.join(tl.split('<')[1:]).replace('>', '.').rstrip('.')
 	freq = float(row[4]);
-	pattern = row[2].split(' ');
+	pattern = common.tokenize_tagger_line(row[2]);
 
 	if row[2].count('<guio>') > 0 or row[2].count('<sent>') > 0 or row[2].count('<cm>') > 0: #{
 		print('PUNCTUATION_IN_PATTERN', line, file=sys.stderr);
@@ -63,7 +64,7 @@ for line in infile.readlines(): #{
 	#}
 
 	# Hacks
-	if len(pattern[0].strip()) == 0: #{
+	if len(pattern) == 0: #{
 		print('ZERO_PATTERN' , line, file=sys.stderr);
 		continue;
 	#}
@@ -93,7 +94,7 @@ for line in infile.readlines(): #{
 		continue;
 	#}
 
-	if tl_tags not in permitted_tags: #{
+	if tl_tags.split('.')[0] not in permitted_tags: #{
 		print("TAG_NOT_PERMITTED" , tl_tags , '||' , line, file=sys.stderr);
 		continue;
 	#}
@@ -117,40 +118,6 @@ for line in infile.readlines(): #{
 		else: #{
 			sl_tags = '<'.join(word.split('<')[1:]).strip('<>');
 		#}
-
-		# ======================================================================= #
-		if sl_tags.count('.') > 0 or sl_tags == 'vblex' or sl_tags == 'det' or sl_tags == 'vbser' or sl_tags == 'vbhaver' or sl_tags == 'vbloc' or sl_tags == 'rel' or sl_tags == 'prn' or sl_tags == 'vaux':  #{
-			sl_tags = sl_tags + '.*';
-		#}
-
-		if sl_tags == 'n': #{
-			sl_tags = sl_tags.replace('n', 'n.*');
-		#}
-		sl_tags = sl_tags.replace('.inf', '').replace('.pp', '').replace('.ger','');
-		tl_tags = tl_tags.replace('.inf', '').replace('.pp', '').replace('.ger','');
-		if sl_tags == 'num': #{
-			sl_lema = '';
-		#}
-		if sl_tags == 'det.pos.*' or sl_tags == 'det.ord.*': #{
-			sl_lema = '';
-		#}
-		if sl_tags == 'np.top.*' or sl_tags == 'np.loc.*' or sl_tags == 'np.ant.*' or sl_tags == 'np.cog.*': #{
-			sl_lema = '';
-		#}
-		if sl_tags == 'num.percent': #{
-			sl_lema = '';
-			sl_tags = 'num.percent';
-		#}
-		if sl_tags == 'det.ind.*' and sl_lema == 'a': #{
-			sl_tags = 'det.ind.sg';
-		#}
-		if sl_tags == 'det.def.*' and sl_lema == 'the': #{
-			sl_tags = 'det.def.sg';
-
-		if sl_tags == 'np': #{
-			sl_lema = sl_lema.title();
-		#}
-
 
 		# ======================================================================= #
 
