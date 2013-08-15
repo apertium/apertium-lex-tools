@@ -40,7 +40,6 @@ for line in infile.readlines(): #{
 	line = line.strip();
 	#line = line.decode('utf-8').strip();
 
-
 	#+ 0.571428571429 14 8 8 	troiñ<vblex>		tourner<vblex>	8
 	row = line.split('\t');
 

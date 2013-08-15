@@ -22,6 +22,9 @@ sys.stderr = codecs.getwriter('utf-8')(sys.stderr);
 #5 	0-0 4-2 5-3 8-1 9-5 10-6 12-7 13-8 14-9 15-10
 #-------------------------------------------------------------------------------
 
+def wrap (x):
+	return '^' + x + '$'
+
 if len(sys.argv) < 3: #{
 	print ('count-patterns.py <lex> <extracted> <crispiness threshold>');
 	sys.exit(-1);
@@ -40,9 +43,11 @@ for line in file(sys.argv[1]).readlines(): #{
 	if len(line) < 1: #{
 		continue;
 	#}
-	row = line.decode('utf-8').split(' ');
-	sl = row[1];
-	tl = row[2];
+	row = common.tokenize_tagger_line(line.decode('utf-8'));
+	sl = wrap(row[0]);
+	tl = wrap(row[1]);
+	if tl[1] == '*':
+		tl = tl[:-3] + '$'
 	if line.count('@') > 0: #{
 		sl_tl_defaults[sl] = tl;
 	else: #{
@@ -76,25 +81,14 @@ for line in file(sys.argv[2]).readlines(): #{
 					if al_sl != i: #{
 						continue;
 					#}
-					tlword = cur_tl_row[al_tl];
-					slword = slword;
-
-					if slword.startswith("parlementaire<adj>") and tlword.startswith("comisi"):
-						print >>sys.stderr, "TESTING: ", ' '.join(cur_tl_row)
-						print >>sys.stderr, "TESTING: ", ' '.join(cur_sl_row)
-
-						print >>sys.stderr, "TESTING: ", slword, tlword, al
+					tlword = wrap(cur_tl_row[al_tl]);
+					slword = wrap(slword);
 
 					if slword not in sl_tl_defaults: #{
 						print >>sys.stderr, 'WARNING: "' + slword + '" not in sl_tl_defaults, skipping';
 						continue;
 					#}
-#					if tlword !=  sl_tl_defaults[slword]: #{
-#						print >>sys.stderr, '+' , slword , sl_tl_defaults[slword] , tlword;
-#					else: #{
-#						print >>sys.stderr, '-' , slword , sl_tl_defaults[slword] , tlword;
-					#}
-#					print >>sys.stderr, cur_sl_row;
+
 					for j in range(1, MAX_NGRAMS): #{
 
 						pregram = ' '.join(cur_sl_row[i-j:i+1]);

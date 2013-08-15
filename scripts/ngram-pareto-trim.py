@@ -28,7 +28,7 @@ def dominates(xs, ys):
 	else:
 		return 0
 
-def calculate_pareto_frontier(ngrams, translations):
+def calculate_pareto_frontier(sl, ngrams, translations):
 	pareto = set();
 	m = []
 	for tl in translations:
@@ -40,11 +40,10 @@ def calculate_pareto_frontier(ngrams, translations):
 				v.append(0)
 		m.append((tl, v))
 
-	print (m)
 	for x in m:
 		if all(map(lambda y: dominates(x[1], y[1]) >= 0, m)):
 			pareto.add(x[0])
-	print (pareto)
+
 	return pareto
 	
 
@@ -68,8 +67,11 @@ for line in sys.stdin.readlines():
 
 
 for sl in ngrams:
-	pareto = calculate_pareto_frontier(ngrams[sl], translations[sl])
+	pareto = calculate_pareto_frontier(sl, ngrams[sl], translations[sl])
 	for ngram in ngrams[sl]:
+		if len(pareto) == 1:
+			print (sl + " has a single translation", file=sys.stderr);
+		
 		for tl in ngrams[sl][ngram]:
 			if tl in pareto:
 				print (make_line(ngrams, sl, ngram, tl));

@@ -1,4 +1,5 @@
 import sys;
+import common;
 
 def wrap (x):
 	return '^' + x + '$'
@@ -14,9 +15,11 @@ for line in open(sys.argv[1]).readlines(): #{
 	if len(line) < 1: #{
 		continue;
 	#}
-	row = line.split(' ');
-	sl = wrap(row[1].strip());
-	tl = wrap(row[2].strip());
+	row = common.tokenize_tagger_line(line);
+	sl = wrap(row[0].strip()).lower();
+	tl = wrap(row[1].strip()).lower();
+	if tl[1] == '*':
+		tl = tl[:-3] + '$'
 	if sl not in sl_tl: #{
 		sl_tl[sl] = [];
 	#}
@@ -25,16 +28,12 @@ for line in open(sys.argv[1]).readlines(): #{
 	#}
 	if line.count('@') > 0: #{
 		sl_tl_defaults[sl] = tl;
-		sl_tl[sl].append(tl);
-		indexes[(sl, tl)] = trad_counter[sl];
-		rindex[(sl, trad_counter[sl])] = tl;
-		trad_counter[sl] = trad_counter[sl] + 1;
-	else: #{
-		sl_tl[sl].append(tl);
-		indexes[(sl, tl)] = trad_counter[sl];
-		rindex[(sl, trad_counter[sl])] = tl;
-		trad_counter[sl] = trad_counter[sl] + 1;
 	#}
+	sl_tl[sl].append(tl);
+	indexes[(sl, tl)] = trad_counter[sl];
+	rindex[(sl, trad_counter[sl])] = tl;
+	trad_counter[sl] = trad_counter[sl] + 1;
+
 #}
 
 for pair in rindex: #{
@@ -52,6 +51,7 @@ for line in open(sys.argv[2]).readlines(): #{
 	l = float(row[1]);
 	tlid = int(row[2]);
 	if (slword, tlid) not in rindex: #{
+		print ('(', slword, ',', tlid, ') not in index', file=sys.stderr)
 		continue;
 	#}
 	tlword = rindex[(slword, tlid)];
