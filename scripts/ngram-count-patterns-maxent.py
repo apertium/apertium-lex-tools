@@ -101,19 +101,19 @@ for line in file(sys.argv[2]).readlines(): #{
 					slword = slword.lower();
 					
 					if slword not in sl_tl_defaults: #{
-#						print >>sys.stderr, 'WARNING: "' + slword + '" not in sl_tl_defaults, skipping';
+						print >>sys.stderr, 'WARNING: "' + slword + '" not in sl_tl_defaults, skipping';
 						continue;
 					#}
 					if (slword, tlword) not in indexes: #{
-#						print >>sys.stderr, 'WARNING: pair (%s, %s) not found in index' % (slword, tlword);
+						print >>sys.stderr, 'WARNING: pair (%s, %s) not found in index' % (slword, tlword);
 						continue;
 					#}
 #					if tlword !=  sl_tl_defaults[slword]: #{
 #						print >>sys.stderr, '+' , slword , sl_tl_defaults[slword] , tlword;
 #					else: #{
 #						print >>sys.stderr, '-' , slword , sl_tl_defaults[slword] , tlword;
-#					#}
-#					print >>sys.stderr, cur_sl_row;
+					#}
+
 					for j in range(1, MAX_NGRAMS): #{
 #						print >>sys.stderr, cur_sl_row[i] , cur_sl_row[i-j:i+1]
 #						print >>sys.stderr, cur_sl_row[i] , cur_sl_row[i:i+j+1]
@@ -168,7 +168,6 @@ for line in file(sys.argv[2]).readlines(): #{
 							features[ni] = feature_counter;
 						#}
 						meevents[slword][event_counter].append(features[ni]);
-						#meevents[slword][event_counter].append(feat);
 						meoutcomes[slword][event_counter] = tlword;
 						
 					#}

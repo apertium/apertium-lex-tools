@@ -23,6 +23,9 @@ sys.stderr = codecs.getwriter('utf-8')(sys.stderr);
 #5 	0-0 4-2 5-3 8-1 9-5 10-6 12-7 13-8 14-9 15-10
 #-------------------------------------------------------------------------------
 
+def wrap (x):
+	return '^' + x + '$'
+
 MAX_NGRAMS = 3;
 
 cur_line = 0;
@@ -36,9 +39,10 @@ cur_bt_row = [];
 cur_al_row = [];
 
 if len(sys.argv) < 2: #{
-	print 'extract-freq-lexicon.py <candidate sent>';
+	print 'extract-freq-lexicon.py <candidate sent> [threshold]';
 	sys.exit(-1);
 #}
+
 
 for line in file(sys.argv[1]).readlines(): #{
 	line = line.strip().decode('utf-8');	
@@ -69,11 +73,6 @@ for line in file(sys.argv[1]).readlines(): #{
 
 					# print '+' , slword , tlword , sl_tl[slword][tlword], lineno;
 				#}
-
-#				for j in range(0, MAX_NGRAMS): #{
-#					print cur_sl_row[i-j:i+1];
-#					print cur_sl_row[i:i+j];
-#				#}
 			#}	
 			i = i + 1;
 		#}
@@ -92,22 +91,23 @@ for line in file(sys.argv[1]).readlines(): #{
 	elif cur_line == 2: #{
 		cur_tl_row = common.tokenize_tagger_line(line);
 	elif cur_line == 3:  #{
-		cur_al_row = line.split(' ')[:-1];
+		cur_al_row = line.split(' ');
 	#}
 
 	cur_line = cur_line + 1;
 #}
 
 for sl in sl_tl: #{
+
 	newtl = sorted(sl_tl[sl], key=lambda x: sl_tl[sl][x])
 	newtl.reverse()
 	first = True;
 	for tl in newtl: #{
 		if first: #{
-			print sl_tl[sl][tl] , sl , tl , '@';
+			print sl_tl[sl][tl] , wrap(sl) , wrap(tl) , '@';
 			first = False
 		else: #{
-			print sl_tl[sl][tl] , sl , tl;
+			print sl_tl[sl][tl] , wrap(sl) , wrap(tl);
 		#}
 	#}
 #}

@@ -22,13 +22,16 @@ sys.stderr = codecs.getwriter('utf-8')(sys.stderr);
 #5 	0-0 4-2 5-3 8-1 9-5 10-6 12-7 13-8 14-9 15-10
 #-------------------------------------------------------------------------------
 
-if len(sys.argv) < 2: #{
-	print 'count-patterns.py <lex> <extracted>'
+THRESHOLD = 0
+if len(sys.argv) not in [3, 4]: #{
+	print 'count-patterns.py <lex> <extracted> [threshold]'
 	sys.exit(-1);
 #}
 
-MAX_NGRAMS = 3;
+if len(sys.argv) == 4:
+	THRESHOLD = int(sys.argv[2])
 
+MAX_NGRAMS = 3;
 cur_line = 0;
 
 sl_tl_defaults = {}; 
@@ -52,9 +55,16 @@ for line in file(sys.argv[1]).readlines(): #{
 	if len(line) < 1: #{
 		continue;
 	#}
-	row = line.decode('utf-8').split(' ');
-	sl = wrap(row[1]);
-	tl = wrap(row[2].strip());
+	w = int(line.decode('utf-8').split(' ')[0])
+	if w < THRESHOLD:
+		continue;
+
+	row = common.tokenize_tagger_line(line.decode('utf-8'));
+	sl = wrap(row[0]).lower();
+	tl = wrap(row[1].strip()).lower();
+	if tl[1] == '*':
+		tl = tl[:-3] + '$'
+	
 	if sl not in sl_tl: #{
 		sl_tl[sl] = [];
 	#}
@@ -63,13 +73,10 @@ for line in file(sys.argv[1]).readlines(): #{
 	#}
 	if line.count('@') > 0: #{
 		sl_tl_defaults[sl] = tl;
-		sl_tl[sl].append(tl);
-		indexes[(sl, tl)] = trad_counter[sl];
-		trad_counter[sl] = trad_counter[sl] + 1;
-	else: #{
-		sl_tl[sl].append(tl);
-		indexes[(sl, tl)] = trad_counter[sl];
-		trad_counter[sl] = trad_counter[sl] + 1;
+	sl_tl[sl].append(tl);
+	indexes[(sl, tl)] = trad_counter[sl];
+	trad_counter[sl] = trad_counter[sl] + 1;
+	
 	#}
 #}
 
@@ -103,6 +110,9 @@ for line in file(sys.argv[2]).readlines(): #{
 
 					tlword = wrap(cur_tl_row[al_tl].lower());
 					slword = wrap(slword.lower());
+
+					if tlword[1] == '*' or slword[1] == '*':
+						continue;
 					
 					if slword not in sl_tl_defaults: #{
 #						print >>sys.stderr, 'WARNING: "' + slword + '" not in sl_tl_defaults, skipping';
