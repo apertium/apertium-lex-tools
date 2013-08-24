@@ -3,6 +3,7 @@
 # -*- encoding: utf-8 -*-
 
 import sys;
+import common
 
 d = open(sys.argv[1]);
 
@@ -11,16 +12,16 @@ for line in d.readlines(): #{
 
 	sys.stdout.flush();
 	if line[-2] == '@': #{
-		row = line.split(' ');
+		row = common.tokenize_tagger_line(line)
 
-		fq = row[0];
-		sl = row[1];
-		tl = row[2];
+		fq = line.split(' ')[0];
+		sl = row[0];
+		tl = row[1];
 
 		if line.count('>') < 2: #{
 			continue;
 		#}
-
+		print(sl, tl, file=sys.stderr)
 		sl_lem = sl.split('<')[0];
 		tl_lem = tl.split('<')[0];
 		sl_lem = sl_lem.replace('-', '\\-').replace('~', ' ').replace('&', '&amp;');

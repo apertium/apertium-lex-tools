@@ -3,6 +3,7 @@
 # -*- encoding: utf-8 -*-
 
 import sys;
+import common
 
 #+nature<n>	service<n> nature<n>	carácter<n>	3
 #+nature<n>	The<def><def> imperialist<adj> nature<n>	carácter<n>	1
@@ -44,34 +45,27 @@ for line in infile.readlines(): #{
 
 #	tipus = row[0].split(' ')[0];
 	weight = row[0].split(' ')[1];
-	sl = row[1].strip().lower();
-	tl = row[3];
+	sl = row[1].strip()[1:-1];
+	tl = row[3][1:-1];
 	tl_lema = tl.split('<')[0].lower();
 	tl_tags = '<'.join(tl.split('<')[1:]).replace('><', '.').replace('>', '');
 
 	freq = row[4];
-	pattern = row[2].split(' ');
+	pattern = common.tokenize_tagger_line(row[2]);
 
 	if row[2].count('<guio>') > 0 or row[2].count('<sent>') > 0 or row[2].count('<cm>') > 0: #{
 		print('PUNCTUATION_IN_PATTERN', line, file=sys.stderr);
 		continue;
 	#}
 
-
-	# Hacks
-	if len(pattern[0].strip()) == 0: #{
-		print('ZERO_PATTERN' , line, file=sys.stderr);
-		continue;
-	#}
-
 	inpattern = False;
 	for w in pattern: #{
-		if w.lower().count(sl) > 0: #{
+		if w.count(sl) > 0: #{
 			inpattern = True;
 		#}
 	#}
 	if inpattern == False:  #{
-		print('SL_NOT_IN_PATTERN' , line, file=sys.stderr);
+		print('SL_NOT_IN_PATTERN' , line, sl, tl, file=sys.stderr);
 		continue;
 	#}
 

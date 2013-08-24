@@ -10,7 +10,8 @@
 #include <vector>
 #include <deque>
 #include <map>
-
+#include <fstream>
+#include <istream>
 #include <limits>
 
 #include "lmContainer.h"
@@ -25,8 +26,8 @@ private:
 
 	double totalProbabilityMass;
 
-    vector<double> logScores;
-    vector<double> probs;
+    vector<long double> logScores;
+    vector<long double> probs;
 	vector<int> sortedIndex;	
 
     vector<string> batch;
@@ -36,8 +37,8 @@ private:
 	int lineno;
 	int sublineno;
 
-	double norm;
-    double current_max;
+	long double norm;
+    long double current_max;
 
 protected:
 	lmContainer        *m_lmtb;
@@ -51,19 +52,20 @@ protected:
 	size_t         m_nGramOrder; // max n-gram length contained in this LM.
 
 	vector<std::string> parseLine(std::string);
-	void printScores(vector<double> scores);
-	void insertSortedIndex(double prob);
+	void printScores(vector<long double> scores);
+	void insertSortedIndex(long double prob);
 	
 	void reset();
 	void normalizeProbabilities();
 	
+	ifstream tmtrans;
 
 	std::string trim(const std::string& o);
 	bool load(const std::string &filePath, float weight);
 	double score(const std::string &frame, double &pp);	
 
 public:
-	IrstlmRanker(const string &filePath, vector<double> params);	
+	IrstlmRanker(const string &filePath, char *mtransPath, vector<double> params);	
 	~IrstlmRanker();
 	
 	int standard();

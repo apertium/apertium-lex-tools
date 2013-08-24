@@ -53,9 +53,11 @@ for line in open(sys.argv[1]).readlines(): #{
 	if len(line) < 1: #{
 		continue;
 	#}
-	row = line.split(' ');
-	sl = row[1];
-	tl = row[2];
+	row = common.tokenize_tagger_line(line);
+	sl = common.wrap(row[0]);
+	tl = common.wrap(row[1]);
+	if tl[1] == '*':
+		tl = tl[:-3] + '$'
 	if sl not in trad_counter: #{
 		trad_counter[sl] = 0;
 	#}
@@ -71,17 +73,6 @@ for line in open(sys.argv[1]).readlines(): #{
 		sl_tl[sl].append(tl);
 		indexes[(sl, tl)] = trad_counter[sl];
 		trad_counter[sl] = trad_counter[sl] + 1;
-	#}
-#}
-
-#for sl in sl_tl: #{
-#	sl_tl[sl] = set(sl_tl[sl]);
-#	for tl in sl_tl[sl]: #{
-#		if tl == sl_tl_defaults[sl]: #{
-#			print('-', trad_counter[sl], indexes[(sl, tl)], sl, tl + '*', file=sys.stderr);
-#		else: #{
-#			print('-', trad_counter[sl], indexes[(sl, tl)], sl, tl, file=sys.stderr);
-		#}
 	#}
 #}
 
@@ -105,19 +96,6 @@ while reading: #{
 	#}
 
 	current_am_line_id += 1
-
-	# to skip lines in the frac corpus if we have a sub-corpus
-#	if current_dm_line_id != current_am_line_id: #{
-#		while current_dm_line_id != current_am_line_id: #{
-#			dm_line = dm_file.readline();
-#			try:
-#				current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
-#			except:
-#				break
-
-		#}
-	#}
-
 	while current_dm_line_id == current_am_line_id: #{
 
 		am_row = common.tokenize_biltrans_line(am_line);
@@ -131,16 +109,6 @@ while reading: #{
 			continue;
 		#}
 
-		cur_sl_row = [];
-		for lu in am_row: #{
-			sl = lu.split('/')[0];
-			if sl.count('><') > 0: #{
-				sl = sl.split('><')[0] + '>';
-			#}
-			cur_sl_row.append(sl);
-		#}
-
-		#frac_count = float(dm_line.split('\t')[2]);
 		try:
 			frac_count = 0.0;
 			s_fc = dm_line.split('\t')[2].strip();
@@ -160,30 +128,17 @@ while reading: #{
 		except:
 			pass
 
-	
+		cur_sl_row = map(lambda x: x['sl'], am_row)
 		limit = len(am_row);
 		for i in range(0, limit): #{
 			if am_row[i].count('/') > 1: #{
-				#print(am_row[i] , dm_row[i]); 
-				sl = am_row[i].split('/')[0].replace(' ', '~');
-				tl = dm_row[i].split('/')[1].replace(' ', '~');
-				if sl.count('><') > 0: #{
-					sl = sl.split('><')[0] + '>';
-				#}
-				if tl.count('><') > 0: #{
-					tl = tl.split('><')[0] + '>';
-				#}
-	
-#				if tl !=  sl_tl_defaults[sl]: #{
-#					print('+' , sl , sl_tl_defaults[sl] , tl, file=sys.stderr);
-#				else: #{
-#					print('-' , sl , sl_tl_defaults[sl] , tl, file=sys.stderr);
-#				#}
+				sl = wrap(am_row['sl'])
+				tl = wrap(dm_row[i]['tls'][0])
 	
 				for j in range(1, MAX_NGRAMS): #{
-					pregram = ' '.join(cur_sl_row[i-j:i+1]);
-					postgram = ' '.join(cur_sl_row[i:i+j+1]);
-					roundgram = ' '.join(cur_sl_row[i-j:i+j+1]);
+					pregram = ' '.join(map(common.wrap, cur_sl_row[i-j:i+1]));
+					postgram = ' '.join(map(common.wrap, cur_sl_row[i:i+j+1]));
+					roundgram = ' '.join(map(common.wrap, cur_sl_row[i-j:i+j+1]));
 	
 					if sl not in ngrams: #{
 						ngrams[sl] = {};

@@ -173,9 +173,9 @@ while reading: #{
 				tl = dm_row[i]['tls'][0]
 
 				for j in range(1, MAX_NGRAMS): #{
-					pregram = ' '.join(cur_sl_row[i-j:i+1]);
-					postgram = ' '.join(cur_sl_row[i:i+j+1]);
-					roundgram = ' '.join(cur_sl_row[i-j:i+j+1]);
+					pregram = ' '.join(map(common.wrap, cur_sl_row[i-j:i+1]));
+					postgram = ' '.join(map(common.wrap, cur_sl_row[i:i+j+1]));
+					roundgram = ' '.join(map(common.wrap, cur_sl_row[i-j:i+j+1]));
 	
 					if sl not in ngrams: #{
 						ngrams[sl] = {};

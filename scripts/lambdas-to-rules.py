@@ -20,6 +20,7 @@ for line in open(sys.argv[1]).readlines(): #{
 	tl = wrap(row[1].strip()).lower();
 	if tl[1] == '*':
 		tl = tl[:-3] + '$'
+
 	if sl not in sl_tl: #{
 		sl_tl[sl] = [];
 	#}

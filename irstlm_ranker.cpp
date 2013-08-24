@@ -1,7 +1,10 @@
 #include "irstlm_ranker.h"
 using namespace std;
 
-IrstlmRanker::IrstlmRanker(const string &filePath, vector<double> params) {
+IrstlmRanker::IrstlmRanker(const string &filePath, 
+						   char *tmtrans_path, 
+						   vector<double> params) 
+{
     bool val = this->load(filePath, 1.0);
 
     if(!val) {
@@ -10,7 +13,11 @@ IrstlmRanker::IrstlmRanker(const string &filePath, vector<double> params) {
         exit(EXIT_FAILURE);
     }
 	this->totalProbabilityMass = params[0];
-
+	tmtrans.open(tmtrans_path);
+	if (!tmtrans.is_open()) {
+		cout << "Could not open trimmed multitrans file: " << tmtrans_path << endl;
+		exit(-1);
+	}
     cout.precision(10);
     wcout.precision(10);
 
@@ -149,16 +156,16 @@ bool IrstlmRanker::load(const string &filePath, float weight) {
 }
 
 void IrstlmRanker::normalizeProbabilities() {
-
+	
 	for(int i = 0; i < probs.size(); i++) {
 		probs[i] = probs[i] / this->norm;
 	}
 }
 
-void IrstlmRanker::printScores(vector<double> scores)
+void IrstlmRanker::printScores(vector<long double> scores)
 {	
 	set<int> positiveIndex;
-	double probSum = 0.0;
+	long double probSum = 0.0;
 	for(int i = 0; i < sortedIndex.size(); i++) {
 		int idx = sortedIndex[i];
 		probSum += probs[idx];
@@ -168,12 +175,9 @@ void IrstlmRanker::printScores(vector<double> scores)
 		positiveIndex.insert(idx);
 	}
 
-	cout << positiveIndex.size() << endl;
-
-	
     for(int i = 0; i < batch.size(); i++)
     {
-        double score = scores[i];
+        long double score = scores[i];
         string line = batch[i];
 		bool inside = positiveIndex.find(i) != positiveIndex.end();
 
@@ -195,7 +199,11 @@ int IrstlmRanker::fractional() {
     while (!cin.eof()) {
         string line;
         getline(cin, line);
-        if (line.length()>0) {
+
+		string tt_line;
+		getline(this->tmtrans, tt_line);
+
+        if (line.length() > 0) {
             vector<string> tokens = parseLine(line);
             lineno = atoi(tokens[0].c_str());
             if(current_line == -1)
@@ -210,8 +218,8 @@ int IrstlmRanker::fractional() {
             }
 
             double pp;
-            double log_prob = score(line, pp);
-			double prob = exp10(log_prob);
+            long double log_prob = score(line, pp);
+			long double prob = exp10(log_prob);
 
             this->norm += prob;
             if(log_prob > current_max)
@@ -220,13 +228,16 @@ int IrstlmRanker::fractional() {
                 maxlineno = sublineno;
             }
 
-			batch.push_back(line);
+			batch.push_back(tt_line);
             probs.push_back(prob);
 			logScores.push_back(log_prob);
 			insertSortedIndex(prob);
 			sublineno ++;
         }
     }
+	if (this->norm == 0) {
+		cerr << "NORM == 0" << endl;
+	}
 	normalizeProbabilities();
     printScores(probs);
 
@@ -237,6 +248,9 @@ int IrstlmRanker::standard() {
     while (!cin.eof()) {
         string line;
         getline(cin, line);
+
+		string tt_line;
+		getline(this->tmtrans, tt_line);
         if (line.length()>0) {
             vector<string> tokens = parseLine(line);
             lineno = atoi(tokens[0].c_str());
@@ -260,7 +274,7 @@ int IrstlmRanker::standard() {
                 maxlineno = sublineno;
             }
 	
-            batch.push_back(line);
+            batch.push_back(tt_line);
             probs.push_back(prob);
 			logScores.push_back(log_prob);
 			insertSortedIndex(prob);
@@ -272,7 +286,7 @@ int IrstlmRanker::standard() {
     return EXIT_SUCCESS;
 }
 
-void IrstlmRanker::insertSortedIndex(double prob) {
+void IrstlmRanker::insertSortedIndex(long double prob) {
 	vector<int>::iterator it = sortedIndex.begin();
 	bool inserted = false;
 	for(int i = 0; i < sortedIndex.size(); i++) {
@@ -310,7 +324,7 @@ vector<double> parseArgs(int argc, char **argv) {
 
 void printError(char* name) {
     cout<<"Error: Wrong number of parameters"<<endl;
-    cout<<"Usage: "<<name<<" <lm_file> <mode> [-m | --probability-mass-threshold]"<<endl;
+    cout<<"Usage: "<<name<<" <lm_file> <trimmed-multitrans-file> <mode> [-m | --probability-mass-threshold]"<<endl;
     cout<<"modes:" << endl;
     cout<<"\t -s | --standard"<<endl;
     cout<<"\t -f | --fractional-counts"<<endl;
@@ -327,15 +341,15 @@ int main(int argc, char ** argv) {
         setlocale(LC_ALL, "C");
     }
 
-    if (argc != 3 && argc != 5) {
+    if (argc != 4 && argc != 6) {
         printError(argv[0]);
 		exit(1);
     }
 	
 	vector<double> params = parseArgs(argc, argv);
+    IrstlmRanker irstlm_ranker(argv[1], argv[2], params);
 
-    IrstlmRanker irstlm_ranker(argv[1], params);
-    string mode(argv[2]);
+    string mode(argv[3]);
     if (mode == "--standard" || mode == "-s") {
         irstlm_ranker.standard();
     } else if (mode == "--fractional-counts" || mode == "-f") {
