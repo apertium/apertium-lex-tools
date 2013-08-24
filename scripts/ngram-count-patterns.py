@@ -91,9 +91,9 @@ for line in file(sys.argv[2]).readlines(): #{
 
 					for j in range(1, MAX_NGRAMS): #{
 
-						pregram = ' '.join(cur_sl_row[i-j:i+1]);
-						postgram = ' '.join(cur_sl_row[i:i+j+1]);
-						roundgram = ' '.join(cur_sl_row[i-j:i+j+1]);
+						pregram = ' '.join(map(wrap, cur_sl_row[i-j:i+1]));
+						postgram = ' '.join(map(wrap, cur_sl_row[i:i+j+1]));
+						roundgram = ' '.join(map(wrap, cur_sl_row[i-j:i+j+1]));
 
 						if slword not in ngrams: #{
 							ngrams[slword] = {};
@@ -200,20 +200,6 @@ for sl in ngrams: #{
 				print '+', crispiness , weight , total, max_freq, ngrams[sl][ngram][tl], '\t' +  sl + '\t' + ngram + '\t' + tl + '\t' + str(ngrams[sl][ngram][current_tl]);
 			#}
 
-#			if tl == current_tl and tl not in sl_tl_defaults[sl] and total != max_freq: #{
-#				mf = max_freq / 2;
-#				if (total - max_freq) < mf:  #{
-#					print '@', weight, total, max_freq, ngrams[sl][ngram][tl], '\t' + sl + '\t' + ngram + '\t' + tl + '\t' + str(ngrams[sl][ngram][current_tl]);
-#				else: #{	
-#					print '+', weight, total, max_freq, ngrams[sl][ngram][tl], '\t' +  sl + '\t' + ngram + '\t' + tl + '\t' + str(ngrams[sl][ngram][current_tl]);
-#				#}
-#				continue;
-#			#}
-#			if tl == current_tl and tl not in sl_tl_defaults[sl] and total == max_freq: #{
-#				print '~', weight, total, max_freq, ngrams[sl][ngram][tl], '\t'+ sl + '\t' + ngram + '\t' + tl + '\t' + str(ngrams[sl][ngram][current_tl]);
-#				continue;
-#			#}
-#			print '-', weight, total, max_freq, ngrams[sl][ngram][tl], '\t'+ sl + '\t' + ngram + '\t' + tl + '\t' + str(ngrams[sl][ngram][tl]);
 		#}
 	#}
 #}

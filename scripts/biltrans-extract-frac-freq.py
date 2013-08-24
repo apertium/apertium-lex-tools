@@ -4,6 +4,7 @@
 
 import sys, codecs, copy, re
 import common
+import math
 
 # Input:
 #        a) Biltrans output
@@ -34,12 +35,27 @@ while reading: #{
 		continue;
 	#}
 	current_am_line_id = int(am_line.split("\t")[0])
-#	current_am_line_id = int(am_line.split('\t')[0]);
-#	print (str(current_am_line_id) + " " + str(current_dm_line_id))
-	while current_dm_line_id == current_am_line_id: #{
+
+	while True: #{
+		dm_line = dm_file.readline();
+		
+		if dm_line == '': #{
+			print('breaking', file=sys.stderr);
+			reading = False;
+			break;
+		#}
+		current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
+		if (current_dm_line_id != current_am_line_id):
+			break;
+		try:
+			frac_count = float(dm_line.split('\t')[2]);
+			if math.isnan(frac_count):
+				frac_count = 0;
+		except:
+			break;
+		
 		am_row = common.tokenize_biltrans_line(am_line);
 		dm_row = common.tokenize_biltrans_line(dm_line);
-
 
 		if len(am_row) != len(dm_row): #{
 			print('Mismatch in number of LUs between analysis and training', file=sys.stderr);
@@ -48,14 +64,10 @@ while reading: #{
 
 			print('\t' + am_line, file=sys.stderr);
 			print('\t' + dm_line, file=sys.stderr);
-
 			continue;
 		#}
 
-		try:
-			frac_count = float(dm_line.split('\t')[2]);
-		except:
-			break;
+		
 
 		limit = len(am_row);
 		for i in range(0, limit): #{
@@ -74,14 +86,6 @@ while reading: #{
 			
 			#}
 		#}
-		dm_line = dm_file.readline();
-
-		if dm_line == '': #{
-			print('breaking', file=sys.stderr);
-			reading = False;
-			break;
-		#}
-		current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
 	#}	
 #}
 
@@ -92,10 +96,10 @@ for sl in sl_tl: #{
 	first = True;
 	for tl in newtl: #{
 		if first: #{
-			print('%.10f %s %s @' % (sl_tl[sl][tl] , sl , tl));
+			print('%.10f %s %s @' % (sl_tl[sl][tl] , common.wrap(sl) , common.wrap(tl)));
 			first = False
 		else: #{
-			print('%.10f %s %s' % (sl_tl[sl][tl] , sl , tl));
+			print('%.10f %s %s' % (sl_tl[sl][tl] , common.wrap(sl) , common.wrap(tl)));
 		#}
 	#}
 #}

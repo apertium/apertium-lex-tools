@@ -3,7 +3,7 @@
 # -*- encoding: utf-8 -*-
 
 import sys, codecs, copy;
-
+import common
 # Input:
 
 #0.6000015452	k<post> bukatu<vblex> ari izan<vbper>	bukatu<vblex>	acabar<vblex>
@@ -37,10 +37,11 @@ for line in open(sys.argv[1]).readlines(): #{
 	if len(line) < 1: #{
 		continue;
 	#}
-	row = line.split(' ');
-	sl = row[1];
-	tl = row[2];
-	fr = float(row[0]);
+
+	row = common.tokenize_tagger_line(line)
+	sl = row[0];
+	tl = row[1];
+	fr = float(line.split(' ')[0]);
 	if line.count('@') and fr == 0.0: #{
 		print('!!! Prolly something went wrong here, the default has a freq of 0.0', file=sys.stderr);
 		print('    %s => %s = %.10f' % (sl, tl, fr), file=sys.stderr);
@@ -94,9 +95,10 @@ for sl in ngrams: #{
 		#}
 
 		total = 0.0;
-		max_freq = 0.0;
+		max_freq = -1.0;
 		max_tl = '';
 		for tl in ngrams[sl][ngram]: #{
+
 			if ngrams[sl][ngram][tl] > max_freq: #{
 				max_freq = ngrams[sl][ngram][tl];
 				max_tl = tl;
@@ -106,11 +108,14 @@ for sl in ngrams: #{
 
 		default = sl_tl_defaults[sl];	
 		
-		if max_tl not in ngrams[sl][ngram] or default not in ngrams[sl][ngram]: #{
+		if max_tl not in ngrams[sl][ngram] and default not in ngrams[sl][ngram]: #{
 			print('Some shit went down..', file=sys.stderr);
 			print('= %s\t%s\t%s' % (sl, ngram, max_tl), file=sys.stderr);
 			continue;
 		#}
+		if max_freq == 0.0:
+			continue;
+
 
 		if only_max == True: #{
 			crispiness = 0.0;

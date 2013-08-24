@@ -78,12 +78,6 @@ cur_al_row = [];
 for line in file(sys.argv[2]).readlines(): #{
 	line = line.strip().decode('utf-8');	
 	if line[0] == '-': #{
-#		print len(cur_sl_row), len(cur_tl_row), len(cur_bt_row), len(cur_al_row);	
-#		print cur_sl_row;
-#		print cur_bt_row;
-#		print cur_tl_row;
-#		print cur_al_row;
-#
 		# Read the corpus, make a note of all ambiguous words, their frequency and their possible translations
 		#
 		# sl_tl[sl_word][tl_word] = tl_freq
@@ -97,8 +91,8 @@ for line in file(sys.argv[2]).readlines(): #{
 						continue;
 					#}
 
-					tlword = cur_tl_row[al_tl].lower();
-					slword = slword.lower();
+					tlword = cur_tl_row[al_tl];
+					slword = slword;
 					
 					if slword not in sl_tl_defaults: #{
 						print >>sys.stderr, 'WARNING: "' + slword + '" not in sl_tl_defaults, skipping';

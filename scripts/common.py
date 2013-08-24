@@ -4,8 +4,11 @@
 
 
 import re
+import sys
 
 re_start = re.compile('(^[^\^]*)');
+def wrap (x):
+	return '^' + x + '$'
 
 def parse_tags(ptr, line):
 	tags = []
@@ -95,12 +98,10 @@ def parse_tls(ptr, line):
 
 def toBiltransToken(sl, tls):
 	new_tls = []
-	new_sl = (sl[0], [])
-
 	for tl in tls:
 		new_tl = tl[0] + '<' + '><'.join(tl[1]) + '>';
 		new_tls.append(new_tl);
-
+	print (sl, file=sys.stderr)
 	new_sl = sl[0] + '<' + '><'.join(sl[1]) + '>';
 
 	return (new_sl, new_tls);
