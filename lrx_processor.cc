@@ -49,6 +49,7 @@ LRXProcessor::LRXProcessor()
   traceMode = false;
   debugMode = false;
   outOfWord = true;
+  nullFlush = false;
 }
 
 LRXProcessor::~LRXProcessor()
@@ -60,6 +61,12 @@ void
 LRXProcessor::setTraceMode(bool m)
 {
   traceMode = m;
+}
+
+void
+LRXProcessor::setNullFlush(bool m)
+{
+  nullFlush = m;
 }
 
 void
@@ -295,6 +302,13 @@ LRXProcessor::process(FILE *input, FILE *output)
   while(!feof(input))
   {
     int val = fgetwc_unlocked(input);
+
+    if(nullFlush && val == L'\0') 
+    {
+      fputwc_unlocked(val, output);
+      fflush(output);
+      continue;
+    }
 
     // We're starting to read a new lexical form
     if(val == L'^' && !isEscaped && outOfWord)
@@ -937,6 +951,13 @@ LRXProcessor::processME(FILE *input, FILE *output)
   while(!feof(input))
   {
     int val = fgetwc_unlocked(input);
+
+    if(nullFlush && val == L'\0') 
+    {
+      fputwc_unlocked(val, output);
+      fflush(output);
+      continue;
+    }
 
     // We're starting to read a new lexical form
     if(val == L'^' && !isEscaped && outOfWord)

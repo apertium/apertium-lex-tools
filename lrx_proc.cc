@@ -33,15 +33,17 @@ using namespace std;
 void endProgram(char *name)
 {
   cout << basename(name) << ": process a bilingual stream with a lexical rule transducer" << endl;
-  cout << "USAGE: " << basename(name) << "[ -t | -d | -m ] fst_file [input_file [output_file]]" << endl;
+  cout << "USAGE: " << basename(name) << "[ -z | -d | -t | -m ] fst_file [input_file [output_file]]" << endl;
 #if HAVE_GETOPT_LONG
   cout << "  -m, --max-ent:       run the rules using weights as lambdas" << endl; 
   cout << "  -t, --trace:         trace the rules which have been applied" << endl;
   cout << "  -d, --debug:         print out information about how the rules are run" << endl;
+  cout << "  -z, --null-flush:    flush on the null character" << endl;
 #else
   cout << "  -m:         run the rules using weights as lambdas" << endl;
   cout << "  -t:         trace the rules which have been applied" << endl;
   cout << "  -d:         print out information about how the rules are run" << endl;
+  cout << "  -z:         flush on the null character" << endl;
 #endif
   exit(EXIT_FAILURE);
 }
@@ -58,6 +60,7 @@ int main(int argc, char *argv[])
       {"trace",        0, 0, 't'}
       {"max-ent",      0, 0, 'm'}
       {"debug",        0, 0, 'd'}
+      {"null-flush",   0, 0, 'z'}
     };
 #endif
 
@@ -65,9 +68,9 @@ int main(int argc, char *argv[])
   {
 #if HAVE_GETOPT_LONG
     int option_index;
-    int c = getopt_long(argc, argv, "mtd", long_options, &option_index);
+    int c = getopt_long(argc, argv, "mztd", long_options, &option_index);
 #else
-    int c = getopt(argc, argv, "mtd");
+    int c = getopt(argc, argv, "mztd");
 #endif
 
     if(c == -1)
@@ -79,6 +82,9 @@ int main(int argc, char *argv[])
     {
     case 'm':
       useMaxEnt = true;
+      break;
+    case 'z':
+      lrxp.setNullFlush(true);
       break;
     case 't':
       lrxp.setTraceMode(true);
