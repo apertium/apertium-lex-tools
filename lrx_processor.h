@@ -92,6 +92,7 @@ private:
 
   bool traceMode;
   bool debugMode;
+  bool nullFlush;
   bool outOfWord;
 
   unsigned int pos; 
@@ -117,6 +118,7 @@ public:
 
   void setTraceMode(bool mode);
   void setDebugMode(bool mode);
+  void setNullFlush(bool mode);
 
   void init();
   void load(FILE *input);
