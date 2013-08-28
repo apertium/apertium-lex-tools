@@ -9,7 +9,7 @@ lrx_comp_SOURCES = lrx_compiler.cc lrx_comp.cc
 
 lrx_proc_SOURCES = lrx_processor.cc lrx_proc.cc
 
-multitrans_SOURCES = TaggerOutputProcessor.cpp Multitrans.cpp multitrans.cpp
+multitrans_SOURCES = TaggerOutputProcessor.cc multi_translator.cc multitrans.cc
 
 # irstlm_ranker_SOURCES = irstlm_ranker.cpp
 
