@@ -1,6 +1,6 @@
-#include "Multitrans.h"
+#include "multi_translator.h"
 
-Multitrans::Multitrans(string path, string mode, bool trimmed, bool filter, bool number_lines) {
+MultiTranslator::MultiTranslator(string path, string mode, bool trimmed, bool filter, bool number_lines) {
 	this->trimmed = trimmed;
 	this->filter = filter;
 	this->number_lines = number_lines;
@@ -14,9 +14,9 @@ Multitrans::Multitrans(string path, string mode, bool trimmed, bool filter, bool
 	bilingual.initBiltrans();
 	bilingual.setDictionaryCaseMode(true);
 }
-Multitrans::~Multitrans() {}
+MultiTranslator::~MultiTranslator() {}
 
-int Multitrans::calculateFertility(vector<BiltransToken> sent) {
+int MultiTranslator::calculateFertility(vector<BiltransToken> sent) {
 	int fertility = 1;
 	for (int i = 0; i < sent.size(); i++) {
 		fertility *= sent[i].targetTokens.size();
@@ -25,7 +25,7 @@ int Multitrans::calculateFertility(vector<BiltransToken> sent) {
 }
 
 
-BiltransToken Multitrans::parseBiltransToken(wstring bt) {
+BiltransToken MultiTranslator::parseBiltransToken(wstring bt) {
 
 	BiltransToken token;
 	vector<wstring> tokens = wsplit(bt, L'/');
@@ -39,7 +39,7 @@ BiltransToken Multitrans::parseBiltransToken(wstring bt) {
 
 }
 
-bool Multitrans::isPosAmbig(BiltransToken bt) {
+bool MultiTranslator::isPosAmbig(BiltransToken bt) {
 
 	bool isPos;
 	if (bt.sourceToken.tags.size() > 0) {
@@ -55,7 +55,7 @@ bool Multitrans::isPosAmbig(BiltransToken bt) {
 
 }
 
-BiltransToken Multitrans::getFullToken(wstring source) {
+BiltransToken MultiTranslator::getFullToken(wstring source) {
 
 	BiltransToken token;	
 	if (source[0] == L'*') {
@@ -75,7 +75,7 @@ BiltransToken Multitrans::getFullToken(wstring source) {
 	
 }
 
-BiltransToken Multitrans::getTrimmedToken(wstring source) {
+BiltransToken MultiTranslator::getTrimmedToken(wstring source) {
 
 	BiltransToken ttoken;
 	BiltransToken ftoken;
@@ -129,7 +129,7 @@ BiltransToken Multitrans::getTrimmedToken(wstring source) {
 	
 }
 
-void Multitrans::biltransToMultitrans(int sn, int &tn, int idx, 
+void MultiTranslator::biltransToMultiTranslator(int sn, int &tn, int idx, 
 	vector<BiltransToken> s, wstring buffer) 
 {
 
@@ -146,10 +146,10 @@ void Multitrans::biltransToMultitrans(int sn, int &tn, int idx,
 		if(idx != s.size() - 1) {
 			token += L" ";
 		}
-		biltransToMultitrans(sn, tn, idx+1, s, buffer + token);	
+		biltransToMultiTranslator(sn, tn, idx+1, s, buffer + token);	
 	}
 }
-void Multitrans::printBiltransSentence(int n, vector<BiltransToken> s) {
+void MultiTranslator::printBiltransSentence(int n, vector<BiltransToken> s) {
 	if (number_lines) {
 		wcout << n << "\t";
 	}
@@ -162,7 +162,7 @@ void Multitrans::printBiltransSentence(int n, vector<BiltransToken> s) {
 	wcout << endl;
 }
 
-void Multitrans::printTaggerOutput(int n, vector<BiltransToken> sentence) {
+void MultiTranslator::printTaggerOutput(int n, vector<BiltransToken> sentence) {
 	if (number_lines) {
 		wcout << n << "\t";
 	}
@@ -176,7 +176,7 @@ void Multitrans::printTaggerOutput(int n, vector<BiltransToken> sentence) {
 	wcout << endl;
 }
 
-void Multitrans::processSentence(vector<TaggerToken> sentence) {
+void MultiTranslator::processSentence(vector<TaggerToken> sentence) {
 
 	vector<BiltransToken> outputSentence;
 	bool isAmbig = false;
@@ -221,7 +221,7 @@ void Multitrans::processSentence(vector<TaggerToken> sentence) {
 		} else if (mode == "-m") {
 			wstring outBuffer = L"";
 			int tn = 0;
-			biltransToMultitrans(this->sn, tn, 0, outputSentence, outBuffer);
+			biltransToMultiTranslator(this->sn, tn, 0, outputSentence, outBuffer);
 		} 
 	}
 	this->sn ++;
