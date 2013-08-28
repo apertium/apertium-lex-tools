@@ -1,7 +1,7 @@
 #ifndef BILTRANS_WITHOUT_QUEUE
 #define BILTRANS_WITHOUT_QUEUE
 
-#include "TaggerOutputProcessor.h"
+#include "tagger_output_processor.h"
 
 class BiltransToken {
 public:
@@ -27,7 +27,7 @@ public:
 	}
 };
 
-class Multitrans : public TaggerOutputProcessor {
+class MultiTranslator : public TaggerOutputProcessor {
 private:
 	FSTProcessor bilingual;
 	string path;
@@ -51,14 +51,14 @@ private:
 
 	void printTaggerOutput(int i, vector<BiltransToken> s);
 	
-	void biltransToMultitrans(int sn, int &tn, int idx, 
+	void biltransToMultiTranslator(int sn, int &tn, int idx, 
 			vector<BiltransToken> s, wstring buffer);
 
 	
 
 public:
-	Multitrans(string path, string mode, bool trimmed, bool filter, bool number_lines);
-	~Multitrans();
+	MultiTranslator(string path, string mode, bool trimmed, bool filter, bool number_lines);
+	~MultiTranslator();
 
 	int calculateFertility(vector<BiltransToken> sent);
 

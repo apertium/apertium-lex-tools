@@ -1,4 +1,4 @@
-#include "TaggerOutputProcessor.h"
+#include "tagger_output_processor.h"
 
 TaggerOutputProcessor::TaggerOutputProcessor() {
 	this->sn = 0;

@@ -1,4 +1,4 @@
-#include "Multitrans.h"
+#include "multi_translator.h"
 
 bool trim = false;
 bool filter = false;
@@ -58,6 +58,6 @@ int main(int argc, char** argv) {
 
 	parseArguments(argc, argv);
 
-	Multitrans mt(path, mode, trim, filter, number_lines);
+	MultiTranslator mt(path, mode, trim, filter, number_lines);
 	mt.processTaggerOutput();
 }
