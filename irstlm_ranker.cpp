@@ -180,8 +180,8 @@ void IrstlmRanker::printScores(vector<long double> scores)
         long double score = scores[i];
         string line = batch[i];
 		bool inside = positiveIndex.find(i) != positiveIndex.end();
-
-        cout << fixed << score << "\t|";
+		cout << line;
+        cout << "\t" << score << "\t|";
 		if(i == maxlineno) {
            cout << "@";
 		} else if (inside) {
@@ -189,8 +189,7 @@ void IrstlmRanker::printScores(vector<long double> scores)
 		} else {
 			cout << "-";
 		}
-        
-        cout << "|\t" << line << endl;
+		cout << "|" << endl;   
     }
 }
 
