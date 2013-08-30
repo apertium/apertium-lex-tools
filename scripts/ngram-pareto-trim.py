@@ -8,6 +8,16 @@ translations = {}
 def make_line(ngrams, sl, ngram, tl):
 	return '+ ' + str(ngrams[sl][ngram][tl]) + '\t' + sl + '\t' + ngram + '\t' + tl + '\t1'
 
+def compose_single_translation(ngrams, sl, pareto):
+	s = 0;
+	for ngram in ngrams[sl]:
+		for tl in ngrams[sl][ngram]:
+			if tl in pareto:
+				s += ngrams[sl][ngram][tl]
+
+	return '+ ' + str(s) + '\t' + sl + '\t' + '' + '\t' + list(pareto)[0] + '\t1'
+	
+
 def dominates(xs, ys):
 	n = len(xs)
 	fst = True;
@@ -65,13 +75,14 @@ for line in sys.stdin.readlines():
 	if tl not in ngrams[sl][ngram]:
 		ngrams[sl][ngram][tl] = weight;
 
-
 for sl in ngrams:
 	pareto = calculate_pareto_frontier(sl, ngrams[sl], translations[sl])
-	for ngram in ngrams[sl]:
-		if len(pareto) == 1:
-			print (sl + " has a single translation", file=sys.stderr);
+	if len(pareto) == 1:
+		print(sl, 'has a single translation:', list(pareto)[0], file=sys.stderr)
+		print(compose_single_translation(ngrams, sl, pareto));
+		continue;
 		
+	for ngram in ngrams[sl]:
 		for tl in ngrams[sl][ngram]:
 			if tl in pareto:
 				print (make_line(ngrams, sl, ngram, tl));

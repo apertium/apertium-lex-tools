@@ -36,17 +36,13 @@ while reading: #{
 	#}
 	current_am_line_id = int(am_line.split("\t")[0])
 
-	while True: #{
-		dm_line = dm_file.readline();
-		
+	while current_am_line_id == current_dm_line_id: #{
 		if dm_line == '': #{
 			print('breaking', file=sys.stderr);
 			reading = False;
 			break;
 		#}
 		current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
-		if (current_dm_line_id != current_am_line_id):
-			break;
 		try:
 			frac_count = float(dm_line.split('\t')[2]);
 			if math.isnan(frac_count):
@@ -64,7 +60,10 @@ while reading: #{
 
 			print('\t' + am_line, file=sys.stderr);
 			print('\t' + dm_line, file=sys.stderr);
-			continue;
+			dm_line = dm_file.readline();
+			if dm_line == '': break;
+			current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
+
 		#}
 
 		
@@ -86,6 +85,11 @@ while reading: #{
 			
 			#}
 		#}
+		dm_line = dm_file.readline();
+		if dm_line == '': break;
+		current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
+
+
 	#}	
 #}
 
