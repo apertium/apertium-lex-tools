@@ -175,6 +175,10 @@ void IrstlmRanker::printScores(vector<long double> scores)
 		positiveIndex.insert(idx);
 	}
 
+	for (int i = 0; i < sortedIndex.size(); i++) {
+		cerr << batch[sortedIndex[i]] << "\t" << scores[sortedIndex[i]] << endl;
+	}
+
     for(int i = 0; i < batch.size(); i++)
     {
         long double score = scores[i];
@@ -286,18 +290,36 @@ int IrstlmRanker::standard() {
 }
 
 void IrstlmRanker::insertSortedIndex(long double prob) {
+	if (sortedIndex.size() == 0) {
+		sortedIndex.push_back(sublineno);
+		return;
+	}
 	vector<int>::iterator it = sortedIndex.begin();
-	bool inserted = false;
-	for(int i = 0; i < sortedIndex.size(); i++) {
-		int idx = sortedIndex[i];
-		if (prob > probs[idx]) {
-			sortedIndex.insert(it + i, sublineno);
-			inserted = true;
+	int lowBound = 0;
+	int highBound = sortedIndex.size() - 1;
+	if (prob <= probs[sortedIndex[highBound]]) {
+ 		sortedIndex.push_back(sublineno);
+		return;
+	} else if (prob >= probs[sortedIndex[lowBound]]) {
+		sortedIndex.insert(it, sublineno);
+		return;
+	}
+
+	while(true) {
+		int midIdx = (lowBound + highBound ) / 2;
+		if (lowBound == highBound) {
+			sortedIndex.insert(it + lowBound, sublineno);
+			break;
+		} else if (lowBound == highBound - 1) {
+			sortedIndex.insert(it + lowBound + 1, sublineno);
 			break;
 		}
-	}
-	if (! inserted) {
-		sortedIndex.push_back(sublineno);
+		
+		if (prob > probs[sortedIndex[midIdx]]) {
+			highBound = midIdx;
+		} else {
+			lowBound = midIdx;
+		}
 	}
 }
 

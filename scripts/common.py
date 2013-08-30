@@ -101,7 +101,6 @@ def toBiltransToken(sl, tls):
 	for tl in tls:
 		new_tl = tl[0] + '<' + '><'.join(tl[1]) + '>';
 		new_tls.append(new_tl);
-	print (sl, file=sys.stderr)
 	new_sl = sl[0] + '<' + '><'.join(sl[1]) + '>';
 
 	return (new_sl, new_tls);
