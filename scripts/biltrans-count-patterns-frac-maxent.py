@@ -86,7 +86,6 @@ current_dm_line_id = -1;
 dm_line = dm_file.readline();
 current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
 
-
 while reading: #{
 	am_line = am_file.readline();
 
@@ -95,7 +94,7 @@ while reading: #{
 		continue;
 	#}
 
-	current_am_line_id += 1
+	current_am_line_id = int(am_line.split('\t')[0]);
 	while current_dm_line_id == current_am_line_id: #{
 
 		am_row = common.tokenize_biltrans_line(am_line);
@@ -106,6 +105,8 @@ while reading: #{
 			print('\t' + am_line, file=sys.stderr);
 			print('\t' + dm_line, file=sys.stderr);
 			print('...skipping', file=sys.stderr);
+			dm_line = dm_file.readline()
+			current_dm_line_id = int(dm_line.split('\t')[0]);
 			continue;
 		#}
 
@@ -113,27 +114,29 @@ while reading: #{
 			frac_count = 0.0;
 			s_fc = dm_line.split('\t')[2].strip();
 			if s_fc == '' or len(s_fc) == 0: #{
-				break;
-				print('%d %d :: %d %d :: Frac count is not floatable' % (am_counter, dm_counter, current_am_line_id, current_dm_line_id), file=sys.stderr);
+#				print('%d %d :: %d %d :: Frac count is not floatable' % (am_counter, dm_counter, current_am_line_id, current_dm_line_id), file=sys.stderr);
+				dm_line = dm_file.readline()
+				current_dm_line_id = int(dm_line.split('\t')[0]);
+				continue;
 			#}
 
 			frac_count = float(s_fc);
 		
 			if math.isnan(frac_count): #{ 
-				break;
-				print('%d %d :: %d %d :: Frac count is not a number' % (am_counter, dm_counter, current_am_line_id, current_dm_line_id), file=sys.stderr);
-
+#				print('%d %d :: %d %d :: Frac count is not a number' % (am_counter, dm_counter, current_am_line_id, current_dm_line_id), file=sys.stderr);
 				frac_count = 0.0;
 			#}
 		except:
-			pass
+			dm_line = dm_file.readline()
+			current_dm_line_id = int(dm_line.split('\t')[0]);
+			continue;
 
-		cur_sl_row = map(lambda x: x['sl'], am_row)
+		cur_sl_row = [x['sl'] for x in am_row]
 		limit = len(am_row);
 		for i in range(0, limit): #{
-			if am_row[i].count('/') > 1: #{
-				sl = wrap(am_row['sl'])
-				tl = wrap(dm_row[i]['tls'][0])
+			if len(am_row[i]['tls']) > 1: #{
+				sl = common.wrap(am_row[i]['sl'])
+				tl = common.wrap(dm_row[i]['tls'][0])
 	
 				for j in range(1, MAX_NGRAMS): #{
 					pregram = ' '.join(map(common.wrap, cur_sl_row[i-j:i+1]));

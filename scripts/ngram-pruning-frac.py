@@ -126,14 +126,14 @@ for sl in ngrams: #{
 			#}
 			if def_crisp == 0.0: #{
 				print('!!! Something wanky happened. :(', file=sys.stderr);	
-				print('%.10f %.10f %.10f %.10f\t%s\t%s\t%s\t%.10f' % (total, ngrams[sl][ngram][default] , max_freq, ngrams[sl][ngram][max_tl], sl, ngram, max_tl, ngrams[sl][ngram][max_tl]), file=sys.stderr);
+				print('%.10f %.10f %.10f\t%s\t%s\t%s\t%.10f' % (total , max_freq, ngrams[sl][ngram][max_tl], sl, ngram, max_tl, ngrams[sl][ngram][max_tl]), file=sys.stderr);
 				print('\tskipping...', file=sys.stderr);	
 				continue;
 			#}
 			weight = float(ngrams[sl][ngram][max_tl]) / float(total);
 			crispiness = alt_crisp/def_crisp;
 
-			print('- %.10f %.10f %.10f %.10f %.10f %.10f\t%s\t%s\t%s\t%.10f' % (crispiness, weight, total, ngrams[sl][ngram][default] , max_freq, ngrams[sl][ngram][max_tl], sl, ngram, max_tl, ngrams[sl][ngram][max_tl]));
+			print('- %.10f %.10f %.10f %.10f %.10f\t%s\t%s\t%s\t%.10f' % (crispiness, weight, total , max_freq, ngrams[sl][ngram][max_tl], sl, ngram, max_tl, ngrams[sl][ngram][max_tl]));
 #			print('- %.10f \t%s\t%s\t%s\t%.10f' % (crispiness, sl, ngram, max_tl, ngrams[sl][ngram][max_tl]));
 
 			if crispiness > max_crispiness: #{
