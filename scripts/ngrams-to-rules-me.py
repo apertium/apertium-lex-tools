@@ -39,7 +39,7 @@ for line in infile.readlines(): #{
 	#}
 	line = line.strip();
 	#line = line.decode('utf-8').strip();
-
+	print(line, file=sys.stderr)
 	#+ 0.571428571429 14 8 8 	troiñ<vblex>		tourner<vblex>	8
 	row = line.split('\t');
 
@@ -49,7 +49,9 @@ for line in infile.readlines(): #{
 	tl = row[3][1:-1];
 	tl_lema = tl.split('<')[0].lower();
 	tl_tags = ''.join(tl.split('<')[1:]).replace('>', '.').rstrip('.')
-	freq = float(row[4]);
+	freq = 1
+#	freq = float(row[4]);
+
 	pattern = common.tokenize_tagger_line(row[2]);
 
 	if row[2].count('<guio>') > 0 or row[2].count('<sent>') > 0 or row[2].count('<cm>') > 0: #{
@@ -63,12 +65,13 @@ for line in infile.readlines(): #{
 	#}
 
 	# Hacks
-	if len(pattern) == 0: #{
-		print('ZERO_PATTERN' , line, file=sys.stderr);
-		continue;
+#	if len(pattern) == 0: #{
+#		print('ZERO_PATTERN' , line, file=sys.stderr);
+#		continue;
 	#}
 
-	if len(pattern) < MINMATCH: #{
+
+	if len(pattern) < MINMATCH and len(pattern) > 0: #{
 		print('BELOW_MINMATCH', line, file=sys.stderr);
 		continue;
 	#}
@@ -79,7 +82,7 @@ for line in infile.readlines(): #{
 			inpattern = True;
 		#}
 	#}
-	if inpattern == False:  #{
+	if len(pattern) > 0 and not inpattern:  #{
 		print('SL_NOT_IN_PATTERN' , line, file=sys.stderr);
 		continue;
 	#}
