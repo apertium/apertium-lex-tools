@@ -50,6 +50,7 @@ for line in infile.readlines(): #{
 	tl_lema = tl.split('<')[0].lower();
 	tl_tags = '<'.join(tl.split('<')[1:]).replace('><', '.').replace('>', '');
 
+
 	freq = row[4];
 	pattern = common.tokenize_tagger_line(row[2]);
 

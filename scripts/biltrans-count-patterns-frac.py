@@ -78,6 +78,8 @@ reading = True;
 current_am_line_id = -1;
 current_dm_line_id = -1;
 
+rsep = re.compile('\$[^\^]*\^');
+
 dm_line = dm_file.readline();
 current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
 

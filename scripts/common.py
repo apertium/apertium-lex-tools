@@ -119,6 +119,8 @@ def parse_biltrans_token(ptr, line):
 		
 def parse_tagger_token(ptr, line):
 	(ptr, sl) = parse_sl(ptr, line);
+	print (sl)
+	print (line)
 	sl = sl[0] + '<' + '><'.join(sl[1]) + '>'	
 
 	return (ptr, sl);
