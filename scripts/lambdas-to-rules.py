@@ -16,8 +16,8 @@ for line in open(sys.argv[1]).readlines(): #{
 		continue;
 	#}
 	row = common.tokenize_tagger_line(line);
-	sl = wrap(row[0].strip()).lower();
-	tl = wrap(row[1].strip()).lower();
+	sl = wrap(row[0].strip());
+	tl = wrap(row[1].strip());
 	if tl[1] == '*':
 		tl = tl[:-3] + '$'
 

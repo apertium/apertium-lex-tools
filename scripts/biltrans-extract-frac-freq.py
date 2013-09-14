@@ -29,8 +29,9 @@ rsep = re.compile('\$[^\^]*\^');
 dm_line = dm_file.readline();
 current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
 while reading: #{
+	current_am_line_id += 1
 	am_line = am_file.readline();
-	if am_line == '': #{
+	if am_line == '':
 		reading = False;
 		continue;
 	#}

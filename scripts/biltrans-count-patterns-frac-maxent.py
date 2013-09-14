@@ -28,6 +28,21 @@ import sys, codecs, copy, math, re, common;
 MAX_NGRAMS = 3; # Max = 5-grams
 cur_line = 0;
 
+re_sep = re.compile('\$[^\^]*\^');
+
+def split_line(line):
+	line = re_clean_start.sub('', line.split('\t')[1]);
+	line = re_clean_end.sub('$', line);
+	line = line[1:-1];
+
+	row = re_sep.split(line);
+	return row
+	
+
+
+	# am_row = re_sep.sub('$ ^', am_line.split('\t')[1])[1:-1].split('$ ^');
+
+
 sl_tl_defaults = {}; 
 sl_tl = {};
 ngrams = {};
@@ -94,14 +109,13 @@ while reading: #{
 		continue;
 	#}
 
-	current_am_line_id = int(am_line.split('\t')[0]);
+	current_am_line_id = int(am_line.split('\t')[0])
 	while current_dm_line_id == current_am_line_id: #{
-
 		am_row = common.tokenize_biltrans_line(am_line);
 		dm_row = common.tokenize_biltrans_line(dm_line);
 
 		if len(am_row) != len(dm_row): #{
-			print('Mismatch in number of LUs between analysis and training', file=sys.stderr);
+			print('Mismatch in number of LUs between analysis and training', len(am_row), len(dm_row), 'lines', current_am_line_id, current_dm_line_id, file=sys.stderr);
 			print('\t' + am_line, file=sys.stderr);
 			print('\t' + dm_line, file=sys.stderr);
 			print('...skipping', file=sys.stderr);
@@ -116,7 +130,7 @@ while reading: #{
 			if s_fc == '' or len(s_fc) == 0: #{
 #				print('%d %d :: %d %d :: Frac count is not floatable' % (am_counter, dm_counter, current_am_line_id, current_dm_line_id), file=sys.stderr);
 				dm_line = dm_file.readline()
-				current_dm_line_id = int(dm_line.split('\t')[0]);
+				current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
 				continue;
 			#}
 
@@ -128,7 +142,7 @@ while reading: #{
 			#}
 		except:
 			dm_line = dm_file.readline()
-			current_dm_line_id = int(dm_line.split('\t')[0]);
+			current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
 			continue;
 
 		cur_sl_row = [x['sl'] for x in am_row]

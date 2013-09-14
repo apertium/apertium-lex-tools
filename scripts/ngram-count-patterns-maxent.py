@@ -95,11 +95,11 @@ for line in file(sys.argv[2]).readlines(): #{
 					slword = slword;
 					
 					if slword not in sl_tl_defaults: #{
-						print >>sys.stderr, 'WARNING: "' + slword + '" not in sl_tl_defaults, skipping';
+#						print >>sys.stderr, 'WARNING: "' + slword + '" not in sl_tl_defaults, skipping';
 						continue;
 					#}
 					if (slword, tlword) not in indexes: #{
-						print >>sys.stderr, 'WARNING: pair (%s, %s) not found in index' % (slword, tlword);
+#						print >>sys.stderr, 'WARNING: pair (%s, %s) not found in index' % (slword, tlword);
 						continue;
 					#}
 #					if tlword !=  sl_tl_defaults[slword]: #{
