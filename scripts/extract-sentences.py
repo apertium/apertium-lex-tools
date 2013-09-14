@@ -44,6 +44,7 @@ while reading: #{
 	bt = common.tokenize_biltrans_line(bt_line);
 	sl = common.tokenize_tagger_line(row[1]);
 	tl = common.tokenize_tagger_line(row[0]);
+
 		
 	if not ambiguous(bt): #{
 		print ("line", lineno, "not ambiguous", file=sys.stderr);

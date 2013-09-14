@@ -31,7 +31,7 @@ for line in open(ldf).readlines(): #{
 	if line.count('@@') > 0: #{
 		continue;
 	#}
-	row = line.strip().split(' ');
+	row = line.strip().split('\t');
 
 	l = float(row[2]);
 	ngid = int(row[1].split(':')[0]);
