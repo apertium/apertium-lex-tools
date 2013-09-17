@@ -12,7 +12,7 @@ IrstlmRanker::IrstlmRanker(const string &filePath,
         cerr << filePath <<"'"<<endl;
         exit(EXIT_FAILURE);
     }
-	this->totalProbabilityMass = params[0];
+	this->probMassThr = params[0];
 	tmtrans.open(tmtrans_path);
 	if (!tmtrans.is_open()) {
 		cout << "Could not open trimmed multitrans file: " << tmtrans_path << endl;
@@ -31,6 +31,8 @@ IrstlmRanker::IrstlmRanker(const string &filePath,
 IrstlmRanker::~IrstlmRanker() {
 
 }
+
+
 
 
 void IrstlmRanker::reset() {
@@ -159,47 +161,75 @@ void IrstlmRanker::normalizeProbabilities() {
 	
 	for(int i = 0; i < probs.size(); i++) {
 		probs[i] = probs[i] / this->norm;
+		if (probs[i] != probs[i]) {
+			probs[i] = 0;
+		}
 	}
 }
 
 void IrstlmRanker::printScores(vector<long double> scores)
 {	
+	
+	double thr = 0.5;
+	vector<double> thresholds;
 	set<int> positiveIndex;
 	long double probSum = 0.0;
+
 	for(int i = 0; i < sortedIndex.size(); i++) {
 		int idx = sortedIndex[i];
 		probSum += probs[idx];
-		if (probSum > totalProbabilityMass) {
-			break;
+		if (probSum > thr) {
+			thr += 0.1;
+			if (i != 0) {
+				while(probSum > thr) {
+					thresholds.push_back(-1);
+					thr += 0.1;
+				}
+			}
+			thresholds.push_back(i);
 		}
-		positiveIndex.insert(idx);
 	}
-
-	for (int i = 0; i < sortedIndex.size(); i++) {
-		cerr << batch[sortedIndex[i]] << "\t" << scores[sortedIndex[i]] << endl;
+	
+	if (thresholds.size() == 0) {
+		for(int i = 0; i < 6; i++) {
+			thresholds.push_back(-1);
+		}
 	}
 
     for(int i = 0; i < batch.size(); i++)
     {
         long double score = scores[i];
         string line = batch[i];
-		bool inside = positiveIndex.find(i) != positiveIndex.end();
-		cout << line;
-        cout << "\t" << score << "\t|";
-		if(i == maxlineno) {
-           cout << "@";
-		} else if (inside) {
-			cout << "+";
-		} else {
-			cout << "-";
+
+		double c = 5;
+		int rank = find(sortedIndex.begin(), sortedIndex.end(), i) - sortedIndex.begin();
+		for(int j = 0; j < thresholds.size(); j++) {
+			if (rank <= thresholds[j]) {
+				c = j;
+				break;
+			}
 		}
-		cout << "|" << endl;   
+		bool inside = false;
+		double thr_idx = probMassThr * 10.0 - 5;
+		if (rank <= thresholds[ceil(thr_idx)]) {
+			inside = true;
+		}
+		cout << line;
+        cout << "\t" << score;
+		if(i == maxlineno) {
+           cout << "\t|@|\t";
+		} else if (inside) {
+			cout << "\t|+|\t";
+		} else {
+			cout << "\t|-|\t";
+		}
+		cout << "|" << (c + 5) / 10 << "|\t" << rank << endl;
     }
 }
 
 int IrstlmRanker::fractional() {
-	cout.precision(10);
-    while (!cin.eof()) {
+		cout.precision(10);
+		while (!cin.eof()) {
         string line;
         getline(cin, line);
 
@@ -270,13 +300,16 @@ int IrstlmRanker::standard() {
             double pp;
             double log_prob = score(line, pp);
 			double prob = exp10(log_prob);
+			if (isnan(prob)) {
+				prob = 0;
+			}
 			this->norm += prob;
             if(log_prob > current_max)
             {
                 current_max = log_prob;
                 maxlineno = sublineno;
             }
-	
+			
             batch.push_back(tt_line);
             probs.push_back(prob);
 			logScores.push_back(log_prob);
@@ -351,6 +384,8 @@ void printError(char* name) {
     cout<<"\t -f | --fractional-counts"<<endl;
     exit(EXIT_FAILURE);
 }
+
+
 
 int main(int argc, char ** argv) {
 

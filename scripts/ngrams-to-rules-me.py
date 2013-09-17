@@ -45,7 +45,7 @@ for line in infile.readlines(): #{
 
 	tipus = row[0].split(' ')[0];
 	weight = row[0].replace('  ', ' ').split(' ')[1];
-	sl = row[1].strip().lower()[1:-1];
+	sl = row[1].strip()[1:-1];
 	tl = row[3][1:-1];
 	tl_lema = tl.split('<')[0].lower();
 	tl_tags = ''.join(tl.split('<')[1:]).replace('>', '.').rstrip('.')
@@ -75,6 +75,8 @@ for line in infile.readlines(): #{
 		print('BELOW_MINMATCH', line, file=sys.stderr);
 		continue;
 	#}
+
+	
 
 	inpattern = False;
 	for w in pattern: #{
@@ -149,8 +151,20 @@ for line in infile.readlines(): #{
 			#}
 		#}
 	#}
-	if sel == False: #{
-		print('  </rule>'+commente+ '<!-- Warning: No select operation -->');
+	if sel == False and len(pattern) == 0: #{
+		sl_lema = sl.split('<')[0];
+		if sl.count('><') > 0: #{
+			sl_tags = '<'.join(sl.split('<')[1:]).replace('><', '.').replace('>', '');
+		else: #{
+			sl_tags = '<'.join(sl.split('<')[1:]).strip('<>');
+		#} 
+		if sl_lema == '': #{
+			print('    <match tags="' + sl_tags + '"><select lemma="' + tl_lema + '" tags="' + tl_tags + '"/></match>');
+		else: #{
+			print('    <match lemma="' + sl_lema + '" tags="' + sl_tags + '"><select lemma="' + tl_lema + '" tags="' + tl_tags + '"/></match>');
+		print('  </rule>' + commente);
+	elif sel == False:
+		print('  </rule>'+commente+ '<!-- Warning: No select operation ', line, '-->');
 	else: #{
 		print('  </rule>' + commente);
 	#}
