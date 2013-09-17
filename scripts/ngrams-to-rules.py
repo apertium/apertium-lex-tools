@@ -139,7 +139,8 @@ for line in infile.readlines(): #{
 		#}
 	#}
 	if sel == False: #{
-		print('  </rule> <!-- Warning: No select operation -->');
+		
+		print('  </rule> <!-- Warning: No select operation ', line, '-->');
 	else: #{
 		print('  </rule>');
 	#}
