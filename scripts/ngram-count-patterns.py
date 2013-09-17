@@ -59,77 +59,80 @@ cur_sl_row = [];
 cur_tl_row = [];
 cur_bt_row = [];
 cur_al_row = [];
-
+lineno = 0
 for line in file(sys.argv[2]).readlines(): #{
+	lineno += 1
 	line = line.strip().decode('utf-8');	
 	if line[0] == '-': #{
-#		print len(cur_sl_row), len(cur_tl_row), len(cur_bt_row), len(cur_al_row);	
-#		print cur_sl_row;
-#		print cur_bt_row;
-#		print cur_tl_row;
-#		print cur_al_row;
-#
-		# Read the corpus, make a note of all ambiguous words, their frequency and their possible translations
-		#
-		# sl_tl[sl_word][tl_word] = tl_freq
-		i = 0;
-		for slword in cur_sl_row: #{
-			if len(cur_bt_row[i]['tls']) > 1: #{
-				for al in cur_al_row: #{
-					al_sl = int(al.split('-')[1]);
-					al_tl = int(al.split('-')[0]);
-					if al_sl != i: #{
-						continue;
+		try:
+	#		print len(cur_sl_row), len(cur_tl_row), len(cur_bt_row), len(cur_al_row);	
+	#		print cur_sl_row;
+	#		print cur_bt_row;
+	#		print cur_tl_row;
+	#		print cur_al_row;
+	#
+			# Read the corpus, make a note of all ambiguous words, their frequency and their possible translations
+			#
+			# sl_tl[sl_word][tl_word] = tl_freq
+			i = 0;
+			for slword in cur_sl_row: #{
+				if len(cur_bt_row[i]['tls']) > 1: #{
+					for al in cur_al_row: #{
+						al_sl = int(al.split('-')[1]);
+						al_tl = int(al.split('-')[0]);
+						if al_sl != i: #{
+							continue;
+						#}
+						tlword = wrap(cur_tl_row[al_tl]);
+						slword = wrap(slword);
+
+						if slword not in sl_tl_defaults: #{
+							print >>sys.stderr, 'WARNING: "' + slword + '" not in sl_tl_defaults, skipping';
+							continue;
+						#}
+
+						for j in range(1, MAX_NGRAMS): #{
+
+							pregram = ' '.join(map(wrap, cur_sl_row[i-j:i+1]));
+							postgram = ' '.join(map(wrap, cur_sl_row[i:i+j+1]));
+							roundgram = ' '.join(map(wrap, cur_sl_row[i-j:i+j+1]));
+
+							if slword not in ngrams: #{
+								ngrams[slword] = {};
+							#}
+							if pregram not in ngrams[slword]: #{
+								ngrams[slword][pregram] = {};
+							#}
+							if postgram not in ngrams[slword]: #{
+								ngrams[slword][postgram] = {};
+							#}
+							if roundgram not in ngrams[slword]: #{
+								ngrams[slword][roundgram] = {};
+							#}
+							if tlword not in ngrams[slword][pregram]: #{
+								ngrams[slword][pregram][tlword] = 0;
+							#}
+							if tlword not in ngrams[slword][postgram]: #{
+								ngrams[slword][postgram][tlword] = 0;
+							#}
+							if tlword not in ngrams[slword][roundgram]: #{
+								ngrams[slword][roundgram][tlword] = 0;
+							#}
+
+							ngrams[slword][pregram][tlword] = ngrams[slword][pregram][tlword] + 1;
+							ngrams[slword][postgram][tlword] = ngrams[slword][postgram][tlword] + 1;
+							ngrams[slword][roundgram][tlword] = ngrams[slword][roundgram][tlword] + 1;
+						#}
 					#}
-					tlword = wrap(cur_tl_row[al_tl]);
-					slword = wrap(slword);
-
-					if slword not in sl_tl_defaults: #{
-						print >>sys.stderr, 'WARNING: "' + slword + '" not in sl_tl_defaults, skipping';
-						continue;
-					#}
-
-					for j in range(1, MAX_NGRAMS): #{
-
-						pregram = ' '.join(map(wrap, cur_sl_row[i-j:i+1]));
-						postgram = ' '.join(map(wrap, cur_sl_row[i:i+j+1]));
-						roundgram = ' '.join(map(wrap, cur_sl_row[i-j:i+j+1]));
-
-						if slword not in ngrams: #{
-							ngrams[slword] = {};
-						#}
-						if pregram not in ngrams[slword]: #{
-							ngrams[slword][pregram] = {};
-						#}
-						if postgram not in ngrams[slword]: #{
-							ngrams[slword][postgram] = {};
-						#}
-						if roundgram not in ngrams[slword]: #{
-							ngrams[slword][roundgram] = {};
-						#}
-						if tlword not in ngrams[slword][pregram]: #{
-							ngrams[slword][pregram][tlword] = 0;
-						#}
-						if tlword not in ngrams[slword][postgram]: #{
-							ngrams[slword][postgram][tlword] = 0;
-						#}
-						if tlword not in ngrams[slword][roundgram]: #{
-							ngrams[slword][roundgram][tlword] = 0;
-						#}
-
-						ngrams[slword][pregram][tlword] = ngrams[slword][pregram][tlword] + 1;
-						ngrams[slword][postgram][tlword] = ngrams[slword][postgram][tlword] + 1;
-						ngrams[slword][roundgram][tlword] = ngrams[slword][roundgram][tlword] + 1;
-					#}
-				#}
-#				for j in range(0, MAX_NGRAMS): #{
-#					print cur_sl_row[i-j:i+1];
-#					print cur_sl_row[i:i+j];
-#				#}
-			#}	
-			i = i + 1;
-		#}
-
+	#				for j in range(0, MAX_NGRAMS): #{
+	#					print cur_sl_row[i-j:i+1];
+	#					print cur_sl_row[i:i+j];
+	#				#}
+				#}	
+				i = i + 1;
+			#}
+		except:
+			print >>sys.stderr, "error in line", lineno
 		cur_line = 0;
 		#print line;	
 		continue;

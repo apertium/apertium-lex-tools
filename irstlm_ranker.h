@@ -1,6 +1,7 @@
 #ifndef IRSTLM_RANKER_H
 #define IRSTLM_RANKER_H
 
+#include <algorithm>
 #include <stdlib.h>
 #include <math.h>
 #include <sstream>
@@ -24,7 +25,7 @@ class lmmacro;  // irst lm for macro tags
 class IrstlmRanker {
 private:
 
-	double totalProbabilityMass;
+	double probMassThr;
 
     vector<long double> logScores;
     vector<long double> probs;

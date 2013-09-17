@@ -48,36 +48,38 @@ for line in file(sys.argv[1]).readlines(): #{
 	line = line.strip().decode('utf-8');	
 	lineno += 1
 	if line[0] == '-': #{
-		# Read the corpus, make a note of all ambiguous words, their frequency and their possible translations
-		#
-		# sl_tl[sl_word][tl_word] = tl_freq
-		i = 0;
-		for slword in cur_sl_row: #{
-			if len(cur_bt_row[i]['tls']) > 1: #{
-				for al in cur_al_row: #{
-					al_sl = int(al.split('-')[1]);
-					al_tl = int(al.split('-')[0]);
-					if al_sl != i: #{
-						continue;
-					#}
+		try:
+			# Read the corpus, make a note of all ambiguous words, their frequency and their possible translations
+			#
+			# sl_tl[sl_word][tl_word] = tl_freq
+			i = 0;
+			for slword in cur_sl_row: #{
+				if len(cur_bt_row[i]['tls']) > 1: #{
+					for al in cur_al_row: #{
+						al_sl = int(al.split('-')[1]);
+						al_tl = int(al.split('-')[0]);
+						if al_sl != i: #{
+							continue;
+						#}
+						tlword = cur_tl_row[al_tl];
+						slword = slword;
+						if slword not in sl_tl: #{
+							sl_tl[slword] = {};
+						#}
+						if tlword not in sl_tl[slword]: #{
+							sl_tl[slword][tlword] = 0;
+						#}
+						sl_tl[slword][tlword] = sl_tl[slword][tlword] + 1;
 
-					tlword = cur_tl_row[al_tl];
-					slword = slword;
-					if slword not in sl_tl: #{
-						sl_tl[slword] = {};
+						# print '+' , slword , tlword , sl_tl[slword][tlword], lineno;
 					#}
-					if tlword not in sl_tl[slword]: #{
-						sl_tl[slword][tlword] = 0;
-					#}
-					sl_tl[slword][tlword] = sl_tl[slword][tlword] + 1;
+				#}	
+				i = i + 1;
+			#}
 
-					# print '+' , slword , tlword , sl_tl[slword][tlword], lineno;
-				#}
-			#}	
-			i = i + 1;
-		#}
-
-		cur_line = 0;
+			cur_line = 0;
+		except:
+			print >>sys.stderr, "error in line", lineno;
 		#print line;	
 		continue;
 	#}	

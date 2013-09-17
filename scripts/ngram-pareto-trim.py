@@ -15,7 +15,7 @@ def compose_single_translation(ngrams, sl, pareto):
 			if tl in pareto:
 				s += ngrams[sl][ngram][tl]
 
-	return '+ ' + str(s) + '\t' + sl + '\t' + '' + '\t' + list(pareto)[0] + '\t1'
+	return '+ ' + str(s) + '\t' + sl + '\t' + '-' + '\t' + list(pareto)[0] + '\t1'
 	
 
 def dominates(xs, ys):

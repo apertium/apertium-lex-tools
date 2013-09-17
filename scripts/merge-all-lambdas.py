@@ -4,7 +4,7 @@ from subprocess import Popen, PIPE, STDOUT
 import sys;
 
 tokens = {}
-for line in sys.stdin.readlines():
+for line in sys.stdin:
 	line = line.rstrip();
 	row = line.split('\t');
 	token = row[0].rstrip();
