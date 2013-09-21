@@ -5,10 +5,17 @@
 import sys, codecs;
 import common;
 
-if len(sys.argv) < 2: #{
-	print('extact-sentences.py <phrasetable> <biltrans>');
+if len(sys.argv) < 3 or len(sys.argv) > 4: #{
+	print('extact-sentences.py <phrasetable> <biltrans> [-m|--match-pos]');
 	sys.exit(-1);
 #}
+
+match_pos = False;
+if len(sys.argv) == 4 and sys.argv[3] not in ['-m', '--match-pos']:
+	print('extact-sentences.py <phrasetable> <biltrans> [-m|--match-pos]');
+	sys.exit(-1);
+elif len(sys.argv) == 4 and sys.argv[3] in ['-m', '--match-pos']:
+	match_pos = True;
 
 phrase_table = open(sys.argv[1]);
 biltrans_out = open(sys.argv[2]);
@@ -34,6 +41,12 @@ def generate_entry(slw, tlw):
 
 	print (out % (llemma, ltags, rlemma, rtags));
 
+def pos_equal(s, t):
+	spos = s.split('>')[1][1:]
+	tpos = s.split('>')[1][1:]
+
+	return spos == tpos;
+	
 
 def ambiguous(bt): #{
 	# legislation<n><sg>/legislación<n><f><sg>/ordenamiento<n><m><sg>
@@ -106,6 +119,10 @@ while reading: #{
 			tlw = r['tls']
 			# If the word is ambiguous
 			if len(r['bts']['tls']) > 1: #{
+				# if match_pos = 1 and pos tags do not match
+				if match_pos and not pos_equal(tran, tlw):
+					continue;
+
 				# Check to see if the TL possibilities are found in the lexical 
 				# transfer output.
 				if tlw not in r['bts']['tls']:
