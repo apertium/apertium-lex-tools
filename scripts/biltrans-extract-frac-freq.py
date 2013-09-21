@@ -67,8 +67,6 @@ while reading: #{
 
 		#}
 
-		
-
 		limit = len(am_row);
 		for i in range(0, limit): #{
 			if len(am_row[i]['tls']) > 1: #{
