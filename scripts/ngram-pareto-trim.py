@@ -57,7 +57,7 @@ def calculate_pareto_frontier(sl, ngrams, translations):
 	return pareto
 	
 
-for line in sys.stdin.readlines():
+for line in sys.stdin:
 	line = line.rstrip();
 	row = line.split('\t');
 
