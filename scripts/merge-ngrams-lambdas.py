@@ -26,18 +26,19 @@ for line in open(ngf).readlines(): #{
 	ngrams[ngid] = row[1];
 #}
 
-for line in open(ldf).readlines(): #{
-	#59176:0 1.00131
-	if line.count('@@') > 0: #{
-		continue;
+with open(ldf) as d:
+	for line in d: #{
+		#59176:0 1.00131
+		if line.count('@@') > 0: #{
+			continue;
+		#}
+		row = line.strip().split('\t');
+
+		l = float(row[2]);
+		ngid = int(row[1].split(':')[0]);
+		ngram = ngrams[ngid];
+
+		trad = row[1].split(':')[1];
+		token = row[0]
+		print(token, '\t', l, '\t', trad, '\t', ngram);
 	#}
-	row = line.strip().split('\t');
-
-	l = float(row[2]);
-	ngid = int(row[1].split(':')[0]);
-	ngram = ngrams[ngid];
-
-	trad = row[1].split(':')[1];
-	token = row[0]
-	print(token, '\t', l, '\t', trad, '\t', ngram);
-#}
