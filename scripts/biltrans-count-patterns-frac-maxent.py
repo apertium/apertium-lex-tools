@@ -63,7 +63,7 @@ dm_counter = 0;
 
 # First read in the frequency defaults
 
-for line in open(sys.argv[1]).readlines(): #{
+for line in open(sys.argv[1]): #{
 	line = line.strip();
 	if len(line) < 1: #{
 		continue;

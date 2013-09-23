@@ -239,14 +239,13 @@ int IrstlmRanker::fractional() {
         if (line.length() > 0) {
             vector<string> tokens = parseLine(line);
             lineno = atoi(tokens[0].c_str());
-            if(current_line == -1)
-            {
-                current_line = lineno;
-            }
-            if(current_line != lineno)
+			int current_sublineno = atoi(tokens[1].c_str());
+            
+            if(current_sublineno < sublineno)
             {
 				normalizeProbabilities();
                 printScores(probs);
+			
                 reset();
             }
 
@@ -268,9 +267,7 @@ int IrstlmRanker::fractional() {
 			sublineno ++;
         }
     }
-	if (this->norm == 0) {
-		cerr << "NORM == 0" << endl;
-	}
+	
 	normalizeProbabilities();
     printScores(probs);
 

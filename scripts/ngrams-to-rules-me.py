@@ -31,7 +31,7 @@ permitted_tags = ['n', 'vblex', 'adj'];
 print('<rules>');
 lineno = 1;
 ruleno = 0;
-for line in infile.readlines(): #{
+for line in infile: #{
 #	print '\n';
 #	print line
 	if len(line) < 2: #{
