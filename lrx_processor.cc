@@ -305,8 +305,8 @@ LRXProcessor::process(FILE *input, FILE *output)
 
     if(nullFlush && val == L'\0') 
     {
-      fputwc_unlocked(val, output);
       fflush(output);
+      fputwc_unlocked(val, output);
       continue;
     }
 
