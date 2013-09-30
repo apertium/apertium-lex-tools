@@ -76,9 +76,6 @@ double IrstlmRanker::score(const string &frame, double &pp) {
     int lmId = 0;
     float prob = 0, sprob = 0;
 
-    m_lmtb_ng = new ngram(m_lmtb->getDict()); // ngram of words
-    m_lmtb_ng->size = 0;
-
     int count = 0;
 	s_unigrams.push_back("<s>");
     while (ss >> buf) {
