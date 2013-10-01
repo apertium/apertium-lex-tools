@@ -29,7 +29,7 @@ if len(sys.argv) not in [3, 4]: #{
 #}
 
 if len(sys.argv) == 4:
-	THRESHOLD = int(sys.argv[2])
+	THRESHOLD = int(sys.argv[3])
 
 MAX_NGRAMS = 3;
 cur_line = 0;
