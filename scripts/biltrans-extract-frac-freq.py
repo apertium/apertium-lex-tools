@@ -28,6 +28,7 @@ rsep = re.compile('\$[^\^]*\^');
 
 dm_line = dm_file.readline();
 current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
+
 while reading: #{
 	current_am_line_id += 1
 	am_line = am_file.readline();
@@ -36,21 +37,21 @@ while reading: #{
 		continue;
 	#}
 	current_am_line_id = int(am_line.split("\t")[0])
-
 	while current_am_line_id == current_dm_line_id: #{
+		if current_dm_line_id % 1000 == 0:
+			print ("STATUS: at line", current_dm_line_id, file=sys.stderr);
 		if dm_line == '': #{
 			print('breaking', file=sys.stderr);
 			reading = False;
 			break;
 		#}
-		current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
 		try:
 			frac_count = float(dm_line.split('\t')[2]);
 			if math.isnan(frac_count):
 				frac_count = 0;
 		except:
 			break;
-		
+	
 		am_row = common.tokenize_biltrans_line(am_line);
 		dm_row = common.tokenize_biltrans_line(dm_line);
 
@@ -70,7 +71,7 @@ while reading: #{
 		limit = len(am_row);
 		for i in range(0, limit): #{
 			if len(am_row[i]['tls']) > 1: #{
-				
+			
 				sl = am_row[i]['sl']
 				tl = dm_row[i]['tls'][0]
 
@@ -81,13 +82,12 @@ while reading: #{
 					sl_tl[sl][tl] = 0.0;
 				#}
 				sl_tl[sl][tl] = sl_tl[sl][tl] + frac_count;
-			
+		
 			#}
 		#}
 		dm_line = dm_file.readline();
 		if dm_line == '': break;
 		current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
-
 
 	#}	
 #}

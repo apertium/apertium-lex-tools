@@ -124,7 +124,7 @@ def parse_tagger_token(ptr, line):
 	return (ptr, sl);
 
 def tokenize_biltrans_line(line):
-
+	print (line, file=sys.stderr)
 	out = []
 	escaped = False;
 	for ptr in range(0, len(line)):
