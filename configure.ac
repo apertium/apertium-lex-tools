@@ -12,10 +12,24 @@ AC_PROG_CXX
 AM_SANITY_CHECK
 AC_LANG_CPLUSPLUS
 
-
 AC_ARG_ENABLE(debug,
               [  --enable-debug  Enable "-g -Wall" compiler options],
               [CXXFLAGS="-g -Wall";CFLAGS="-g -Wall"])
+
+# This doesn't work yet
+dnl IRSTLM support
+AH_TEMPLATE(HAVE_IRSTLM, [Have IRSTLM])
+AC_ARG_WITH(irstlm, AC_HELP_STRING([--with-irstlm=PATH],
+	[enable IRSTLM ranker (needed for monolingual rule-learning)]),
+	[irstlm=${withval}], [irstlm=no])
+AM_CONDITIONAL([HAVE_IRSTLM], [test "x$irstlm" != "xno"])
+AC_DEFINE(HAVE_IRSTLM, 0)
+AS_IF([test "x$irstlm" != "xno"], [
+        CXXFLAGS="$CXXFLAGS -I$withval/include"
+        AC_CHECK_HEADERS([lmmacro.h], AC_DEFINE(HAVE_IRSTLM, 1), [])
+        AC_CHECK_HEADERS([lmtable.h], AC_DEFINE(HAVE_IRSTLM, 1), [])
+          CXXFLAGS="$CXXFLAGS $IRSTLM_CFLAGS"
+        ])
 
 PKG_CHECK_MODULES([LTTOOLBOX], [lttoolbox-3.2 >= required_lttoolbox_version])
 
@@ -46,3 +60,9 @@ AC_CONFIG_FILES([
                  Makefile
                  ])
 AC_OUTPUT
+
+AS_IF([test "x$irstlm" == "xno"],
+      [AC_MSG_WARN([IRSTLM is not enabled; you will not be able run monolingual rule-learning; enable using --enable-irstlm])])
+
+
+
