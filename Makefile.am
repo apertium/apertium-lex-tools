@@ -13,6 +13,10 @@ multitrans_SOURCES = tagger_output_processor.cc multi_translator.cc multitrans.c
 
 yasmet_SOURCES = yasmet.cc
 
-# irstlm_ranker_SOURCES = irstlm_ranker.cpp
+if HAVE_IRSTLM
+    irstlm_ranker_SOURCES = irstlm_ranker.cpp
+else
+    bin_PROGRAMS += irstlm_ranker
+endif
 
-#apertium_ldx_proc_SOURCES = ldx_proc.cc
+
