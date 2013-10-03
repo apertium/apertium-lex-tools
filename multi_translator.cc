@@ -208,10 +208,11 @@ void MultiTranslator::processSentence(vector<TaggerToken> sentence) {
 		
 
 	}
-	double coverage = (1.0 * sentence.size() - numberOfUnknown / sentence.size()) * 100;
+	double coverage = (1.0 * sentence.size() - 2* numberOfUnknown) / sentence.size() * 100;
 
 	bool flag = (this->filter == false) || (this->filter && fertility >= 2 && 
 				fertility <= 10000 && coverage >= 90.0 && hasAmbigPos);
+
 
 	if (flag) {
 		if (mode == "-p") {
