@@ -511,8 +511,8 @@ LRXProcessor::process(FILE *input, FILE *output)
       blanks.clear();
       spans.clear();
 
-      fflush(output);
       fputwc_unlocked(val, output);
+      fflush(output);
       continue;
     }
 
