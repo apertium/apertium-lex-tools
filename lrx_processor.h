@@ -108,6 +108,14 @@ private:
   void filterFinals();
   void evaluateRules();
 
+  void processFlush(map<int, wstring > &sl,
+		    map<int, vector<wstring> > &tl,
+		    map<int, wstring > &blanks,
+		    map<int, pair<double, vector<State> > > &covers,
+		    pair<double, vector<State> > &empty_seq,
+		    map<pair<int, int>, vector<State> > &spans,
+		    int last_final);
+
 public:
   static wstring const LRX_PROCESSOR_TAG_SELECT;
   static wstring const LRX_PROCESSOR_TAG_REMOVE;
