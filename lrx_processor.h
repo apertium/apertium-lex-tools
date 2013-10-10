@@ -108,7 +108,8 @@ private:
   void filterFinals();
   void evaluateRules();
 
-  void processFlush(map<int, wstring > &sl,
+  void processFlush(FILE *output,
+		    map<int, wstring > &sl,
 		    map<int, vector<wstring> > &tl,
 		    map<int, wstring > &blanks,
 		    map<int, pair<double, vector<State> > > &covers,

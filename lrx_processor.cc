@@ -278,7 +278,8 @@ LRXProcessor::recognisePattern(const wstring lu, const wstring op)
 
 
 void
-LRXProcessor::processFlush(map<int, wstring > &sl,
+LRXProcessor::processFlush(FILE *output,
+                           map<int, wstring > &sl,
                            map<int, vector<wstring> > &tl,
                            map<int, wstring > &blanks,
                            map<int, pair<double, vector<State> > > &covers,
@@ -389,7 +390,7 @@ LRXProcessor::processFlush(map<int, wstring > &sl,
       fwprintf(stderr, L"#APPL%S. %S\n", tipus.c_str(), op.c_str());
     }
 
-    fwprintf(stdout, L"%S^%S/", blanks[spos].c_str(), sl[spos].c_str());
+    fwprintf(output, L"%S^%S/", blanks[spos].c_str(), sl[spos].c_str());
 
     vector<wstring>::iterator ti;
     vector<wstring>::iterator penum = tl[spos].end(); penum--;
@@ -407,7 +408,7 @@ LRXProcessor::processFlush(map<int, wstring > &sl,
           {
             fwprintf(stderr, L"%d:SELECT%S:%S:%S\n", lineno, operations[spos].first.c_str(), sl[spos].c_str(), op.c_str());
           }
-          fwprintf(stdout, L"%S", ti->c_str());
+          fwprintf(output, L"%S", ti->c_str());
           selected = true;
           break;
         }
@@ -416,10 +417,10 @@ LRXProcessor::processFlush(map<int, wstring > &sl,
       {
         for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
         {
-          fwprintf(stdout, L"%S", ti->c_str());
+          fwprintf(output, L"%S", ti->c_str());
           if(ti != penum)
           {
-            fwprintf(stdout, L"/");
+            fwprintf(output, L"/");
           }
         }
       }
@@ -445,10 +446,10 @@ LRXProcessor::processFlush(map<int, wstring > &sl,
       vector<wstring>::iterator npenum = new_tl.end(); npenum--;
       for(nti = new_tl.begin(); nti != new_tl.end(); nti++)
       {
-        fwprintf(stdout, L"%S", nti->c_str());
+        fwprintf(output, L"%S", nti->c_str());
         if(nti != npenum)
         {
-          fwprintf(stdout, L"/");
+          fwprintf(output, L"/");
         }
       }
       new_tl.clear();
@@ -457,17 +458,17 @@ LRXProcessor::processFlush(map<int, wstring > &sl,
     {
       for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
       {
-        fwprintf(stdout, L"%S", ti->c_str());
+        fwprintf(output, L"%S", ti->c_str());
         if(ti != penum)
         {
-          fwprintf(stdout, L"/");
+          fwprintf(output, L"/");
         }
       }
     }
-    fwprintf(stdout, L"$");
+    fwprintf(output, L"$");
     if(debugMode)
     {
-      fwprintf(stdout, L"%d", spos);
+      fwprintf(output, L"%d", spos);
     }
   }
 }
@@ -662,7 +663,7 @@ LRXProcessor::process(FILE *input, FILE *output)
       {
         // If we have only a single alive state, it means no rules are 
         // active, and we can flush the buffers.
-        processFlush(sl, tl, blanks, covers, empty_seq, spans, last_final);
+        processFlush(output, sl, tl, blanks, covers, empty_seq, spans, last_final);
 
         pos = 0;
         last_final = 0;
@@ -770,9 +771,9 @@ LRXProcessor::process(FILE *input, FILE *output)
     }
   }
 
-  processFlush(sl, tl, blanks, covers, empty_seq, spans, last_final);
+  processFlush(output, sl, tl, blanks, covers, empty_seq, spans, last_final);
 
-  fwprintf(stdout, L"%S", blanks[pos].c_str());
+  fwprintf(output, L"%S", blanks[pos].c_str());
 }
 
 void
