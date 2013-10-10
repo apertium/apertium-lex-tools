@@ -15,7 +15,6 @@ yasmet_SOURCES = yasmet.cc
 
 if HAVE_IRSTLM
     irstlm_ranker_SOURCES = irstlm_ranker.cpp
-else
     bin_PROGRAMS += irstlm_ranker
 endif
 
