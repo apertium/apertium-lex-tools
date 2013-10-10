@@ -1,0 +1,23 @@
+#!/bin/bash
+
+set -e -u -o pipefail
+
+err () {
+    sed "s/^/$1:	/"
+}
+
+colournul () {
+    local colour=$(printf '\033[0;36m') plain=$(printf '\033[0m')
+    sed -e "s/\x0/${colour}0&${plain}/g"
+}
+
+cd "$(dirname $0)"
+for xml in *.xml; do
+    test=${xml%%.xml}
+    rm -f "$test.{output,bin}"
+    (
+	../lrx-comp "$test.xml" "$test.bin" &>>>(err "$test") &&
+	../lrx-proc -z "$test.bin" < "$test.input" > "$test.output" 2>>>(err "$test") &&
+	diff -au "$test.expected" "$test.output" | colournul
+    ) || echo "$test: FAILED"
+done
