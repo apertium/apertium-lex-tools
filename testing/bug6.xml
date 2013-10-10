@@ -1,4 +1,4 @@
 
 <rules>
-  <rule><match lemma="вреден"><select lemma="hard\-working"/></match></rule>
+  <rule><match lemma="вреден"><select lemma="hard-working"/></match></rule>
 </rules>
