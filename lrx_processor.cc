@@ -502,6 +502,15 @@ LRXProcessor::process(FILE *input, FILE *output)
 
     if(nullFlush && val == L'\0') 
     {
+      processFlush(output, sl, tl, blanks, covers, empty_seq, spans, last_final);
+      fwprintf(output, L"%S", blanks[pos].c_str());
+      pos = 0;
+      last_final = 0;
+      tl.clear();
+      sl.clear();
+      blanks.clear();
+      spans.clear();
+
       fflush(output);
       fputwc_unlocked(val, output);
       continue;
