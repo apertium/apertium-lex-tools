@@ -278,6 +278,202 @@ LRXProcessor::recognisePattern(const wstring lu, const wstring op)
 
 
 void
+LRXProcessor::processFlush(map<int, wstring > &sl,
+                           map<int, vector<wstring> > &tl,
+                           map<int, wstring > &blanks,
+                           map<int, pair<double, vector<State> > > &covers,
+                           pair<double, vector<State> > &empty_seq,
+                           map<pair<int, int>, vector<State> > &spans,
+                           int last_final)
+{
+  if(debugMode)
+  {
+    fwprintf(stderr, L"FLUSH:\n");
+  }
+
+  map<int, pair<double, vector<State> > >::iterator it;
+  map<int, pair<wstring, wstring> > operations;
+
+  for(it = covers.begin(); it != covers.end(); it++)
+  {
+    pair<double, vector<State> > best = it->second;
+    if(debugMode)
+    {
+      fwprintf(stderr, L"===================================================\n");
+      fwprintf(stderr, L"[%d][%d] covers[%d] best (score: %d, size: %d)\n", pos, last_final, it->first, best.first, best.second.size());
+    }
+
+    // return M[i-1]
+    if(it->first == last_final)
+    {
+      vector<State>::iterator it2;
+      for(it2 = best.second.begin(); it2 != best.second.end(); it2++)
+      {
+        if(debugMode)
+        {
+          wstring out = it2->filterFinals(anfinals, alphabet, escaped_chars);
+          fwprintf(stderr, L"!!!    filter_finals: %S\n", out.c_str());
+        }
+        set<pair<wstring, vector<wstring> > > outpaths;
+        outpaths = it2->filterFinalsLRX(anfinals, alphabet, escaped_chars, false, false, 0);
+
+        int j = 1;
+        set<pair<wstring, vector<wstring> > >::iterator it3;
+        for(it3 = outpaths.begin(); it3 != outpaths.end(); it3++)
+        {
+          wstring id = it3->first;
+          vector<wstring> ops = it3->second;
+          vector<wstring>::iterator op;
+          for(op = ops.begin(); op != ops.end(); op++)
+          {
+            if(*op != LRX_PROCESSOR_TAG_SKIP)
+            {
+              int starting_point = -1;
+              map<pair<int, int>, vector<State> >::iterator ix;
+              for(ix = spans.begin(); ix != spans.end(); ix++)
+              {
+                vector<State>::iterator iy;
+                for(iy = ix->second.begin(); iy != ix->second.end(); iy++)
+                {
+                  set<pair<wstring, vector<wstring> > > y;
+                  y = iy->filterFinalsLRX(anfinals, alphabet, escaped_chars, false, false, 0);
+                  if(y == outpaths)
+                  {
+                    starting_point = ix->first.first;
+                  }
+                }
+              }
+              if(debugMode)
+              {
+                fwprintf(stderr, L"=> APPLY [pos: %d, dep: %d, j: %d, start: %d, len: %d]: %S // %S\n", pos, starting_point, j, starting_point+j, ops.size(), id.c_str(), op->c_str());
+              }
+              operations[starting_point+j].first = id;
+              operations[starting_point+j].second = *op;
+            }
+            j++;
+          }
+        }
+        if(debugMode)
+        {
+          fwprintf(stderr, L"[best: %d, outpaths: %d]\n", best.first, outpaths.size());
+        }
+      }
+    }
+  }
+
+  covers.clear();
+  covers[-1] = empty_seq;
+  covers[-1].first = 0;
+
+  // Here we actually apply the rules that we've matched
+
+  unsigned int spos = 0;
+  for(spos = 0; spos <= pos; spos++)
+  {
+    if(sl[spos] == L"")
+    {
+      continue;
+    }
+    wstring  op = operations[spos].second;
+    wstring  tipus = L"";
+    if(op.find(LRX_PROCESSOR_TAG_SELECT) != wstring::npos)
+    {
+      tipus = LRX_PROCESSOR_TAG_SELECT;
+    }
+    if(op.find(LRX_PROCESSOR_TAG_REMOVE) != wstring::npos)
+    {
+      tipus = LRX_PROCESSOR_TAG_REMOVE;
+    }
+    if(debugMode)
+    {
+      fwprintf(stderr, L"#APPL%S. %S\n", tipus.c_str(), op.c_str());
+    }
+
+    fwprintf(stdout, L"%S^%S/", blanks[spos].c_str(), sl[spos].c_str());
+
+    vector<wstring>::iterator ti;
+    vector<wstring>::iterator penum = tl[spos].end(); penum--;
+
+    if(tipus == LRX_PROCESSOR_TAG_SELECT && tl[spos].size() > 1)
+    {
+      bool matched = true;
+      bool selected = false;
+      for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
+      {
+        matched = recognisePattern(*ti, op);
+        if(matched)
+        {
+          if(traceMode || debugMode)
+          {
+            fwprintf(stderr, L"%d:SELECT%S:%S:%S\n", lineno, operations[spos].first.c_str(), sl[spos].c_str(), op.c_str());
+          }
+          fwprintf(stdout, L"%S", ti->c_str());
+          selected = true;
+          break;
+        }
+      }
+      if(!selected)
+      {
+        for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
+        {
+          fwprintf(stdout, L"%S", ti->c_str());
+          if(ti != penum)
+          {
+            fwprintf(stdout, L"/");
+          }
+        }
+      }
+    }
+    else if(tipus == LRX_PROCESSOR_TAG_REMOVE && tl[spos].size() > 1)
+    {
+      bool matched = true;
+      vector<wstring> new_tl;  // The new list of TL translations
+      for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
+      {
+        matched = recognisePattern(*ti, op);
+        if(matched)
+        {
+          if(traceMode || debugMode)
+          {
+            fwprintf(stderr, L"%d:REMOVE%S:%S:%S\n", lineno, operations[spos].first.c_str(), sl[spos].c_str(), op.c_str());
+          }
+          continue;
+        }
+        new_tl.push_back(*ti);
+      }
+      vector<wstring>::iterator nti;
+      vector<wstring>::iterator npenum = new_tl.end(); npenum--;
+      for(nti = new_tl.begin(); nti != new_tl.end(); nti++)
+      {
+        fwprintf(stdout, L"%S", nti->c_str());
+        if(nti != npenum)
+        {
+          fwprintf(stdout, L"/");
+        }
+      }
+      new_tl.clear();
+    }
+    else
+    {
+      for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
+      {
+        fwprintf(stdout, L"%S", ti->c_str());
+        if(ti != penum)
+        {
+          fwprintf(stdout, L"/");
+        }
+      }
+    }
+    fwprintf(stdout, L"$");
+    if(debugMode)
+    {
+      fwprintf(stdout, L"%d", spos);
+    }
+  }
+}
+
+
+void
 LRXProcessor::process(FILE *input, FILE *output)
 {
   bool isEscaped = false;
@@ -466,191 +662,7 @@ LRXProcessor::process(FILE *input, FILE *output)
       {
         // If we have only a single alive state, it means no rules are 
         // active, and we can flush the buffers.
-
-        if(debugMode)
-        {
-          fwprintf(stderr, L"FLUSH:\n");
-        }
-
-        map<int, pair<double, vector<State> > >::iterator it;
-        map<int, pair<wstring, wstring> > operations;
-
-        for(it = covers.begin(); it != covers.end(); it++)
-        {
-          pair<double, vector<State> > best = it->second;
-          if(debugMode)
-          {
-            fwprintf(stderr, L"===================================================\n");
-            fwprintf(stderr, L"[%d][%d] covers[%d] best (score: %d, size: %d)\n", pos, last_final, it->first, best.first, best.second.size());
-          }
-
-          // return M[i-1]
-          if(it->first == last_final)
-          {
-            vector<State>::iterator it2;
-            for(it2 = best.second.begin(); it2 != best.second.end(); it2++)
-            {
-              if(debugMode)
-              {
-                wstring out = it2->filterFinals(anfinals, alphabet, escaped_chars);
-                fwprintf(stderr, L"!!!    filter_finals: %S\n", out.c_str());
-              }
-              set<pair<wstring, vector<wstring> > > outpaths;
-              outpaths = it2->filterFinalsLRX(anfinals, alphabet, escaped_chars, false, false, 0);
-
-              int j = 1;
-              set<pair<wstring, vector<wstring> > >::iterator it3;
-              for(it3 = outpaths.begin(); it3 != outpaths.end(); it3++)
-              {
-                wstring id = it3->first;
-                vector<wstring> ops = it3->second;
-                vector<wstring>::iterator op;
-                for(op = ops.begin(); op != ops.end(); op++)
-                {
-                  if(*op != LRX_PROCESSOR_TAG_SKIP)
-                  {
-                    int starting_point = -1;
-                    map<pair<int, int>, vector<State> >::iterator ix;
-                    for(ix = spans.begin(); ix != spans.end(); ix++)
-                    {
-                      vector<State>::iterator iy;
-                      for(iy = ix->second.begin(); iy != ix->second.end(); iy++)
-                      {
-                        set<pair<wstring, vector<wstring> > > y;
-                        y = iy->filterFinalsLRX(anfinals, alphabet, escaped_chars, false, false, 0);
-                        if(y == outpaths)
-                        {
-                          starting_point = ix->first.first;
-                        }
-                      }
-                    }
-                    if(debugMode)
-                    {
-                      fwprintf(stderr, L"=> APPLY [pos: %d, dep: %d, j: %d, start: %d, len: %d]: %S // %S\n", pos, starting_point, j, starting_point+j, ops.size(), id.c_str(), op->c_str());
-                    }
-                    operations[starting_point+j].first = id;
-                    operations[starting_point+j].second = *op;
-                  }
-                  j++;
-                }
-              }
-              if(debugMode)
-              {
-                fwprintf(stderr, L"[best: %d, outpaths: %d]\n", best.first, outpaths.size());
-              }
-            }
-          }
-        }
-
-        covers.clear();
-        covers[-1] = empty_seq;
-        covers[-1].first = 0;
-
-        // Here we actually apply the rules that we've matched
-
-        unsigned int spos = 0;
-        for(spos = 0; spos <= pos; spos++)
-        {
-          if(sl[spos] == L"")
-          {
-            continue;
-          }
-          wstring  op = operations[spos].second;
-          wstring  tipus = L"";
-          if(op.find(LRX_PROCESSOR_TAG_SELECT) != wstring::npos)
-          {
-            tipus = LRX_PROCESSOR_TAG_SELECT;
-          }
-          if(op.find(LRX_PROCESSOR_TAG_REMOVE) != wstring::npos)
-          {
-            tipus = LRX_PROCESSOR_TAG_REMOVE;
-          }
-          if(debugMode)
-          {
-            fwprintf(stderr, L"#APPL%S. %S\n", tipus.c_str(), op.c_str());
-          }
-
-          fwprintf(stdout, L"%S^%S/", blanks[spos].c_str(), sl[spos].c_str());
-
-          vector<wstring>::iterator ti;
-          vector<wstring>::iterator penum = tl[spos].end(); penum--;
-
-          if(tipus == LRX_PROCESSOR_TAG_SELECT && tl[spos].size() > 1) 
-          {
-            bool matched = true;
-            bool selected = false;
-            for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
-            {
-              matched = recognisePattern(*ti, op);
-              if(matched)
-              {
-                if(traceMode || debugMode)
-                {
-                  fwprintf(stderr, L"%d:SELECT%S:%S:%S\n", lineno, operations[spos].first.c_str(), sl[spos].c_str(), op.c_str());
-                }
-                fwprintf(stdout, L"%S", ti->c_str());
-                selected = true;
-                break;
-              }
-            }
-            if(!selected)
-            {
-              for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
-              {
-                fwprintf(stdout, L"%S", ti->c_str());
-                if(ti != penum)
-                {
-                  fwprintf(stdout, L"/");
-                }
-              }
-            }
-          }
-          else if(tipus == LRX_PROCESSOR_TAG_REMOVE && tl[spos].size() > 1)
-          {
-            bool matched = true;
-            vector<wstring> new_tl;  // The new list of TL translations
-            for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
-            {
-              matched = recognisePattern(*ti, op);
-              if(matched)
-              {
-                if(traceMode || debugMode)
-                {
-                  fwprintf(stderr, L"%d:REMOVE%S:%S:%S\n", lineno, operations[spos].first.c_str(), sl[spos].c_str(), op.c_str());
-                }
-                continue;
-              }
-              new_tl.push_back(*ti);
-            }
-            vector<wstring>::iterator nti;
-            vector<wstring>::iterator npenum = new_tl.end(); npenum--;
-            for(nti = new_tl.begin(); nti != new_tl.end(); nti++) 
-            {  
-              fwprintf(stdout, L"%S", nti->c_str());
-              if(nti != npenum)
-              {
-                fwprintf(stdout, L"/");
-              }
-            }
-            new_tl.clear();
-          }
-          else
-          {
-            for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
-            {
-              fwprintf(stdout, L"%S", ti->c_str());
-              if(ti != penum)
-              {
-                fwprintf(stdout, L"/");
-              }
-            }
-          }
-          fwprintf(stdout, L"$");
-          if(debugMode)
-          {
-            fwprintf(stdout, L"%d", spos);
-          }
-        }
+        processFlush(sl, tl, blanks, covers, empty_seq, spans, last_final);
 
         pos = 0;
         last_final = 0;
@@ -758,190 +770,7 @@ LRXProcessor::process(FILE *input, FILE *output)
     }
   }
 
-  if(debugMode)
-  {
-    fwprintf(stderr, L"FLUSH:\n");
-  }
-
-  map<int, pair<double, vector<State> > >::iterator it;
-  map<int, pair<wstring, wstring> > operations;
-
-  for(it = covers.begin(); it != covers.end(); it++)
-  {
-    pair<double, vector<State> > best = it->second;
-    if(debugMode)
-    {
-      fwprintf(stderr, L"===================================================\n");
-      fwprintf(stderr, L"[%d][%d] covers[%d] best (score: %d, size: %d)\n", pos, last_final, it->first, best.first, best.second.size());
-    }
-
-    // return M[i-1]
-    if(it->first == last_final)
-    {
-      vector<State>::iterator it2;
-      for(it2 = best.second.begin(); it2 != best.second.end(); it2++)
-      {
-        if(debugMode)
-        {
-          wstring out = it2->filterFinals(anfinals, alphabet, escaped_chars);
-          fwprintf(stderr, L"!!!    filter_finals: %S\n", out.c_str());
-        }
-        set<pair<wstring, vector<wstring> > > outpaths;
-        outpaths = it2->filterFinalsLRX(anfinals, alphabet, escaped_chars, false, false, 0);
-
-        int j = 1;
-        set<pair<wstring, vector<wstring> > >::iterator it3;
-        for(it3 = outpaths.begin(); it3 != outpaths.end(); it3++)
-        {
-          wstring id = it3->first;
-          vector<wstring> ops = it3->second;
-          vector<wstring>::iterator op;
-          for(op = ops.begin(); op != ops.end(); op++)
-          {
-            if(*op != LRX_PROCESSOR_TAG_SKIP)
-            {
-              int starting_point = -1;
-              map<pair<int, int>, vector<State> >::iterator ix;
-              for(ix = spans.begin(); ix != spans.end(); ix++)
-              {
-                vector<State>::iterator iy;
-                for(iy = ix->second.begin(); iy != ix->second.end(); iy++)
-                {
-                  set<pair<wstring, vector<wstring> > > y;
-                  y = iy->filterFinalsLRX(anfinals, alphabet, escaped_chars, false, false, 0);
-                  if(y == outpaths)
-                  {
-                    starting_point = ix->first.first;
-                  }
-                }
-              }
-              if(debugMode)
-              {
-                fwprintf(stderr, L"=> APPLY [pos: %d, dep: %d, j: %d, start: %d, len: %d]: %S // %S\n", pos, starting_point, j, starting_point+j, ops.size(), id.c_str(), op->c_str());
-              }
-              operations[starting_point+j].first = id;
-              operations[starting_point+j].second = *op;
-            }
-            j++;
-          }
-        }
-        if(debugMode)
-        {
-          fwprintf(stderr, L"[best: %d, outpaths: %d]\n", best.first, outpaths.size());
-        }
-      }
-    }
-  }
-
-  covers.clear();
-  covers[-1] = empty_seq;
-  covers[-1].first = 0;
-
-  // Here we actually apply the rules that we've matched
-
-  unsigned int spos = 0;
-  for(spos = 0; spos <= pos; spos++)
-  {
-    if(sl[spos] == L"")
-    {
-      continue;
-    }
-    wstring  op = operations[spos].second;
-    wstring  tipus = L"";
-    if(op.find(LRX_PROCESSOR_TAG_SELECT) != wstring::npos)
-    {
-      tipus = LRX_PROCESSOR_TAG_SELECT;
-    }
-    if(op.find(LRX_PROCESSOR_TAG_REMOVE) != wstring::npos)
-    {
-      tipus = LRX_PROCESSOR_TAG_REMOVE;
-    }
-    if(debugMode)
-    {
-      fwprintf(stderr, L"#APPL%S. %S\n", tipus.c_str(), op.c_str());
-    }
-
-    fwprintf(stdout, L"%S^%S/", blanks[spos].c_str(), sl[spos].c_str());
-
-    vector<wstring>::iterator ti;
-    vector<wstring>::iterator penum = tl[spos].end(); penum--;
-
-    if(tipus == LRX_PROCESSOR_TAG_SELECT && tl[spos].size() > 1) 
-    {
-      bool matched = true;
-      bool selected = false;
-      for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
-      {
-        matched = recognisePattern(*ti, op);
-        if(matched)
-        {
-          if(traceMode || debugMode)
-          {
-            fwprintf(stderr, L"%d:SELECT%S:%S:%S\n", lineno, operations[spos].first.c_str(), sl[spos].c_str(), op.c_str());
-          }
-          fwprintf(stdout, L"%S", ti->c_str());
-          selected = true;
-          break;
-        }
-      }
-      if(!selected)
-      {
-        for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
-        {
-          fwprintf(stdout, L"%S", ti->c_str());
-          if(ti != penum)
-          {
-            fwprintf(stdout, L"/");
-          }
-        }
-      }
-    }
-    else if(tipus == LRX_PROCESSOR_TAG_REMOVE && tl[spos].size() > 1)
-    {
-      bool matched = true;
-      vector<wstring> new_tl;  // The new list of TL translations
-      for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
-      {
-        matched = recognisePattern(*ti, op);
-        if(matched)
-        {
-          if(traceMode || debugMode)
-          {
-            fwprintf(stderr, L"%d:REMOVE%S:%S:%S\n", lineno, operations[spos].first.c_str(), sl[spos].c_str(), op.c_str());
-          }
-          continue;
-        }
-        new_tl.push_back(*ti);
-      }
-      vector<wstring>::iterator nti;
-      vector<wstring>::iterator npenum = new_tl.end(); npenum--;
-      for(nti = new_tl.begin(); nti != new_tl.end(); nti++) 
-      {  
-        fwprintf(stdout, L"%S", nti->c_str());
-        if(nti != npenum)
-        {
-          fwprintf(stdout, L"/");
-        }
-      }
-      new_tl.clear();
-    }
-    else
-    {
-      for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
-      {
-        fwprintf(stdout, L"%S", ti->c_str());
-        if(ti != penum)
-        {
-          fwprintf(stdout, L"/");
-        }
-      }
-    }
-    fwprintf(stdout, L"$");
-    if(debugMode)
-    {
-      fwprintf(stdout, L"%d", spos);
-    }
-  }
+  processFlush(sl, tl, blanks, covers, empty_seq, spans, last_final);
 
   fwprintf(stdout, L"%S", blanks[pos].c_str());
 }
