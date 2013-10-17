@@ -23,7 +23,7 @@ public:
 	vector<wstring> tags;
 	wstring toString(bool delimiters) {
 		wstring out = lemma;
-		for(int i = 0; i < tags.size(); i++) {
+		for(unsigned int i = 0; i < tags.size(); i++) {
 			out += L"<" + tags[i] + L">";
 		}
 		if (delimiters) {
