@@ -17,7 +17,7 @@ public:
 
 	wstring toString(bool delimiter) {
 		wstring out = sourceToken.toString(false);
-		for(int i = 0; i < targetTokens.size(); i++) {
+		for(unsigned int i = 0; i < targetTokens.size(); i++) {
 			out += L'/' + targetTokens[i].toString(false);
 		}
 		if (delimiter) {
@@ -51,7 +51,7 @@ private:
 
 	void printTaggerOutput(int i, vector<BiltransToken> s);
 	
-	void biltransToMultiTranslator(int sn, int &tn, int idx, 
+	void biltransToMultiTranslator(int sn, int &tn, unsigned int idx, 
 			vector<BiltransToken> s, wstring buffer);
 
 	
