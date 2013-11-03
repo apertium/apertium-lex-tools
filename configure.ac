@@ -31,12 +31,12 @@ AS_IF([test "x$irstlm" != "xno"], [
           CXXFLAGS="$CXXFLAGS $IRSTLM_CFLAGS"
         ])
 
-PKG_CHECK_MODULES([LTTOOLBOX], [lttoolbox-3.2 >= required_lttoolbox_version])
+PKG_CHECK_MODULES([LTTOOLBOX], [lttoolbox >= required_lttoolbox_version])
 
 AC_SUBST(LTTOOLBOX_CFLAGS)
 AC_SUBST(LTTOOLBOX_LIBS)
 
-PKG_CHECK_MODULES([APERTIUM], [apertium-3.2 >= required_apertium_version])
+PKG_CHECK_MODULES([APERTIUM], [apertium >= required_apertium_version])
 
 AC_SUBST(APERTIUM_CFLAGS)
 AC_SUBST(APERTIUM_LIBS)
@@ -62,7 +62,7 @@ AC_CONFIG_FILES([
 AC_OUTPUT
 
 AS_IF([test "x$irstlm" == "xno"],
-      [AC_MSG_WARN([IRSTLM is not enabled; you will not be able run monolingual rule-learning; enable using --enable-irstlm])])
+      [AC_MSG_NOTICE([IRSTLM is not enabled; you will not be able run monolingual rule-learning; enable using --with-irstlm])])
 
 
 
