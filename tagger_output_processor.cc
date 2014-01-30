@@ -108,7 +108,7 @@ void TaggerOutputProcessor::processTaggerOutput() {
 	bool escaped = false;
 	int state = 0; // outside
 	wchar_t c;
-	while(c = fgetwc(stdin)) {
+	while((c = fgetwc(stdin))) {
 		if (c == -1) {
 			break;
 		}
