@@ -31,6 +31,14 @@ AS_IF([test "x$irstlm" != "xno"], [
           CXXFLAGS="$CXXFLAGS $IRSTLM_CFLAGS"
         ])
 
+AH_TEMPLATE(HAVE_YASMET, [Have YASMET])
+AC_ARG_WITH(yasmet, AC_HELP_STRING([--with-yasmet=PATH],
+	[enable YASMET (needed for maximum-entropy training)]),
+	[yasmet=${withval}], [yasmet=no])
+AM_CONDITIONAL([HAVE_YASMET], [test "x$yasmet" != "xno"])
+AC_DEFINE(HAVE_YASMET, 0)
+
+
 PKG_CHECK_MODULES([LTTOOLBOX], [lttoolbox >= required_lttoolbox_version])
 
 AC_SUBST(LTTOOLBOX_CFLAGS)
@@ -63,6 +71,9 @@ AC_OUTPUT
 
 AS_IF([test "x$irstlm" == "xno"],
       [AC_MSG_NOTICE([IRSTLM is not enabled; you will not be able run monolingual rule-learning; enable using --with-irstlm])])
+
+AS_IF([test "x$yasmet" == "xno"],
+      [AC_MSG_NOTICE([YASMET is not enabled; you will not be able run maximum-entropy training; enable using --with-yasmet])])
 
 
 
