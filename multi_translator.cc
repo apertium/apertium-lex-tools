@@ -75,8 +75,8 @@ BiltransToken MultiTranslator::getFullToken(wstring source) {
 	
 }
 
-BiltransToken MultiTranslator::getTrimmedToken(wstring source) {
-
+BiltransToken MultiTranslator::getTrimmedToken(wstring source) 
+{
 	BiltransToken ttoken;
 	BiltransToken ftoken;
 
@@ -88,18 +88,44 @@ BiltransToken MultiTranslator::getTrimmedToken(wstring source) {
 		return ttoken;
 	}
 
-	wstring fstr = bilingual.biltrans(source, false);
-	wstring tstr = bilingual.biltransWithoutQueue(source, false);
+	wstring new_source = L"";
 
-	if (fstr == L"") {
-		fstr = L"@" + source;
-	} 
-	if (tstr == L"") {
-		tstr = L"@" + source;
+	for(wstring::iterator it = source.begin(); it != source.end(); it++)
+	{
+		if(*it == L'~') 
+		{
+			new_source = new_source + L' ';
+		}
+		else
+		{
+			new_source = new_source + *it;
+		}
 	}
 
-	ttoken = parseBiltransToken(source + L"/" + tstr);
-	ftoken = parseBiltransToken(source + L"/" + fstr);
+	wstring fstr = bilingual.biltrans(new_source, false);
+	wstring tstr = bilingual.biltransWithoutQueue(new_source, false);
+
+	if (fstr == L"") {
+		fstr = L"@" + new_source;
+	} 
+	if (tstr == L"") {
+		tstr = L"@" + new_source;
+	}
+	wstring new_source2 = L"";
+	for(wstring::iterator it = new_source.begin(); it != new_source.end(); it++)
+	{
+		if(*it == L' ') 
+		{
+			new_source2 = new_source2 + L'~';
+		}
+		else
+		{
+			new_source2 = new_source2 + *it;
+		}
+	}
+
+	ttoken = parseBiltransToken(new_source2 + L"/" + tstr);
+	ftoken = parseBiltransToken(new_source2 + L"/" + fstr);
 
 
 	if(this->trimmed) {
@@ -126,7 +152,6 @@ BiltransToken MultiTranslator::getTrimmedToken(wstring source) {
 	ttoken.sourceToken.tags = newTags;
 
 	return ttoken;
-	
 }
 
 void MultiTranslator::biltransToMultiTranslator(int sn, int &tn, unsigned int idx, 
