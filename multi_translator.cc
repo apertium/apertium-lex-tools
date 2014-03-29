@@ -88,44 +88,18 @@ BiltransToken MultiTranslator::getTrimmedToken(wstring source)
 		return ttoken;
 	}
 
-	wstring new_source = L"";
-
-	for(wstring::iterator it = source.begin(); it != source.end(); it++)
-	{
-		if(*it == L'~') 
-		{
-			new_source = new_source + L' ';
-		}
-		else
-		{
-			new_source = new_source + *it;
-		}
-	}
-
-	wstring fstr = bilingual.biltrans(new_source, false);
-	wstring tstr = bilingual.biltransWithoutQueue(new_source, false);
+	wstring fstr = bilingual.biltrans(source, false);
+	wstring tstr = bilingual.biltransWithoutQueue(source, false);
 
 	if (fstr == L"") {
-		fstr = L"@" + new_source;
+		fstr = L"@" + source;
 	} 
 	if (tstr == L"") {
-		tstr = L"@" + new_source;
-	}
-	wstring new_source2 = L"";
-	for(wstring::iterator it = new_source.begin(); it != new_source.end(); it++)
-	{
-		if(*it == L' ') 
-		{
-			new_source2 = new_source2 + L'~';
-		}
-		else
-		{
-			new_source2 = new_source2 + *it;
-		}
+		tstr = L"@" + source;
 	}
 
-	ttoken = parseBiltransToken(new_source2 + L"/" + tstr);
-	ftoken = parseBiltransToken(new_source2 + L"/" + fstr);
+	ttoken = parseBiltransToken(source + L"/" + tstr);
+	ftoken = parseBiltransToken(source + L"/" + fstr);
 
 
 	if(this->trimmed) {
