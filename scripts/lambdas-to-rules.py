@@ -16,7 +16,7 @@ with open(sys.argv[1]) as d:
 		if len(line) < 1: #{
 			continue;
 		#}
-		row = common.tokenize_tagger_line(line);
+		row = common.tokenise_tagger_line(line);
 		sl = wrap(row[0].strip());
 		tl = wrap(row[1].strip());
 		if tl[1] == '*':
