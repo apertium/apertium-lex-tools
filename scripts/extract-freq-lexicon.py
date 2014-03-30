@@ -87,11 +87,11 @@ for line in file(sys.argv[1]).readlines(): #{
 	line = line.split('\t')[1];
 
 	if cur_line == 0: #{
-		cur_sl_row = common.tokenize_tagger_line(line);
+		cur_sl_row = common.tokenise_tagger_line(line);
 	elif cur_line == 1: #{
-		cur_bt_row = common.tokenize_biltrans_line(line);
+		cur_bt_row = common.tokenise_biltrans_line(line);
 	elif cur_line == 2: #{
-		cur_tl_row = common.tokenize_tagger_line(line);
+		cur_tl_row = common.tokenise_tagger_line(line);
 	elif cur_line == 3:  #{
 		cur_al_row = line.split(' ');
 	#}
