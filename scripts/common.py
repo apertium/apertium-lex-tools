@@ -123,7 +123,7 @@ def parse_tagger_token(ptr, line):
 
 	return (ptr, sl);
 
-def tokenize_biltrans_line(line):
+def tokenise_biltrans_line(line):
 	out = []
 	escaped = False;
 	for ptr in range(0, len(line)):
@@ -138,7 +138,7 @@ def tokenize_biltrans_line(line):
 
 	return out
 
-def tokenize_tagger_line(line):
+def tokenise_tagger_line(line):
 
 	out = []
 	escaped = False;
@@ -156,7 +156,7 @@ def tokenize_tagger_line(line):
 	return out
 
 
-def tokenize_biltrans_line2(line):
+def tokenise_biltrans_line2(line):
 	line = clean_biltrans_line(line)[1:-1];
 	row = [];
 	token = '';
