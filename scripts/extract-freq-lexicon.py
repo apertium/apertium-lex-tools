@@ -2,12 +2,7 @@
 # coding=utf-8
 # -*- encoding: utf-8 -*-
 
-import sys, codecs, copy, commands;
-import common
-
-sys.stdin  = codecs.getreader('utf-8')(sys.stdin);
-sys.stdout = codecs.getwriter('utf-8')(sys.stdout);
-sys.stderr = codecs.getwriter('utf-8')(sys.stderr);
+import sys, common;
 
 # Read the corpus, make a note of all ambiguous words, their frequency and their possible translations
 
@@ -39,64 +34,73 @@ cur_bt_row = [];
 cur_al_row = [];
 
 if len(sys.argv) < 2: #{
-	print 'extract-freq-lexicon.py <candidate sent> [threshold]';
+	print('extract-freq-lexicon.py <candidate sent>');
 	sys.exit(-1);
 #}
 
-
-for line in file(sys.argv[1]).readlines(): #{
-	line = line.strip().decode('utf-8');	
-	lineno += 1
-	if line[0] == '-': #{
-		try:
-			# Read the corpus, make a note of all ambiguous words, their frequency and their possible translations
-			#
-			# sl_tl[sl_word][tl_word] = tl_freq
-			i = 0;
-			for slword in cur_sl_row: #{
-				if len(cur_bt_row[i]['tls']) > 1: #{
-					for al in cur_al_row: #{
-						al_sl = int(al.split('-')[1]);
-						al_tl = int(al.split('-')[0]);
-						if al_sl != i: #{
-							continue;
-						#}
-						tlword = cur_tl_row[al_tl];
-						slword = slword;
-						if slword not in sl_tl: #{
-							sl_tl[slword] = {};
-						#}
-						if tlword not in sl_tl[slword]: #{
-							sl_tl[slword][tlword] = 0;
-						#}
-						sl_tl[slword][tlword] = sl_tl[slword][tlword] + 1;
-
-						# print '+' , slword , tlword , sl_tl[slword][tlword], lineno;
-					#}
-				#}	
-				i = i + 1;
+#for line in open(sys.argv[1]).readlines(): #{
+with open(sys.argv[1]) as infile:
+	for line in infile: #{
+		line = line.strip();	
+		lineno += 1
+		if lineno % 5000 == 0: #{
+			sys.stderr.write('.');
+			if lineno % 100000 == 0: #{
+				sys.stderr.write(str(lineno)+'\n');
 			#}
-
-			cur_line = 0;
-		except:
-			print >>sys.stderr, "error in line", lineno;
-		#print line;	
-		continue;
-	#}	
+			sys.stderr.flush();
+		#}
+		if line[0] == '-': #{
+			try:
+				# Read the corpus, make a note of all ambiguous words, their frequency and their possible translations
+				#
+				# sl_tl[sl_word][tl_word] = tl_freq
+				i = 0;
+				for slword in cur_sl_row: #{
+					if len(cur_bt_row[i]['tls']) > 1: #{
+						for al in cur_al_row: #{
+							al_sl = int(al.split('-')[1]);
+							al_tl = int(al.split('-')[0]);
+							if al_sl != i: #{
+								continue;
+							#}
+							tlword = cur_tl_row[al_tl];
+							slword = slword;
+							if slword not in sl_tl: #{
+								sl_tl[slword] = {};
+							#}
+							if tlword not in sl_tl[slword]: #{
+								sl_tl[slword][tlword] = 0;
+							#}
+							sl_tl[slword][tlword] = sl_tl[slword][tlword] + 1;
 	
-	line = line.split('\t')[1];
-
-	if cur_line == 0: #{
-		cur_sl_row = common.tokenise_tagger_line(line);
-	elif cur_line == 1: #{
-		cur_bt_row = common.tokenise_biltrans_line(line);
-	elif cur_line == 2: #{
-		cur_tl_row = common.tokenise_tagger_line(line);
-	elif cur_line == 3:  #{
-		cur_al_row = line.split(' ');
+							# print '+' , slword , tlword , sl_tl[slword][tlword], lineno;
+						#}
+					#}	
+					i = i + 1;
+				#}
+	
+				cur_line = 0;
+			except:
+				print("error in line", lineno, file=sys.stderr);
+			#print line;	
+			continue;
+		#}	
+		
+		line = line.split('\t')[1];
+	
+		if cur_line == 0: #{
+			cur_sl_row = common.tokenise_tagger_line(line);
+		elif cur_line == 1: #{
+			cur_bt_row = common.tokenise_biltrans_line(line);
+		elif cur_line == 2: #{
+			cur_tl_row = common.tokenise_tagger_line(line);
+		elif cur_line == 3:  #{
+			cur_al_row = line.split(' ');
+		#}
+	
+		cur_line = cur_line + 1;
 	#}
-
-	cur_line = cur_line + 1;
 #}
 
 for sl in sl_tl: #{
@@ -105,11 +109,21 @@ for sl in sl_tl: #{
 	newtl.reverse()
 	first = True;
 	for tl in newtl: #{
+		if tl[0] == '*': #{
+			print('error: tl word unknown', tl,  file=sys.stderr);
+			continue;
+		#}
+		first_tag_sl = sl.split('<')[1].split('>')[0].strip();
+		first_tag_tl = tl.split('<')[1].split('>')[0].strip();
+		if first_tag_sl != first_tag_tl: #{
+			print('error:', first_tag_sl, '!=', first_tag_tl, file=sys.stderr);
+			continue;
+		#}
 		if first: #{
-			print sl_tl[sl][tl] , wrap(sl) , wrap(tl) , '@';
+			print(sl_tl[sl][tl] , wrap(sl) , wrap(tl) , '@');
 			first = False
 		else: #{
-			print sl_tl[sl][tl] , wrap(sl) , wrap(tl);
+			print(sl_tl[sl][tl] , wrap(sl) , wrap(tl));
 		#}
 	#}
 #}
