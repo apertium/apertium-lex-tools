@@ -30,6 +30,9 @@ def ambiguous(bt): #{
 reading = True;
 lineno = 0;
 total_valid = 0;
+total_errors = 0;
+
+not_ambiguous = [];
 
 while reading: #{	
 	try:
@@ -40,18 +43,21 @@ while reading: #{
 		if not bt_line.strip() and not pt_line.strip(): #{
 			reading = False;
 			break
-		#}
-		elif not bt_line.strip() or not pt_line.strip():
+		elif not bt_line.strip() or not pt_line.strip(): #{
 			continue;
 
-		row = pt_line.split(' ||| ');
-		bt = common.tokenize_biltrans_line(bt_line);
-		sl = common.tokenize_tagger_line(row[1]);
-		tl = common.tokenize_tagger_line(row[0]);
-
+		#}
+		row = pt_line.split('|||');
+		bt = common.tokenise_biltrans_line(bt_line.strip());
+		sl = common.tokenise_tagger_line(row[1].strip());
+		tl = common.tokenise_tagger_line(row[0].strip());
 		
 		if not ambiguous(bt): #{
-			print ("line", lineno, "not ambiguous", file=sys.stderr);
+			not_ambiguous.append(str(lineno));
+			if len(not_ambiguous) >= 10: #{
+				print ("not ambiguous:", ' '.join(not_ambiguous), file=sys.stderr);
+				not_ambiguous = [];
+			#}
 			continue;
 		#}
 		if len(sl) < 2 and len(tl) < 2: #{
@@ -79,10 +85,12 @@ while reading: #{
 		print('-------------------------------------------------------------------------------');
 		total_valid += 1
 	except:
+		print ("error in line", lineno, file=sys.stderr);
+		total_errors += 1
 		continue
 
 #}
 
 print('total:', lineno, file=sys.stderr);
 print('valid:', total_valid, '(' + str((total_valid/lineno)*100) + '%)', file=sys.stderr);
-
+print('errors:',total_errors, '(' + str((total_errors/lineno)*100) + '%)', file=sys.stderr);
