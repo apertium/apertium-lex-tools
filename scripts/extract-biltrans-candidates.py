@@ -77,10 +77,10 @@ while reading: #{
 		#}
 
 		row = pt_line.split('|||');
-		sl = common.tokenize_tagger_line(row[1]);
-		tl = common.tokenize_tagger_line(row[0]);
+		sl = common.tokenise_tagger_line(row[1]);
+		tl = common.tokenise_tagger_line(row[0]);
 		alignments = row[2].strip();
-		bt = common.tokenize_biltrans_line(bt_line);
+		bt = common.tokenise_biltrans_line(bt_line);
 
 		if not ambiguous(bt): #{
 			continue;
