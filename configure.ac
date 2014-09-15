@@ -26,6 +26,7 @@ AM_CONDITIONAL([HAVE_IRSTLM], [test "x$irstlm" != "xno"])
 AC_DEFINE(HAVE_IRSTLM, 0)
 AS_IF([test "x$irstlm" != "xno"], [
         CXXFLAGS="$CXXFLAGS -I$withval/include"
+        LIBS="$LIBS -lirstlm"
         AC_CHECK_HEADERS([lmmacro.h], AC_DEFINE(HAVE_IRSTLM, 1), [])
         AC_CHECK_HEADERS([lmtable.h], AC_DEFINE(HAVE_IRSTLM, 1), [])
           CXXFLAGS="$CXXFLAGS $IRSTLM_CFLAGS"
