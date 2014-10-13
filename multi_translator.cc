@@ -88,6 +88,12 @@ BiltransToken MultiTranslator::getTrimmedToken(wstring source)
 		return ttoken;
 	}
 
+        /*---------------------------------------------*/
+        
+        // This code is to attempt to avoid memory leak problems when calling
+        // the bilingual.* methods in FSTProcessor. Unknown why we get the 
+        // leaks in the first place...
+
         wstring fstr = L"";
         wstring tstr = L"";
 
@@ -102,6 +108,8 @@ BiltransToken MultiTranslator::getTrimmedToken(wstring source)
 
         fstr = f_cache[source];
         tstr = t_cache[source];
+
+        /*---------------------------------------------*/
 
 	if (fstr == L"") {
 		fstr = L"@" + source;
