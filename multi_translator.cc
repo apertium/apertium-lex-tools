@@ -88,8 +88,20 @@ BiltransToken MultiTranslator::getTrimmedToken(wstring source)
 		return ttoken;
 	}
 
-	wstring fstr = bilingual.biltrans(source, false);
-	wstring tstr = bilingual.biltransWithoutQueue(source, false);
+        wstring fstr = L"";
+        wstring tstr = L"";
+
+	if((f_cache.find(source) == f_cache.end())) 
+        {
+	  f_cache[source] = bilingual.biltrans(source, false);
+        }
+	if((t_cache.find(source) == t_cache.end())) 
+        {
+	  t_cache[source] = bilingual.biltransWithoutQueue(source, false);
+        }
+
+        fstr = f_cache[source];
+        tstr = t_cache[source];
 
 	if (fstr == L"") {
 		fstr = L"@" + source;
