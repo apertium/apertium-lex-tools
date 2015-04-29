@@ -203,7 +203,6 @@ void MultiTranslator::printTaggerOutput(int n, vector<BiltransToken> sentence) {
 void MultiTranslator::processSentence(vector<TaggerToken> sentence) {
 
 	vector<BiltransToken> outputSentence;
-	bool isAmbig = false;
 	bool hasAmbigPos = false;
 	int numberOfUnknown = 0;
 	int fertility = 1;
@@ -218,9 +217,6 @@ void MultiTranslator::processSentence(vector<TaggerToken> sentence) {
 			bt = getFullToken(token);
 		}
 
-		if (bt.targetTokens.size() > 1) {
-			isAmbig = true;
-		}
 		if (isPosAmbig(bt)) {
 			hasAmbigPos = true;
 		}
