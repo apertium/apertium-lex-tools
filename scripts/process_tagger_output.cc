@@ -23,13 +23,10 @@ int find(vector<wstring> xs, wstring x) {
 
 }
 
-FSTProcessor loadBilingual(char **argv) {
+FSTProcessor loadBilingual(char *path) {
 	FSTProcessor bilingual;
 
-	std::string resources_path(argv[1]);
-	std::string direction(argv[2]);
-
-	FILE *f_bin = fopen((resources_path + direction + ".autobil.bin").c_str(), "r");
+	FILE *f_bin = fopen(path.c_str(), "r");
 	bilingual.load(f_bin);
 	fclose(f_bin);
 	bilingual.initBiltrans();
@@ -54,7 +51,7 @@ vector<wstring> parseTags(wstring token) {
 			} else {
 				buffer += c;
 			}
-		} 
+		}
 	}
 	return tags;
 }
@@ -98,7 +95,7 @@ void processTaggerOutput(FSTProcessor *bilingual) {
 	wchar_t c;
 	bilingual->setBiltransSurfaceForms(true);
 	while((wcin.get(c)) != NULL) {
-		
+
 		if (state == 0) {
 			if (c == '^' && !escaped) {
 				state = 1; // inside
@@ -161,17 +158,15 @@ void processTaggerOutput(FSTProcessor *bilingual) {
 
 int main(int argc, char **argv)
 {
-	if(argc != 3) { 
-		wcout << L"Usage: " << argv[0] << "<language pair resources> <direction>"<< endl;
+	if(argc != 2) {
+		wcout << L"Usage: " << argv[0] << " bidix_bin_file" << endl;
+		wcout << L"with output from pretransfer on standard input." << endl;
 		exit(-1);
 	}
 
     LtLocale::tryToSetLocale();
-	FSTProcessor bilingual = loadBilingual(argv);
+	FSTProcessor bilingual = loadBilingual(argv[1]);
 	processTaggerOutput(&bilingual);
 
 	return 0;
 }
-
-
-
