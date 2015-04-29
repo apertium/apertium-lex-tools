@@ -8,7 +8,12 @@ MultiTranslator::MultiTranslator(string path, string mode, bool trimmed, bool fi
 	this->path = path;
 	this->mode = mode;
 
-	FILE *f_bin = fopen(path.c_str(), "r");
+	FILE *f_bin = fopen(path.c_str(), "rb");
+	if(!f_bin)
+	{
+		cerr << "Error: Could not open file '" << path << "'." << endl;
+		exit(EXIT_FAILURE);
+	}
 	bilingual.load(f_bin);
 	fclose(f_bin);
 	bilingual.initBiltrans();

@@ -1,3 +1,5 @@
+// -*- mode: c++ -*-
+
 #ifndef BILTRANS_WITHOUT_QUEUE
 #define BILTRANS_WITHOUT_QUEUE
 
