@@ -26,7 +26,7 @@ int find(vector<wstring> xs, wstring x) {
 FSTProcessor loadBilingual(char *path) {
 	FSTProcessor bilingual;
 
-	FILE *f_bin = fopen(path.c_str(), "r");
+	FILE *f_bin = fopen(path, "r");
 	bilingual.load(f_bin);
 	fclose(f_bin);
 	bilingual.initBiltrans();
