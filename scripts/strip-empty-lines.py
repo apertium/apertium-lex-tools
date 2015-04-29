@@ -1,3 +1,7 @@
+#!/usr/bin/python3
+# coding=utf-8
+# -*- encoding: utf-8 -*-
+
 import sys ;
 
 #perl "$MOSESDECODER/clean-corpus-n.perl" data.$SL-$TL/$CORPUS.tagged $SL $TL "data.$SL-$TL/$CORPUS.tagged-clean" 1 40;
