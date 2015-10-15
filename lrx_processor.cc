@@ -804,6 +804,12 @@ LRXProcessor::processME(FILE *input, FILE *output)
 
     if(nullFlush && val == L'\0') 
     {
+      processFlushME(output, sl, tl, blanks, scores);
+      pos = 0;
+      tl.clear();
+      sl.clear();
+      blanks.clear();
+
       fputwc_unlocked(val, output);
       fflush(output);
       continue;
@@ -1140,85 +1146,93 @@ LRXProcessor::processME(FILE *input, FILE *output)
 
   }
 
-  // Here we actually apply the rules that we've matched
+  processFlushME(output, sl, tl, blanks, scores);
+}
+
+void
+LRXProcessor::processFlushME(FILE *output,
+                             map<int, wstring > &sl,
+                             map<int, vector<wstring> > &tl,
+                             map<int, wstring > &blanks,
+                             map<int, map<wstring, double> > &scores) {
 
   unsigned int spos = 0;
   for(spos = 0; spos <= pos; spos++)
   {
     if(sl[spos] == L"")
-          {
-            continue;
-          }
+    {
+      continue;
+    }
 
-          fwprintf(stdout, L"%S^%S/", blanks[spos].c_str(), sl[spos].c_str());
+    fwprintf(stdout, L"%S^%S/", blanks[spos].c_str(), sl[spos].c_str());
 
-          vector<wstring>::iterator ti;
-          vector<wstring>::iterator penum = tl[spos].end(); penum--;
+    vector<wstring>::iterator ti;
+    vector<wstring>::iterator penum = tl[spos].end(); penum--;
 
-          if(tl[spos].size() > 1)
-          {
-            //--
-            double l_max = 0.0;
-            wstring ti_max;
-            for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
-            {
+    if(tl[spos].size() > 1)
+    {
+      //--
+      double l_max = 0.0;
+      wstring ti_max;
+      for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
+      {
 
-                map<wstring, double>::iterator si;
-                for(si = scores[spos].begin(); si != scores[spos].end(); si++) 
-                {
-                  if(debugMode) 
-                  {
-                    fwprintf(stderr, L">>> %d -> %S -> %.5f\n", spos, si->first.c_str(), si->second);
-                  }
-                  bool matched = false;
-                  matched = recognisePattern(*ti, si->first);
-                  if(si->second > l_max && matched) 
-                  { 
-                    l_max = si->second;
-                    ti_max = *ti;
-                  }
-                }
-            }
-
-            if(l_max > 0.0)  // If we actually got a winner
-            {
-              if(traceMode || debugMode)
-              {
-                //fwprintf(stderr, L"%d: %d: %S -> %S (%d)\n", lineno, spos, sl[spos].c_str(), ti->c_str(), scores[spos].size());
-                //fwprintf(stderr, L"MAX: %.5f = %S\n", l_max, ti_max.c_str());
-                fwprintf(stderr, L"%d:SELECT:%.5f:%S:%S\n", lineno, l_max, sl[spos].c_str(), ti_max.c_str());
-              }
-              fwprintf(stdout, L"%S", ti_max.c_str());
-            }
-            else
-            {
-              for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
-              {
-                fwprintf(stdout, L"%S", ti->c_str());
-                if(ti != penum)
-                {
-                  fwprintf(stdout, L"/");
-                }
-              }
-            }
-          }
-          else
-          {
-            for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
-            {
-              fwprintf(stdout, L"%S", ti->c_str());
-              if(ti != penum)
-              {
-                fwprintf(stdout, L"/");
-              }
-            }
-          }
-
-          fwprintf(stdout, L"$");
+        map<wstring, double>::iterator si;
+        for(si = scores[spos].begin(); si != scores[spos].end(); si++)
+        {
           if(debugMode)
           {
-            fwprintf(stdout, L"%d", spos);
+            fwprintf(stderr, L">>> %d -> %S -> %.5f\n", spos, si->first.c_str(), si->second);
           }
+          bool matched = false;
+          matched = recognisePattern(*ti, si->first);
+          if(si->second > l_max && matched)
+          {
+            l_max = si->second;
+            ti_max = *ti;
+          }
+        }
+      }
+
+      if(l_max > 0.0)  // If we actually got a winner
+      {
+        if(traceMode || debugMode)
+        {
+          //fwprintf(stderr, L"%d: %d: %S -> %S (%d)\n", lineno, spos, sl[spos].c_str(), ti->c_str(), scores[spos].size());
+          //fwprintf(stderr, L"MAX: %.5f = %S\n", l_max, ti_max.c_str());
+          fwprintf(stderr, L"%d:SELECT:%.5f:%S:%S\n", lineno, l_max, sl[spos].c_str(), ti_max.c_str());
+        }
+        fwprintf(stdout, L"%S", ti_max.c_str());
+      }
+      else
+      {
+        for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
+        {
+          fwprintf(stdout, L"%S", ti->c_str());
+          if(ti != penum)
+          {
+            fwprintf(stdout, L"/");
+          }
+        }
+      }
+    }
+    else
+    {
+      for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
+      {
+        fwprintf(stdout, L"%S", ti->c_str());
+        if(ti != penum)
+        {
+          fwprintf(stdout, L"/");
+        }
+      }
+    }
+
+    fwprintf(stdout, L"$");
+    if(debugMode)
+    {
+      fwprintf(stdout, L"%d", spos);
+    }
 
 
   }

@@ -115,6 +115,12 @@ private:
 		    map<pair<int, int>, vector<State> > &spans,
 		    int last_final);
 
+  void processFlushME(FILE *output,
+                      map<int, wstring > &sl,
+                      map<int, vector<wstring> > &tl,
+                      map<int, wstring > &blanks,
+                      map<int, map<wstring, double> > &scores);
+
 public:
   static wstring const LRX_PROCESSOR_TAG_SELECT;
   static wstring const LRX_PROCESSOR_TAG_REMOVE;
