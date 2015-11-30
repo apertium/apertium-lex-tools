@@ -1,6 +1,5 @@
 AM_LDFLAGS=$(LIBS)
 #AM_CXXFLAGS=-Wall -g -ggdb -DDEBUG 
-AM_CXXFLAGS=-Wall -g -ggdb -DDEBUG 
 
 # bin_PROGRAMS = lrx-comp lrx-proc multitrans irstlm-ranker #apertium-ldx-proc
 bin_PROGRAMS = lrx-comp lrx-proc multitrans # irstlm-ranker apertium-ldx-proc
