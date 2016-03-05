@@ -8,7 +8,7 @@
 
 #include <cwchar>
 #include <set>
-#include <apertium/tagger.h>
+//#include <apertium/tagger.h>
 #include <apertium/tsx_reader.h>
 #include <apertium/string_utils.h>
 
