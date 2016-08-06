@@ -89,6 +89,7 @@ public:
   static wstring const LRX_COMPILER_REMOVE_ELEM;
   static wstring const LRX_COMPILER_OR_ELEM;
 
+  static wstring const LRX_COMPILER_SURFACE_ATTR;
   static wstring const LRX_COMPILER_LEMMA_ATTR;
   static wstring const LRX_COMPILER_TAGS_ATTR;
   static wstring const LRX_COMPILER_COMMENT_ATTR;
