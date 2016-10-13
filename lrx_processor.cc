@@ -1164,7 +1164,7 @@ LRXProcessor::processFlushME(FILE *output,
       continue;
     }
 
-    fwprintf(stdout, L"%S^%S/", blanks[spos].c_str(), sl[spos].c_str());
+    fwprintf(output, L"%S^%S/", blanks[spos].c_str(), sl[spos].c_str());
 
     vector<wstring>::iterator ti;
     vector<wstring>::iterator penum = tl[spos].end(); penum--;
@@ -1202,16 +1202,16 @@ LRXProcessor::processFlushME(FILE *output,
           //fwprintf(stderr, L"MAX: %.5f = %S\n", l_max, ti_max.c_str());
           fwprintf(stderr, L"%d:SELECT:%.5f:%S:%S\n", lineno, l_max, sl[spos].c_str(), ti_max.c_str());
         }
-        fwprintf(stdout, L"%S", ti_max.c_str());
+        fwprintf(output, L"%S", ti_max.c_str());
       }
       else
       {
         for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
         {
-          fwprintf(stdout, L"%S", ti->c_str());
+          fwprintf(output, L"%S", ti->c_str());
           if(ti != penum)
           {
-            fwprintf(stdout, L"/");
+            fwprintf(output, L"/");
           }
         }
       }
@@ -1220,22 +1220,22 @@ LRXProcessor::processFlushME(FILE *output,
     {
       for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
       {
-        fwprintf(stdout, L"%S", ti->c_str());
+        fwprintf(output, L"%S", ti->c_str());
         if(ti != penum)
         {
-          fwprintf(stdout, L"/");
+          fwprintf(output, L"/");
         }
       }
     }
 
-    fwprintf(stdout, L"$");
+    fwprintf(output, L"$");
     if(debugMode)
     {
-      fwprintf(stdout, L"%d", spos);
+      fwprintf(output, L"%d", spos);
     }
 
 
   }
 
-  fwprintf(stdout, L"%S", blanks[pos].c_str());
+  fwprintf(output, L"%S", blanks[pos].c_str());
 }
