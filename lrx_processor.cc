@@ -491,6 +491,7 @@ LRXProcessor::process(FILE *input, FILE *output)
   vector<State> alive_states_clean ;
   vector<State> alive_states = alive_states_clean ;
   alive_states.push_back(*initial_state);
+  vector<State> new_states;
 
   int last_final = -1; // check what we actually use this for
 
@@ -559,7 +560,7 @@ LRXProcessor::process(FILE *input, FILE *output)
         fwprintf(stderr, L"[POS] %d: [sl %d ; tl %d ; bl %d]\n", pos, sl[pos].size(), tl[pos].size(), blanks[pos].size());
       }
 
-      vector<State> new_state; // alive_states_new 
+      new_states.clear(); // alive_states_new 
       pair<double, vector<State> > new_best_cover;
       new_best_cover.first = -numeric_limits<int>::max();
 
@@ -576,7 +577,7 @@ LRXProcessor::process(FILE *input, FILE *output)
         if(s.size() > 0) // If the current state has outgoing transitions, 
                          // add it to the new alive states
         {
-          new_state.push_back(s);
+          new_states.push_back(s);
         }
         s.step(alphabet(L"<$>"));
 
@@ -658,7 +659,7 @@ LRXProcessor::process(FILE *input, FILE *output)
         }
       }
  
-      alive_states = new_state;
+      alive_states.swap(new_states);
       alive_states.push_back(*initial_state);
 
       if(debugMode)
@@ -715,7 +716,7 @@ LRXProcessor::process(FILE *input, FILE *output)
         fwprintf(stderr, L"outOfWord = false\n");
       }
 
-      vector<State> new_state;
+      new_states.clear();
       wstring res = L"";
       for(vector<State>::const_iterator it = alive_states.begin(); it != alive_states.end(); it++)
       {
@@ -740,14 +741,14 @@ LRXProcessor::process(FILE *input, FILE *output)
         }
         if(s.size() > 0) // If the current state has outgoing transitions, add it to the new alive states
         {
-          new_state.push_back(s);
+          new_states.push_back(s);
         }
       }
       if(debugMode)
       {
-        fwprintf(stderr, L"new_state: %d\n", new_state.size());
+        fwprintf(stderr, L"new_states: %d\n", new_states.size());
       }
-      alive_states = new_state;
+      alive_states.swap(new_states);
       alive_states.push_back(*initial_state);
 
     }
@@ -797,6 +798,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
   vector<State> alive_states_clean ;
   vector<State> alive_states = alive_states_clean ;
   alive_states.push_back(*initial_state);
+  vector<State> new_states;
 
   while(!feof(input))
   {
@@ -858,7 +860,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
       {
         fwprintf(stderr, L"[POS] %d: [sl %d ; tl %d ; bl %d]: %S\n", pos, sl[pos].size(), tl[pos].size(), blanks[pos].size(), sl[pos].c_str());
       }
-      vector<State> new_state; // alive_states_new 
+      new_states.clear(); // alive_states_new 
 
       // \forall s \in A
       set<wstring> seen_ids;
@@ -872,7 +874,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
         if(s.size() > 0) // If the current state has outgoing transitions, 
                          // add it to the new alive states
         {
-          new_state.push_back(s);
+          new_states.push_back(s);
         }
         s.step(alphabet(L"<$>"));
 
@@ -933,7 +935,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
           }
         }
       }
-      alive_states = new_state;
+      alive_states.swap(new_states);
       alive_states.push_back(*initial_state);
 
       if(debugMode)
@@ -1082,7 +1084,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
         fwprintf(stderr, L"outOfWord = false\n");
       }
 
-      vector<State> new_state;
+      new_states.clear();
       wstring res = L"";
       for(vector<State>::const_iterator it = alive_states.begin(); it != alive_states.end(); it++)
       {
@@ -1107,14 +1109,14 @@ LRXProcessor::processME(FILE *input, FILE *output)
         }
         if(s.size() > 0) // If the current state has outgoing transitions, add it to the new alive states
         {
-          new_state.push_back(s);
+          new_states.push_back(s);
         }
       }
       if(debugMode)
       {
-        fwprintf(stderr, L"new_state: %d\n", new_state.size());
+        fwprintf(stderr, L"new_states: %d\n", new_states.size());
       }
-      alive_states = new_state;
+      alive_states.swap(new_states);
       alive_states.push_back(*initial_state);
 
     }
