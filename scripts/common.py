@@ -13,7 +13,7 @@ def wrap (x):
 def parse_tags(ptr, line):
 	tags = []
 	tag = '';
-	
+
 	while True:
 		c = line[ptr];
 
@@ -104,7 +104,7 @@ def toBiltransToken(sl, tls):
 	new_sl = sl[0] + '<' + '><'.join(sl[1]) + '>';
 
 	return (new_sl, new_tls);
-		
+
 
 def parse_biltrans_token(ptr, line):
 	(ptr, sl) = parse_sl(ptr, line);
@@ -116,12 +116,15 @@ def parse_biltrans_token(ptr, line):
 	token['tls'] = tls;
 
 	return (ptr, token);
-		
+
 def parse_tagger_token(ptr, line):
 	(ptr, sl) = parse_sl(ptr, line);
-	sl = sl[0] + '<' + '><'.join(sl[1]) + '>'	
+	sl = sl[0] + '<' + '><'.join(sl[1]) + '>'
 
 	return (ptr, sl);
+
+def tokenize_biltrans_line(line):
+    return tokenise_biltrans_line(line)
 
 def tokenise_biltrans_line(line):
 	out = []
@@ -137,6 +140,9 @@ def tokenise_biltrans_line(line):
 			escaped = False;
 
 	return out
+
+def tokenize_tagger_line(line):
+    return tokenise_tagger_line(line)
 
 def tokenise_tagger_line(line):
 
@@ -155,6 +161,8 @@ def tokenise_tagger_line(line):
 
 	return out
 
+def tokenize_biltrans_line2(line):
+    return tokenise_biltrans_line2(line)
 
 def tokenise_biltrans_line2(line):
 	line = clean_biltrans_line(line)[1:-1];
