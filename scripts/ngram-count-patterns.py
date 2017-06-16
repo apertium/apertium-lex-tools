@@ -30,20 +30,24 @@ if len(sys.argv) < 3: #{
 	sys.exit(-1);
 #}
 
-MAX_NGRAMS = 3;
+MAX_NGRAMS = 2;
 
 crisphold = float(sys.argv[3]);
 cur_line = 0;
 
-sl_tl_defaults = {}; 
+sl_tl_defaults = {};
 sl_tl = {};
 ngrams = {};
 
+lineno = 0
 for line in file(sys.argv[1]).readlines(): #{
+	lineno += 1
+	if lineno % 10000 == 0:
+		print >> sys.stderr, lineno
 	if len(line) < 1: #{
 		continue;
 	#}
-	row = common.tokenize_tagger_line(line.decode('utf-8'));
+	row = common.tokenise_tagger_line(line.decode('utf-8'));
 	sl = wrap(row[0]);
 	tl = wrap(row[1]);
 	if tl[1] == '*':
@@ -62,90 +66,91 @@ cur_al_row = [];
 lineno = 0
 for line in file(sys.argv[2]).readlines(): #{
 	lineno += 1
-	line = line.strip().decode('utf-8');	
+	line = line.strip().decode('utf-8');
+	if lineno % 500 == 0:
+		print >> sys.stderr, lineno
 	if line[0] == '-': #{
-		try:
-	#		print len(cur_sl_row), len(cur_tl_row), len(cur_bt_row), len(cur_al_row);	
+	#		print len(cur_sl_row), len(cur_tl_row), len(cur_bt_row), len(cur_al_row);
 	#		print cur_sl_row;
 	#		print cur_bt_row;
 	#		print cur_tl_row;
 	#		print cur_al_row;
 	#
-			# Read the corpus, make a note of all ambiguous words, their frequency and their possible translations
-			#
-			# sl_tl[sl_word][tl_word] = tl_freq
-			i = 0;
-			for slword in cur_sl_row: #{
-				if len(cur_bt_row[i]['tls']) > 1: #{
-					for al in cur_al_row: #{
-						al_sl = int(al.split('-')[1]);
-						al_tl = int(al.split('-')[0]);
-						if al_sl != i: #{
-							continue;
-						#}
-						tlword = wrap(cur_tl_row[al_tl]);
-						slword = wrap(slword);
-
-						if slword not in sl_tl_defaults: #{
-							print >>sys.stderr, 'WARNING: "' + slword + '" not in sl_tl_defaults, skipping';
-							continue;
-						#}
-
-						for j in range(1, MAX_NGRAMS): #{
-
-							pregram = ' '.join(map(wrap, cur_sl_row[i-j:i+1]));
-							postgram = ' '.join(map(wrap, cur_sl_row[i:i+j+1]));
-							roundgram = ' '.join(map(wrap, cur_sl_row[i-j:i+j+1]));
-
-							if slword not in ngrams: #{
-								ngrams[slword] = {};
-							#}
-							if pregram not in ngrams[slword]: #{
-								ngrams[slword][pregram] = {};
-							#}
-							if postgram not in ngrams[slword]: #{
-								ngrams[slword][postgram] = {};
-							#}
-							if roundgram not in ngrams[slword]: #{
-								ngrams[slword][roundgram] = {};
-							#}
-							if tlword not in ngrams[slword][pregram]: #{
-								ngrams[slword][pregram][tlword] = 0;
-							#}
-							if tlword not in ngrams[slword][postgram]: #{
-								ngrams[slword][postgram][tlword] = 0;
-							#}
-							if tlword not in ngrams[slword][roundgram]: #{
-								ngrams[slword][roundgram][tlword] = 0;
-							#}
-
-							ngrams[slword][pregram][tlword] = ngrams[slword][pregram][tlword] + 1;
-							ngrams[slword][postgram][tlword] = ngrams[slword][postgram][tlword] + 1;
-							ngrams[slword][roundgram][tlword] = ngrams[slword][roundgram][tlword] + 1;
-						#}
+		# Read the corpus, make a note of all ambiguous words, their frequency and their possible translations
+		#
+		# sl_tl[sl_word][tl_word] = tl_freq
+		i = 0;
+		for slword in cur_sl_row: #{
+			if len(cur_bt_row[i]['tls']) > 1: #{
+				for al in cur_al_row: #{
+					if al == '':
+						continue
+					al_sl = int(al.split('-')[1]);
+					al_tl = int(al.split('-')[0]);
+					if al_sl != i: #{
+						continue;
 					#}
-	#				for j in range(0, MAX_NGRAMS): #{
-	#					print cur_sl_row[i-j:i+1];
-	#					print cur_sl_row[i:i+j];
-	#				#}
-				#}	
-				i = i + 1;
+					tlword = wrap(cur_tl_row[al_tl]);
+					slword = wrap(slword);
+
+					if slword not in sl_tl_defaults: #{
+						print >>sys.stderr, '!',
+						continue;
+					#}
+
+					for j in range(1, MAX_NGRAMS): #{
+
+						pregram = ' '.join(map(wrap, cur_sl_row[i-j:i+1]));
+						postgram = ' '.join(map(wrap, cur_sl_row[i:i+j+1]));
+						roundgram = ' '.join(map(wrap, cur_sl_row[i-j:i+j+1]));
+
+						if slword not in ngrams: #{
+							ngrams[slword] = {};
+						#}
+						if pregram not in ngrams[slword]: #{
+							ngrams[slword][pregram] = {};
+						#}
+						if postgram not in ngrams[slword]: #{
+							ngrams[slword][postgram] = {};
+						#}
+						if roundgram not in ngrams[slword]: #{
+							ngrams[slword][roundgram] = {};
+						#}
+						if tlword not in ngrams[slword][pregram]: #{
+							ngrams[slword][pregram][tlword] = 0;
+						#}
+						if tlword not in ngrams[slword][postgram]: #{
+							ngrams[slword][postgram][tlword] = 0;
+						#}
+						if tlword not in ngrams[slword][roundgram]: #{
+							ngrams[slword][roundgram][tlword] = 0;
+						#}
+
+						ngrams[slword][pregram][tlword] = ngrams[slword][pregram][tlword] + 1;
+						ngrams[slword][postgram][tlword] = ngrams[slword][postgram][tlword] + 1;
+						ngrams[slword][roundgram][tlword] = ngrams[slword][roundgram][tlword] + 1;
+					#}
+				#}
+#				for j in range(0, MAX_NGRAMS): #{
+#					print cur_sl_row[i-j:i+1];
+#					print cur_sl_row[i:i+j];
+#				#}
 			#}
-		except:
-			print >>sys.stderr, "error in line", lineno
+			i = i + 1;
+		#}
 		cur_line = 0;
-		#print line;	
+		#print line;
 		continue;
-	#}	
-	
+	#}
+
 	line = line.split('\t')[1];
 
 	if cur_line == 0: #{
-		cur_sl_row = common.tokenize_tagger_line(line)
+		cur_sl_row = common.tokenise_tagger_line(line)
 	elif cur_line == 1: #{
-		cur_bt_row = common.tokenize_biltrans_line(line)
+		cur_bt_row = common.tokenise_biltrans_line(line)
 	elif cur_line == 2: #{
-		cur_tl_row = common.tokenize_tagger_line(line)
+		cur_tl_row = common.tokenise_tagger_line(line)
 	elif cur_line == 3:  #{
 		cur_al_row = line.split(' ');
 	#}
@@ -153,11 +158,12 @@ for line in file(sys.argv[2]).readlines(): #{
 	cur_line = cur_line + 1;
 #}
 
+
 for sl in ngrams: #{
 
 	for ngram in ngrams[sl]: #{
 		total = 0;
-		max_freq = -1;	
+		max_freq = -1;
 		current_tl = '';
 		for tl in ngrams[sl][ngram]: #{
 			if ngrams[sl][ngram][tl] > max_freq: #{
@@ -175,14 +181,14 @@ for sl in ngrams: #{
 		#> translation is). I think this would be easier to explain than the magic
 		#> number I came up with.
 		#
-		#I see this as a way to define how "crispy" the decisions are. I think it 
-		#would be better to express this as a ratio: the ratio of the times the 
-		#alternative translation is seen to the number of times the defaullt 
+		#I see this as a way to define how "crispy" the decisions are. I think it
+		#would be better to express this as a ratio: the ratio of the times the
+		#alternative translation is seen to the number of times the defaullt
 		#translation is seen with that n-gram.
 		#
-		#It would be "2" in this case: the alternative is seen twice as often as 
+		#It would be "2" in this case: the alternative is seen twice as often as
 		#the default.
-		
+
 		for tl in ngrams[sl][ngram]: #{
 			crispiness = 0.0;
 			default = sl_tl_defaults[sl];
@@ -194,8 +200,8 @@ for sl in ngrams: #{
 			weight = float(ngrams[sl][ngram][tl]) / float(total);
 			crispiness = alt_crisp/def_crisp;
 
-			#print '%%%' , crispiness , alt_crisp , def_crisp , tl , default , ngrams[sl][ngram] ; 
-			
+			#print '%%%' , crispiness , alt_crisp , def_crisp , tl , default , ngrams[sl][ngram] ;
+
 			if crispiness < crisphold: #{
 				print '-', crispiness , weight , total, max_freq, ngrams[sl][ngram][tl], '\t'+ sl + '\t' + ngram + '\t' + tl + '\t' + str(ngrams[sl][ngram][tl]);
 			else: #{

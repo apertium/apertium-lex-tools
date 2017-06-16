@@ -41,7 +41,7 @@ if len(sys.argv) < 2: #{
 #for line in open(sys.argv[1]).readlines(): #{
 with open(sys.argv[1]) as infile:
 	for line in infile: #{
-		line = line.strip();	
+		line = line.strip();
 		lineno += 1
 		if lineno % 5000 == 0: #{
 			sys.stderr.write('.');
@@ -51,44 +51,51 @@ with open(sys.argv[1]) as infile:
 			sys.stderr.flush();
 		#}
 		if line[0] == '-': #{
-			try:
-				# Read the corpus, make a note of all ambiguous words, their frequency and their possible translations
-				#
-				# sl_tl[sl_word][tl_word] = tl_freq
-				i = 0;
-				for slword in cur_sl_row: #{
-					if len(cur_bt_row[i]['tls']) > 1: #{
-						for al in cur_al_row: #{
-							al_sl = int(al.split('-')[1]);
-							al_tl = int(al.split('-')[0]);
-							if al_sl != i: #{
-								continue;
-							#}
-							tlword = cur_tl_row[al_tl];
-							slword = slword;
-							if slword not in sl_tl: #{
-								sl_tl[slword] = {};
-							#}
-							if tlword not in sl_tl[slword]: #{
-								sl_tl[slword][tlword] = 0;
-							#}
-							sl_tl[slword][tlword] = sl_tl[slword][tlword] + 1;
-	
-							# print '+' , slword , tlword , sl_tl[slword][tlword], lineno;
+			# Read the corpus, make a note of all ambiguous words, their frequency and their possible translations
+			#
+			# sl_tl[sl_word][tl_word] = tl_freq
+			i = 0;
+			for slword in cur_sl_row: #{
+				if len(cur_bt_row[i]['tls']) > 1: #{
+					for al in cur_al_row: #{
+						if al == '':
+							continue
+						al_sl = int(al.split('-')[1]);
+						al_tl = int(al.split('-')[0]);
+						if al_sl != i: #{
+							continue;
 						#}
-					#}	
-					i = i + 1;
+						if al_tl < len(cur_tl_row):
+							tlword = cur_tl_row[al_tl];
+						else:
+							tlword = cur_tl_row[-1]
+							print("alignment out",
+								"of",
+								"range", al_tl,
+								"not in",
+								"len(",
+								cur_tl_row,
+								")",
+								file=sys.stderr)
+						slword = slword;
+						if slword not in sl_tl: #{
+							sl_tl[slword] = {};
+						#}
+						if tlword not in sl_tl[slword]: #{
+							sl_tl[slword][tlword] = 0;
+						#}
+						sl_tl[slword][tlword] = sl_tl[slword][tlword] + 1;
+						# print '+' , slword , tlword , sl_tl[slword][tlword], lineno;
+					#}
 				#}
-	
-				cur_line = 0;
-			except:
-				print("error in line", lineno, file=sys.stderr);
-			#print line;	
+				i = i + 1;
+			#}
+			cur_line = 0;
 			continue;
-		#}	
-		
+		#}
+
 		line = line.split('\t')[1];
-	
+
 		if cur_line == 0: #{
 			cur_sl_row = common.tokenise_tagger_line(line);
 		elif cur_line == 1: #{
@@ -98,7 +105,7 @@ with open(sys.argv[1]) as infile:
 		elif cur_line == 3:  #{
 			cur_al_row = line.split(' ');
 		#}
-	
+
 		cur_line = cur_line + 1;
 	#}
 #}
