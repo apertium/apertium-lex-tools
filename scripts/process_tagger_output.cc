@@ -94,7 +94,7 @@ void processTaggerOutput(FSTProcessor *bilingual) {
 	int state = 0; // outside
 	wchar_t c;
 	bilingual->setBiltransSurfaceForms(true);
-	while((wcin.get(c)) != NULL) {
+	while((wcin.get(c))) {
 
 		if (state == 0) {
 			if (c == '^' && !escaped) {
