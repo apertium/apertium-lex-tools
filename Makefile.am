@@ -21,4 +21,4 @@ if HAVE_IRSTLM
     bin_PROGRAMS += irstlm_ranker
 endif
 
-
+EXTRA_DIST = lrx_compiler.h lrx_processor.h multi_translator.h tagger_output_processor.h
