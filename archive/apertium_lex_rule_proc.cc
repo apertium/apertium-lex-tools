@@ -58,7 +58,7 @@ map<int, LSRuleExe> rules;
 //map<wstring, TransExe> transducers; 
 Alphabet alphabet;
 State *initial_state;
-set<Node *> anfinals;
+map<Node *, double> anfinals;
 set<wchar_t> escaped;
 bool outOfWord = true;
 map<int, Transducer> transducers;
@@ -662,7 +662,10 @@ main (int argc, char** argv)
   initial_state = new State(pool);
   initial_state->init(te.getInitial());
 
-  anfinals.insert(te.getFinals().begin(), te.getFinals().end());
+  for(map<Node*, double>::const_iterator it = te.getFinals().begin(); it != te.getFinals().end(); it++)
+  {
+    anfinals.insert(pair<Node*, double>(it->first, it->second));
+  }
 
   //
   // Main loop

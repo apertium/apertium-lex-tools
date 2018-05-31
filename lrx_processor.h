@@ -84,7 +84,7 @@ private:
 
   vector<State> alive_states;
 
-  set<Node *> anfinals;
+  map<Node *, double> anfinals;
   set<wchar_t> escaped_chars;
   State *initial_state;
 
@@ -107,13 +107,13 @@ private:
   void evaluateRules();
 
   void processFlush(FILE *output,
-		    map<int, wstring > &sl,
-		    map<int, vector<wstring> > &tl,
-		    map<int, wstring > &blanks,
-		    map<int, pair<double, vector<State> > > &covers,
-		    pair<double, vector<State> > &empty_seq,
-		    map<pair<int, int>, vector<State> > &spans,
-		    int last_final);
+                    map<int, wstring > &sl,
+                    map<int, vector<wstring> > &tl,
+                    map<int, wstring > &blanks,
+                    map<int, pair<double, vector<State> > > &covers,
+                    pair<double, vector<State> > &empty_seq,
+                    map<pair<int, int>, vector<State> > &spans,
+                    int last_final);
 
   void processFlushME(FILE *output,
                       map<int, wstring > &sl,
@@ -141,4 +141,3 @@ public:
 };
 
 #endif /* __LRX_PROCESSOR_H__ */
-
