@@ -131,7 +131,10 @@ LRXProcessor::init()
 {
   initial_state->init(transducer.getInitial());
 
-  anfinals.insert(transducer.getFinals().begin(), transducer.getFinals().end());
+  for(map<Node*, double>::const_iterator it = transducer.getFinals().begin(); it != transducer.getFinals().end(); it++)
+  {
+    anfinals.insert(pair<Node*, double>(it->first, it->second));
+  }
 
   escaped_chars.insert(L'[');
   escaped_chars.insert(L']');
@@ -181,8 +184,12 @@ LRXProcessor::recognisePattern(const wstring lu, const wstring op)
   first_state->init(recognisers[op].getInitial());
   State cur = *first_state;
 
-  set<Node *> end_states;
-  end_states.insert(recognisers[op].getFinals().begin(), recognisers[op].getFinals().end());
+  map<Node *, double> end_states;
+
+  for(map<Node*, double>::const_iterator it = recognisers[op].getFinals().begin(); it != recognisers[op].getFinals().end(); it++)
+  {
+    end_states.insert(pair<Node*, double>(it->first, it->second));
+  }
 
   bool readingTag = false;
   wstring tag = L"";
