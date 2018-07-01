@@ -316,11 +316,22 @@ LRXProcessor::processFlush(FILE *output,
       {
         if(debugMode)
         {
-          wstring out = it2->filterFinals(anfinals, alphabet, escaped_chars);
+          map<wstring, double> out_resp = it2->filterFinals(anfinals, alphabet, escaped_chars);
+          wstring out = L"";
+          for(map<wstring, double>::const_iterator it3 = out_resp.begin(); it3 != out_resp.end(); it3++)
+          {
+            out += L"/";
+            out += it3->first;
+          }
           fwprintf(stderr, L"!!!    filter_finals: %S\n", out.c_str());
         }
+        map<pair<wstring, vector<wstring> >, double > outpaths_resp;
+        outpaths_resp = it2->filterFinalsLRX(anfinals, alphabet, escaped_chars, false, false, 0);
         set<pair<wstring, vector<wstring> > > outpaths;
-        outpaths = it2->filterFinalsLRX(anfinals, alphabet, escaped_chars, false, false, 0);
+        for(map<pair<wstring, vector<wstring> >, double >::const_iterator it3 = outpaths_resp.begin(); it3 != outpaths_resp.end(); it3++)
+        {
+          outpaths.insert(it3->first);
+        }
 
         int j = 1;
         set<pair<wstring, vector<wstring> > >::iterator it3;
@@ -340,8 +351,13 @@ LRXProcessor::processFlush(FILE *output,
                 vector<State>::iterator iy;
                 for(iy = ix->second.begin(); iy != ix->second.end(); iy++)
                 {
+                  map<pair<wstring, vector<wstring> >, double > y_resp;
+                  y_resp = iy->filterFinalsLRX(anfinals, alphabet, escaped_chars, false, false, 0);
                   set<pair<wstring, vector<wstring> > > y;
-                  y = iy->filterFinalsLRX(anfinals, alphabet, escaped_chars, false, false, 0);
+                  for(map<pair<wstring, vector<wstring> >, double >::const_iterator iy2 = y_resp.begin(); iy2 != y_resp.end(); iy2++)
+                  {
+                    y.insert(iy2->first);
+                  }
                   if(y == outpaths)
                   {
                     starting_point = ix->first.first;
@@ -593,12 +609,23 @@ LRXProcessor::process(FILE *input, FILE *output)
           // We've reached a final state, so we need to evaluate the rule we've matched
           if(debugMode)
           {
-            wstring out = s.filterFinals(anfinals, alphabet, escaped_chars);
+            map<wstring, double> out_resp = s.filterFinals(anfinals, alphabet, escaped_chars);
+            wstring out = L"";
+            for(map<wstring, double>::const_iterator it2 = out_resp.begin(); it2 != out_resp.end(); it2++)
+            {
+              out += L"/";
+              out += it2->first;
+            }
             fwprintf(stderr, L"    filter_finals: %S\n", out.c_str());
           }
  
+          map<pair<wstring, vector<wstring> >, double > outpaths_resp;
+          outpaths_resp = s.filterFinalsLRX(anfinals, alphabet, escaped_chars, false, false, 0);
           set<pair<wstring, vector<wstring> > > outpaths;
-          outpaths = s.filterFinalsLRX(anfinals, alphabet, escaped_chars, false, false, 0);
+          for(map<pair<wstring, vector<wstring> >, double >::const_iterator it2 = outpaths_resp.begin(); it2 != outpaths_resp.end(); it2++)
+          {
+            outpaths.insert(it2->first);
+          }
 
           set<pair<wstring, vector<wstring> > >::iterator it;
           for(it = outpaths.begin(); it != outpaths.end(); it++)
@@ -644,7 +671,13 @@ LRXProcessor::process(FILE *input, FILE *output)
                   {
                     if(debugMode)
                     {
-                      wstring out2 = l->filterFinals(anfinals, alphabet, escaped_chars);
+                      map<wstring, double> out2_resp = l->filterFinals(anfinals, alphabet, escaped_chars);
+                      wstring out2 = L"";
+                      for(map<wstring, double>::const_iterator il = out2_resp.begin(); il != out2_resp.end(); il++)
+                      {
+                        out2 += L"/";
+                        out2 += il->first;
+                      }
                       fwprintf(stderr, L"    == INCLUDE FINALS: %S\n", out2.c_str());
                     }
                     reached.push_back(*l);
@@ -890,12 +923,23 @@ LRXProcessor::processME(FILE *input, FILE *output)
           // We've reached a final state, so we need to evaluate the rule we've matched
           if(debugMode)
           {
-            wstring out = s.filterFinals(anfinals, alphabet, escaped_chars);
+            map<wstring, double> out_resp = s.filterFinals(anfinals, alphabet, escaped_chars);
+            wstring out = L"";
+            for(map<wstring, double>::const_iterator it2 = out_resp.begin(); it2 != out_resp.end(); it2++)
+            {
+              out += L"/";
+              out += it2->first;
+            }
             fwprintf(stderr, L"    filter_finals: %S\n", out.c_str());
           }
 
+          map<pair<wstring, vector<wstring> >, double > outpaths_resp;
+          outpaths_resp = s.filterFinalsLRX(anfinals, alphabet, escaped_chars, false, false, 0);
           set<pair<wstring, vector<wstring> > > outpaths;
-          outpaths = s.filterFinalsLRX(anfinals, alphabet, escaped_chars, false, false, 0);
+          for(map<pair<wstring, vector<wstring> >, double >::const_iterator it2 = outpaths_resp.begin(); it2 != outpaths_resp.end(); it2++)
+          {
+            outpaths.insert(it2->first);
+          }
 
           set<pair<wstring, vector<wstring> > >::iterator it;
           for(it = outpaths.begin(); it != outpaths.end(); it++)
