@@ -662,10 +662,7 @@ main (int argc, char** argv)
   initial_state = new State(pool);
   initial_state->init(te.getInitial());
 
-  for(map<Node*, double>::const_iterator it = te.getFinals().begin(); it != te.getFinals().end(); it++)
-  {
-    anfinals.insert(pair<Node*, double>(it->first, it->second));
-  }
+  anfinals.insert(te.getFinals().begin(), te.getFinals().end());
 
   //
   // Main loop
