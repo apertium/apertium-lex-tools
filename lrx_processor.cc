@@ -89,7 +89,7 @@ LRXProcessor::load(FILE *in)
       name += static_cast<wchar_t>(Compression::multibyte_read(in));
       len2--;
     }
-    recognisers[name].read(in, alphabet);
+    recognisers[name].read(in, alphabet, false);
     len--;
   }
 
@@ -107,7 +107,7 @@ LRXProcessor::load(FILE *in)
     len3--;
   }
 
-  transducer.read(in, alphabet);
+  transducer.read(in, alphabet, false);
 
   // Now read in weights
   struct weight {
@@ -188,7 +188,7 @@ LRXProcessor::recognisePattern(const wstring lu, const wstring op)
   first_state->init(recognisers[op].getInitial());
   State cur = *first_state;
 
-  set<Node *> end_states;
+  map<Node *, double> end_states;
   end_states.insert(recognisers[op].getFinals().begin(), recognisers[op].getFinals().end());
 
   bool readingTag = false;
@@ -310,7 +310,13 @@ LRXProcessor::processFlush(FILE *output,
       {
         if(debugMode)
         {
-          wstring out = it2->filterFinals(anfinals, alphabet, escaped_chars);
+          map<wstring, double> out_resp = it2->filterFinals(anfinals, alphabet, escaped_chars);
+          wstring out = L"";
+          for(map<wstring, double>::const_iterator it3 = out_resp.begin(); it3 != out_resp.end(); it3++)
+          {
+            out += L"/";
+            out += it3->first;
+          }
           fwprintf(stderr, L"!!!    filter_finals: %S\n", out.c_str());
         }
         set<pair<wstring, vector<wstring> > > outpaths;
@@ -587,7 +593,13 @@ LRXProcessor::process(FILE *input, FILE *output)
           // We've reached a final state, so we need to evaluate the rule we've matched
           if(debugMode)
           {
-            wstring out = s.filterFinals(anfinals, alphabet, escaped_chars);
+            map<wstring, double> out_resp = s.filterFinals(anfinals, alphabet, escaped_chars);
+            wstring out = L"";
+            for(map<wstring, double>::const_iterator it2 = out_resp.begin(); it2 != out_resp.end(); it2++)
+            {
+              out += L"/";
+              out += it2->first;
+            }
             fwprintf(stderr, L"    filter_finals: %S\n", out.c_str());
           }
  
@@ -638,7 +650,13 @@ LRXProcessor::process(FILE *input, FILE *output)
                   {
                     if(debugMode)
                     {
-                      wstring out2 = l->filterFinals(anfinals, alphabet, escaped_chars);
+                      map<wstring, double> out2_resp = l->filterFinals(anfinals, alphabet, escaped_chars);
+                      wstring out2 = L"";
+                      for(map<wstring, double>::const_iterator il = out2_resp.begin(); il != out2_resp.end(); il++)
+                      {
+                        out2 += L"/";
+                        out2 += il->first;
+                      }
                       fwprintf(stderr, L"    == INCLUDE FINALS: %S\n", out2.c_str());
                     }
                     reached.push_back(*l);
@@ -884,7 +902,13 @@ LRXProcessor::processME(FILE *input, FILE *output)
           // We've reached a final state, so we need to evaluate the rule we've matched
           if(debugMode)
           {
-            wstring out = s.filterFinals(anfinals, alphabet, escaped_chars);
+            map<wstring, double> out_resp = s.filterFinals(anfinals, alphabet, escaped_chars);
+            wstring out = L"";
+            for(map<wstring, double>::const_iterator it2 = out_resp.begin(); it2 != out_resp.end(); it2++)
+            {
+              out += L"/";
+              out += it2->first;
+            }
             fwprintf(stderr, L"    filter_finals: %S\n", out.c_str());
           }
 
