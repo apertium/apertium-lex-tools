@@ -58,7 +58,7 @@ map<int, LSRuleExe> rules;
 //map<wstring, TransExe> transducers; 
 Alphabet alphabet;
 State *initial_state;
-set<Node *> anfinals;
+map<Node *, double> anfinals;
 set<wchar_t> escaped;
 bool outOfWord = true;
 map<int, Transducer> transducers;
