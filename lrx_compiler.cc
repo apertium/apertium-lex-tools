@@ -81,6 +81,7 @@ LRXCompiler::LRXCompiler()
   outputGraph = false;
 
   currentRuleId = 0;
+  default_weight = 0.0000;
 
   initialState = transducer.getInitial();
   currentState = initialState;
@@ -257,13 +258,13 @@ LRXCompiler::procRule()
     }
     else if(name == LRX_COMPILER_RULE_ELEM)
     {
-      currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<$>"), alphabet(L"<$>")), currentState);
+      currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<$>"), alphabet(L"<$>")), currentState, default_weight);
       if(!alphabet.isSymbolDefined(ruleId.c_str()))
       { 
         alphabet.includeSymbol(ruleId.c_str());
       }
-      currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(ruleId.c_str())), currentState);
-      transducer.setFinal(currentState);
+      currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(ruleId.c_str())), currentState, default_weight);
+      transducer.setFinal(currentState, default_weight);
       currentState = initialState;
       return;
     }
@@ -319,7 +320,7 @@ LRXCompiler::procOr()
           {
             continue;
           }
-          transducer.linkStates(*it, currentState, 0);
+          transducer.linkStates(*it, currentState, 0, default_weight);
         }
       }
       break;
@@ -353,7 +354,7 @@ LRXCompiler::procMatch()
 
     for(wstring::iterator it = surface.begin(); it != surface.end(); it++)
     {
-      currentState = transducer.insertSingleTransduction(alphabet(*it, 0), currentState);
+      currentState = transducer.insertSingleTransduction(alphabet(*it, 0), currentState, default_weight);
     }
   }
   else
@@ -375,14 +376,14 @@ LRXCompiler::procMatch()
         fwprintf(stderr, L"        char: -\n");
       }
       int localLast = currentState;
-      currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_CHAR>"), 0), currentState);
-      transducer.linkStates(currentState, localLast, 0);
+      currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_CHAR>"), 0), currentState, default_weight);
+      transducer.linkStates(currentState, localLast, 0, default_weight);
     }
     else 
     {
       for(wstring::iterator it = lemma.begin(); it != lemma.end(); it++)
       {
-        currentState = transducer.insertSingleTransduction(alphabet(*it, 0), currentState);
+        currentState = transducer.insertSingleTransduction(alphabet(*it, 0), currentState, default_weight);
       }
     }
 
@@ -404,11 +405,11 @@ LRXCompiler::procMatch()
           }
           if(tag == L"<*>")
           {
-            currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"), 0), currentState);
+            currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"), 0), currentState, default_weight);
           }
           else
           {
-            currentState = transducer.insertSingleTransduction(alphabet(alphabet(tag.c_str()), 0), currentState);
+            currentState = transducer.insertSingleTransduction(alphabet(alphabet(tag.c_str()), 0), currentState, default_weight);
           }
           tag = L"";
           continue;
@@ -422,8 +423,8 @@ LRXCompiler::procMatch()
           fwprintf(stderr, L"        tag: %S\n", tag.c_str());
         }
         int localLast = currentState;
-        currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"), 0), currentState);
-        transducer.linkStates(currentState, localLast, 0);
+        currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"), 0), currentState, default_weight);
+        transducer.linkStates(currentState, localLast, 0, default_weight);
       }  
       else 
       {
@@ -436,7 +437,7 @@ LRXCompiler::procMatch()
         {
           fwprintf(stderr, L"        tag: %S\n", tag.c_str());
         }
-        currentState = transducer.insertSingleTransduction(alphabet(alphabet(tag.c_str()), 0), currentState);
+        currentState = transducer.insertSingleTransduction(alphabet(alphabet(tag.c_str()), 0), currentState, default_weight);
       }
     } 
     else
@@ -446,16 +447,16 @@ LRXCompiler::procMatch()
         fwprintf(stderr, L"        tag: -\n");
       }
       int localLast = currentState;
-      currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"), 0), currentState);
-      transducer.linkStates(currentState, localLast, 0);
+      currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"), 0), currentState, default_weight);
+      transducer.linkStates(currentState, localLast, 0, default_weight);
     }
   }
 
   if(xmlTextReaderIsEmptyElement(reader))
   {
     // If self-closing
-    currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<$>"), alphabet(L"<$>")), currentState);
-    currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<skip>")), currentState);
+    currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<$>"), alphabet(L"<$>")), currentState, default_weight);
+    currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<skip>")), currentState, default_weight);
     return;
   }
 
@@ -515,13 +516,13 @@ LRXCompiler::procSelect()
     fwprintf(stderr, L"        select: %S, %S\n", lemma.c_str(), tags.c_str());
   }
 
-  currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<$>"), alphabet(L"<$>")), currentState);
-  currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<" + LRX_COMPILER_TYPE_SELECT + L">")), currentState);
+  currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<$>"), alphabet(L"<$>")), currentState, default_weight);
+  currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<" + LRX_COMPILER_TYPE_SELECT + L">")), currentState, default_weight);
 
   for(wstring::iterator it = lemma.begin(); it != lemma.end(); it++)
   {
-    currentState = transducer.insertSingleTransduction(alphabet(0, *it), currentState);
-    localCurrentState = recogniser.insertSingleTransduction(alphabet(*it, 0), localCurrentState);
+    currentState = transducer.insertSingleTransduction(alphabet(0, *it), currentState, default_weight);
+    localCurrentState = recogniser.insertSingleTransduction(alphabet(*it, 0), localCurrentState, default_weight);
   }
 
   if(tags != L"")
@@ -542,14 +543,14 @@ LRXCompiler::procSelect()
         }
         if(tag == L"<*>")
         {
-          currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_TAG>")), currentState);
-          localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"),0), localCurrentState);
+          currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_TAG>")), currentState, default_weight);
+          localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"),0), localCurrentState, default_weight);
           key = key + L"<ANY_TAG>";
         }
         else
         {
-          currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(tag.c_str())), currentState);
-          localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(tag.c_str()),0), localCurrentState);
+          currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(tag.c_str())), currentState, default_weight);
+          localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(tag.c_str()),0), localCurrentState, default_weight);
           key = key + tag;
         }
         tag = L"";
@@ -563,10 +564,10 @@ LRXCompiler::procSelect()
       {
         fwprintf(stderr, L"        tag: %S\n", tag.c_str());
       }
-      currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_TAG>")), currentState);
+      currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_TAG>")), currentState, default_weight);
       int localLast = localCurrentState;
-      localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"),0), localCurrentState);
-      recogniser.linkStates(localCurrentState, localLast, 0);
+      localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"),0), localCurrentState, default_weight);
+      recogniser.linkStates(localCurrentState, localLast, 0, default_weight);
       key = key + L"<ANY_TAG>";
     }  
     else 
@@ -580,8 +581,8 @@ LRXCompiler::procSelect()
       {
         fwprintf(stderr, L"        tag: %S\n", tag.c_str());
       }
-      currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(tag.c_str())), currentState);
-      localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(tag.c_str()),0), localCurrentState);
+      currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(tag.c_str())), currentState, default_weight);
+      localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(tag.c_str()),0), localCurrentState, default_weight);
       key = key + tag;
     }
   } 
@@ -591,15 +592,15 @@ LRXCompiler::procSelect()
     {
       fwprintf(stderr, L"        tag: -\n");
     }
-    currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_TAG>")), currentState);
+    currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_TAG>")), currentState, default_weight);
     int localLast = localCurrentState;
-    localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"),0), localCurrentState);
-    recogniser.linkStates(localCurrentState, localLast, 0);
+    localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"),0), localCurrentState, default_weight);
+    recogniser.linkStates(localCurrentState, localLast, 0, default_weight);
     key = key + L"<ANY_TAG>";
   }
  
 
-  recogniser.setFinal(localCurrentState);
+  recogniser.setFinal(localCurrentState, default_weight);
 
   recognisers[key] = recogniser;
   if(debugMode) 
@@ -628,13 +629,13 @@ LRXCompiler::procRemove()
     fwprintf(stderr, L"        remove: %S, %S\n", lemma.c_str(), tags.c_str());
   }
 
-  currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<$>"), alphabet(L"<$>")), currentState);
-  currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<" + LRX_COMPILER_TYPE_REMOVE + L">")), currentState);
+  currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<$>"), alphabet(L"<$>")), currentState, default_weight);
+  currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<" + LRX_COMPILER_TYPE_REMOVE + L">")), currentState, default_weight);
 
   for(wstring::iterator it = lemma.begin(); it != lemma.end(); it++)
   {
-    currentState = transducer.insertSingleTransduction(alphabet(0, *it), currentState);
-    localCurrentState = recogniser.insertSingleTransduction(alphabet(*it, 0), localCurrentState);
+    currentState = transducer.insertSingleTransduction(alphabet(0, *it), currentState, default_weight);
+    localCurrentState = recogniser.insertSingleTransduction(alphabet(*it, 0), localCurrentState, default_weight);
   }
 
   if(tags != L"")
@@ -655,14 +656,14 @@ LRXCompiler::procRemove()
         }
         if(tag == L"<*>")
         {
-          currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_TAG>")), currentState);
-          localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"),0), localCurrentState);
+          currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_TAG>")), currentState, default_weight);
+          localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"),0), localCurrentState, default_weight);
           key = key + L"<ANY_TAG>";
         }
         else
         {
-          currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(tag.c_str())), currentState);
-          localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(tag.c_str()),0), localCurrentState);
+          currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(tag.c_str())), currentState, default_weight);
+          localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(tag.c_str()),0), localCurrentState, default_weight);
           key = key + tag;
         }
         tag = L"";
@@ -676,10 +677,10 @@ LRXCompiler::procRemove()
       {
         fwprintf(stderr, L"        tag: %S\n", tag.c_str());
       }
-      currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_TAG>")), currentState);
+      currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_TAG>")), currentState, default_weight);
       int localLast = localCurrentState;
-      localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"),0), localCurrentState);
-      recogniser.linkStates(localCurrentState, localLast, 0);
+      localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"),0), localCurrentState, default_weight);
+      recogniser.linkStates(localCurrentState, localLast, 0, default_weight);
       key = key + L"<ANY_TAG>";
     }  
     else 
@@ -693,8 +694,8 @@ LRXCompiler::procRemove()
       {
         fwprintf(stderr, L"        tag: %S\n", tag.c_str());
       }
-      currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(tag.c_str())), currentState);
-      localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(tag.c_str()),0), localCurrentState);
+      currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(tag.c_str())), currentState, default_weight);
+      localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(tag.c_str()),0), localCurrentState, default_weight);
       key = key + tag;
     }
   } 
@@ -704,15 +705,15 @@ LRXCompiler::procRemove()
     {
       fwprintf(stderr, L"        tag: -\n");
     }
-    currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_TAG>")), currentState);
+    currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_TAG>")), currentState, default_weight);
     int localLast = localCurrentState;
-    localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"),0), localCurrentState);
-    recogniser.linkStates(localCurrentState, localLast, 0);
+    localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"),0), localCurrentState, default_weight);
+    recogniser.linkStates(localCurrentState, localLast, 0, default_weight);
     key = key + L"<ANY_TAG>";
   }
  
 
-  recogniser.setFinal(localCurrentState);
+  recogniser.setFinal(localCurrentState, default_weight);
 
   recognisers[key] = recogniser;
   if(debugMode) 
@@ -738,7 +739,7 @@ LRXCompiler::write(FILE *fst)
       fwprintf(stderr, L"+ %d => %S\n", it->second.size(), it->first.c_str());
       it->second.show(alphabet, stderr);
     }
-    it->second.write(fst);
+    it->second.write(fst, 0, false);
   }
 
   Compression::wstring_write(L"main", fst);
@@ -746,7 +747,7 @@ LRXCompiler::write(FILE *fst)
   {
     transducer.show(alphabet, stderr);
   }
-  transducer.write(fst);
+  transducer.write(fst, 0, false);
 
   struct weight {
         int id;

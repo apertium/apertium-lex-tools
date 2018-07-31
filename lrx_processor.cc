@@ -89,7 +89,7 @@ LRXProcessor::load(FILE *in)
       name += static_cast<wchar_t>(Compression::multibyte_read(in));
       len2--;
     }
-    recognisers[name].read(in, alphabet);
+    recognisers[name].read(in, alphabet, false);
     len--;
   }
 
@@ -107,7 +107,7 @@ LRXProcessor::load(FILE *in)
     len3--;
   }
 
-  transducer.read(in, alphabet);
+  transducer.read(in, alphabet, false);
 
   // Now read in weights
   struct weight {
@@ -188,7 +188,7 @@ LRXProcessor::recognisePattern(const wstring lu, const wstring op)
   first_state->init(recognisers[op].getInitial());
   State cur = *first_state;
 
-  set<Node *> end_states;
+  map<Node *, double> end_states;
   end_states.insert(recognisers[op].getFinals().begin(), recognisers[op].getFinals().end());
 
   bool readingTag = false;
