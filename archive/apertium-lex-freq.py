@@ -20,11 +20,11 @@ def loadFreqTablesFromFile(f): #{
 		row = line.split('\t');
 		frequency = int(row[0]);
 		analysis = row[1];
-		lemma = analysis.split('<')[0];	
+		lemma = analysis.split('<')[0];
 		freq_table[analysis] = frequency;
 		if lemma not in freq_table_lemmas: #{
 			freq_table_lemmas[lemma] = 0 ;
-		#}	
+		#}
 		freq_table_lemmas[lemma] = freq_table_lemmas[lemma] + frequency;
 	#}
 	return (freq_table, freq_table_lemmas);
@@ -32,7 +32,7 @@ def loadFreqTablesFromFile(f): #{
 
 def procLexicalUnit(c): #{
 	global debug;
-	escaped = False; 	
+	escaped = False;
 	sl = '';
 	tl = [];
 
@@ -45,13 +45,13 @@ def procLexicalUnit(c): #{
 	buf = '';
 	c = sys.stdin.read(1);
 	while c != '$': #{
-		if c == '\\': 
-			escaped = True; 
+		if c == '\\':
+			escaped = True;
 			buf = buf + c;
 			c = sys.stdin.read(1);
 			continue;
 
-		if c == '/' and not escaped and buf: 
+		if c == '/' and not escaped and buf:
 			tl.append(buf);
 			buf = '';
 			c = sys.stdin.read(1);
@@ -66,14 +66,14 @@ def procLexicalUnit(c): #{
 	i = 0;
 	tl_freq = [];
 	tl_freq_lemmas = [];
-	
+
 	for i in range(0, len(tl)): #{
 		tl_lema = tl[i].split('<')[0];
 		if tl[i] in freq_table: #{
 			if freq_table[tl[i]] > 0: #{
 				tl_freq.append((freq_table[tl[i]], tl[i]));
 			#}
-		#}	
+		#}
 		if tl_lema in freq_table_lemmas: #{
 			if freq_table_lemmas[tl_lema] > 0: #{
 				tl_freq_lemmas.append((freq_table_lemmas[tl_lema], tl[i]));
@@ -87,19 +87,19 @@ def procLexicalUnit(c): #{
 	tl_freq_lemmas.reverse();
 
 	sys.stdout.write('^');
-	sys.stdout.write(sl); 
+	sys.stdout.write(sl);
 	sys.stdout.write('/');
 
 	#if len(tl_freq) > 0:
 	#	print >>sys.stderr , 'a:' , tl_freq ;
 	#if len(tl_freq_lemmas) > 0:
 	#	print >>sys.stderr , 'l:' ,  tl_freq_lemmas ;
-		
+
 	if len(tl_freq) > 1 and debug: #{
 		sys.stdout.write(tl_freq[0][1] + '/');
 		for i in range(1, len(tl_freq)): #{
 			sys.stdout.write('=' + tl_freq[i][1]);
-		
+
 			if i < (len(tl_freq) - 1): #{
 				sys.stdout.write('/');
 			#}
@@ -112,7 +112,7 @@ def procLexicalUnit(c): #{
 		sys.stdout.write(tl_freq_lemmas[0][1] + '/');
 		for i in range(1, len(tl_freq_lemmas)): #{
 			sys.stdout.write('§' + tl_freq_lemmas[i][1]);
-		
+
 			if i < (len(tl_freq_lemmas) - 1): #{
 				sys.stdout.write('/');
 			#}
@@ -124,7 +124,7 @@ def procLexicalUnit(c): #{
 	else: #{
 		for i in range(0, len(tl)): #{
 			sys.stdout.write(tl[i]);
-		
+
 			if i < (len(tl) - 1): #{
 				sys.stdout.write('/');
 			#}
@@ -156,7 +156,7 @@ escaped = False;
 c = sys.stdin.read(1);
 
 while c: #{
-	if c == '\\': 
+	if c == '\\':
 		escaped = True;
 		sys.stdout.write(c);
 		c = sys.stdin.read(1);
@@ -173,7 +173,7 @@ while c: #{
 	else: #{
 		sys.stdout.write(c);
 	#}
-		
+
 	c = sys.stdin.read(1);
 	escaped = False;
 #}

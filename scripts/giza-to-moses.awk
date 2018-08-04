@@ -35,7 +35,7 @@ function process_alignment(str) {
   alignment="";
 
   ntokens=split(str, tokens, " }) ");
- 
+
   sl_pos=0;
 
   for(i=1; i<=ntokens; i++) {
@@ -53,7 +53,7 @@ function process_alignment(str) {
 
     if(length(source_sentence)>0) {
       source_sentence = source_sentence " ";
-    } 
+    }
     source_sentence = source_sentence wa[1];
 
     for (j=3; j<=nwa; j++) {
@@ -92,8 +92,8 @@ BEGIN {
   alignment="";
   reading_al=0;
 }
-{  
-  line++; 
+{
+  line++;
   if (reading_al==0)
     alignment_score=$NF;
   else if (reading_al==1)

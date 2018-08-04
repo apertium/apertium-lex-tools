@@ -4,7 +4,7 @@
 
 import sys, codecs, copy;
 
-# This script selects biltrans lines which generate more than a minimum 
+# This script selects biltrans lines which generate more than a minimum
 # and less than a maximum number of disambiguation paths.
 # By default the minimum is set to 2 -- e.g. the sentences should be ambiguous
 # in some way, and the maximum is set to 10,000. If you are discarding too
@@ -25,8 +25,8 @@ c = sys.stdin.read(1);
 def process_biltrans_unit(lu): #{
 
 	state = 0;
-	for c in lu[1:-1]: #{ 
-		#^worth<n><sg>/valor<n><m><sg>$ ^\$<mon>/\$<mon>$^20<num>/20<num>$^*m/*m$ 
+	for c in lu[1:-1]: #{
+		#^worth<n><sg>/valor<n><m><sg>$ ^\$<mon>/\$<mon>$^20<num>/20<num>$^*m/*m$
 		#print c , sl , tl;
 		if c == '/': #{
 			state = state + 1;
@@ -52,7 +52,7 @@ while c: #{
 		lu = lu + c;
 		sent_count = sent_count * process_biltrans_unit(lu);
 		reading_word = False;
-		lu = '';		
+		lu = '';
 	#}
 	if c != '\\' and escaped == True: #{
 		escaped = False;

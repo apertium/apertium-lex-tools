@@ -47,7 +47,7 @@ int main (int argc, char** argv)
 
   LtLocale::tryToSetLocale();
 
-  if(argc < 3) 
+  if(argc < 3)
   {
     endProgram(argv[0]);
   }
@@ -67,10 +67,10 @@ int main (int argc, char** argv)
      {
        wchar_t c;
        wstring tipus = L""; // The type of rule (s 'select', r 'remove')
-       wstring sl = L""; // The source language pattern of the rule 
+       wstring sl = L""; // The source language pattern of the rule
        wstring tl = L""; // The target language pattern of the rule (that the operation works on)
 
-       unsigned int i = 0; 
+       unsigned int i = 0;
        while(rule.at(i) != '\t')                 // First read the rule type
        {
          tipus = tipus + rule.at(i);
@@ -84,43 +84,43 @@ int main (int argc, char** argv)
 
        while(c != L'\t')                         // Then the source word
        {
-         if(c == L'(' || c == L')') // Skip parentheses 
+         if(c == L'(' || c == L')') // Skip parentheses
          {
            i++;
            c = rule.at(i);
-           continue; 
+           continue;
          }
-         if(seen == 0 && c == L'"' && inq == false)  
+         if(seen == 0 && c == L'"' && inq == false)
          {
            seen = 1; // We're seeing the lemma
            inq = true;
            i++;
            c = rule.at(i);
-           continue; 
+           continue;
          }
-         if(seen == 1 && c == L'"' && inq == true) 
+         if(seen == 1 && c == L'"' && inq == true)
          {
            seen = 2; // We've seen the lemma
            inq = false;
            i++;
            c = rule.at(i);
-           continue; 
-         }
-         if(seen == 2 && c == L' ') 
-         { 
-           sl = sl + L'<'; 
-           seen = 3; // We're in the first tag 
-           i++;
-           c = rule.at(i); 
            continue;
          }
-         if(seen == 3 && c == L' ') 
+         if(seen == 2 && c == L' ')
+         {
+           sl = sl + L'<';
+           seen = 3; // We're in the first tag
+           i++;
+           c = rule.at(i);
+           continue;
+         }
+         if(seen == 3 && c == L' ')
          {
            sl = sl + L"><";
            i++;
            c = rule.at(i);
-           continue; 
-         } 
+           continue;
+         }
          sl = sl + c;
          i++;
          c = rule.at(i);
@@ -133,43 +133,43 @@ int main (int argc, char** argv)
        c = rule.at(i);
        while(c != L'\t')                         // Then the target word (this pattern is as above)
        {
-         if(c == L'(' || c == L')')  
+         if(c == L'(' || c == L')')
          {
            i++;
            c = rule.at(i);
-           continue; 
+           continue;
          }
-         if(seen == 0 && c == L'"' && inq == false) 
+         if(seen == 0 && c == L'"' && inq == false)
          {
-           seen = 1; 
+           seen = 1;
            inq = true;
            i++;
            c = rule.at(i);
-           continue; 
+           continue;
          }
-         if(seen == 1 && c == L'"' && inq == true) 
+         if(seen == 1 && c == L'"' && inq == true)
          {
-           seen = 2; 
+           seen = 2;
            inq = false;
            i++;
            c = rule.at(i);
-           continue; 
-         }
-         if(seen == 2 && c == L' ') 
-         { 
-           tl = tl + L'<'; 
-           seen = 3;
-           i++;
-           c = rule.at(i); 
            continue;
          }
-         if(seen == 3 && c == L' ') 
+         if(seen == 2 && c == L' ')
+         {
+           tl = tl + L'<';
+           seen = 3;
+           i++;
+           c = rule.at(i);
+           continue;
+         }
+         if(seen == 3 && c == L' ')
          {
            tl = tl + L"><";
            i++;
            c = rule.at(i);
-           continue; 
-         } 
+           continue;
+         }
          tl = tl + c;
          i++;
          c = rule.at(i);
@@ -187,29 +187,29 @@ int main (int argc, char** argv)
        seen = 0;
        c = rule.at(i);
        int context_count = 0;
-       while(i < (rule.size() - 1))              // Then the context 
+       while(i < (rule.size() - 1))              // Then the context
        {
          //fwprintf(ous, L"%d %d %c\n ", i, rule.size(), c);
-         if(c == L'(') 
-         { 
+         if(c == L'(')
+         {
            seen = 0;
            pos = L"", lem = L"", tag = L"";
            inp = true;
-           i++; 
+           i++;
            c = rule.at(i);
            context_count++;
            continue;
          }
-         else if(c == L')') 
+         else if(c == L')')
          { // read one
            wistringstream wstrm(pos);
            int p = -1;
            wstrm >> p;
            wstring csl;
-           if(tag != L"") 
+           if(tag != L"")
            {
              csl = lem + L"<" + tag + L">[0-9A-Za-z <>]*";
-           } 
+           }
            else
            {
              csl = lem + L"<[0-9A-Za-z <>]*";
@@ -218,40 +218,40 @@ int main (int argc, char** argv)
            context[p] = td;
            inp = false;
            inq = false;
-           i++; 
+           i++;
            c = rule.at(i);
            continue;
          }
-         else if(c == L'"' and inq == false) 
-         { 
+         else if(c == L'"' and inq == false)
+         {
            seen = 1;
            inq = true;
-           i++; 
+           i++;
            c = rule.at(i);
            continue;
          }
-         else if(c == L'"' and inq == true) 
-         { 
+         else if(c == L'"' and inq == true)
+         {
            seen = 2;
            inq = false;
-           i++; 
+           i++;
            c = rule.at(i);
            continue;
          }
 
-         switch(seen) 
+         switch(seen)
          {
            case 0:
               pos = pos + c;
               i++;
               c = rule.at(i);
               continue;
-           case 1: 
-              if(c == L'*') 
+           case 1:
+              if(c == L'*')
               {
                 lem = lem + L"[0-9A-Za-z #]+"; // Replace Kleene star with equivalent in regex
-              } 
-              else 
+              }
+              else
               {
                 lem = lem + c;
               }
@@ -260,9 +260,9 @@ int main (int argc, char** argv)
               continue;
            case 2:
               if(c == L' ')
-              { 
+              {
                 seen = 3;
-              } 
+              }
               else
               {
                 tag = tag + c;
@@ -272,30 +272,30 @@ int main (int argc, char** argv)
               continue;
            case 3:
               if(c == L' ')
-              { 
+              {
                 tag = tag + L"><";
               }
               else
-              { 
+              {
                 tag = tag + c;
               }
               i++;
               c = rule.at(i);
               continue;
-  
+
          }
          i++;
          c = rule.at(i);
        }
-       
+
        wistringstream wstrm(pos);
        int p = 1001; // The position
        wstrm >> p;
        wstring csl;
-       if(tag != L"") 
+       if(tag != L"")
        {
          csl = lem + L"<" + tag + L">[0-9A-Za-z <>]*";
-       } 
+       }
        else
        {
          csl = lem;
@@ -306,12 +306,12 @@ int main (int argc, char** argv)
        pos = L"", lem = L"", tag = L"";
 
        if(tipus == L"s")
-       { 
-         tipus = L"select"; 
+       {
+         tipus = L"select";
        }
        else if(tipus == L"r")
        {
-         tipus = L"remove"; 
+         tipus = L"remove";
        }
        fputws_unlocked(rule.c_str(), ous);
        fputws_unlocked(L"\n", ous);
@@ -332,7 +332,7 @@ int main (int argc, char** argv)
 
        if(!alphabet.isSymbolDefined(L"<*>"))
        {
-         alphabet.includeSymbol(L"<*>");  
+         alphabet.includeSymbol(L"<*>");
        }
        if(!alphabet.isSymbolDefined(L"<skip(*)>"))
        {
@@ -342,13 +342,13 @@ int main (int argc, char** argv)
 
        int s = t.getInitial();
        map<int, pair<wstring, wstring> >::iterator fpos = context.begin();
-       int first_pos = (fpos->first - 1);  
+       int first_pos = (fpos->first - 1);
        fwprintf(ous, L" first: %d\n", first_pos);
-       for(map<int, pair<wstring, wstring> >::iterator it = context.begin();  
+       for(map<int, pair<wstring, wstring> >::iterator it = context.begin();
                  it != context.end(); it++)
        {
          int pos = it->first;
- 
+
          pair<wstring, wstring> pat = it->second;
          fwprintf(ous, L"  %d ", pos);
          fputws_unlocked(pat.first.c_str(), ous);
@@ -369,10 +369,10 @@ int main (int argc, char** argv)
            left = L"<" + pat.first + L">";
          }
          wstring right = L"";
-         if(pos == 0) 
+         if(pos == 0)
          {
            right = L"<" + tipus + L"(" + pat.second + L")>";
-         } 
+         }
          else
          {
            right = L"<skip(" + pat.second + L")>";
@@ -380,14 +380,14 @@ int main (int argc, char** argv)
 
          if(!alphabet.isSymbolDefined(left.c_str()))
          {
-           alphabet.includeSymbol(left.c_str());  
+           alphabet.includeSymbol(left.c_str());
          }
          if(!alphabet.isSymbolDefined(right.c_str()))
          {
-           alphabet.includeSymbol(right.c_str());  
+           alphabet.includeSymbol(right.c_str());
          }
          s = t.insertSingleTransduction(alphabet(alphabet(left.c_str()), alphabet(right.c_str())), s);
-         if(patterns.count(alphabet(left.c_str())) < 1) 
+         if(patterns.count(alphabet(left.c_str())) < 1)
          {
            Transducer t = re.getTransducer();
            t.minimize();
@@ -406,7 +406,7 @@ int main (int argc, char** argv)
        id = L"<" + id + L"," + cc + L">";
        if(!alphabet.isSymbolDefined(id.c_str()))
        {
-         alphabet.includeSymbol(id.c_str());  
+         alphabet.includeSymbol(id.c_str());
        }
 
        s = t.insertSingleTransduction(alphabet(0, alphabet(id)), s);
@@ -416,7 +416,7 @@ int main (int argc, char** argv)
        fwprintf(ous, L"%d@%d %d\n", t.size(), t.numberOfTransitions(), alphabet.size());
 
        rule = L"";
- 
+
        rule_count++;
      }
      else
@@ -424,7 +424,7 @@ int main (int argc, char** argv)
        rule.append(1, static_cast<wchar_t>(val));
      }
      val = fgetwc_unlocked(ins);
-  } 
+  }
 
   t.minimize();
   fwprintf(ous, L"%d@%d %d %d\n", t.size(), t.numberOfTransitions(), alphabet.size(), patterns.size());
@@ -433,7 +433,7 @@ int main (int argc, char** argv)
 
   alphabet.write(fst);
   Compression::multibyte_write(patterns.size(), fst);
-  for(map<int, Transducer>::iterator it = patterns.begin(); it != patterns.end(); it++) 
+  for(map<int, Transducer>::iterator it = patterns.begin(); it != patterns.end(); it++)
   {
     wchar_t buf[50];
     memset(buf, '\0', sizeof(buf));
@@ -442,7 +442,7 @@ int main (int argc, char** argv)
     wcout << id << " " << it->second.size() << endl;
     Compression::wstring_write(id, fst);
     it->second.write(fst);
-  } 
+  }
   Compression::wstring_write(L"main", fst);
   t.write(fst);
   fclose(fst);

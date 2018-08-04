@@ -32,14 +32,14 @@ for element in root: #{
 		#print('  ', context_counter, child.tag, child.attrib['lemma'], child.attrib['tags'], file=sys.stderr);
 		current_rule[context_counter] = [(child.attrib['lemma'], child.attrib['tags'])];
 		if child.tag == 'or': #{
-			current_rule[context_counter] = []; 
+			current_rule[context_counter] = [];
 			for sub in child: #{
 				if 'lemma' not in sub.attrib: sub.attrib['lemma'] = '';
 				if 'tags' not in sub.attrib: sub.attrib['tags'] = '';
 				#print('     ', sub.tag, sub.attrib['lemma'], sub.attrib['tags'], file=sys.stderr);
 				current_rule[context_counter].append((sub.attrib['lemma'], sub.attrib['tags']));
 			#}
-		else: 
+		else:
 			for sub in child: #{
 				if 'lemma' not in sub.attrib: sub.attrib['lemma'] = '';
 				if 'tags' not in sub.attrib: sub.attrib['tags'] = '';

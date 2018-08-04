@@ -27,7 +27,7 @@ if len(sys.argv) == 4: #{
 	print('crisp:', crisphold, file=sys.stderr);
 #}
 
-sl_tl_defaults = {}; 
+sl_tl_defaults = {};
 sl_tl = {};
 ngrams = {};
 
@@ -52,7 +52,7 @@ for line in open(sys.argv[1]).readlines(): #{
 	else: #{
 		sl_tl[sl] = tl;
 	#}
-	
+
 #}
 
 max_crispiness = 0.0;
@@ -106,8 +106,8 @@ for sl in ngrams: #{
 			total = total + ngrams[sl][ngram][tl];
 		#}
 
-		default = sl_tl_defaults[sl];	
-		
+		default = sl_tl_defaults[sl];
+
 		if max_tl not in ngrams[sl][ngram] and default not in ngrams[sl][ngram]: #{
 			print('Some shit went down..', file=sys.stderr);
 			print('= %s\t%s\t%s' % (sl, ngram, max_tl), file=sys.stderr);
@@ -125,9 +125,9 @@ for sl in ngrams: #{
 				def_crisp = float(ngrams[sl][ngram][default] / float(total));
 			#}
 			if def_crisp == 0.0: #{
-				print('!!! Something wanky happened. :(', file=sys.stderr);	
+				print('!!! Something wanky happened. :(', file=sys.stderr);
 				print('%.10f %.10f %.10f\t%s\t%s\t%s\t%.10f' % (total , max_freq, ngrams[sl][ngram][max_tl], sl, ngram, max_tl, ngrams[sl][ngram][max_tl]), file=sys.stderr);
-				print('\tskipping...', file=sys.stderr);	
+				print('\tskipping...', file=sys.stderr);
 				continue;
 			#}
 			weight = float(ngrams[sl][ngram][max_tl]) / float(total);
@@ -144,7 +144,7 @@ for sl in ngrams: #{
 #+ 2.61845457309 0.7236389238 1.0 0.2763610762 0.7236389238 0.7236389238         aozer<n>        aozer<n> an<det> levr<n>        organisateur<n> 0.7236389238
 #- 14736.0468727 0.9999321438 1.0 0.9999321438 0.9999321438      treuzkas<n>     treuzkas<n> teknologel<adj>     transfert<n>    0.9999321438
 		else: #{
-		
+
 			for tl in ngrams[sl][ngram]: #{
 
 				crispiness = 0.0;
@@ -156,9 +156,9 @@ for sl in ngrams: #{
 				#}
 				weight = float(ngrams[sl][ngram][tl]) / float(total);
 				crispiness = alt_crisp/def_crisp;
-	
-				#print '%%%' , crispiness , alt_crisp , def_crisp , tl , default , ngrams[sl][ngram] ; 
-				
+
+				#print '%%%' , crispiness , alt_crisp , def_crisp , tl , default , ngrams[sl][ngram] ;
+
 				print('- %.10f %.10f %.10f %.10f %.10f %.10f\t%s\t%s\t%s\t%.10f' % (crispiness, weight, total, ngrams[sl][ngram][default] , max_freq, ngrams[sl][ngram][tl], sl, ngram, tl, ngrams[sl][ngram][tl]));
 #+ 1013.01568891 0.9989973752 2.0 1.9979947504 1.9979947504 	galloud<n>	ha<cnjcoo> an<det> galloud<n>	puissance<n>	1.9979947504
 			#}

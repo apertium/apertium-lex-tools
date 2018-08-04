@@ -22,8 +22,8 @@ def process_biltrans_unit(lu, sents): #{
 	state = 0;
 	sl = '';
 	tl = {};
-	for c in lu[1:-1]: #{ 
-		#^worth<n><sg>/valor<n><m><sg>$ ^\$<mon>/\$<mon>$^20<num>/20<num>$^*m/*m$ 
+	for c in lu[1:-1]: #{
+		#^worth<n><sg>/valor<n><m><sg>$ ^\$<mon>/\$<mon>$^20<num>/20<num>$^*m/*m$
 		#print c , sl , tl;
 		if c == '/': #{
 			state = state + 1;
@@ -49,13 +49,13 @@ def process_biltrans_unit(lu, sents): #{
 		for path in sents: #{
 			if state not in tl: #{
 				print >> sys.stderr, 'ERROR: ';
-				print >> sys.stderr, sl ; 
-				print >> sys.stderr, tl ; 
+				print >> sys.stderr, sl ;
+				print >> sys.stderr, tl ;
 			#}
 			new_paths[path] = sents[path] + '^' + sl + tl[state] + '$';
 		#}
 	#}
-	
+
 
 	return new_paths;
 #}
@@ -78,7 +78,7 @@ while c: #{
 		del output_sentences;
 		output_sentences = new_paths;
 		reading_word = False;
-		lu = '';		
+		lu = '';
 	#}
 	if c != '\\' and escaped == True: #{
 		escaped = False;
@@ -99,7 +99,7 @@ while c: #{
 			output_sentences[''] = '';
 			seen_newline = True;
 			cur_id = '';
-			
+
 		elif reading_word == False: #{
 			for sentence in output_sentences: #{
 				output_sentences[sentence] = output_sentences[sentence] + c;

@@ -17,11 +17,11 @@ for line in d.readlines(): #{
 	#}
 
 	if line.count('c="') > 0 and line.count('0"') > 0 and poss_ambig == 1: #{
-		poss_ambig = 0;	
+		poss_ambig = 0;
 	#}
 
 	if line.count('c="') > 0 and line.count('0"') > 0 and poss_ambig == 0: #{
-		poss_ambig = 1;	
+		poss_ambig = 1;
 		if sentit == 'lr': #{
 			sl = line.split('<l>')[1].split('</l>')[0];
 			default = line.split('<r>')[1].split('</r>')[0];
@@ -30,7 +30,7 @@ for line in d.readlines(): #{
 			default = line.split('<l>')[1].split('</l>')[0];
 		#}
 	#}
-	
+
 	if line.count('slr="') > 0 and line.count('1"') > 0 and poss_ambig == 1: #{
 		if sentit == 'lr': #{
 			nsl = line.split('<l>')[1].split('</l>')[0];

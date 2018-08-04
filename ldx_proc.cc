@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Universitat d'Alacant 
+ * Copyright (C) 2011 Universitat d'Alacant
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -221,8 +221,8 @@ int main(int argc, char **argv)
 
   LtLocale::tryToSetLocale();
 
-  if(argc < 2) 
-  { 
+  if(argc < 2)
+  {
     cout << basename(argv[0]) << " v" << PACKAGE_VERSION <<": assign default lexical selection values" << endl;
     cout << "USAGE: " << basename(argv[0]) << " lex_file " << endl;
     exit(-1);
@@ -248,9 +248,9 @@ int main(int argc, char **argv)
   fstp.initBiltrans();
 
   // Input stream is output of lt-proc -b
-  // ^patró<n><m><sg>/patron<n><sg>/owner<n><sg>/master<n><sg>/head<n><sg>/pattern<n><sg>/employer<n><sg>$ 
+  // ^patró<n><m><sg>/patron<n><sg>/owner<n><sg>/master<n><sg>/head<n><sg>/pattern<n><sg>/employer<n><sg>$
   // Output is disambiguated:
-  // ^patró<n><m><sg>/pattern<n><sg>$ 
+  // ^patró<n><m><sg>/pattern<n><sg>$
   // Algorithm:
   // read until '/', then read each from '/' adding to a map, then look up first in transducer, and if the result
   // is found in the map, then output it, otherwise error.
@@ -267,35 +267,35 @@ int main(int argc, char **argv)
 
   while((val = readGeneration(input, output)) != 0x7fffffff)
   {
-    switch(val) 
-    { 
+    switch(val)
+    {
       case L'^':
         outOfWord = false;
 	val = readGeneration(input, output);
         break;
       case L'/':
-        if(!seenFirst) 
-        { 
+        if(!seenFirst)
+        {
           seenFirst = true;
-        } 
-        else 
+        }
+        else
         {
           tllu.insert(tl);
         }
         i++;
         tl = L"";
 	val = readGeneration(input, output);
-        if(val != L'$')  
+        if(val != L'$')
         {
           break;
-        } 
+        }
       case L'$':
         outOfWord = true;
-        if(!seenFirst) 
-        { 
+        if(!seenFirst)
+        {
           seenFirst = true;
-        } 
-        else 
+        }
+        else
         {
           tllu.insert(tl);
         }
@@ -303,7 +303,7 @@ int main(int argc, char **argv)
         seenFirst = false;
         fputws_unlocked(L"^", output);
         fputws_unlocked(sl.c_str(), output);
-        if(tllu.size() > 1) 
+        if(tllu.size() > 1)
         {
           tl = L"";
           wstring in = L"^" + sl + L"$";
@@ -322,7 +322,7 @@ int main(int argc, char **argv)
               break;
             }
           }
-        
+
           j = 0;
           if(!tlout)  // if we haven't found a default translation, then output all
           {
@@ -338,27 +338,27 @@ int main(int argc, char **argv)
           }
 
         }
-        else 
+        else
         {
           fputws_unlocked(L"/", output);
           fputws_unlocked(tl.c_str(), output);
         }
         fputws_unlocked(L"$", output);
 
-        sl = L""; tl = L"";       
+        sl = L""; tl = L"";
         tllu.clear();
         i = 0;
         break;
     }
-    if(!seenFirst && !outOfWord) 
+    if(!seenFirst && !outOfWord)
     {
       sl.append(1, static_cast<wchar_t>(val));
     }
     else if(!outOfWord)
-    { 
+    {
       tl.append(1, static_cast<wchar_t>(val));
     }
-  }   
+  }
 
   return 0;
 }

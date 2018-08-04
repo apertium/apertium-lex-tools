@@ -29,7 +29,7 @@ void parseArguments(int argc, char **argv) {
 	}
 	path = argv[1];
 	mode = argv[2];
-	
+
 	if ( mode == "--biltrans") {
 		mode = "-b";
 	} else if (mode == "--multitrans") {

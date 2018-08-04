@@ -13,14 +13,14 @@ import sys, codecs, copy, math, re, common;
 # 0.0000001004 a-led<adv> à~plat<adv>
 # 20.4545497200 pazenn<n> étape<n> @
 # 2.5454502800 pazenn<n> marche<n>
-# 
+#
 
 #	b) Biltrans output
 
 # 56011   ^un<det><ind><sp>/un<det><ind><GD><ND>$ ^digarez<n><m><sg>/excuse<n><f><sg>/occasion<n><f><sg>$ ^da<pr>/à<pr>$ ^distreiñ<vblex><inf>/revenir<vblex><inf>$ ^war<pr>/sur<pr>$ ^e<det><pos><m><sp>/son<det><pos><GD><ND>$ ^doare<n><m><sg>/manière<n><f><sg>$ ^ober<vblex><inf>/faire<vblex><inf>$ ^.<sent>/.<sent>$
 
 
-#	c) Disambiguated biltrans output  
+#	c) Disambiguated biltrans output
 
 #.[][56011 0].[] ^un<det><ind><sp>/un<det><ind><GD><ND>$ ^digarez<n><m><sg>/excuse<n><f><sg>$ ^da<pr>/à<pr>$ ^distreiñ<vblex><inf>/revenir<vblex><inf>$ ^war<pr>/sur<pr>$ ^e<det><pos><m><sp>/son<det><pos><GD><ND>$ ^doare<n><m><sg>/manière<n><f><sg>$ ^ober<vblex><inf>/faire<vblex><inf>$ ^.<sent>/.<sent>$^.<sent>/.<sent>$ 0.9917274061    |@|
 #.[][56011 1].[] ^un<det><ind><sp>/un<det><ind><GD><ND>$ ^digarez<n><m><sg>/occasion<n><f><sg>$ ^da<pr>/à<pr>$ ^distreiñ<vblex><inf>/revenir<vblex><inf>$ ^war<pr>/sur<pr>$ ^e<det><pos><m><sp>/son<det><pos><GD><ND>$ ^doare<n><m><sg>/manière<n><f><sg>$ ^ober<vblex><inf>/faire<vblex><inf>$ ^.<sent>/.<sent>$^.<sent>/.<sent>$       0.0082725939    ||
@@ -37,13 +37,13 @@ def split_line(line):
 
 	row = re_sep.split(line);
 	return row
-	
+
 
 
 	# am_row = re_sep.sub('$ ^', am_line.split('\t')[1])[1:-1].split('$ ^');
 
 
-sl_tl_defaults = {}; 
+sl_tl_defaults = {};
 sl_tl = {};
 ngrams = {};
 
@@ -135,8 +135,8 @@ while reading: #{
 			#}
 
 			frac_count = float(s_fc);
-		
-			if math.isnan(frac_count): #{ 
+
+			if math.isnan(frac_count): #{
 #				print('%d %d :: %d %d :: Frac count is not a number' % (am_counter, dm_counter, current_am_line_id, current_dm_line_id), file=sys.stderr);
 				frac_count = 0.0;
 			#}
@@ -151,12 +151,12 @@ while reading: #{
 			if len(am_row[i]['tls']) > 1: #{
 				sl = common.wrap(am_row[i]['sl'])
 				tl = common.wrap(dm_row[i]['tls'][0])
-	
+
 				for j in range(1, MAX_NGRAMS): #{
 					pregram = ' '.join(map(common.wrap, cur_sl_row[i-j:i+1]));
 					postgram = ' '.join(map(common.wrap, cur_sl_row[i:i+j+1]));
 					roundgram = ' '.join(map(common.wrap, cur_sl_row[i-j:i+j+1]));
-	
+
 					if sl not in ngrams: #{
 						ngrams[sl] = {};
 					#}
@@ -178,7 +178,7 @@ while reading: #{
 					if tl not in ngrams[sl][roundgram]: #{
 						ngrams[sl][roundgram][tl] = 0.0;
 					#}
-	
+
 					ngrams[sl][pregram][tl] = ngrams[sl][pregram][tl] + frac_count;
 					ngrams[sl][postgram][tl] = ngrams[sl][postgram][tl] + frac_count;
 					ngrams[sl][roundgram][tl] = ngrams[sl][roundgram][tl] + frac_count;
@@ -232,7 +232,7 @@ while reading: #{
 				meoutcomes = {};
 			#}
 		#}
-		
+
 		dm_line = dm_file.readline();
 		if dm_line == '': #{
 			reading = False;

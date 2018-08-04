@@ -1,49 +1,49 @@
 <rules>
-  <rule>  
-    <match lemma="prova" tags="n.*">    
-      <select lemma="event" tags="n.*"/> 
-    </match>  
+  <rule>
+    <match lemma="prova" tags="n.*">
+      <select lemma="event" tags="n.*"/>
+    </match>
     <match lemma="internacional" tags="adj.*"/>
   </rule>
-  <rule>  
-    <match lemma="prova" tags="n.*">    
-      <select lemma="event" tags="n.*"/> 
-    </match>  
+  <rule>
+    <match lemma="prova" tags="n.*">
+      <select lemma="event" tags="n.*"/>
+    </match>
     <match lemma="de" tags="pr.*"/>
     <match lemma="eslàlom" tags="n.*"/>
   </rule>
-  <rule>  
-    <match lemma="prova" tags="n.*">    
-      <select lemma="proof" tags="n.*"/> 
-    </match>  
+  <rule>
+    <match lemma="prova" tags="n.*">
+      <select lemma="proof" tags="n.*"/>
+    </match>
     <match lemma="definitiu" tags="adj.*"/>
   </rule>
-  <rule>  
-    <match lemma="prova" tags="n.*">    
-      <remove lemma="test" tags="n.*"/> 
-      <remove lemma="event" tags="n.*"/> 
-      <remove lemma="proof" tags="n.*"/> 
-    </match>  
+  <rule>
+    <match lemma="prova" tags="n.*">
+      <remove lemma="test" tags="n.*"/>
+      <remove lemma="event" tags="n.*"/>
+      <remove lemma="proof" tags="n.*"/>
+    </match>
     <match lemma="experimental" tags="adj.*"/>
   </rule>
-  <rule>  
-    <match lemma="prova" tags="n.*">    
-      <remove lemma="test" tags="n.*"/> 
-      <remove lemma="proof" tags="n.*"/> 
-    </match>  
+  <rule>
+    <match lemma="prova" tags="n.*">
+      <remove lemma="test" tags="n.*"/>
+      <remove lemma="proof" tags="n.*"/>
+    </match>
     <match lemma="concret" tags="adj.*"/>
   </rule>
-  <rule>  
-    <match lemma="prova" tags="n.*">    
-      <remove lemma="test" tags="n.*"/> 
-    </match>  
+  <rule>
+    <match lemma="prova" tags="n.*">
+      <remove lemma="test" tags="n.*"/>
+    </match>
     <match lemma="que" tags="*"/>
     <match lemma="descendir" tags="vblex.*"/>
   </rule>
-  <rule>  
-    <match lemma="prova" tags="n.*">    
-      <select lemma="evidence" tags="n.*"/> 
-    </match>  
+  <rule>
+    <match lemma="prova" tags="n.*">
+      <select lemma="evidence" tags="n.*"/>
+    </match>
     <or>
       <match lemma="genètic" tags="adj.*"/>
       <match lemma="directe" tags="adj.*"/>
@@ -52,136 +52,136 @@
     </or>
   </rule>
   <rule>
-    <match lemma="prova" tags="n.*">    
-      <select lemma="proof" tags="n.*"/> 
-    </match>  
+    <match lemma="prova" tags="n.*">
+      <select lemma="proof" tags="n.*"/>
+    </match>
     <match lemma="de" tags="pr.*"/>
     <match lemma="hipòtesis" tags="n.*"/>
   </rule>
-  <rule>  
+  <rule>
     <match lemma="trobar" tags="vblex.*"/>
-    <match lemma="prova" tags="n.*">    
-      <remove lemma="test" tags="n.*"/> 
-      <remove lemma="event" tags="n.*"/> 
-    </match>  
+    <match lemma="prova" tags="n.*">
+      <remove lemma="test" tags="n.*"/>
+      <remove lemma="event" tags="n.*"/>
+    </match>
     <match lemma="a" tags="pr.*"/>
   </rule>
   <rule>
-    <match lemma="prova" tags="n.*">    
-      <select lemma="test" tags="n.*"/> 
-    </match>  
+    <match lemma="prova" tags="n.*">
+      <select lemma="test" tags="n.*"/>
+    </match>
     <match lemma="estadístic" tags="adj.*"/>
   </rule>
   <rule c="el guanyador de cada prova">
     <match lemma="guanyador" tags="n.*"/>
     <match lemma="de" tags="pr.*"/>
     <match/> <!-- det -->
-    <match lemma="prova" tags="n.*">    
-      <select lemma="event" tags="n.*"/> 
-    </match>  
+    <match lemma="prova" tags="n.*">
+      <select lemma="event" tags="n.*"/>
+    </match>
   </rule>
   <rule>
     <match lemma="tècnica" tags="n.*"/>
     <match lemma="de" tags="pr.*"/>
-    <match lemma="prova" tags="n.*">    
-      <select lemma="testing" tags="n.*"/> 
-    </match>  
+    <match lemma="prova" tags="n.*">
+      <select lemma="testing" tags="n.*"/>
+    </match>
   </rule>
   <rule>
-    <match lemma="càrrega" tags="n.*">    
-      <select lemma="charge" tags="n.*"/> 
-    </match>  
+    <match lemma="càrrega" tags="n.*">
+      <select lemma="charge" tags="n.*"/>
+    </match>
     <or>
       <match lemma="negatiu" tags="adj.*"/>
       <match lemma="positiu" tags="adj.*"/>
     </or>
   </rule>
   <rule>
-    <match lemma="camp" tags="n.*">    
-      <select lemma="field" tags="n.*"/> 
-    </match>  
+    <match lemma="camp" tags="n.*">
+      <select lemma="field" tags="n.*"/>
+    </match>
     <match lemma="elèctric" tags="adj.*"/>
   </rule>
   <rule>
-    <match lemma="joc" tags="n.*">    
-      <select lemma="game" tags="n.*"/> 
-    </match>  
+    <match lemma="joc" tags="n.*">
+      <select lemma="game" tags="n.*"/>
+    </match>
     <match lemma="olímpic" tags="adj.*"/>
   </rule>
   <rule>
-    <match lemma="joc" tags="n.*">    
-      <select lemma="set" tags="n.*"/> 
-    </match>  
+    <match lemma="joc" tags="n.*">
+      <select lemma="set" tags="n.*"/>
+    </match>
     <match lemma="de" tags="pr.*"/>
     <match lemma="caràcter" tags="n.*"/>
   </rule>
   <rule>
-    <match lemma="pista" tags="n.*">    
-      <remove lemma="hint" tags="n.*"/> 
-      <remove lemma="clue" tags="n.*"/> 
-    </match>  
+    <match lemma="pista" tags="n.*">
+      <remove lemma="hint" tags="n.*"/>
+      <remove lemma="clue" tags="n.*"/>
+    </match>
     <match lemma="més" tags="preadv.*"/>
     <match lemma="llarg" tags="adj.*"/>
   </rule>
   <rule>
     <match lemma="aquest" tags="prn.*"/>
     <match lemma="per" tags="pr.*"/>
-    <match lemma="motiu" tags="n.*">    
-      <remove lemma="motif" tags="n.*"/> 
-    </match>  
+    <match lemma="motiu" tags="n.*">
+      <remove lemma="motif" tags="n.*"/>
+    </match>
   </rule>
   <rule>
-    <match lemma="carn" tags="n.*">    
-      <select lemma="flesh" tags="n.*"/> 
-    </match>  
+    <match lemma="carn" tags="n.*">
+      <select lemma="flesh" tags="n.*"/>
+    </match>
     <match lemma="i" tags="cnjcoo.*"/>
     <match lemma="os" tags="n.*"/>
   </rule>
   <rule>
-    <match lemma="humit" tags="adj.*">    
-      <select lemma="wet" tags="adj.*"/> 
-    </match>  
+    <match lemma="humit" tags="adj.*">
+      <select lemma="wet" tags="adj.*"/>
+    </match>
     <match/>
     <match lemma="sec" tags="adj.*"/>
   </rule>
   <rule>
     <match lemma="sec" tags="adj.*"/>
     <match/>
-    <match lemma="humit" tags="adj.*">    
-      <select lemma="wet" tags="adj.*"/> 
-    </match>  
+    <match lemma="humit" tags="adj.*">
+      <select lemma="wet" tags="adj.*"/>
+    </match>
   </rule>
   <rule>
     <match lemma="victòria" tags="n.*"/>
     <match/>
-    <match lemma="sobre" tags="pr.*">    
-      <select lemma="over" tags="pr.*"/> 
-    </match>  
+    <match lemma="sobre" tags="pr.*">
+      <select lemma="over" tags="pr.*"/>
+    </match>
   </rule>
   <rule>
-    <match lemma="estació" tags="n.*">    
-      <select lemma="season" tags="n.*"/> 
-    </match>  
+    <match lemma="estació" tags="n.*">
+      <select lemma="season" tags="n.*"/>
+    </match>
     <match/>
     <match lemma="plujós" tags="adj.*"/>
   </rule>
   <rule>
-    <match lemma="estació" tags="n.*">    
-      <select lemma="season" tags="n.*"/> 
-    </match>  
+    <match lemma="estació" tags="n.*">
+      <select lemma="season" tags="n.*"/>
+    </match>
     <match lemma="plujós" tags="adj.*"/>
   </rule>
   <rule>
-    <match lemma="estació" tags="n.*">    
-      <select lemma="season" tags="n.*"/> 
-    </match>  
+    <match lemma="estació" tags="n.*">
+      <select lemma="season" tags="n.*"/>
+    </match>
     <match lemma="de" tags="pr.*"/>
     <match lemma="any" tags="n.*"/>
   </rule>
   <rule>
-    <match lemma="estació" tags="n.*">    
-      <select lemma="station" tags="n.*"/> 
-    </match>  
+    <match lemma="estació" tags="n.*">
+      <select lemma="station" tags="n.*"/>
+    </match>
     <match lemma="de" tags="pr.*"/>
     <or>
       <match lemma="[Ll]ínia" tags="n.*"/>
@@ -189,9 +189,9 @@
     </or>
   </rule>
   <rule>
-    <match lemma="règim" tags="n.*">    
-      <remove lemma="diet" tags="n.*"/> 
-    </match>  
+    <match lemma="règim" tags="n.*">
+      <remove lemma="diet" tags="n.*"/>
+    </match>
     <or>
       <match lemma="nazi" tags="adj.*"/>
       <match lemma="totalitari" tags="adj.*"/>
@@ -202,9 +202,9 @@
     </or>
   </rule>
   <rule>
-    <match lemma="llengua" tags="n.*">    
-      <select lemma="language" tags="n.*"/> 
-    </match>  
+    <match lemma="llengua" tags="n.*">
+      <select lemma="language" tags="n.*"/>
+    </match>
     <or>
       <match lemma="oficial" tags="adj.*"/>
       <match lemma="cooficial" tags="adj.*"/>
@@ -212,54 +212,54 @@
   </rule>
   <rule>
     <match lemma="el" tags="det.*"/>
-    <match lemma="Terra" tags="n.*">    
-      <select lemma="Earth" tags="n.*"/> 
-    </match>  
+    <match lemma="Terra" tags="n.*">
+      <select lemma="Earth" tags="n.*"/>
+    </match>
   </rule>
   <rule>
     <match lemma="especial" tags="adj.*"/>
-    <match lemma="cura" tags="n.*">    
-      <select lemma="care" tags="n.*"/> 
-    </match>  
+    <match lemma="cura" tags="n.*">
+      <select lemma="care" tags="n.*"/>
+    </match>
   </rule>
   <rule>
     <match lemma="*" tags="det.pos.*"/>
-    <match lemma="dona" tags="n.*">    
-      <select lemma="wife" tags="n.*"/> 
-    </match>  
+    <match lemma="dona" tags="n.*">
+      <select lemma="wife" tags="n.*"/>
+    </match>
   </rule>
   <rule>
     <match lemma="el" tags="det.*"/>
-    <match lemma="dona" tags="n.*">    
-      <select lemma="wife" tags="n.*"/> 
-    </match>  
+    <match lemma="dona" tags="n.*">
+      <select lemma="wife" tags="n.*"/>
+    </match>
     <match lemma="de" tags="pr.*"/>
   </rule>
   <rule c="la dona dels seus somnis">
-    <match lemma="dona" tags="n.*">    
-      <select lemma="wife" tags="n.*"/> 
-    </match>  
+    <match lemma="dona" tags="n.*">
+      <select lemma="wife" tags="n.*"/>
+    </match>
     <match lemma="de" tags="pr.*"/>
     <match lemma="*" tags="det.pos.*"/>
     <match lemma="somni" tags="n.*"/>
   </rule>
   <rule>
-    <match lemma="patró" tags="n.*">    
-      <remove lemma="pattern" tags="n.*"/> 
-    </match>  
+    <match lemma="patró" tags="n.*">
+      <remove lemma="pattern" tags="n.*"/>
+    </match>
     <match lemma="*" tags="np.ant.*"/>
   </rule>
   <rule>
     <match lemma="fer" tags="vblex.*"/>
-    <match lemma="necesari" tags="adj.*">    
-      <remove lemma="needed" tags="adj.*"/> 
-    </match>  
+    <match lemma="necesari" tags="adj.*">
+      <remove lemma="needed" tags="adj.*"/>
+    </match>
   </rule>
   <rule>
     <match lemma="un" tags="det.*"/>
-    <match lemma="estació" tags="n.*">    
-      <select lemma="station" tags="n.*"/> 
-    </match>  
+    <match lemma="estació" tags="n.*">
+      <select lemma="station" tags="n.*"/>
+    </match>
     <match lemma="a" tags="pr.*"/>
   </rule>
 </rules>

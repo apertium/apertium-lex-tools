@@ -7,7 +7,7 @@ import common;
 
 # Input:
 #        a) Biltrans output
-#        b) Disambiguated biltrans output  
+#        b) Disambiguated biltrans output
 
 #
 
@@ -39,7 +39,7 @@ while reading: #{
 	limit = len(am_row);
 	for i in range(0, limit): #{
 		if am_row[i].count('/') > 1: #{
-			#print(am_row[i] , dm_row[i]); 
+			#print(am_row[i] , dm_row[i]);
 			sl = am_row[i].split('/')[0].replace(' ', '~');
 			tl = dm_row[i].split('/')[1].replace(' ', '~');
 			if sl.count('><') > 0: #{
@@ -56,7 +56,7 @@ while reading: #{
 			#}
 			sl_tl[sl][tl] = sl_tl[sl][tl] + 1;
 		#}
-	#}	
+	#}
 #}
 
 for sl in sl_tl: #{

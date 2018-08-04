@@ -34,21 +34,21 @@ with open(sys.argv[1]) as d:
 
 			if sl_tag.split('.')[0] not in ['adj', 'vblex', 'n']: #{
 				cmb = '<!--';
-				cma = '-->';	
+				cma = '-->';
 			else: #{
 				cma = '';
 				cmb = '';
 			#}
 
 			rule = cmb + '<rule comment="' + fq + '">';
-			#rule = rule + '<match lemma="' + sl_lem + '" tags="' + sl_tag + '"><select lemma="' + tl_lem + '" tags="' + tl_tag + '"/>';	
-			rule = rule + '<match lemma="' + sl_lem + '"><select lemma="' + tl_lem + '"/>';	
+			#rule = rule + '<match lemma="' + sl_lem + '" tags="' + sl_tag + '"><select lemma="' + tl_lem + '" tags="' + tl_tag + '"/>';
+			rule = rule + '<match lemma="' + sl_lem + '"><select lemma="' + tl_lem + '"/>';
 			rule = rule + '</match>';
 			rule = rule + '</rule>' + cma;
-	
+
 			print(rule);
 		#}
-	
+
 
 	#}
 	print('</rules>');

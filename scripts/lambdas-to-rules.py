@@ -4,11 +4,11 @@ import common;
 def wrap (x):
 	return '^' + x + '$'
 
-sl_tl_defaults = {}; 
+sl_tl_defaults = {};
 sl_tl = {};
 
 indexes = {};
-trad_counter = {}; 
+trad_counter = {};
 rindex = {};
 
 with open(sys.argv[1]) as d:
@@ -49,7 +49,7 @@ for pair in rindex: #{
 with open(sys.argv[2]) as d:
 	for line in d: #{
 
-		row = line.split(' \t '); 
+		row = line.split(' \t ');
 		slword = row[0].strip();
 		l = float(row[1]);
 		tlid = int(row[2]);
@@ -70,7 +70,7 @@ with open(sys.argv[2]) as d:
 	#		if c.count(slword) == 1: #{
 	#			print(slword, tlword);
 	#		else: #{
-	#			print(c);	
+	#			print(c);
 	#		#}
 	#	#}
 	#	print('  </rule>');

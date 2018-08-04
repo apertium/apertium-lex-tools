@@ -15,7 +15,7 @@ biltrans_out = open(sys.argv[2]);
 
 def ambiguous(bt): #{
 	# legislation<n><sg>/legislación<n><f><sg>/ordenamiento<n><m><sg>
-	
+
 	ambig = False;
 	for w in bt.split(' '): #{
 		if w.count('/') > 1: #{
@@ -34,7 +34,7 @@ total_valid = 0;
 
 while reading: #{
 	lineno = lineno + 1;
-	pt_line = phrase_table.readline().strip();	
+	pt_line = phrase_table.readline().strip();
 	bt_line = biltrans_out.readline().strip();
 
 	if bt_line == '' and pt_line == '': #{
@@ -73,7 +73,7 @@ while reading: #{
 
 #	print(lineno, ' ambiguous', file=sys.stderr);
 
-	words = {};	
+	words = {};
 	i = 0;
 
 	# Here we collect a set of SL words, with their correspondences in the bilingual
@@ -105,14 +105,14 @@ while reading: #{
 
 	valid = True;
 	i = 0;
-	
+
 	#
 	for word in words: #{
 		# If the word is ambiguous
 		if len(words[word][1]) > 1: #{
 			current_ambig_words[i] = words[word];
-	
-			# Check to see if the TL possibilities are found in the lexical 
+
+			# Check to see if the TL possibilities are found in the lexical
 			# transfer output.
 			for tlw in words[word][2]: #{
 				found = False;
@@ -121,13 +121,13 @@ while reading: #{
 					if btw.count(needle) > 0: #{
 						found = True;
 					#}
-				#}	
+				#}
 				if not found: #{
 					print('!!!: Missing:' , tlw, 'not found for', words[word][0], file=sys.stderr);
 #					print('\tw:' , word, file=sys.stderr);
 					valid = False;
 				#}
-			#}			
+			#}
 		#}
 		i = i + 1;
 	#}
@@ -136,9 +136,9 @@ while reading: #{
 		continue;
 	#}
 
-	# Resumption<n> of<pr> the<def><def> session<n> 
-	# Resumption<n><sg>/Reanudación<n><f><sg> of<pr>/de<pr> the<det><def><sp>/el<det><def><GD><ND> session<n><sg>/sesión<n><f><sg> 
-	# Reanudación<n> de<pr> el<det><def> periodo<n> de<pr> sesión<n> 
+	# Resumption<n> of<pr> the<def><def> session<n>
+	# Resumption<n><sg>/Reanudación<n><f><sg> of<pr>/de<pr> the<det><def><sp>/el<det><def><GD><ND> session<n><sg>/sesión<n><f><sg>
+	# Reanudación<n> de<pr> el<det><def> periodo<n> de<pr> sesión<n>
 	# 0-0 1-1 2-2 5-3
 
 
@@ -148,7 +148,7 @@ while reading: #{
 	print(lineno, '\t' + aliniaments);
 	print('-------------------------------------------------------------------------------');
 
-	
+
 	total_valid = total_valid + 1;
 #}
 

@@ -7,7 +7,7 @@ import sys, codecs, copy, re;
 # Input:
 #        a) Frequency lexicon
 #        b) Biltrans output
-#        c) Disambiguated biltrans output  
+#        c) Disambiguated biltrans output
 #	 d) Crispiness threshold
 
 MAX_NGRAMS = 3;
@@ -20,7 +20,7 @@ if len(sys.argv) == 5: #{
 	print('crisp:', crisphold, file=sys.stderr);
 #}
 
-sl_tl_defaults = {}; 
+sl_tl_defaults = {};
 sl_tl = {};
 ngrams = {};
 
@@ -74,7 +74,7 @@ while reading: #{
 	limit = len(am_row);
 	for i in range(0, limit): #{
 		if am_row[i].count('/') > 1: #{
-			#print(am_row[i] , dm_row[i]); 
+			#print(am_row[i] , dm_row[i]);
 			sl = am_row[i].split('/')[0].replace(' ', '~');
 			tl = dm_row[i].split('/')[1].replace(' ', '~');
 			if sl.count('><') > 0: #{
@@ -129,7 +129,7 @@ for sl in ngrams: #{
 
 	for ngram in ngrams[sl]: #{
 		total = 0;
-		max_freq = -1;	
+		max_freq = -1;
 		current_tl = '';
 		for tl in ngrams[sl][ngram]: #{
 			if ngrams[sl][ngram][tl] > max_freq: #{
@@ -147,14 +147,14 @@ for sl in ngrams: #{
 		#> translation is). I think this would be easier to explain than the magic
 		#> number I came up with.
 		#
-		#I see this as a way to define how "crispy" the decisions are. I think it 
-		#would be better to express this as a ratio: the ratio of the times the 
-		#alternative translation is seen to the number of times the defaullt 
+		#I see this as a way to define how "crispy" the decisions are. I think it
+		#would be better to express this as a ratio: the ratio of the times the
+		#alternative translation is seen to the number of times the defaullt
 		#translation is seen with that n-gram.
 		#
-		#It would be "2" in this case: the alternative is seen twice as often as 
+		#It would be "2" in this case: the alternative is seen twice as often as
 		#the default.
-		
+
 		for tl in ngrams[sl][ngram]: #{
 			crispiness = 0.0;
 			default = sl_tl_defaults[sl];
@@ -166,8 +166,8 @@ for sl in ngrams: #{
 			weight = float(ngrams[sl][ngram][tl]) / float(total);
 			crispiness = alt_crisp/def_crisp;
 
-			#print '%%%' , crispiness , alt_crisp , def_crisp , tl , default , ngrams[sl][ngram] ; 
-			
+			#print '%%%' , crispiness , alt_crisp , def_crisp , tl , default , ngrams[sl][ngram] ;
+
 			if crispiness < crisphold: #{
 				print('-', crispiness , weight , total, max_freq, ngrams[sl][ngram][tl], '\t'+ sl + '\t' + ngram + '\t' + tl + '\t' + str(ngrams[sl][ngram][tl]));
 			else: #{

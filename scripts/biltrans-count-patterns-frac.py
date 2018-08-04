@@ -14,14 +14,14 @@ import common;
 # 0.0000001004 a-led<adv> à~plat<adv>
 # 20.4545497200 pazenn<n> étape<n> @
 # 2.5454502800 pazenn<n> marche<n>
-# 
+#
 
 #        b) Biltrans output
 
 # 56011   ^un<det><ind><sp>/un<det><ind><GD><ND>$ ^digarez<n><m><sg>/excuse<n><f><sg>/occasion<n><f><sg>$ ^da<pr>/à<pr>$ ^distreiñ<vblex><inf>/revenir<vblex><inf>$ ^war<pr>/sur<pr>$ ^e<det><pos><m><sp>/son<det><pos><GD><ND>$ ^doare<n><m><sg>/manière<n><f><sg>$ ^ober<vblex><inf>/faire<vblex><inf>$ ^.<sent>/.<sent>$
 
 
-#        c) Disambiguated biltrans output  
+#        c) Disambiguated biltrans output
 
 #.[][56011 0].[] ^un<det><ind><sp>/un<det><ind><GD><ND>$ ^digarez<n><m><sg>/excuse<n><f><sg>$ ^da<pr>/à<pr>$ ^distreiñ<vblex><inf>/revenir<vblex><inf>$ ^war<pr>/sur<pr>$ ^e<det><pos><m><sp>/son<det><pos><GD><ND>$ ^doare<n><m><sg>/manière<n><f><sg>$ ^ober<vblex><inf>/faire<vblex><inf>$ ^.<sent>/.<sent>$^.<sent>/.<sent>$ 0.9917274061    |@|
 #.[][56011 1].[] ^un<det><ind><sp>/un<det><ind><GD><ND>$ ^digarez<n><m><sg>/occasion<n><f><sg>$ ^da<pr>/à<pr>$ ^distreiñ<vblex><inf>/revenir<vblex><inf>$ ^war<pr>/sur<pr>$ ^e<det><pos><m><sp>/son<det><pos><GD><ND>$ ^doare<n><m><sg>/manière<n><f><sg>$ ^ober<vblex><inf>/faire<vblex><inf>$ ^.<sent>/.<sent>$^.<sent>/.<sent>$       0.0082725939    ||
@@ -41,7 +41,7 @@ if len(sys.argv) == 5: #{
 	print('crisp:', crisphold, file=sys.stderr);
 #}
 
-sl_tl_defaults = {}; 
+sl_tl_defaults = {};
 sl_tl = {};
 ngrams = {};
 
@@ -65,7 +65,7 @@ for line in open(sys.argv[1]).readlines(): #{
 	else: #{
 		sl_tl[sl] = tl;
 	#}
-	
+
 #}
 
 print('Reading...', file=sys.stderr);
@@ -102,7 +102,7 @@ while reading: #{
 #		print('line_id_mismatch: %d != %d' % (current_am_line_id, current_dm_line_id), file=sys.stderr);
 #		while current_dm_line_id != current_am_line_id: #{
 #			dm_line = dm_file.readline();
-#			current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);       
+#			current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
 #			print('skipping %d ...' % (current_dm_line_id), file=sys.stderr);
 #		#}
 #	#}
@@ -118,7 +118,7 @@ while reading: #{
 			print('...skipping', file=sys.stderr);
 			continue;
 		#}
-	
+
 		cur_sl_row = [];
 		for lu in am_row: #{
 			sl = lu.split('/')[0];
@@ -132,11 +132,11 @@ while reading: #{
 			frac_count = float(dm_line.split('\t')[2]);
 		except:
 			break;
-	
+
 		limit = len(am_row);
 		for i in range(0, limit): #{
 			if am_row[i].count('/') > 1: #{
-				#print(am_row[i] , dm_row[i]); 
+				#print(am_row[i] , dm_row[i]);
 				sl = am_row[i].split('/')[0].replace(' ', '~');
 				tl = dm_row[i].split('/')[1].replace(' ', '~');
 				if sl.count('><') > 0: #{
@@ -145,13 +145,13 @@ while reading: #{
 				if tl.count('><') > 0: #{
 					tl = tl.split('><')[0] + '>';
 				#}
-	
+
 #				if tl !=  sl_tl_defaults[sl]: #{
 #					print('+' , sl , sl_tl_defaults[sl] , tl, file=sys.stderr);
 #				else: #{
 #					print('-' , sl , sl_tl_defaults[sl] , tl, file=sys.stderr);
 #				#}
-	
+
 				for j in range(1, MAX_NGRAMS): #{
 					pregram = ' '.join(cur_sl_row[i-j:i+1]);
 					postgram = ' '.join(cur_sl_row[i:i+j+1]);
@@ -182,11 +182,11 @@ while reading: #{
 					ngrams[sl][pregram][tl] = ngrams[sl][pregram][tl] + frac_count;
 					ngrams[sl][postgram][tl] = ngrams[sl][postgram][tl] + frac_count;
 					ngrams[sl][roundgram][tl] = ngrams[sl][roundgram][tl] + frac_count;
-	
+
 #					print('=> %s\t[%.10f] %s' % (tl, ngrams[sl][pregram][tl], pregram), file=sys.stderr);
 #					print('=> %s\t[%.10f] %s' % (tl, ngrams[sl][roundgram][tl], roundgram), file=sys.stderr);
 #					print('=> %s\t[%.10f] %s' % (tl, ngrams[sl][postgram][tl], postgram), file=sys.stderr);
-	
+
 
 				#}
 			#}
@@ -215,7 +215,7 @@ for sl in ngrams: #{
 	for ngram in ngrams[sl]: #{
 
 		for tl in ngrams[sl][ngram]: #{
-			print('%.10f\t%s\t%s\t%s' % (ngrams[sl][ngram][tl], ngram, sl, tl), file=cache_counts);		
+			print('%.10f\t%s\t%s\t%s' % (ngrams[sl][ngram][tl], ngram, sl, tl), file=cache_counts);
 		#}
 	#}
 #}
@@ -233,12 +233,12 @@ for sl in ngrams: #{
 			#> translation is). I think this would be easier to explain than the magic
 			#> number I came up with.
 			#
-			#I see this as a way to define how "crispy" the decisions are. I think it 
-			#would be better to express this as a ratio: the ratio of the times the 
-			#alternative translation is seen to the number of times the defaullt 
+			#I see this as a way to define how "crispy" the decisions are. I think it
+			#would be better to express this as a ratio: the ratio of the times the
+			#alternative translation is seen to the number of times the defaullt
 			#translation is seen with that n-gram.
 			#
-			#It would be "2" in this case: the alternative is seen twice as often as 
+			#It would be "2" in this case: the alternative is seen twice as often as
 			#the default.
 
 			total = 0.0;
@@ -254,7 +254,7 @@ for sl in ngrams: #{
 
 			if only_max == True: #{
 				crispiness = 0.0;
-				default = sl_tl_defaults[sl];	
+				default = sl_tl_defaults[sl];
 	#			if default == max_tl: #{
 	#				print('default=max_tl', default, max_tl, '\t', ngram, file=sys.stderr);
 	#			else:#{
@@ -282,9 +282,9 @@ for sl in ngrams: #{
 	#- 14736.0468727 0.9999321438 1.0 0.9999321438 0.9999321438      treuzkas<n>     treuzkas<n> teknologel<adj>     transfert<n>    0.9999321438
 
 
-	
+
 			else: #{
-		
+
 				for tl in ngrams[sl][ngram]: #{
 
 					crispiness = 0.0;
@@ -296,9 +296,9 @@ for sl in ngrams: #{
 					#}
 					weight = float(ngrams[sl][ngram][tl]) / float(total);
 					crispiness = alt_crisp/def_crisp;
-	
-					#print '%%%' , crispiness , alt_crisp , def_crisp , tl , default , ngrams[sl][ngram] ; 
-				
+
+					#print '%%%' , crispiness , alt_crisp , def_crisp , tl , default , ngrams[sl][ngram] ;
+
 					if crispiness < crisphold: #{
 						print('- %.10f %.10f %.10f %.10f %.10f %.10f\t%s\t%s\t%s\t%.10f' % (crispiness, weight, total, ngrams[sl][ngram][default] , max_freq, ngrams[sl][ngram][tl], sl, ngram, tl, ngrams[sl][ngram][tl]));
 					else: #{

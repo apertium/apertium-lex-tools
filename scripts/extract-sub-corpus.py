@@ -15,11 +15,11 @@ import sys, codecs, copy, random;
 
 bt_file = open(sys.argv[1]);
 fq_file = open(sys.argv[2]);
-num_lines = int(sys.argv[3]); 
+num_lines = int(sys.argv[3]);
 bto_file = open(sys.argv[4], 'w+');
 fqo_file = open(sys.argv[5], 'w+');
 
-# read in all possible line ids 
+# read in all possible line ids
 # unsort them
 # take top num_lines
 # for each line in biltrans, output if in num_lines
@@ -55,7 +55,7 @@ print('Output %d lines to sub biltrans' % (outlines), file=sys.stderr);
 outlines = 0;
 for line in fq_file.readlines(): #{
 	# .[][12 0].[]
-	line_id = int(line.split(' ')[0].replace('.[][', ''));	 
+	line_id = int(line.split(' ')[0].replace('.[][', ''));
 	if line_id in lines: #{
 		print(line.strip(), file=fqo_file);
 		outlines += 1;

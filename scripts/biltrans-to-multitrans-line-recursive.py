@@ -17,8 +17,8 @@ def process_biltrans_unit(lu): #{
 	state = 0;
 	sl = '';
 	tl = [];
-	for c in lu[1:-1]: #{ 
-		#^worth<n><sg>/valor<n><m><sg>$ ^\$<mon>/\$<mon>$^20<num>/20<num>$^*m/*m$ 
+	for c in lu[1:-1]: #{
+		#^worth<n><sg>/valor<n><m><sg>$ ^\$<mon>/\$<mon>$^20<num>/20<num>$^*m/*m$
 		#print c , sl , tl;
 		if c == '/': #{
 			state = state + 1;
@@ -94,7 +94,7 @@ while True: #{
 	string = sys.stdin.readline().rstrip();
 	if string == "":
 		break;
-	
+
 	tokens = parse_input(string)
 	# print map(len, tokens)
 	# print reduce(mul, map(len, tokens))
