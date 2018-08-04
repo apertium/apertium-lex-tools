@@ -5,7 +5,7 @@ import sys;
 
 if len(sys.argv) != 2:
 	print ("Usage:", sys.argv[0], "<path to yasmet>")
-	sys.exit(-1); 
+	sys.exit(-1);
 
 tokens = {}
 for line in sys.stdin:
@@ -17,7 +17,7 @@ for line in sys.stdin:
 		tokens[token]['n'] = row[1];
 		tokens[token]['events'] = []
 	tokens[token]['events'].append(row[2]);
-	
+
 for token in tokens:
 	print >>sys.stderr, token
 	with open('events', 'w') as tmp_file:
@@ -37,5 +37,5 @@ for token in tokens:
 		outfile.close();
 
 
-	
+
 

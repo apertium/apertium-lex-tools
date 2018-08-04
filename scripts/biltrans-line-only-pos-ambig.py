@@ -26,11 +26,11 @@ def process_line(l): #{
 					word_in_pos = True;
 				#}
 			#}
-			
+
 			if w.count('/') > 1 and word_in_pos == True: #{
 				return True;
 			#}
-			
+
 			w = '';
 			in_word = False;
 		#}
@@ -39,12 +39,12 @@ def process_line(l): #{
 		#}
 		escaped = False;
 	#}
-	return False;	
+	return False;
 #}
 
-output = False;	
+output = False;
 
-infile = sys.stdin ; 
+infile = sys.stdin ;
 
 if len(sys.argv) > 1: #{
 	infile = open(sys.argv[1]);
@@ -53,7 +53,7 @@ if len(sys.argv) > 1: #{
 for line in infile.readlines(): #{
 
 	output = process_line(line);
-		
+
 	if output == True: #{
 		print(line.strip());
 	#}

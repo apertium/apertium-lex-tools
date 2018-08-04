@@ -63,7 +63,7 @@ vector<wstring> TaggerOutputProcessor::parseTags(wstring token) {
 			} else {
 				buffer += c;
 			}
-		} 
+		}
 	}
 	return tags;
 }

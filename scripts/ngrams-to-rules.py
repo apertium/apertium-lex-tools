@@ -93,7 +93,7 @@ for line in infile.readlines(): #{
 		print("UNKNOWN_WORD_IN_PATTERN" , pattern, file=sys.stderr);
 		continue;
 	#}
-	
+
 	sel = False;
 	ruleno = ruleno + 1;
 	lineno = lineno + 1;
@@ -131,7 +131,7 @@ for line in infile.readlines(): #{
 			sel = True;
 		else: #{
 			lineno = lineno + 1;
-			if sl_lema == '': #{	
+			if sl_lema == '': #{
 				print('    <match tags="' + sl_tags + '"/>');
 			else: #{
 				print('    <match lemma="' + sl_lema + '" tags="' + sl_tags + '"/>');
@@ -139,7 +139,7 @@ for line in infile.readlines(): #{
 		#}
 	#}
 	if sel == False: #{
-		
+
 		print('  </rule> <!-- Warning: No select operation ', line, '-->');
 	else: #{
 		print('  </rule>');

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011--2012 Universitat d'Alacant 
+ * Copyright (C) 2011--2012 Universitat d'Alacant
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -50,7 +50,7 @@ class LRXCompiler
 private:
   xmlTextReaderPtr reader;
   Alphabet alphabet;
-  Transducer transducer;  
+  Transducer transducer;
 
   map<wstring, Transducer> recognisers; // keyed on pattern
   map<int, double> weights; // keyed on rule id

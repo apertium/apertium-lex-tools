@@ -19,7 +19,7 @@ target_tagged = file(sys.argv[3]);
 
 def ambiguous(bt): #{
 	# ^legislation<n><sg>/legislación<n><f><sg>/ordenamiento<n><m><sg>$
-	
+
 	ambig = False;
 	for w in bt.split(' '): #{
 		if w.count('/') > 1: #{
@@ -38,9 +38,9 @@ def line_to_row(bt): #{
 	word = '';
 	for c in bt: #{
 		if c == '^': #{
-			inWord = True;		
+			inWord = True;
 			continue;
-		#}	
+		#}
 		if c == '\\': #{
 			escaped = True;
 			continue;
@@ -63,18 +63,18 @@ lineno = 0;
 
 while reading: #{
 	lineno = lineno + 1;
-	al_line = alignments.readline().decode('utf-8');	
+	al_line = alignments.readline().decode('utf-8');
 	bt_line = biltrans_out.readline().decode('utf-8');
 	tg_line = target_tagged.readline().decode('utf-8');
 
 	if bt_line == '' and al_line == '' and tg_line == '': #{
 		reading = False;
 	#}
-	
+
 	al_num = al_line.split('\t')[0];
 	al_line = al_line.split('\t')[1];
         # Shitty tokenisation
-	bt_line = bt_line.replace(u'$^', '$ ^'); 
+	bt_line = bt_line.replace(u'$^', '$ ^');
 
 	bt_line = bt_line.replace(u'^', ' ^');
 
@@ -93,11 +93,11 @@ while reading: #{
 	print '----';
 
 #2 0-1 0-2 3-0 4-3 5-4 6-5
-#     0                                                             1                                           2                               3      
+#     0                                                             1                                           2                               3
 #2 ] ^Nature<n><sg>/Carácter<n><f><sg>/Naturaleza<n><f><sg>$  ^protection<n><sg>/protección<n><f><sg>$  ^officer<n><pl>/agente<n><mf><pl>$  ^accuse<vblex><past>/acusar<vblex><past>$  ^of<pr>/de<pr>$  ^blackmail<n><sg>/chantaje<n><m><sg>$[
 #     0                    1         2                     3                     4                        5           6
 #2 ]^Defensor<n><m><sg>$ ^de<pr>$ ^el<det><def><f><sg>$ ^naturaleza<n><f><sg>$ ^acusar<vblex><pp><m><sg>$ ^de<pr>$ ^chantaje<n><m><sg>$[
-	
+
 	i = 0;
 	sys.stdout.write(al_num + ' ' + str(lineno) + ' dab: ');
 	for word in bt_row: #{
@@ -120,7 +120,7 @@ while reading: #{
 						#}
 					#}
 				#}
-			#}		
+			#}
 		#}
 		if len(resolved) > 0: #{
 			sl = word.split('/')[0];

@@ -20,7 +20,7 @@ all: data/$(CORPUS).$(DIR).freq.lrx.bin data/$(CORPUS).$(DIR).lm.xml
 data/$(CORPUS).$(DIR).tagger: $(CORPUS).$(PAIR).$(SL)
 	if [ ! -d data ]; then mkdir data; fi
 	cat $(CORPUS).$(PAIR).$(SL) | head -n $(TRAINING_LINES) | apertium-destxt | apertium -f none -d $(DATA) $(DIR)-tagger | apertium-pretransfer > $@
- 
+
 data/$(CORPUS).$(DIR).ambig: data/$(CORPUS).$(DIR).tagger
 	cat data/$(CORPUS).$(DIR).tagger | $(LEX_TOOLS)/multitrans $(DATA)/$(AUTOBIL) -b -t -f -n > $@
 
@@ -28,11 +28,11 @@ data/$(CORPUS).$(DIR).multi-trimmed: data/$(CORPUS).$(DIR).tagger
 	cat data/$(CORPUS).$(DIR).tagger | $(LEX_TOOLS)/multitrans $(DATA)/$(AUTOBIL) -m -t -f > $@
 
 data/$(CORPUS).$(DIR).annotated: data/$(CORPUS).$(DIR).tagger data/$(CORPUS).$(DIR).multi-trimmed
-	cat data/$(CORPUS).$(DIR).tagger | $(LEX_TOOLS)/multitrans $(DATA)/$(AUTOBIL) -m -f | apertium -f none -d $(DATA) $(DIR)-multi | $(LEX_TOOLS)/irstlm-ranker $(MODEL) data/$(CORPUS).$(DIR).multi-trimmed -f 2>/dev/null > $@ 
+	cat data/$(CORPUS).$(DIR).tagger | $(LEX_TOOLS)/multitrans $(DATA)/$(AUTOBIL) -m -f | apertium -f none -d $(DATA) $(DIR)-multi | $(LEX_TOOLS)/irstlm-ranker $(MODEL) data/$(CORPUS).$(DIR).multi-trimmed -f 2>/dev/null > $@
 
 data/$(CORPUS).$(DIR).freq: data/$(CORPUS).$(DIR).ambig data/$(CORPUS).$(DIR).annotated
 	python3 $(SCRIPTS)/biltrans-extract-frac-freq.py data/$(CORPUS).$(DIR).ambig data/$(CORPUS).$(DIR).annotated > $@
- 
+
 data/$(CORPUS).$(DIR).freq.lrx:  data/$(CORPUS).$(DIR).freq
 	python3 $(SCRIPTS)/extract-alig-lrx.py $< > $@
 

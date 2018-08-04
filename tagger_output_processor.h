@@ -39,7 +39,7 @@ protected:
 	vector<wstring> parseTags(wstring token);
 	vector<wstring> wsplit(wstring wstr, wchar_t delim);
 	TaggerToken parseTaggerToken(wstring buffer);
-	
+
 	int find(vector<wstring> xs, wstring x);
 	wstring getLemma(wstring token);
 
@@ -47,7 +47,7 @@ protected:
 public:
 	TaggerOutputProcessor();
 	~TaggerOutputProcessor();
-	
+
 	void processTaggerOutput();
 
 };

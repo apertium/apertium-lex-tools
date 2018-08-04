@@ -9,7 +9,7 @@ sys.stdout = codecs.getwriter('utf-8')(sys.stdout);
 sys.stderr = codecs.getwriter('utf-8')(sys.stderr);
 
 c = sys.stdin.read(1);
- 
+
 
 def processWord(c): #{
 	lemma = '';
@@ -33,7 +33,7 @@ def processWord(c): #{
 		tags = tags + c;
 		c = sys.stdin.read(1);
 	#}
-	
+
 	sys.stdout.write(lemma.replace(' ', '~') + tags.replace(' ', '~') + ' ');
 #}
 

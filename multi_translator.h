@@ -7,12 +7,12 @@
 
 class BiltransToken {
 public:
-	TaggerToken sourceToken;	
+	TaggerToken sourceToken;
 	vector<TaggerToken> targetTokens;
 	wstring blanks;
 
 	bool isEOF;
-	
+
 	BiltransToken() {
 		isEOF = false;
 	}
@@ -42,23 +42,23 @@ private:
 
 	string mode;
 
-	bool isPosAmbig(BiltransToken token);	
-	
+	bool isPosAmbig(BiltransToken token);
+
 	BiltransToken getTrimmedToken(wstring str);
 	BiltransToken getFullToken(wstring str);
-	
+
 	BiltransToken parseBiltransToken(wstring bt);
-	
+
 	void processSentence(vector<TaggerToken> s);
 
 	void printBiltransSentence(int i, vector<BiltransToken> s);
 
 	void printTaggerOutput(int i, vector<BiltransToken> s);
-	
-	void biltransToMultiTranslator(int sn, int &tn, unsigned int idx, 
+
+	void biltransToMultiTranslator(int sn, int &tn, unsigned int idx,
 			vector<BiltransToken> s, wstring buffer);
 
-	
+
 
 public:
 	MultiTranslator(string path, string mode, bool trimmed, bool filter, bool number_lines);

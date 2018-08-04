@@ -10,7 +10,7 @@ import math
 #        a) Biltrans output
 # 56011   ^un<det><ind><sp>/un<det><ind><GD><ND>$ ^digarez<n><m><sg>/excuse<n><f><sg>/occasion<n><f><sg>$ ^da<pr>/à<pr>$ ^distreiñ<vblex><inf>/revenir<vblex><inf>$ ^war<pr>/sur<pr>$ ^e<det><pos><m><sp>/son<det><pos><GD><ND>$ ^doare<n><m><sg>/manière<n><f><sg>$ ^ober<vblex><inf>/faire<vblex><inf>$ ^.<sent>/.<sent>$
 #
-#        b) Disambiguated biltrans output  
+#        b) Disambiguated biltrans output
 #.[][56011 0].[] ^un<det><ind><sp>/un<det><ind><GD><ND>$ ^digarez<n><m><sg>/excuse<n><f><sg>$ ^da<pr>/à<pr>$ ^distreiñ<vblex><inf>/revenir<vblex><inf>$ ^war<pr>/sur<pr>$ ^e<det><pos><m><sp>/son<det><pos><GD><ND>$ ^doare<n><m><sg>/manière<n><f><sg>$ ^ober<vblex><inf>/faire<vblex><inf>$ ^.<sent>/.<sent>$^.<sent>/.<sent>$ 0.9917274061    |@|
 #.[][56011 1].[] ^un<det><ind><sp>/un<det><ind><GD><ND>$ ^digarez<n><m><sg>/occasion<n><f><sg>$ ^da<pr>/à<pr>$ ^distreiñ<vblex><inf>/revenir<vblex><inf>$ ^war<pr>/sur<pr>$ ^e<det><pos><m><sp>/son<det><pos><GD><ND>$ ^doare<n><m><sg>/manière<n><f><sg>$ ^ober<vblex><inf>/faire<vblex><inf>$ ^.<sent>/.<sent>$^.<sent>/.<sent>$       0.0082725939    ||
 #
@@ -51,7 +51,7 @@ while reading: #{
 				frac_count = 0;
 		except:
 			break;
-	
+
 		am_row = common.tokenize_biltrans_line(am_line);
 		dm_row = common.tokenize_biltrans_line(dm_line);
 
@@ -71,7 +71,7 @@ while reading: #{
 		limit = len(am_row);
 		for i in range(0, limit): #{
 			if len(am_row[i]['tls']) > 1: #{
-			
+
 				sl = am_row[i]['sl']
 				tl = dm_row[i]['tls'][0]
 
@@ -82,14 +82,14 @@ while reading: #{
 					sl_tl[sl][tl] = 0.0;
 				#}
 				sl_tl[sl][tl] = sl_tl[sl][tl] + frac_count;
-		
+
 			#}
 		#}
 		dm_line = dm_file.readline();
 		if dm_line == '': break;
 		current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
 
-	#}	
+	#}
 #}
 
 

@@ -15,7 +15,7 @@ apertium-lex-freq.py:
 The input is the output of lt-proc -b and the model produced
 by the training script.
 
-$ python apertium-lex-freq.py -d MODEL 
+$ python apertium-lex-freq.py -d MODEL
 
 Example model:
 
@@ -26,24 +26,24 @@ Example model:
 
 Example input:
 
-^Després de<pr>/After<pr>$ ^aquest<det><dem><m><sg>/this<det><dem><m><sg>$ 
-^temps<n><m><sp>/time<n><ND>/weather<n><ND>$^,<cm>/,<cm>$ 
-^el<det><def><m><sg>/the<det><def><m><sg>$ ^individu<n><m><sg>/individual<n><sg>$ 
-^poder<vbmod><pri><p3><sg>/can<vaux><pri><p3><sg>$ 
-^tornar<vblex><inf>/go# back<vblex><inf>/give# back<vblex><sep><inf>$ 
-^a<pr>/at<pr>$ 
-^fer<vblex><inf>/do<vblex><inf>$ ^un<det><ind><f><sg>/a<det><ind><sg>$ 
+^Després de<pr>/After<pr>$ ^aquest<det><dem><m><sg>/this<det><dem><m><sg>$
+^temps<n><m><sp>/time<n><ND>/weather<n><ND>$^,<cm>/,<cm>$
+^el<det><def><m><sg>/the<det><def><m><sg>$ ^individu<n><m><sg>/individual<n><sg>$
+^poder<vbmod><pri><p3><sg>/can<vaux><pri><p3><sg>$
+^tornar<vblex><inf>/go# back<vblex><inf>/give# back<vblex><sep><inf>$
+^a<pr>/at<pr>$
+^fer<vblex><inf>/do<vblex><inf>$ ^un<det><ind><f><sg>/a<det><ind><sg>$
 ^vida<n><f><sg>/life<n><sg>$ ^normal<adj><mf><sg>/normal<adj><sg>$
 ^.<sent>/.<sent>$
 
 Example output (with -d):
 
-^Després de<pr>/After<pr>$ ^aquest<det><dem><m><sg>/this<det><dem><m><sg>$ 
-^temps<n><m><sp>/weather<n><ND>/=time<n><ND>$^,<cm>/,<cm>$ 
+^Després de<pr>/After<pr>$ ^aquest<det><dem><m><sg>/this<det><dem><m><sg>$
+^temps<n><m><sp>/weather<n><ND>/=time<n><ND>$^,<cm>/,<cm>$
 ^el<det><def><m><sg>/the<det><def><m><sg>$ ^individu<n><m><sg>/individual<n><sg>$
-^poder<vbmod><pri><p3><sg>/can<vaux><pri><p3><sg>$ 
-^tornar<vblex><inf>/go# back<vblex><inf>/=give# back<vblex><sep><inf>$ 
-^a<pr>/at<pr>$ 
+^poder<vbmod><pri><p3><sg>/can<vaux><pri><p3><sg>$
+^tornar<vblex><inf>/go# back<vblex><inf>/=give# back<vblex><sep><inf>$
+^a<pr>/at<pr>$
 ^fer<vblex><inf>/do<vblex><inf>$ ^un<det><ind><f><sg>/a<det><ind><sg>$
 ^vida<n><f><sg>/life<n><sg>$ ^normal<adj><mf><sg>/normal<adj><sg>$
 ^.<sent>/.<sent>$

@@ -24,7 +24,7 @@ if len(sys.argv) < 2: #{
 #}
 
 infile = open(sys.argv[1]);
-	
+
 
 permitted_tags = ['n', 'vblex', 'adj'];
 
@@ -76,7 +76,7 @@ for line in infile: #{
 		continue;
 	#}
 
-	
+
 
 	inpattern = False;
 	for w in pattern: #{
@@ -113,7 +113,7 @@ for line in infile: #{
 #		commentb = '<!--';
 #		commente = '-->';
 #	#}
-	
+
 	print(commentb + '  <rule c="' + str(ruleno) + ' ' + str(lineno) + ': ' + str(freq) + '" weight="' + weight + '">');
 	for word in pattern: #{
 		sl_lema = word.split('<')[0].lower();
@@ -144,7 +144,7 @@ for line in infile: #{
 			sel = True;
 		else: #{
 			lineno = lineno + 1;
-			if sl_lema == '': #{	
+			if sl_lema == '': #{
 				print('    <match tags="' + sl_tags + '"/>');
 			else: #{
 				print('    <match lemma="' + sl_lema + '" tags="' + sl_tags + '"/>');
@@ -157,7 +157,7 @@ for line in infile: #{
 			sl_tags = '<'.join(sl.split('<')[1:]).replace('><', '.').replace('>', '');
 		else: #{
 			sl_tags = '<'.join(sl.split('<')[1:]).strip('<>');
-		#} 
+		#}
 		if sl_lema == '': #{
 			print('    <match tags="' + sl_tags + '"><select lemma="' + tl_lema + '" tags="' + tl_tags + '"/></match>');
 		else: #{

@@ -1254,8 +1254,8 @@ def in_table(tags, table):
 	print >>sys.stderr, tags
 	return tags
 	# raise Exception("Unknown tagging!");
-			
-	
+
+
 
 
 table = {};
@@ -1304,7 +1304,7 @@ def processWord(c): #{
 		tags = tags + c;
 		c = sys.stdin.read(1);
 	#}
-	
+
 	sys.stdout.write(lemma.replace(' ', '~') + in_table(tags, table) + ' ');
 #}
 

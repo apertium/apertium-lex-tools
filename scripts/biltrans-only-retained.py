@@ -22,7 +22,7 @@ while buf != '': #{
 	else: #{
 		print('Something weird happened.', file=sys.stderr);
 	#}
-	
+
 	lineno = lineno + 1;
 	buf = inf.readline();
 #}

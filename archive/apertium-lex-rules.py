@@ -64,14 +64,14 @@ def loadRulesFromFile(f): #{
 		tags = '';
 		for c in pattern.decode('utf-8'): #{
 			if c == '(': #{
-				in_context = True;	
+				in_context = True;
 				in_lemma = False;
 				in_pattern = False;
 				continue;
 			#}
 			if c == ')': #{
 				lemma = lemma.replace('*', '[\w ]+');
-				repatro = lemma + '<' + tags.strip().replace(' ', '><') 
+				repatro = lemma + '<' + tags.strip().replace(' ', '><')
 				if repatro.count('><') > 0: repatro = repatro + '>' + '.*';
 				#print sl_centre , '>>>' , tl_patro , '>>> ' , pos , repatro;
 				sl_patro[int(pos)] = re.compile(repatro);
@@ -85,7 +85,7 @@ def loadRulesFromFile(f): #{
 					in_pattern = True;
 					continue;
 				else: #{
-					pos = pos + c;	
+					pos = pos + c;
 					continue;
 				#}
 			#}
@@ -121,7 +121,7 @@ def loadRulesFromFile(f): #{
 
 def procLexicalUnit(c): #{
 	global debug;
-	escaped = False; 	
+	escaped = False;
 	sl = '';
 	tl = [];
 
@@ -134,13 +134,13 @@ def procLexicalUnit(c): #{
 	buf = '';
 	c = sys.stdin.read(1);
 	while c != '$': #{
-		if c == '\\': 
-			escaped = True; 
+		if c == '\\':
+			escaped = True;
 			buf = buf + c;
 			c = sys.stdin.read(1);
 			continue;
 
-		if c == '/' and not escaped and buf: 
+		if c == '/' and not escaped and buf:
 			tl.append(buf);
 			buf = '';
 			c = sys.stdin.read(1);
@@ -155,7 +155,7 @@ def procLexicalUnit(c): #{
 	return (sl, tl);
 #}
 
-# (u'prova<n><f><sg>', [u'proof<n><sg>', u'event<n><sg>', u'exam<n><sg>', u'trial<n><sg>', u'test<n><sg>', u'exhibit<n><sg>', u'testing<n><sg>', u'evidence<n><sg>', u'piece# of evidence<n><sg>']) prova<n> 
+# (u'prova<n><f><sg>', [u'proof<n><sg>', u'event<n><sg>', u'exam<n><sg>', u'trial<n><sg>', u'test<n><sg>', u'exhibit<n><sg>', u'testing<n><sg>', u'evidence<n><sg>', u'piece# of evidence<n><sg>']) prova<n>
 #('rule:', 'prova<n>', ('s', 'event<n>'), {-3: '"guanyador"', -2: '"de")'})
 
 
@@ -171,7 +171,7 @@ def procBlock(sentence): #{
 		for centre in rule_table: #{
 			# Check to see if we find the centre in the current LU on the SL side
 			if pair[0].find(centre) == 0: #{
-				
+
 				# sort rules by length;
 				rules = sorted(rule_table[centre], key=lambda rule: rule.patro_size);
 				rules.reverse();
@@ -195,7 +195,7 @@ def procBlock(sentence): #{
 						#}
 					#}
 					#print >> sys.stderr ,  matched , i , rule.sl_patro;
-					
+
 					# Now we apply the action!
 					if matched: #{
 						newx = [];
@@ -204,7 +204,7 @@ def procBlock(sentence): #{
 								sys.stderr.write('SELECT:' + str(rule.lineno) + ' ' + str(rule.tl_patro) + '\n');
 							#}
 							for tl in sentence[i][1]: #{
-								for tlf in rule.tl_patro: #{	
+								for tlf in rule.tl_patro: #{
 									if tl.find(tlf) == 0: #{
 										if tl not in newx: #{
 											newx.append(tl);
@@ -212,13 +212,13 @@ def procBlock(sentence): #{
 									#}
 								#}
 							#}
-				
+
 						elif rule.tipus == 'r': #{
 							if trace: #{
 								sys.stderr.write('REMOVE:' + str(rule.lineno) + ' ' + str(rule.tl_patro) + '\n');
 							#}
 							for tl in sentence[i][1]: #{
-								for tlf in rule.tl_patro: #{	
+								for tlf in rule.tl_patro: #{
 									if tl.find(tlf) != 0: #{
 										if tl not in newx: #{
 											newx.append(tl);
@@ -292,7 +292,7 @@ while c: #{
 		sent = [];
 		sys.stdout.write(c);
 	#}
-	if c == '\\': 
+	if c == '\\':
 		escaped = True;
 		sys.stdout.write(c);
 		c = sys.stdin.read(1);
@@ -309,7 +309,7 @@ while c: #{
 #	else: #{
 #		sys.stdout.write(c);
 	#}
-		
+
 	c = sys.stdin.read(1);
 	escaped = False;
 #}

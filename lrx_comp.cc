@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011--2012 Universitat d'Alacant 
+ * Copyright (C) 2011--2012 Universitat d'Alacant
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -35,7 +35,7 @@ int main (int argc, char **argv)
 {
   LRXCompiler compiler;
 
-  if(argc != 3 && argc != 4)  
+  if(argc != 3 && argc != 4)
   {
     endProgram(argv[0]);
   }
@@ -45,7 +45,7 @@ int main (int argc, char **argv)
     compiler.parse(argv[1]);
     FILE *output = fopen(argv[2], "wb");
     compiler.write(output);
-  } 
+  }
   else if(argc == 4)
   {
     if(strcmp(argv[1], "-p") == 0 || strcmp(argv[1], "--print-transducer") == 0)

@@ -84,7 +84,7 @@ if __name__ == "__main__":
 					if roundgram not in ngrams[sl]: #{
 						ngrams[sl][roundgram] = {};
 					#}
-			
+
 					if tl not in ngrams[sl][pregram]: #{
 						ngrams[sl][pregram][tl] = 0;
 					#}
@@ -107,7 +107,7 @@ if __name__ == "__main__":
 	for sl in ngrams: #{
 		for ngram in ngrams[sl]: #{
 			for tl in ngrams[sl][ngram]: #{
-				print('%.10f\t%s\t%s\t%s' % (ngrams[sl][ngram][tl], ngram, sl, tl));		
+				print('%.10f\t%s\t%s\t%s' % (ngrams[sl][ngram][tl], ngram, sl, tl));
 			#}
 		#}
 	#}

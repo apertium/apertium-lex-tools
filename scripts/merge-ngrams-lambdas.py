@@ -4,9 +4,9 @@
 
 import sys, codecs, random;
 
-# ngram file 
+# ngram file
 # lambda file
-# lexicon file 
+# lexicon file
 
 ngf = sys.argv[1];
 ldf = sys.argv[2];

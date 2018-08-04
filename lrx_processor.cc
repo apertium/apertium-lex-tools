@@ -117,13 +117,13 @@ LRXProcessor::load(FILE *in)
 
   while(!feof(in))
   {
-    weight record; 
+    weight record;
     fread(&record, sizeof(weight), 1, in);
 
     wstring sid = L"<" + itow(record.id) + L">";
     weights[sid] = record.pisu;
 
-    if(debugMode) 
+    if(debugMode)
     {
       //fwprintf(stderr, L"%S %d weight(%.4f)\n", sid.c_str(), record.id, record.pisu);
     }
@@ -170,15 +170,15 @@ LRXProcessor::readFullBlock(FILE *input, wchar_t const delim1, wchar_t const del
   return result;
 }
 
-bool 
+bool
 LRXProcessor::recognisePattern(const wstring lu, const wstring op)
 {
   if(debugMode)
   {
     fwprintf(stderr, L"================================================\n");
   }
-  
-  if(recognisers.count(op) < 1) 
+
+  if(recognisers.count(op) < 1)
   {
     fwprintf(stderr, L"WARNING: Recogniser size 0 for key %S, skipping...\n", op.c_str());
     return false;
@@ -202,7 +202,7 @@ LRXProcessor::recognisePattern(const wstring lu, const wstring op)
       fwprintf(stderr, L"alive: %d\n", cur.size());
     }
 */
-    if(cur.size() < 1)  // I think that any time we have 0 alive states, 
+    if(cur.size() < 1)  // I think that any time we have 0 alive states,
                         // we can say that the string is unrecognised
     {
       return false;
@@ -499,7 +499,7 @@ LRXProcessor::process(FILE *input, FILE *output)
   {
     int val = fgetwc_unlocked(input);
 
-    if(nullFlush && val == L'\0') 
+    if(nullFlush && val == L'\0')
     {
       processFlush(output, sl, tl, blanks, covers, empty_seq, spans, last_final);
       fwprintf(output, L"%S", blanks[pos].c_str());
@@ -525,7 +525,7 @@ LRXProcessor::process(FILE *input, FILE *output)
     // We've seen the surface form
     if(val == L'/' && !isEscaped && !outOfWord)
     {
-      // Read in target equivalences 
+      // Read in target equivalences
       wstring trad = L"";
       val = fgetwc_unlocked(input);
       while(val != L'$')
@@ -560,7 +560,7 @@ LRXProcessor::process(FILE *input, FILE *output)
         fwprintf(stderr, L"[POS] %d: [sl %d ; tl %d ; bl %d]\n", pos, sl[pos].size(), tl[pos].size(), blanks[pos].size());
       }
 
-      new_states.clear(); // alive_states_new 
+      new_states.clear(); // alive_states_new
       pair<double, vector<State> > new_best_cover;
       new_best_cover.first = -numeric_limits<int>::max();
 
@@ -574,7 +574,7 @@ LRXProcessor::process(FILE *input, FILE *output)
         s.step(alphabet(L"<$>"));
 
         // A \gets A \cup {c}
-        if(s.size() > 0) // If the current state has outgoing transitions, 
+        if(s.size() > 0) // If the current state has outgoing transitions,
                          // add it to the new alive states
         {
           new_states.push_back(s);
@@ -590,7 +590,7 @@ LRXProcessor::process(FILE *input, FILE *output)
             wstring out = s.filterFinals(anfinals, alphabet, escaped_chars);
             fwprintf(stderr, L"    filter_finals: %S\n", out.c_str());
           }
- 
+
           set<pair<wstring, vector<wstring> > > outpaths;
           outpaths = s.filterFinalsLRX(anfinals, alphabet, escaped_chars, false, false, 0);
 
@@ -633,7 +633,7 @@ LRXProcessor::process(FILE *input, FILE *output)
                   if(debugMode)
                   {
                     fwprintf(stderr, L"= [cov: %d][len: %d][pos: %d][pat: %d] INCLUDE FINALS?\n", k->first, p.first, pos, path.size());
-                  } 
+                  }
                   if(k->first <= (pos - path.size()))
                   {
                     if(debugMode)
@@ -658,7 +658,7 @@ LRXProcessor::process(FILE *input, FILE *output)
           }
         }
       }
- 
+
       alive_states.swap(new_states);
       alive_states.push_back(*initial_state);
 
@@ -669,7 +669,7 @@ LRXProcessor::process(FILE *input, FILE *output)
 
       if(alive_states.size() == 1)
       {
-        // If we have only a single alive state, it means no rules are 
+        // If we have only a single alive state, it means no rules are
         // active, and we can flush the buffers.
         processFlush(output, sl, tl, blanks, covers, empty_seq, spans, last_final);
 
@@ -725,7 +725,7 @@ LRXProcessor::process(FILE *input, FILE *output)
         if(val < 0)
         {
           alphabet.getSymbol(res, val,  false);
-          if(debugMode) 
+          if(debugMode)
           {
             fwprintf(stderr, L"  step: %S\n", res.c_str());
           }
@@ -804,7 +804,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
   {
     int val = fgetwc_unlocked(input);
 
-    if(nullFlush && val == L'\0') 
+    if(nullFlush && val == L'\0')
     {
       processFlushME(output, sl, tl, blanks, scores);
       pos = 0;
@@ -827,7 +827,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
     // We've seen the surface form
     if(val == L'/' && !isEscaped && !outOfWord)
     {
-      // Read in target equivalences 
+      // Read in target equivalences
       wstring trad = L"";
       val = fgetwc_unlocked(input);
       while(val != L'$')
@@ -860,7 +860,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
       {
         fwprintf(stderr, L"[POS] %d: [sl %d ; tl %d ; bl %d]: %S\n", pos, sl[pos].size(), tl[pos].size(), blanks[pos].size(), sl[pos].c_str());
       }
-      new_states.clear(); // alive_states_new 
+      new_states.clear(); // alive_states_new
 
       // \forall s \in A
       set<wstring> seen_ids;
@@ -871,7 +871,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
         s.step(alphabet(L"<$>"));
 
         // A \gets A \cup {c}
-        if(s.size() > 0) // If the current state has outgoing transitions, 
+        if(s.size() > 0) // If the current state has outgoing transitions,
                          // add it to the new alive states
         {
           new_states.push_back(s);
@@ -898,8 +898,8 @@ LRXProcessor::processME(FILE *input, FILE *output)
 
             vector<wstring> path = (*it).second;
             wstring id = (*it).first;
- 
-            if(seen_ids.find(id) != seen_ids.end()) 
+
+            if(seen_ids.find(id) != seen_ids.end())
             {
               continue;
             }
@@ -907,13 +907,13 @@ LRXProcessor::processME(FILE *input, FILE *output)
 
             int j = pos - (path.size() - 1);
 
-            if(debugMode) 
+            if(debugMode)
             {
               fwprintf(stderr, L"id:      %S: (lambda: %.5f)\n", id.c_str(), weights[id.c_str()]);
             }
             for(vector<wstring>::iterator it2 = path.begin(); it2 != path.end(); it2++)
             {
-              if(debugMode) 
+              if(debugMode)
               {
                 fwprintf(stderr, L"op:        %S\n", it2->c_str());
               }
@@ -924,7 +924,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
                   scores[j][*it2] = 0.0;
                 }
                 scores[j][*it2] += weights[id.c_str()];
-                if(debugMode) 
+                if(debugMode)
                 {
                   fwprintf(stderr, L"#[%d]SCORE %.5f / %S\n", j, scores[j][*it2], it2->c_str());
                 }
@@ -941,7 +941,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
       if(debugMode)
       {
         fwprintf(stderr, L"seen:");
-        for(set<wstring>::iterator it = seen_ids.begin(); it != seen_ids.end(); it++) 
+        for(set<wstring>::iterator it = seen_ids.begin(); it != seen_ids.end(); it++)
         {
           fwprintf(stderr, L" %S ", it->c_str());
         }
@@ -952,7 +952,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
 
       if(alive_states.size() == 1)
       {
-        // If we have only a single alive state, it means no rules are 
+        // If we have only a single alive state, it means no rules are
         // active, and we can flush the buffers.
 
         if(debugMode)
@@ -985,16 +985,16 @@ LRXProcessor::processME(FILE *input, FILE *output)
             {
 
                 map<wstring, double>::iterator si;
-                for(si = scores[spos].begin(); si != scores[spos].end(); si++) 
+                for(si = scores[spos].begin(); si != scores[spos].end(); si++)
                 {
-                  if(debugMode) 
+                  if(debugMode)
                   {
                     fwprintf(stderr, L">>> %d -> %S -> %.5f\n", spos, si->first.c_str(), si->second);
                   }
                   bool matched = false;
                   matched = recognisePattern(*ti, si->first);
-                  if(si->second > l_max && matched) 
-                  { 
+                  if(si->second > l_max && matched)
+                  {
                     l_max = si->second;
                     ti_max = *ti;
                   }
@@ -1093,7 +1093,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
         if(val < 0)
         {
           alphabet.getSymbol(res, val,  false);
-          if(debugMode) 
+          if(debugMode)
           {
             fwprintf(stderr, L"  step: %S\n", res.c_str());
           }
