@@ -54,7 +54,7 @@ vector<wstring> parseTags(wstring token) {
 			} else {
 				buffer += c;
 			}
-		} 
+		}
 	}
 	return tags;
 }
@@ -98,7 +98,7 @@ void processTaggerOutput(FSTProcessor *bilingual) {
 	wchar_t c;
 	bilingual->setBiltransSurfaceForms(true);
 	while((wcin.get(c)) != NULL) {
-		
+
 		if (state == 0) {
 			if (c == '^' && !escaped) {
 				state = 1; // inside
@@ -160,7 +160,7 @@ void processTaggerOutput(FSTProcessor *bilingual) {
 
 int main(int argc, char **argv)
 {
-	if(argc != 3) { 
+	if(argc != 3) {
 		wcout << L"Usage: " << argv[0] << "<language pair resources> <direction>"<< endl;
 		exit(-1);
 	}

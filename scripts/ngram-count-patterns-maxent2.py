@@ -34,7 +34,7 @@ if len(sys.argv) == 4:
 MAX_NGRAMS = 3;
 cur_line = 0;
 
-sl_tl_defaults = {}; 
+sl_tl_defaults = {};
 sl_tl = {};
 ngrams = {};
 
@@ -46,7 +46,7 @@ features = {}; # features[(slword, ['a', 'list'], tlword)] = 3
 feature_counter = 0;
 
 indexes = {};
-trad_counter = {}; 
+trad_counter = {};
 
 def wrap (x):
 	return '^' + x + '$'
@@ -64,7 +64,7 @@ for line in file(sys.argv[1]).readlines(): #{
 	tl = wrap(row[1].strip()).lower();
 	if tl[1] == '*':
 		tl = tl[:-3] + '$'
-	
+
 	if sl not in sl_tl: #{
 		sl_tl[sl] = [];
 	#}
@@ -76,7 +76,7 @@ for line in file(sys.argv[1]).readlines(): #{
 	sl_tl[sl].append(tl);
 	indexes[(sl, tl)] = trad_counter[sl];
 	trad_counter[sl] = trad_counter[sl] + 1;
-	
+
 	#}
 #}
 
@@ -87,9 +87,9 @@ cur_al_row = [];
 
 
 for line in file(sys.argv[2]).readlines(): #{
-	line = line.strip().decode('utf-8');	
+	line = line.strip().decode('utf-8');
 	if line[0] == '-': #{
-#		print len(cur_sl_row), len(cur_tl_row), len(cur_bt_row), len(cur_al_row);	
+#		print len(cur_sl_row), len(cur_tl_row), len(cur_bt_row), len(cur_al_row);
 #		print cur_sl_row;
 #		print cur_bt_row;
 #		print cur_tl_row;
@@ -113,7 +113,7 @@ for line in file(sys.argv[2]).readlines(): #{
 
 					if tlword[1] == '*' or slword[1] == '*':
 						continue;
-					
+
 					if slword not in sl_tl_defaults: #{
 #						print >>sys.stderr, 'WARNING: "' + slword + '" not in sl_tl_defaults, skipping';
 						continue;
@@ -185,7 +185,7 @@ for line in file(sys.argv[2]).readlines(): #{
 						meevents[slword][event_counter].append(features[ni]);
 						#meevents[slword][event_counter].append(feat);
 						meoutcomes[slword][event_counter] = tlword;
-						
+
 					#}
 					del ngrams;
 					ngrams = {};
@@ -218,17 +218,17 @@ for line in file(sys.argv[2]).readlines(): #{
 #					print cur_sl_row[i:i+j];
 #				#}
 				#print ngrams[slword];
-			#}	
+			#}
 			i = i + 1;
 
 		#}
 
 		cur_line = 0;
 		event_counter = event_counter + 1;
-		#print line;	
+		#print line;
 		continue;
-	#}	
-	
+	#}
+
 	line = line.split('\t')[1];
 
 	if cur_line == 0: #{

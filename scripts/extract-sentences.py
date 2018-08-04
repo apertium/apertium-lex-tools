@@ -15,7 +15,7 @@ biltrans_out = open(sys.argv[2]);
 
 def ambiguous(bt): #{
 	# legislation<n><sg>/legislación<n><f><sg>/ordenamiento<n><m><sg>
-	
+
 	ambig = False;
 	for token in bt: #{
 		tls = token['tls']
@@ -34,10 +34,10 @@ total_errors = 0;
 
 not_ambiguous = [];
 
-while reading: #{	
+while reading: #{
 	try:
 		lineno = lineno + 1;
-		pt_line = phrase_table.readline().strip();	
+		pt_line = phrase_table.readline().strip();
 		bt_line = biltrans_out.readline().strip();
 
 		if not bt_line.strip() and not pt_line.strip(): #{
@@ -51,7 +51,7 @@ while reading: #{
 		bt = common.tokenise_biltrans_line(bt_line.strip());
 		sl = common.tokenise_tagger_line(row[1].strip());
 		tl = common.tokenise_tagger_line(row[0].strip());
-		
+
 		if not ambiguous(bt): #{
 			not_ambiguous.append(str(lineno));
 			if len(not_ambiguous) >= 10: #{
@@ -72,9 +72,9 @@ while reading: #{
 		#}
 
 
-		# Resumption<n> of<pr> the<def><def> session<n> 
-		# Resumption<n><sg>/Reanudación<n><f><sg> of<pr>/de<pr> the<det><def><sp>/el<det><def><GD><ND> session<n><sg>/sesión<n><f><sg> 
-		# Reanudación<n> de<pr> el<det><def> periodo<n> de<pr> sesión<n> 
+		# Resumption<n> of<pr> the<def><def> session<n>
+		# Resumption<n><sg>/Reanudación<n><f><sg> of<pr>/de<pr> the<det><def><sp>/el<det><def><GD><ND> session<n><sg>/sesión<n><f><sg>
+		# Reanudación<n> de<pr> el<det><def> periodo<n> de<pr> sesión<n>
 		# 0-0 1-1 2-2 5-3
 
 

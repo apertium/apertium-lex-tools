@@ -6,11 +6,11 @@
 # which selects the 'default' translations for each word.
 #
 # It supports two kinds of ambiguous bilingual dictionaries, the kind with 'slr' entries
-# for example mk-en, br-fr. And the kind without 'slr' entries, such as eu-es. 
+# for example mk-en, br-fr. And the kind without 'slr' entries, such as eu-es.
 #
 # In the case of the 'noslr' type, it reads the whole dictionary, keeping all the left
 # sides in a hash, with their corresponding right sides in a list, marked with the
-# direction restriction. It then iterates through the list, generating a rule when 
+# direction restriction. It then iterates through the list, generating a rule when
 # there is a left side with >1 translation possibility, where all the other translation
 # possibilities are marked with a direction restriction.
 #
@@ -27,12 +27,12 @@ import sys;
 
 def sideToTagList(s): #{
 	tags = '<'.join(s.split('<')[1:]);
-	
+
 	tags = tags.replace('"/><s n="', '.');
 	tags = tags.replace('<s n="', '');
 	tags = tags.replace('s n="', '');
 	tags = tags.replace('"/>', '');
-	tags = tags + '.*';		
+	tags = tags + '.*';
 	return tags;
 #}
 
@@ -90,15 +90,15 @@ if tipus == 'noslr': #{
 				if sentit == 'lr': #{
 					if tl[0] == '' or tl[0] == 'LR': #{
 						default = tl;
-						num_def = num_def + 1 ;	
-					#}	
+						num_def = num_def + 1 ;
+					#}
 				elif sentit == 'rl': #{
 					if tl[0] == '' or tl[0] == 'RL': #{
 						default = tl;
-						num_def = num_def + 1 ;	
-					#}	
+						num_def = num_def + 1 ;
+					#}
 				#}
-			#}	
+			#}
 			if num_def == 1: #{
 				rule = '';
 				sl_lem = key;
@@ -115,12 +115,12 @@ if tipus == 'noslr': #{
 				tl_lem = tl_lem.replace('-', '\\-');
 				tl_tag = sideToTagList(tl_lem);
 				tl_lem = tl_lem.split('<')[0];
-				rule = '  <rule>'; 
+				rule = '  <rule>';
 				rule = rule + '<match lemma="' + sl_lem + '" tags="' + sl_tag + '"><select lemma="' + tl_lem + '" tags="' + tl_tag + '"/></match>';
 				rule = rule + '</rule>';
 				print(rule);
 
-				#print(key, default[1]);	
+				#print(key, default[1]);
 			elif num_def < 1: #{
 				print('WARNING: No default translations of ' + key + '.', file=sys.stderr);
 				print('\t', sl_tl[key], file=sys.stderr);
@@ -129,17 +129,17 @@ if tipus == 'noslr': #{
 				print('\t', sl_tl[key], file=sys.stderr);
 			#}
 		#}
-	#}	
+	#}
 
 else:
 	for line in d.readlines(): #{
 		line = line.strip();
-	
+
 		if line.count('c="') > 0 and line.count('0"') > 0 and poss_ambig == 1: #{
-			poss_ambig = 0;	
+			poss_ambig = 0;
 		#}
 		if line.count('c="') > 0 and line.count('0"') > 0 and poss_ambig == 0: #{
-			poss_ambig = 1;	
+			poss_ambig = 1;
 			if sentit == 'lr': #{
 				sl = line.split('<l>')[1].split('</l>')[0];
 				default = line.split('<r>')[1].split('</r>')[0];
@@ -148,14 +148,14 @@ else:
 				default = line.split('<l>')[1].split('</l>')[0];
 			#}
 		#}
-		
+
 		if line.count('slr="') > 0 and line.count('1"') > 0 and poss_ambig == 1: #{
 			if sentit == 'lr': #{
 				nsl = line.split('<l>')[1].split('</l>')[0];
 			elif sentit == 'rl': #{
 				nsl = line.split('<r>')[1].split('</r>')[0];
 			#}
-	
+
 			if nsl == sl: #{
 				#print(sl , default);
 				sl_lem = sl;
@@ -172,13 +172,13 @@ else:
 				tl_lem = tl_lem.replace('-', '\\-');
 				tl_tag = sideToTagList(tl_lem);
 				tl_lem = tl_lem.split('<')[0];
-				rule = '  <rule>'; 
+				rule = '  <rule>';
 				rule = rule + '<match lemma="' + sl_lem + '" tags="' + sl_tag + '"><select lemma="' + tl_lem + '" tags="' + tl_tag + '"/></match>';
 				rule = rule + '</rule>';
 				print(rule);
 			#}
 		#}
 	#}
-#}	
+#}
 
 print('</rules>');

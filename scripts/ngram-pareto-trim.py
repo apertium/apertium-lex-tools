@@ -16,7 +16,7 @@ def compose_single_translation(ngrams, sl, pareto):
 				s += ngrams[sl][ngram][tl]
 
 	return '+ ' + str(s) + '\t' + sl + '\t' + '-' + '\t' + list(pareto)[0] + '\t1'
-	
+
 
 def dominates(xs, ys):
 	n = len(xs)
@@ -27,10 +27,10 @@ def dominates(xs, ys):
 			snd = False;
 		if ys[i] > xs[i]:
 			fst = False;
-	
+
 	fst = int(fst)
 	snd = int(snd)
-	
+
 	if fst > snd:
 		return 1;
 	elif snd > fst:
@@ -55,7 +55,7 @@ def calculate_pareto_frontier(sl, ngrams, translations):
 			pareto.add(x[0])
 
 	return pareto
-	
+
 
 for line in sys.stdin:
 	line = line.rstrip();
@@ -63,7 +63,7 @@ for line in sys.stdin:
 
 	weight = float(row[0].split()[1]);
 	(sl, ngram, tl) = (row[1], row[2], row[3])
-	
+
 	if sl not in translations:
 		translations[sl] = set()
 	translations[sl].add(tl)
@@ -81,15 +81,15 @@ for sl in ngrams:
 		print(sl, 'has a single translation:', list(pareto)[0], file=sys.stderr)
 		print(compose_single_translation(ngrams, sl, pareto));
 		continue;
-		
+
 	for ngram in ngrams[sl]:
 		for tl in ngrams[sl][ngram]:
 			if tl in pareto:
 				print (make_line(ngrams, sl, ngram, tl));
-	
-		
-	
 
-	
 
-	
+
+
+
+
+

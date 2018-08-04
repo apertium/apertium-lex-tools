@@ -53,9 +53,9 @@
 
 <rule>
 		<or>
-			<match lemma="billig" tags="adj.*"/> 
-			<match lemma="and" tags="n.*"/> 
-			<match lemma="kylling" tags="n.m.*"/> 
+			<match lemma="billig" tags="adj.*"/>
+			<match lemma="and" tags="n.*"/>
+			<match lemma="kylling" tags="n.m.*"/>
 		</or>
 		<match lemma="kjøtt" tags="n.*">
 			<select lemma="meat" tags="n.*"/>
@@ -66,19 +66,19 @@
 
 <rule>
 		<or>
-			<match lemma="samme" tags="det.*"/> 
-			<match lemma="morgen" tags="adj.*"/> 
-			<match lemma="ettermiddag" tags="adj.*"/> 
+			<match lemma="samme" tags="det.*"/>
+			<match lemma="morgen" tags="adj.*"/>
+			<match lemma="ettermiddag" tags="adj.*"/>
 		</or>
 		<match lemma="klasse" tags="n.*">
 			<select lemma="class" tags="n.*"/>
 		</match>
 </rule>
 
-<!-- Han har sterk kontroll over tidsplanen. He has strong control over the schedule. -->  
+<!-- Han har sterk kontroll over tidsplanen. He has strong control over the schedule. -->
 
 <rule>
-		<or>		
+		<or>
 			<match lemma="sterk" tags="adj.*"/>
 			<match lemma="ubegrenset" tags="adj.*"/>
 		</or>
@@ -103,20 +103,20 @@
 
 <rule>
 		<or>
-			<match lemma="konfliktfylte" tags="*"/> 
-			<match lemma="farlig" tags="adj.*"/> 
+			<match lemma="konfliktfylte" tags="*"/>
+			<match lemma="farlig" tags="adj.*"/>
 		</or>
 		<match lemma="land" tags="n.*">
 			<select lemma="country" tags="n.*"/>
 		</match>
 </rule>
 
-<!-- Nordmenn sutrer over for lav lønn. Norwegians whine over low pay. -->   
+<!-- Nordmenn sutrer over for lav lønn. Norwegians whine over low pay. -->
 
 <rule>
   <or>
-    <match lemma="lav" tags="adj.*"/> 
-   <match lemma="dårlig" tags="adj.*"/> 
+    <match lemma="lav" tags="adj.*"/>
+   <match lemma="dårlig" tags="adj.*"/>
    </or>
    <match lemma="lønn" tags="n.f.*">
     <select lemma="pay" tags="n.*"/>

@@ -46,11 +46,11 @@ def pos_equal(s, t):
 	tpos = s.split('>')[1][1:]
 
 	return spos == tpos;
-	
+
 
 def ambiguous(bt): #{
 	# legislation<n><sg>/legislación<n><f><sg>/ordenamiento<n><m><sg>
-	
+
 	ambig = False;
 	for token in bt: #{
 		tls = token['tls']
@@ -66,10 +66,10 @@ reading = True;
 lineno = 0;
 total_valid = 0;
 
-while reading: #{	
+while reading: #{
 	try:
 		lineno = lineno + 1;
-		pt_line = phrase_table.readline().strip();	
+		pt_line = phrase_table.readline().strip();
 		bt_line = biltrans_out.readline().strip();
 
 		if bt_line == '' and pt_line == '': #{
@@ -93,7 +93,7 @@ while reading: #{
 		# dictionary, and the word they have been aligned with in the target.
 			# e.g.  words[0] = ('sl', ['bt1', 'bt2', ...], 'tl')
 
-		translations = {};	
+		translations = {};
 		i = 0;
 		for j in alignments.split(' '): #{
 			ament = j.split('-');
@@ -123,12 +123,12 @@ while reading: #{
 				if match_pos and not pos_equal(tran, tlw):
 					continue;
 
-				# Check to see if the TL possibilities are found in the lexical 
+				# Check to see if the TL possibilities are found in the lexical
 				# transfer output.
 				if tlw not in r['bts']['tls']:
 					print (tlw, "not found for", tran, file=sys.stderr);
 					generate_entry(tran, tlw);
-			
+
 		#}
 
 	#}

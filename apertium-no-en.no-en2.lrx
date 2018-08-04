@@ -28,8 +28,8 @@
 
 <rule>
 		<or>
-			<match lemma="stor" tags="adj.*"/> 
-			<match lemma="liten" tags="adj.*"/> 
+			<match lemma="stor" tags="adj.*"/>
+			<match lemma="liten" tags="adj.*"/>
 		</or>
 		<match lemma="andel" tags="n.m.*">
 			<select lemma="proportion" tags="n.*"/>
@@ -39,7 +39,7 @@
 <!-- Vold og trusler - et felles anliggende. Violence and threats - a common case. -->
 
 <rule>
-		<or>		
+		<or>
 			<match lemma="felles" tags="*"/>
 			<match lemma="mange" tags="adj.*"/>
 		</or>
@@ -64,8 +64,8 @@
 
 <rule>
 		<or>
-			<match lemma="kjedelig" tags="adj.*"/> 
-			<match lemma="Tregt" tags="*"/> 
+			<match lemma="kjedelig" tags="adj.*"/>
+			<match lemma="Tregt" tags="*"/>
 		</or>
 		<match lemma="arbeid" tags="n.nt.*">
 			<select lemma="work" tags="n.*"/>
@@ -76,8 +76,8 @@
 
 <rule>
 		<or>
-			<match lemma="Interessant" tags="adj.*"/> 
-			<match lemma="kjedelig" tags="adj.*"/> 
+			<match lemma="Interessant" tags="adj.*"/>
+			<match lemma="kjedelig" tags="adj.*"/>
 		</or>
 		<match lemma="artikkel" tags="n.m.*">
 			<select lemma="article" tags="n.*"/>
@@ -88,8 +88,8 @@
 
 <rule>
 		<or>
-			<match lemma="kommersiell" tags="adj.*"/> 
-			<match lemma="sen" tags="adj.*"/>     
+			<match lemma="kommersiell" tags="adj.*"/>
+			<match lemma="sen" tags="adj.*"/>
 		</or>
 		<match lemma="avbrytelse" tags="n.m.*">
 			<select lemma="interruption" tags="n.*"/>
@@ -100,8 +100,8 @@
 
 <rule>
 		<or>
-			<match lemma="Høy" tags="adj.*"/> 
-			<match lemma="kvalmende" tags="*"/>     
+			<match lemma="Høy" tags="adj.*"/>
+			<match lemma="kvalmende" tags="*"/>
 		</or>
 		<match lemma="avhengighet" tags="n.*">
 			<select lemma="dependence" tags="n.*"/>
@@ -112,8 +112,8 @@
 
 <rule>
 		<or>
-			<match lemma="tidlig" tags="adj.*"/> 
-			<match lemma="sen" tags="adj.*"/>     
+			<match lemma="tidlig" tags="adj.*"/>
+			<match lemma="sen" tags="adj.*"/>
 		</or>
 		<match lemma="avreise" tags="n.*">
 			<select lemma="departure" tags="n.*"/>

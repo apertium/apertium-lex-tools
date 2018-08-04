@@ -13,14 +13,14 @@ import sys, codecs, copy, math, re, common;
 # 0.0000001004 a-led<adv> à~plat<adv>
 # 20.4545497200 pazenn<n> étape<n> @
 # 2.5454502800 pazenn<n> marche<n>
-# 
+#
 
 #        b) Biltrans output
 
 # 56011   ^un<det><ind><sp>/un<det><ind><GD><ND>$ ^digarez<n><m><sg>/excuse<n><f><sg>/occasion<n><f><sg>$ ^da<pr>/à<pr>$ ^distreiñ<vblex><inf>/revenir<vblex><inf>$ ^war<pr>/sur<pr>$ ^e<det><pos><m><sp>/son<det><pos><GD><ND>$ ^doare<n><m><sg>/manière<n><f><sg>$ ^ober<vblex><inf>/faire<vblex><inf>$ ^.<sent>/.<sent>$
 
 
-#        c) Disambiguated biltrans output  
+#        c) Disambiguated biltrans output
 
 #.[][56011 0].[] ^un<det><ind><sp>/un<det><ind><GD><ND>$ ^digarez<n><m><sg>/excuse<n><f><sg>$ ^da<pr>/à<pr>$ ^distreiñ<vblex><inf>/revenir<vblex><inf>$ ^war<pr>/sur<pr>$ ^e<det><pos><m><sp>/son<det><pos><GD><ND>$ ^doare<n><m><sg>/manière<n><f><sg>$ ^ober<vblex><inf>/faire<vblex><inf>$ ^.<sent>/.<sent>$^.<sent>/.<sent>$ 0.9917274061    |@|
 #.[][56011 1].[] ^un<det><ind><sp>/un<det><ind><GD><ND>$ ^digarez<n><m><sg>/occasion<n><f><sg>$ ^da<pr>/à<pr>$ ^distreiñ<vblex><inf>/revenir<vblex><inf>$ ^war<pr>/sur<pr>$ ^e<det><pos><m><sp>/son<det><pos><GD><ND>$ ^doare<n><m><sg>/manière<n><f><sg>$ ^ober<vblex><inf>/faire<vblex><inf>$ ^.<sent>/.<sent>$^.<sent>/.<sent>$       0.0082725939    ||
@@ -39,7 +39,7 @@ if len(sys.argv) == 5: #{
 	print('crisp:', crisphold, file=sys.stderr);
 #}
 
-sl_tl_defaults = {}; 
+sl_tl_defaults = {};
 sl_tl = {};
 ngrams = {};
 
@@ -47,16 +47,16 @@ def clean_line(l): #{
 	newline = '';
 	inword = True;
 	for c in l: #{
-		if c == '\t': 
-			newline = newline + c; 
-			inword = False; 
+		if c == '\t':
+			newline = newline + c;
+			inword = False;
 			continue;
-		if c == '^': 
-			newline = newline + c; 
-			inword = True; 
+		if c == '^':
+			newline = newline + c;
+			inword = True;
 			continue;
-		if c == '$': 
-			newline = newline + c + ' ';  
+		if c == '$':
+			newline = newline + c + ' ';
 			inword = False;
 			continue;
 		if inword == True: #{
@@ -88,7 +88,7 @@ for line in open(sys.argv[1]).readlines(): #{
 	else: #{
 		sl_tl[sl] = tl;
 	#}
-	
+
 #}
 
 print('Reading...', file=sys.stderr);
@@ -122,7 +122,7 @@ while reading: #{
 		print('line_id_mismatch: %d != %d' % (current_am_line_id, current_dm_line_id), file=sys.stderr);
 #		while current_dm_line_id != current_am_line_id: #{
 #			dm_line = dm_file.readline();
-#			current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);       
+#			current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
 #			print('skipping %d ...' % (current_dm_line_id), file=sys.stderr);
 #		#}
 	#}
@@ -162,21 +162,21 @@ while reading: #{
 		frac_count = 0.0;
 		s_fc = dm_line.split('\t')[2].strip();
 		if s_fc == '' or len(s_fc) == 0: #{
-			print('%d %d :: %d %d :: Frac count is not floatable' % (am_counter, dm_counter, current_am_line_id, current_dm_line_id), file=sys.stderr);		
+			print('%d %d :: %d %d :: Frac count is not floatable' % (am_counter, dm_counter, current_am_line_id, current_dm_line_id), file=sys.stderr);
 		#}
 		try:
 			frac_count = float(s_fc);
 		except:
 			break
-		if math.isnan(frac_count): #{ 
-			print('%d %d :: %d %d :: Frac count is not a number' % (am_counter, dm_counter, current_am_line_id, current_dm_line_id), file=sys.stderr);		
+		if math.isnan(frac_count): #{
+			print('%d %d :: %d %d :: Frac count is not a number' % (am_counter, dm_counter, current_am_line_id, current_dm_line_id), file=sys.stderr);
 			frac_count = 0.0;
 		#}
 
 		limit = len(am_row);
 		for i in range(0, limit): #{
 			if am_row[i].count('/') > 1: #{
-				#print(am_row[i] , dm_row[i]); 
+				#print(am_row[i] , dm_row[i]);
 				sl = am_row[i].split('/')[0].replace(' ', '~');
 				tl = dm_row[i].split('/')[1].replace(' ', '~');
 				if sl.count('><') > 0: #{
@@ -185,18 +185,18 @@ while reading: #{
 				if tl.count('><') > 0: #{
 					tl = tl.split('><')[0] + '>';
 				#}
-	
+
 #				if tl !=  sl_tl_defaults[sl]: #{
 #					print('+' , sl , sl_tl_defaults[sl] , tl, file=sys.stderr);
 #				else: #{
 #					print('-' , sl , sl_tl_defaults[sl] , tl, file=sys.stderr);
 #				#}
-	
+
 				for j in range(1, MAX_NGRAMS): #{
 					pregram = ' '.join(cur_sl_row[i-j:i+1]);
 					postgram = ' '.join(cur_sl_row[i:i+j+1]);
 					roundgram = ' '.join(cur_sl_row[i-j:i+j+1]);
-	
+
 					if sl not in ngrams: #{
 						ngrams[sl] = {};
 					#}
@@ -221,16 +221,16 @@ while reading: #{
 					ngrams[sl][pregram][tl] = ngrams[sl][pregram][tl] + frac_count;
 					ngrams[sl][postgram][tl] = ngrams[sl][postgram][tl] + frac_count;
 					ngrams[sl][roundgram][tl] = ngrams[sl][roundgram][tl] + frac_count;
-	
+
 #					print('=> %s\t[%.10f] %s' % (tl, ngrams[sl][pregram][tl], pregram), file=sys.stderr);
 #					print('=> %s\t[%.10f] %s' % (tl, ngrams[sl][roundgram][tl], roundgram), file=sys.stderr);
 #					print('=> %s\t[%.10f] %s' % (tl, ngrams[sl][postgram][tl], postgram), file=sys.stderr);
-	
+
 
 				#}
 			#}
 		#}
-		
+
 		dm_line = dm_file.readline();
 		if dm_line == '': #{
 			reading = False;
@@ -254,7 +254,7 @@ for sl in ngrams: #{
 	for ngram in ngrams[sl]: #{
 
 		for tl in ngrams[sl][ngram]: #{
-			print('%.10f\t%s\t%s\t%s' % (ngrams[sl][ngram][tl], ngram, sl, tl));		
+			print('%.10f\t%s\t%s\t%s' % (ngrams[sl][ngram][tl], ngram, sl, tl));
 		#}
 	#}
 #}

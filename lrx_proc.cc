@@ -33,7 +33,7 @@ void endProgram(char *name)
   cout << basename(name) << ": process a bilingual stream with a lexical rule transducer" << endl;
   cout << "USAGE: " << basename(name) << "[ -z | -d | -t | -m ] fst_file [input_file [output_file]]" << endl;
 #if HAVE_GETOPT_LONG
-  cout << "  -m, --max-ent:       run the rules using weights as lambdas" << endl; 
+  cout << "  -m, --max-ent:       run the rules using weights as lambdas" << endl;
   cout << "  -t, --trace:         trace the rules which have been applied" << endl;
   cout << "  -d, --debug:         print out information about how the rules are run" << endl;
   cout << "  -z, --null-flush:    flush on the null character" << endl;
@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
 #endif
 
   lrxp.init();
-  if(useMaxEnt) 
+  if(useMaxEnt)
   {
     lrxp.processME(input, output);
   }

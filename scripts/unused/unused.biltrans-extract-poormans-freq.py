@@ -6,7 +6,7 @@ import sys, codecs, copy;
 
 # Input:
 #        a) Biltrans output
-#        b) biltrans output  
+#        b) biltrans output
 #	 c)
 #
 #11 	if<cnjadv>/si<cnjadv> the<det><def><sp>/el<det><def><GD><ND> house<n><sg>/casa<n><f><sg> agree<vblex><pri><p3><sg>/acordar<vblex><pri><p3><sg>/concordar<vblex><pri><p3><sg>/estar#~de~acuerdo<vblex><pri><p3><sg> ,<cm>/,<cm> prpers<prn><subj><p1><mf><sg>/prpers<prn><tn><p1><mf><sg> shall<vaux><inf>/ do<vblex><inf>/hacer<vblex><inf> as<preadv>/tan<preadv> Mr~Evans<np><ant><mf><sg>/pn000Evans<np><ant><mf><sg> have<vbhaver><pri><p3><sg>/haber<vbhaver><pri><p3><sg> suggest<vblex><pp>/sugerir<vblex><pp> .<sent>/.<sent>
@@ -35,7 +35,7 @@ while reading: #{
 	limit = len(am_row);
 	for i in range(0, limit): #{
 		if am_row[i].count('/') > 1: #{
-			#print(am_row[i] , dm_row[i]); 
+			#print(am_row[i] , dm_row[i]);
 			sl = am_row[i].split('/')[0];
 			if sl.count('><') > 0: #{
 				sl = sl.split('><')[0] + '>';
@@ -66,7 +66,7 @@ while reading: #{
 				sl_tl[sl][tl] = sl_tl[sl][tl] + 1;
 			#}
 		#}
-	#}	
+	#}
 #}
 
 for sl in sl_tl: #{

@@ -31,7 +31,7 @@ MAX_NGRAMS = 3;
 
 cur_line = 0;
 
-sl_tl_defaults = {}; 
+sl_tl_defaults = {};
 sl_tl = {};
 ngrams = {};
 
@@ -43,7 +43,7 @@ features = {}; # features[(slword, ['a', 'list'], tlword)] = 3
 feature_counter = 0;
 
 indexes = {};
-trad_counter = {}; 
+trad_counter = {};
 
 for line in file(sys.argv[1]).readlines(): #{
 	if len(line) < 1: #{
@@ -76,7 +76,7 @@ cur_bt_row = [];
 cur_al_row = [];
 
 for line in file(sys.argv[2]).readlines(): #{
-	line = line.strip().decode('utf-8');	
+	line = line.strip().decode('utf-8');
 	if line[0] == '-': #{
 		# Read the corpus, make a note of all ambiguous words, their frequency and their possible translations
 		#
@@ -93,7 +93,7 @@ for line in file(sys.argv[2]).readlines(): #{
 
 					tlword = cur_tl_row[al_tl];
 					slword = slword;
-					
+
 					if slword not in sl_tl_defaults: #{
 #						print >>sys.stderr, 'WARNING: "' + slword + '" not in sl_tl_defaults, skipping';
 						continue;
@@ -163,7 +163,7 @@ for line in file(sys.argv[2]).readlines(): #{
 						#}
 						meevents[slword][event_counter].append(features[ni]);
 						meoutcomes[slword][event_counter] = tlword;
-						
+
 					#}
 					del ngrams;
 					ngrams = {};
@@ -196,17 +196,17 @@ for line in file(sys.argv[2]).readlines(): #{
 #					print cur_sl_row[i:i+j];
 #				#}
 				#print ngrams[slword];
-			#}	
+			#}
 			i = i + 1;
 
 		#}
 
 		cur_line = 0;
 		event_counter = event_counter + 1;
-		#print line;	
+		#print line;
 		continue;
-	#}	
-	
+	#}
+
 	line = line.split('\t')[1];
 
 	if cur_line == 0: #{

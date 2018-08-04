@@ -29,7 +29,7 @@ private:
 
     vector<long double> logScores;
     vector<long double> probs;
-	vector<int> sortedIndex;	
+	vector<int> sortedIndex;
 
     vector<string> batch;
 
@@ -55,20 +55,20 @@ protected:
 	vector<std::string> parseLine(std::string);
 	void printScores(vector<long double> scores);
 	void insertSortedIndex(long double prob);
-	
+
 	void reset();
 	void normalizeProbabilities();
-	
+
 	ifstream tmtrans;
 
 	std::string trim(const std::string& o);
 	bool load(const std::string &filePath, float weight);
-	double score(const std::string &frame, double &pp);	
+	double score(const std::string &frame, double &pp);
 
 public:
-	IrstlmRanker(const string &filePath, char *mtransPath, vector<double> params);	
+	IrstlmRanker(const string &filePath, char *mtransPath, vector<double> params);
 	~IrstlmRanker();
-	
+
 	int standard();
 	int fractional();
 };

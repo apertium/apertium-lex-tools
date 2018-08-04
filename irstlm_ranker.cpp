@@ -1,9 +1,9 @@
 #include "irstlm_ranker.h"
 using namespace std;
 
-IrstlmRanker::IrstlmRanker(const string &filePath, 
-						   char *tmtrans_path, 
-						   vector<double> params) 
+IrstlmRanker::IrstlmRanker(const string &filePath,
+						   char *tmtrans_path,
+						   vector<double> params)
 {
     bool val = this->load(filePath, 1.0);
 
@@ -155,7 +155,7 @@ bool IrstlmRanker::load(const string &filePath, float weight) {
 }
 
 void IrstlmRanker::normalizeProbabilities() {
-	
+
 	for(int i = 0; i < probs.size(); i++) {
 		probs[i] = probs[i] / this->norm;
 		if (probs[i] != probs[i]) {
@@ -165,8 +165,8 @@ void IrstlmRanker::normalizeProbabilities() {
 }
 
 void IrstlmRanker::printScores(vector<long double> scores)
-{	
-	
+{
+
 	double thr = 0.5;
 	vector<double> thresholds;
 	set<int> positiveIndex;
@@ -186,7 +186,7 @@ void IrstlmRanker::printScores(vector<long double> scores)
 			thresholds.push_back(i);
 		}
 	}
-	
+
 	if (thresholds.size() == 0) {
 		for(int i = 0; i < 6; i++) {
 			thresholds.push_back(-1);
@@ -237,12 +237,12 @@ int IrstlmRanker::fractional() {
             vector<string> tokens = parseLine(line);
             lineno = atoi(tokens[0].c_str());
 			int current_sublineno = atoi(tokens[1].c_str());
-            
+
             if(current_sublineno < sublineno)
             {
 				normalizeProbabilities();
                 printScores(probs);
-			
+
                 reset();
             }
 
@@ -264,7 +264,7 @@ int IrstlmRanker::fractional() {
 			sublineno ++;
         }
     }
-	
+
 	normalizeProbabilities();
     printScores(probs);
 
@@ -303,14 +303,14 @@ int IrstlmRanker::standard() {
                 current_max = log_prob;
                 maxlineno = sublineno;
             }
-			
+
             batch.push_back(tt_line);
             probs.push_back(prob);
 			logScores.push_back(log_prob);
 			insertSortedIndex(prob);
 			sublineno ++;
         }
-    }	
+    }
 	normalizeProbabilities();
     printScores(logScores);
     return EXIT_SUCCESS;
@@ -341,7 +341,7 @@ void IrstlmRanker::insertSortedIndex(long double prob) {
 			sortedIndex.insert(it + lowBound + 1, sublineno);
 			break;
 		}
-		
+
 		if (prob > probs[sortedIndex[midIdx]]) {
 			highBound = midIdx;
 		} else {
@@ -357,7 +357,7 @@ vector<double> parseArgs(int argc, char **argv) {
 
 	vector<double> params;
 
-	params.push_back(1); 
+	params.push_back(1);
 
 
 	for(int i = 3; i < argc; i++) {
@@ -395,7 +395,7 @@ int main(int argc, char ** argv) {
         printError(argv[0]);
 		exit(1);
     }
-	
+
 	vector<double> params = parseArgs(argc, argv);
     IrstlmRanker irstlm_ranker(argv[1], argv[2], params);
 

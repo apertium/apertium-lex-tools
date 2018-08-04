@@ -12,7 +12,7 @@ def convert_to_biltrans(bt): #{
 	return outline;
 #}
 
-# Take the ambiguous lexical transfer output and return 
+# Take the ambiguous lexical transfer output and return
 # an unambiguous lexical transfer output, en la medida de lo posible.
 def disambiguate_with_alig(bt, al, tl): #{
 	outline = '';
@@ -38,7 +38,7 @@ def disambiguate_with_alig(bt, al, tl): #{
 						#}
 					#}
 				#}
-			#}	      
+			#}
 		#}
 		if len(resolved) > 0: #{
 			slw = word.split('/')[0];
@@ -52,7 +52,7 @@ def disambiguate_with_alig(bt, al, tl): #{
 			outline = outline + '^' + word.replace('~', ' ') + '$ ';
 		#}
 		i = i + 1;
-	#}	
+	#}
 	#print(outline);
 	return outline;
 #}
@@ -112,15 +112,15 @@ for line in candidates.readlines(): #{
 	if line.count('--') > 2: #{
 		if cur_line in tst: #{
 			#print(cur_line, 'tst');
-			outline = disambiguate_with_alig(bt, al, tl);	
+			outline = disambiguate_with_alig(bt, al, tl);
 			print(cur_line, ']\t' + outline, file=tst_refout);
-			outline = convert_to_biltrans(bt);	
+			outline = convert_to_biltrans(bt);
 			print(cur_line, ']\t' + outline, file=tst_srcout);
 		elif cur_line in dev: #{
 			print(cur_line, 'dev');
-			outline = disambiguate_with_alig(bt, al, tl);	
+			outline = disambiguate_with_alig(bt, al, tl);
 			print(cur_line, ']\t' + outline, file=dev_refout);
-			outline = convert_to_biltrans(bt);	
+			outline = convert_to_biltrans(bt);
 			print(cur_line, ']\t' + outline, file=dev_srcout);
 		elif cur_line in train: #{
 			#print(cur_line, 'train');
@@ -137,10 +137,10 @@ for line in candidates.readlines(): #{
 		al = '';
 		bt = '';
 		continue;
-	#}	
+	#}
 	if cur_line == -1: #{
 		cur_line = int(line.split('\t')[0]);
-	#}	
+	#}
 
 	if cur_line > -1 and state == 0: #{
 		sl = line.split('\t')[1];

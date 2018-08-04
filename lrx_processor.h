@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011--2012 Universitat d'Alacant 
+ * Copyright (C) 2011--2012 Universitat d'Alacant
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -66,7 +66,7 @@ public:
 		} else {
 			out = blanks + out;
 		}
-		return out;	
+		return out;
 	}
 };
 
@@ -93,7 +93,7 @@ private:
   bool nullFlush;
   bool outOfWord;
 
-  unsigned int pos; 
+  unsigned int pos;
   unsigned long lineno;
 
   wstring itow(int i);

@@ -28,7 +28,7 @@ def process_bidix(bidix, open_tag, close_tag):
 		dix[stem].append(tags)
 
 	return dix
-		
+
 
 def find_in_bidix(token, bidix, stem_regex, tag_regex):
 
@@ -50,7 +50,7 @@ def find_in_bidix(token, bidix, stem_regex, tag_regex):
 			for bidix_tags in entries:
 				bidix_tags_multiset = collections.Counter(bidix_tags);
 				token_tags_multiset = collections.Counter(token_tags);
-		
+
 				l = len(list((token_tags_multiset & bidix_tags_multiset).elements()));
 				if l > max_len:
 					max_len = l
@@ -88,4 +88,4 @@ if __name__ == "__main__":
 		for token in tokens:
 			out += find_in_bidix(token, bidix_bin, stem_regex, tag_regex) + ' ';
 		print out
-		
+

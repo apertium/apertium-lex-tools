@@ -6,9 +6,9 @@ import sys;
 
 pos = ["<n>", "<vblex>", "<adj>"];
 
-output = False;	
+output = False;
 
-infile = sys.stdin ; 
+infile = sys.stdin ;
 
 if len(sys.argv) > 1: #{
 	infile = open(sys.argv[1]);
@@ -20,10 +20,10 @@ for line in infile.readlines(): #{
 	num_lu = float(line.count('$'));
 	num_unk = float(line.count('*'))  / 2.0;
 	cov = 100.0 - ((num_unk / num_lu) * 100.0);
-	
+
 	if cov >= 90.0: #{
 		print(line.strip());
-	#} 
-	
-	
+	#}
+
+
 #}

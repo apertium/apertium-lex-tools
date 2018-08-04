@@ -3,7 +3,7 @@
 <start>
 <element name="rules">
   <oneOrMore>
-    <element name="rule"> 
+    <element name="rule">
       <optional>
         <attribute name="c">
           <text/>
@@ -24,7 +24,7 @@
               <oneOrMore>
                 <ref name="match"/>
               </oneOrMore>
-            </element> 
+            </element>
           </zeroOrMore>
         </group>
         <group>
@@ -33,7 +33,7 @@
               <oneOrMore>
                 <ref name="match"/>
               </oneOrMore>
-            </element> 
+            </element>
           </zeroOrMore>
           <oneOrMore>
             <ref name="match"/>
@@ -48,7 +48,7 @@
               <oneOrMore>
                 <ref name="match"/>
               </oneOrMore>
-            </element> 
+            </element>
           </zeroOrMore>
           <oneOrMore>
             <ref name="match"/>
@@ -62,7 +62,7 @@
               <oneOrMore>
                 <ref name="match"/>
               </oneOrMore>
-            </element> 
+            </element>
           </zeroOrMore>
           <oneOrMore>
             <ref name="match"/>
@@ -72,7 +72,7 @@
               <oneOrMore>
                 <ref name="match"/>
               </oneOrMore>
-            </element> 
+            </element>
           </zeroOrMore>
         </group>
 
@@ -103,7 +103,7 @@
                   <attribute name="tags">
                     <text/>
                   </attribute>
-                </element> 
+                </element>
                 <element name="remove">
                   <attribute name="lemma">
                     <text/>
@@ -111,7 +111,7 @@
                   <attribute name="tags">
                     <text/>
                   </attribute>
-                </element> 
+                </element>
             </choice>
           </zeroOrMore>
         </element>
@@ -140,7 +140,7 @@
                   <attribute name="tags">
                     <text/>
                   </attribute>
-                </element> 
+                </element>
                 <oneOrMore>
                   <element name="remove">
                     <attribute name="lemma">
@@ -149,7 +149,7 @@
                     <attribute name="tags">
                       <text/>
                     </attribute>
-                  </element> 
+                  </element>
                 </oneOrMore>
               </choice>
             </oneOrMore>
