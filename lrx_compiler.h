@@ -55,8 +55,6 @@ private:
   map<wstring, Transducer> recognisers; // keyed on pattern
   map<int, double> weights; // keyed on rule id
 
-  double default_weight;
-
   int initialState;
   int lastState;
   int currentState;
