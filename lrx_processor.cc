@@ -89,7 +89,7 @@ LRXProcessor::load(FILE *in)
       name += static_cast<wchar_t>(Compression::multibyte_read(in));
       len2--;
     }
-    recognisers[name].read(in, alphabet, false);
+    recognisers[name].read(in, alphabet);
     len--;
   }
 
@@ -107,7 +107,7 @@ LRXProcessor::load(FILE *in)
     len3--;
   }
 
-  transducer.read(in, alphabet, false);
+  transducer.read(in, alphabet);
 
   // Now read in weights
   struct weight {
