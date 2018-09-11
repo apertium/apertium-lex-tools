@@ -1,11 +1,11 @@
 AC_PREREQ(2.61)
 
 m4_define([required_libxml_version], [2.6.17])
-m4_define([required_apertium_version], [3.5.0])
-m4_define([required_lttoolbox_version], [3.4.0])
+m4_define([required_apertium_version], [3.5.2])
+m4_define([required_lttoolbox_version], [3.5.0])
 
-AC_INIT([apertium-lex-tools], [0.2.0], [ftyers@prompsit.com])
-AM_INIT_AUTOMAKE([apertium-lex-tools], [0.2.0], no-define)
+AC_INIT([apertium-lex-tools], [0.2.1], [ftyers@prompsit.com])
+AM_INIT_AUTOMAKE([apertium-lex-tools], [0.2.1], no-define)
 AC_CONFIG_HEADER([lrx_config.h])
 AC_CONFIG_MACRO_DIR([m4])
 
