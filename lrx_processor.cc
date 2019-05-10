@@ -250,11 +250,11 @@ LRXProcessor::recognisePattern(const wstring lu, const wstring op)
       //cur.step(val);
       if(!iswupper(val))
       {
-        cur.step(val);
+        cur.step(val, alphabet(L"<ANY_CHAR>"));
       }
       else
       {
-        cur.step(val, towlower(val));
+        cur.step(val, towlower(val), alphabet(L"<ANY_CHAR>"));
       }
 
     }

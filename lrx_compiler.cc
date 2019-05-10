@@ -505,6 +505,11 @@ LRXCompiler::procSelect()
   wstring lemma =this->attrib(LRX_COMPILER_LEMMA_ATTR);
   wstring tags =this->attrib(LRX_COMPILER_TAGS_ATTR);
 
+  if(lemma == L"*")
+  {
+    lemma = L"";
+  }
+
   wstring key = L"<" + LRX_COMPILER_TYPE_SELECT + L">" + lemma;
 
   Transducer recogniser;
@@ -517,6 +522,17 @@ LRXCompiler::procSelect()
 
   currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<$>"), alphabet(L"<$>")), currentState);
   currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<" + LRX_COMPILER_TYPE_SELECT + L">")), currentState);
+
+
+  if(lemma == L"")
+  {
+    currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_CHAR>")), currentState);
+    int localLast = localCurrentState;
+    localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(L"<ANY_CHAR>"),0), localCurrentState);
+    recogniser.linkStates(localCurrentState, localLast, 0);
+    key = key + L"<ANY_CHAR>";
+    fwprintf(stdout, L"BLANK LEMMA! \n");
+  }
 
   for(wstring::iterator it = lemma.begin(); it != lemma.end(); it++)
   {
