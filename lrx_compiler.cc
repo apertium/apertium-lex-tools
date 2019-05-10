@@ -531,7 +531,6 @@ LRXCompiler::procSelect()
     localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(L"<ANY_CHAR>"),0), localCurrentState);
     recogniser.linkStates(localCurrentState, localLast, 0);
     key = key + L"<ANY_CHAR>";
-    fwprintf(stdout, L"BLANK LEMMA! \n");
   }
 
   for(wstring::iterator it = lemma.begin(); it != lemma.end(); it++)
