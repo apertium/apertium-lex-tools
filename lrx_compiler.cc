@@ -404,7 +404,9 @@ LRXCompiler::procMatch()
           }
           if(tag == L"<*>")
           {
+	    int localLast = currentState;
             currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"), 0), currentState);
+	    transducer.linkStates(currentState, localLast, 0);
           }
           else
           {
@@ -558,7 +560,9 @@ LRXCompiler::procSelect()
         if(tag == L"<*>")
         {
           currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_TAG>")), currentState);
+	  int localLast = localCurrentState;
           localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"),0), localCurrentState);
+	  recogniser.linkStates(localCurrentState, localLast, 0);
           key = key + L"<ANY_TAG>";
         }
         else
@@ -633,6 +637,11 @@ LRXCompiler::procRemove()
   wstring lemma =this->attrib(LRX_COMPILER_LEMMA_ATTR);
   wstring tags =this->attrib(LRX_COMPILER_TAGS_ATTR);
 
+  if(lemma == L"*")
+  {
+    lemma = L"";
+  }
+
   wstring key = L"<" + LRX_COMPILER_TYPE_REMOVE + L">" + lemma;
 
   Transducer recogniser;
@@ -646,6 +655,15 @@ LRXCompiler::procRemove()
   currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<$>"), alphabet(L"<$>")), currentState);
   currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<" + LRX_COMPILER_TYPE_REMOVE + L">")), currentState);
 
+  if(lemma == L"")
+  {
+    currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_CHAR>")), currentState);
+    int localLast = localCurrentState;
+    localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(L"<ANY_CHAR>"),0), localCurrentState);
+    recogniser.linkStates(localCurrentState, localLast, 0);
+    key = key + L"<ANY_CHAR>";
+  }
+  
   for(wstring::iterator it = lemma.begin(); it != lemma.end(); it++)
   {
     currentState = transducer.insertSingleTransduction(alphabet(0, *it), currentState);
@@ -671,7 +689,9 @@ LRXCompiler::procRemove()
         if(tag == L"<*>")
         {
           currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_TAG>")), currentState);
+	  int localLast = localCurrentState;
           localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"),0), localCurrentState);
+	  recogniser.linkStates(localCurrentState, localLast, 0);
           key = key + L"<ANY_TAG>";
         }
         else
