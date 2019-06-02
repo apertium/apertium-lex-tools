@@ -222,7 +222,8 @@ LRXCompiler::procRule()
     weight = LRX_COMPILER_DEFAULT_WEIGHT ;
   }
 
-
+  // insert new epsilon:epsilon step at beginning to rule to ensure that it doesn't overlap with any other rules
+  currentState = transducer.insertNewSingleTransduction(alphabet(0, 0), currentState);
 
   currentRuleId++;
   wstring ruleId = L"<" + itow(currentRuleId) + L">";
