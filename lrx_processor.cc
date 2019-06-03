@@ -1117,8 +1117,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
         fwprintf(stderr, L"new_states: %d\n", new_states.size());
       }
       alive_states.swap(new_states);
-      alive_states.push_back(*initial_state);
-
+      // In the middle of a word, don't push initial state here cf. https://github.com/apertium/apertium-lex-tools/issues/19
     }
 
     // We're still reading a surface form
