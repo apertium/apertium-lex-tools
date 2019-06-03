@@ -170,6 +170,8 @@ LRXCompiler::parse(string const &fitxer)
     ret = xmlTextReaderRead(reader);
   }
 
+  transducer.minimize();
+
   if(ret != 0)
   {
     wcerr << L"Error: Parse error at the end of input." << endl;
