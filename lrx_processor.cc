@@ -798,9 +798,9 @@ LRXProcessor::processME(FILE *input, FILE *output)
   vector<State*> alive_states ;
   alive_states.push_back(new State(*initial_state));
 
-  while(!feof(input))
+  int val = 0;
+  while((val = fgetwc_unlocked(input)) != EOF)
   {
-    int val = fgetwc_unlocked(input);
 
     if(nullFlush && val == L'\0')
     {
@@ -828,7 +828,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
       // Read in target equivalences
       wstring trad = L"";
       val = fgetwc_unlocked(input);
-      while(val != L'$')
+      while(val != L'$' && val != EOF)
       {
         if(val != L'$')
         {
