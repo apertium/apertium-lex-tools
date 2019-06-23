@@ -1,0 +1,58 @@
+#!/usr/bin/env python3
+
+"""
+Setup for SWIG Python bindings for lex-tools
+"""
+from os import path
+from distutils.core import Extension, setup
+from distutils.command.build import build
+
+
+class CustomBuild(build):
+    sub_commands = [
+        ('build_ext', build.has_ext_modules),
+        ('build_py', build.has_pure_modules),
+        ('build_clib', build.has_c_libraries),
+        ('build_scripts', build.has_scripts),
+    ]
+
+
+def get_sources():
+    sources = ['lex_tools.i']
+    cc_sources = ['lrx_processor.cc']
+    rel_path = '..'
+    sources.extend(path.join(rel_path, f) for f in cc_sources)
+    return sources
+
+def get_include_dirs():
+    # get rid of '-I' in LTTOOLBOX_CFLAGS and split list from 1, to remove extra element ''
+    # Strip extra space at end
+    dirs = '@LTTOOLBOX_CFLAGS@'.split('-I')[1:]
+    dirs += '@LIBXML_LIBS@'.split('-I')[1:]
+    dirs = [x.strip() for x in dirs]
+    return dirs + ['..']
+
+
+lextools_module = Extension(
+    name='_lextools',
+    sources=get_sources(),
+    swig_opts = ["-c++", "-I..", "-Wall"],
+    include_dirs=get_include_dirs(),
+    library_dirs=['/usr/include/libxml2', '/usr/local/lib'],
+    extra_compile_args='@CXXFLAGS@'.split(),
+    extra_link_args=['-lxml2', '-llttoolbox3'],
+)
+
+setup(
+    name='@PACKAGE@',
+    version='@PACKAGE_VERSION@',
+    description='SWIG interface to @PACKAGE_NAME@',
+    long_description="SWIG interface to @PACKAGE_NAME@ for use in apertium-python",
+    # TODO: author, maintainer, url
+    author_email='@PACKAGE_BUGREPORT@',
+    license='GPL-3.0+',
+    maintainer_email='@PACKAGE_BUGREPORT@',
+    cmdclass={'build': CustomBuild},
+    ext_modules=[lextools_module],
+    py_modules=['lextools'],
+)
