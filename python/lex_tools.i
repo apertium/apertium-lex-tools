@@ -19,8 +19,8 @@ void
 LRX::lrx_proc(char arg, char *dictionary_path, char *input_path, char *output_path)
 {
   bool useMaxEnt = false;
-  FILE *in = fopen(dictionary_path, "rb");
-  load(in);
+  FILE *dictionary = fopen(dictionary_path, "rb");
+  load(dictionary);
   FILE *input = fopen(input_path, "r"), *output = fopen(output_path, "w");
   switch(arg)
   {
@@ -39,7 +39,7 @@ LRX::lrx_proc(char arg, char *dictionary_path, char *input_path, char *output_pa
   {
     process(input, output);
   }
-  fclose(in);
+  fclose(dictionary);
   fclose(input);
   fclose(output);
 }
@@ -48,6 +48,7 @@ LRX::lrx_proc(char arg, char *dictionary_path, char *input_path, char *output_pa
 
 
 %include <lrx_processor.h>
+%include <lttoolbox/lt_locale.h>
 
 
 class LRX: public LRXProcessor

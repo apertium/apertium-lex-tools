@@ -58,7 +58,7 @@
 lrx-comp
 lrx-proc
 lrx_config.h
-lrx_config.h.in
+lrx_config.h.in*
 multitrans
 stamp-h1
 
