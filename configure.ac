@@ -85,13 +85,21 @@ AX_CHECK_COMPILE_FLAG([-std=c++20], [CXXFLAGS="$CXXFLAGS -std=c++20"], [
  ])
 ])
 
-AC_CONFIG_FILES([
-                 Makefile
-                 ])
-AC_OUTPUT
+AC_CONFIG_FILES([python/setup.py])
 
 AS_IF([test "x$irstlm" == "xno"],
       [AC_MSG_NOTICE([IRSTLM is not enabled; you will not be able run monolingual rule-learning; enable using --with-irstlm])])
 
 AS_IF([test "x$yasmet" == "xno"],
       [AC_MSG_NOTICE([YASMET is not enabled; you will not be able run maximum-entropy training; enable using --with-yasmet])])
+
+AM_PATH_PYTHON([3.4], [], [AC_MSG_WARN([Can't generate SWIG wrapper without Python])])
+
+AC_ARG_ENABLE([python-bindings],
+              AS_HELP_STRING([--enable-python-bindings],
+                             [build python bindings (default=disabled)]),
+              [enable_python_bindings=$enableval],
+              [enable_python_bindings=no])
+AM_CONDITIONAL([HAVE_PYTHON_BINDINGS], [test x$enable_python_bindings = xyes])
+
+AC_OUTPUT([Makefile python/Makefile])
