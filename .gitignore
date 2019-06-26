@@ -1,0 +1,72 @@
+*.pyc
+**/*.deps/
+/.ccls-cache/
+/*.pc
+/aclocal.m4
+/autom4te.cache
+/compile
+/config.guess
+/config.log
+/config.status
+/config.sub
+/configure
+/depcomp
+/INSTALL
+/install-sh
+/m4/libtool.m4
+/m4/lt~obsolete.m4
+/m4/ltoptions.m4
+/m4/ltsugar.m4
+/m4/ltversion.m4
+/Makefile
+/Makefile.in
+/missing
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+lrx-comp
+lrx-proc
+lrx_config.h
+lrx_config.h.in*
+multitrans
+stamp-h1
+
+/python/Makefile.in
+/python/Makefile
+/python/lex_tools_wrap.cpp
+/python/lextools.py
+/python/setup.py
+/python/build*
+*.egg-info/
+*.egg
