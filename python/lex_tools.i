@@ -11,11 +11,16 @@ public:
   /**
    * Imitates functionality of lrx_proc using file path
    */
-  void lrx_proc(char arg, char *dictionary_path, char *input_path, char *output_path)
+  LRX(char *dictionary_path)
   {
-    bool useMaxEnt = false;
     FILE *dictionary = fopen(dictionary_path, "rb");
     load(dictionary);
+    fclose(dictionary);
+  }
+
+  void lrx_proc(char arg, char *input_path, char *output_path)
+  {
+    bool useMaxEnt = false;
     FILE *input = fopen(input_path, "r"), *output = fopen(output_path, "w");
     switch(arg)
     {
@@ -34,7 +39,6 @@ public:
     {
       process(input, output);
     }
-    fclose(dictionary);
     fclose(input);
     fclose(output);
   }
@@ -50,8 +54,6 @@ public:
 class LRX: public LRXProcessor
 {
 public:
-  /**
-   * Imitates functionality of lrx_proc using file path
-   */
-  void lrx_proc(char arg, char *dictionary_path, char *input_path, char *output_path);
+  LRX(char *dictionary_path);
+  void lrx_proc(char arg, char *input_path, char *output_path);
 };
