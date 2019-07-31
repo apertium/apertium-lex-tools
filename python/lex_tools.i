@@ -5,13 +5,13 @@
 #include <lrx_processor.h>
 
 
-class LRX: public LRXProcessor
+class LRXProc: public LRXProcessor
 {
 public:
   /**
    * Imitates functionality of lrx_proc using file path
    */
-  LRX(char *dictionary_path)
+  LRXProc(char *dictionary_path)
   {
     FILE *dictionary = fopen(dictionary_path, "rb");
     load(dictionary);
@@ -51,9 +51,9 @@ public:
 %include <lttoolbox/lt_locale.h>
 
 
-class LRX: public LRXProcessor
+class LRXProc: public LRXProcessor
 {
 public:
-  LRX(char *dictionary_path);
+  LRXProc(char *dictionary_path);
   void lrx_proc(char arg, char *input_path, char *output_path);
 };
