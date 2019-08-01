@@ -48,7 +48,7 @@ public:
 	TaggerOutputProcessor();
 	~TaggerOutputProcessor();
 
-	void processTaggerOutput();
+	void processTaggerOutput(bool nullFlush=false);
 
 };
 

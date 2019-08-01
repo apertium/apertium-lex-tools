@@ -101,18 +101,27 @@ wstring TaggerOutputProcessor::getLemma(wstring token) {
 	return buffer;
 }
 
-void TaggerOutputProcessor::processTaggerOutput() {
+void TaggerOutputProcessor::processTaggerOutput(bool nullFlush /* = false */) {
 
 	wstring buffer;
 	vector<TaggerToken> sentence;
 	bool escaped = false;
 	int state = 0; // outside
-	wchar_t c;
-	while((c = fgetwc(stdin))) {
+        wchar_t c;
+        while((c = fgetwc(stdin))) {
 		if (c == -1) {
 			break;
 		}
-		if(c == L'\n') {
+
+                // null flush --------------
+                if (nullFlush && c == L'\0') {
+                  processSentence(sentence);
+                  sentence.clear();
+                  buffer.clear();
+                }
+                // -------------------------
+		
+                if(c == L'\n') {
 			processSentence(sentence);
 			sentence.clear();
 			buffer.clear();
