@@ -1070,6 +1070,10 @@ LRXProcessor::processME(FILE *input, FILE *output)
       tag = readFullBlock(input, L'<', L'>');
       sl[pos] = sl[pos] + tag;
       val = static_cast<int>(alphabet(tag));
+      if(val == 0)
+      {
+        val = static_cast<int>(alphabet(L"<ANY_TAG>"));
+      }
       if(debugMode)
       {
         fwprintf(stderr, L"tag %S: %d\n", tag.c_str(), val);
@@ -1095,7 +1099,8 @@ LRXProcessor::processME(FILE *input, FILE *output)
           {
             fwprintf(stderr, L"  step: %S\n", res.c_str());
           }
-          s->step(val, alphabet(L"<ANY_TAG>"));
+          if(val == alphabet(L"<ANY_TAG>")) s->step(val);
+          else s->step(val, alphabet(L"<ANY_TAG>"));
         }
         else
         {
