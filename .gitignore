@@ -70,3 +70,7 @@ stamp-h1
 /python/build*
 *.egg-info/
 *.egg
+/testing/*.bin
+/testing/*.output
+/compile_commands.json
+/.projectile
