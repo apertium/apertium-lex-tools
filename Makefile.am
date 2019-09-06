@@ -26,3 +26,10 @@ SUBDIRS = python
 endif
 
 EXTRA_DIST = lrx_compiler.h lrx_processor.h multi_translator.h tagger_output_processor.h
+
+.PHONY: check
+check:
+	testing/run
+
+.PHONY: test
+test: check
