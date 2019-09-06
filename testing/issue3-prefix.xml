@@ -1,0 +1,8 @@
+<rules>
+  <rule weight="2.0">
+    <match lemma="ver" tags="vblex"/>
+    <match lemma="X" tags="adv">
+      <select lemma="X"/>
+    </match>
+  </rule>
+</rules>
