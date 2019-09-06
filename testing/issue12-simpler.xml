@@ -1,0 +1,18 @@
+<rules>
+  <rule weight="2.0">                    <!-- rule1 -->
+    <or>
+      <match tags="seen"/>               <!-- A -->
+      <match tags="unseen"/>             <!-- B -->
+    </or>
+    <match lemma="X" tags="adv"> <!-- C -->
+      <select lemma="X"/>
+    </match>
+  </rule>
+
+  <rule weight="2.0">                    <!-- rule2 -->
+    <match tags="unseen"/>               <!-- B -->
+    <match lemma="Y" tags="n">
+      <select lemma="Y"/>
+    </match>
+  </rule>
+</rules>
