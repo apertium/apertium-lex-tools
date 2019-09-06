@@ -29,7 +29,7 @@ for xml in *.xml; do
     rm -f "$test.{output,bin}"
     if ! (
             ../lrx-comp "$test.xml" "$test.bin" &>>>(err "$test") &&
-                ../lrx-proc -z "$test.bin" < "$test.input" > "$test.output" 2>>>(err "$test") &&
+                ../lrx-proc -m -z "$test.bin" < "$test.input" > "$test.output" 2>>>(err "$test") &&
                 diff -au "$test.expected" "$test.output" | colournul
         )
     then
