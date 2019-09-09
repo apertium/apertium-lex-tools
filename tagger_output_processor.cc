@@ -1,7 +1,7 @@
 #include "tagger_output_processor.h"
 
 TaggerOutputProcessor::TaggerOutputProcessor() {
-	this->sn = 0;
+	sn = 0;
 	LtLocale::tryToSetLocale();
 }
 
@@ -10,22 +10,18 @@ TaggerOutputProcessor::~TaggerOutputProcessor() {
 }
 
 int TaggerOutputProcessor::find(vector<wstring> xs, wstring x) {
-	for (int i = 0; i < xs.size(); i++) {
+	for (size_t i = 0; i < xs.size(); ++i) {
 		if (xs[i] == x)
 			return i;
 	}
 	return -1;
-
 }
-
 
 TaggerToken TaggerOutputProcessor::parseTaggerToken(wstring str) {
 	TaggerToken token;
 	int state = 0; // lemma;
 	wstring buffer;
-	wchar_t c;
-	for (int i = 0; i < str.size(); i++) {
-		c = str[i];
+	for (auto& c : str) {
 		if(c == L'<' && state == 0) {
 			state = 1;
 			token.lemma = buffer;
@@ -49,8 +45,7 @@ vector<wstring> TaggerOutputProcessor::parseTags(wstring token) {
 	int state = 0; // outside
 	vector<wstring> tags;
 	wstring buffer;
-	for(int i = 0; i < token.size(); i++) {
-		wchar_t c = token[i];
+	for (auto& c : token) {
 		if (state == 0) {
 			if (c == '<') {
 				state = 1;
@@ -72,7 +67,7 @@ vector<wstring> TaggerOutputProcessor::wsplit(wstring wstr, wchar_t delim) {
 	vector<wstring> tokens;
 	wstring buffer;
 
-	for(int i = 0; i < wstr.size(); i++) {
+	for(size_t i = 0; i < wstr.size(); ++i) {
 		if(wstr[i] == delim && (i == 0 || wstr[i-1] != L'\\')) {
 			tokens.push_back(buffer);
 			buffer = L"";
@@ -86,14 +81,11 @@ vector<wstring> TaggerOutputProcessor::wsplit(wstring wstr, wchar_t delim) {
 	return tokens;
 }
 
-
-
-
 wstring TaggerOutputProcessor::getLemma(wstring token) {
 	wstring buffer;
-	for(int i = 0; i < token.size(); i++) {
-		if(token[i] != '<') {
-			buffer += token[i];
+	for (auto& c : token) {
+		if(c != '<') {
+			buffer += c;
 		} else {
 			break;
 		}
@@ -101,8 +93,7 @@ wstring TaggerOutputProcessor::getLemma(wstring token) {
 	return buffer;
 }
 
-void TaggerOutputProcessor::processTaggerOutput() {
-
+void TaggerOutputProcessor::processTaggerOutput(bool nullFlush) {
 	wstring buffer;
 	vector<TaggerToken> sentence;
 	bool escaped = false;
@@ -112,6 +103,13 @@ void TaggerOutputProcessor::processTaggerOutput() {
 		if (c == -1) {
 			break;
 		}
+
+		if (nullFlush && c == L'\0') {
+		  processSentence(sentence);
+		  sentence.clear();
+		  buffer.clear();
+		}
+
 		if(c == L'\n') {
 			processSentence(sentence);
 			sentence.clear();
