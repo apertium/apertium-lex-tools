@@ -51,9 +51,8 @@ public:
 
   void lrx_proc(int argc, char **argv, char *input_path, char *output_path)
   {
-    bool useMaxEnt = false;
-    FILE* input = fopen(input_path, "r");
-    FILE* output = fopen(output_path, "w");
+    FILE* input = fopen(input_path, "rb");
+    FILE* output = fopen(output_path, "wb");
     optind = 1;
     while(true)
     {
@@ -66,7 +65,6 @@ public:
       switch(c)
       {
         case 'm':
-          useMaxEnt = true;
           break;
 
         case 'z':
@@ -84,14 +82,7 @@ public:
           break;
       }
     }
-    if(useMaxEnt)
-    {
-      processME(input, output);
-    }
-    else
-    {
-      process(input, output);
-    }
+    processME(input, output);
     fclose(input);
     fclose(output);
   }
