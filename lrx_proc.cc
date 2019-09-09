@@ -31,14 +31,12 @@ using namespace std;
 void endProgram(char *name)
 {
   cout << basename(name) << ": process a bilingual stream with a lexical rule transducer" << endl;
-  cout << "USAGE: " << basename(name) << "[ -z | -d | -t | -m ] fst_file [input_file [output_file]]" << endl;
+  cout << "USAGE: " << basename(name) << "[ -z | -d | -t ] fst_file [input_file [output_file]]" << endl;
 #if HAVE_GETOPT_LONG
-  cout << "  -m, --max-ent:       run the rules using weights as lambdas" << endl;
   cout << "  -t, --trace:         trace the rules which have been applied" << endl;
   cout << "  -d, --debug:         print out information about how the rules are run" << endl;
   cout << "  -z, --null-flush:    flush on the null character" << endl;
 #else
-  cout << "  -m:         run the rules using weights as lambdas" << endl;
   cout << "  -t:         trace the rules which have been applied" << endl;
   cout << "  -d:         print out information about how the rules are run" << endl;
   cout << "  -z:         flush on the null character" << endl;
@@ -50,13 +48,12 @@ void endProgram(char *name)
 int main(int argc, char *argv[])
 {
   LRXProcessor lrxp;
-  bool useMaxEnt = false;
 
 #if HAVE_GETOPT_LONG
   static struct option long_options[]=
     {
       {"trace",        0, 0, 't'}
-      {"max-ent",      0, 0, 'm'}
+      {"max-ent",      0, 0, 'm'} // deprecated cf. https://github.com/apertium/apertium-lex-tools/issues/24
       {"debug",        0, 0, 'd'}
       {"null-flush",   0, 0, 'z'}
     };
@@ -79,7 +76,6 @@ int main(int argc, char *argv[])
     switch(c)
     {
     case 'm':
-      useMaxEnt = true;
       break;
     case 'z':
       lrxp.setNullFlush(true);
@@ -160,14 +156,7 @@ int main(int argc, char *argv[])
 #endif
 
   lrxp.init();
-  if(useMaxEnt)
-  {
-    lrxp.processME(input, output);
-  }
-  else
-  {
-    lrxp.process(input, output);
-  }
+  lrxp.processME(input, output);
   fclose(input);
   fclose(output);
   return EXIT_SUCCESS;
