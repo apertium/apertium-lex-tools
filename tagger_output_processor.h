@@ -22,8 +22,8 @@ public:
 	vector<wstring> tags;
 	wstring toString(bool delimiters) {
 		wstring out = lemma;
-		for(unsigned int i = 0; i < tags.size(); i++) {
-			out += L"<" + tags[i] + L">";
+		for (auto& tag : tags) {
+			out += L"<" + tag + L">";
 		}
 		if (delimiters) {
 			out = L"^" + out + L"$";
@@ -48,7 +48,7 @@ public:
 	TaggerOutputProcessor();
 	~TaggerOutputProcessor();
 
-	void processTaggerOutput();
+	void processTaggerOutput(bool nullFlush=false);
 
 };
 

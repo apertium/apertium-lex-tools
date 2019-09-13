@@ -2,22 +2,45 @@
 
 set -e -u -o pipefail
 
+export VERBOSE=false
+if [[ $# -ge 1 && $1 = -v ]]; then
+    VERBOSE=true
+fi
+
 err () {
-    sed "s/^/$1:	/"
+    if "$VERBOSE"; then
+        sed "s/^/$1:	/"
+    else
+        cat >/dev/null
+    fi
 }
 
 colournul () {
-    local colour=$(printf '\033[0;36m') plain=$(printf '\033[0m')
-    sed -e "s/\x0/${colour}0&${plain}/g"
+    local colour
+    colour=$(printf '\033[0;36m') plain=$(printf '\033[0m')
+    sed -e "s/\\x0/${colour}0&${plain}/g"
 }
 
-cd "$(dirname $0)"
+
+cd "$(dirname "$0")"
+declare -i failures=0
 for xml in *.xml; do
     test=${xml%%.xml}
     rm -f "$test.{output,bin}"
-    (
-	../lrx-comp "$test.xml" "$test.bin" &>>>(err "$test") &&
-	../lrx-proc -z "$test.bin" < "$test.input" > "$test.output" 2>>>(err "$test") &&
-	diff -au "$test.expected" "$test.output" | colournul
-    ) || echo "$test: FAILED"
+    if ! (
+            ../lrx-comp "$test.xml" "$test.bin" &>>>(err "$test") &&
+                ../lrx-proc -m -z "$test.bin" < "$test.input" > "$test.output" 2>>>(err "$test") &&
+                diff -au "$test.expected" "$test.output" | colournul
+        )
+    then
+        if [[ "${test}" = issue3-prefix ]]; then
+            echo "$test: FAILED (expected, TODO)"
+        else
+            echo "$test: FAILED"
+            (( failures++ )) || true
+        fi
+    fi
 done
+if [[ $failures -gt 0 ]]; then
+    exit 1
+fi
