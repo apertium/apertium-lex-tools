@@ -1,0 +1,15 @@
+<rules>
+  <rule>
+	  <match lemma="free" tags="adj.*"><select lemma="gratis"/></match>
+  </rule>
+  <rule weight="3">
+    <match lemma="free" tags="adj.*">
+      <select lemma="libre"/>
+    </match>
+    <repeat from="0" upto="1">
+      <match lemma="as" tags="adv"/>
+      <match lemma="in" tags="pr"/>
+    </repeat>
+    <match lemma="speech" tags="n.*"/>
+  </rule>
+</rules>
