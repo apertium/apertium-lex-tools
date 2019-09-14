@@ -58,6 +58,7 @@ private:
   int initialState;
   int lastState;
   int currentState;
+  bool inRepeat;
 
   int currentRuleId;
 
@@ -74,6 +75,7 @@ private:
   void procMatch();
   void procSelect();
   void procRemove();
+  void procRepeat();
 
   wstring attrib(wstring const &name);
 
@@ -88,6 +90,7 @@ public:
   static wstring const LRX_COMPILER_SELECT_ELEM;
   static wstring const LRX_COMPILER_REMOVE_ELEM;
   static wstring const LRX_COMPILER_OR_ELEM;
+  static wstring const LRX_COMPILER_REPEAT_ELEM;
 
   static wstring const LRX_COMPILER_SURFACE_ATTR;
   static wstring const LRX_COMPILER_LEMMA_ATTR;
@@ -95,6 +98,8 @@ public:
   static wstring const LRX_COMPILER_COMMENT_ATTR;
   static wstring const LRX_COMPILER_NAME_ATTR;
   static wstring const LRX_COMPILER_WEIGHT_ATTR;
+  static wstring const LRX_COMPILER_FROM_ATTR;
+  static wstring const LRX_COMPILER_UPTO_ATTR;
 
   static wstring const LRX_COMPILER_TYPE_SELECT;
   static wstring const LRX_COMPILER_TYPE_REMOVE;

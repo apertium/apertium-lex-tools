@@ -27,12 +27,16 @@ wstring const LRXCompiler::LRX_COMPILER_MATCH_ELEM      = L"match";
 wstring const LRXCompiler::LRX_COMPILER_SELECT_ELEM     = L"select";
 wstring const LRXCompiler::LRX_COMPILER_REMOVE_ELEM     = L"remove";
 wstring const LRXCompiler::LRX_COMPILER_OR_ELEM         = L"or";
+wstring const LRXCompiler::LRX_COMPILER_REPEAT_ELEM     = L"repeat";
+
 wstring const LRXCompiler::LRX_COMPILER_LEMMA_ATTR      = L"lemma";
 wstring const LRXCompiler::LRX_COMPILER_SURFACE_ATTR    = L"surface";
 wstring const LRXCompiler::LRX_COMPILER_TAGS_ATTR       = L"tags";
 wstring const LRXCompiler::LRX_COMPILER_WEIGHT_ATTR     = L"weight";
 wstring const LRXCompiler::LRX_COMPILER_COMMENT_ATTR    = L"c";
 wstring const LRXCompiler::LRX_COMPILER_NAME_ATTR       = L"n";
+wstring const LRXCompiler::LRX_COMPILER_FROM_ATTR       = L"from";
+wstring const LRXCompiler::LRX_COMPILER_UPTO_ATTR       = L"upto";
 
 wstring const LRXCompiler::LRX_COMPILER_TYPE_SELECT     = L"select";
 wstring const LRXCompiler::LRX_COMPILER_TYPE_REMOVE     = L"remove";
@@ -85,6 +89,8 @@ LRXCompiler::LRXCompiler()
   initialState = transducer.getInitial();
   currentState = initialState;
   lastState = initialState;
+
+  inRepeat = false;
 
   alphabet.includeSymbol(L"<"+ LRX_COMPILER_TYPE_SELECT + L">");
   alphabet.includeSymbol(L"<"+ LRX_COMPILER_TYPE_REMOVE + L">");
@@ -257,6 +263,10 @@ LRXCompiler::procRule()
     {
       lastState = currentState;
       procOr();
+    }
+    else if(name == LRX_COMPILER_REPEAT_ELEM)
+    {
+      procRepeat();
     }
     else if(name == LRX_COMPILER_RULE_ELEM)
     {
@@ -480,10 +490,22 @@ LRXCompiler::procMatch()
 
     if(name == LRX_COMPILER_SELECT_ELEM)
     {
+      if(inRepeat)
+      {
+        cerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+        cerr << L"): <select> is not permitted inside <repeat>." << endl;
+        exit(EXIT_FAILURE);
+      }
       procSelect();
     }
     else if(name == LRX_COMPILER_REMOVE_ELEM)
     {
+      if(inRepeat)
+      {
+        cerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+        cerr << L"): <remove> is not permitted inside <repeat>." << endl;
+        exit(EXIT_FAILURE);
+      }
       procRemove();
     }
     else if(name == LRX_COMPILER_MATCH_ELEM)
@@ -759,6 +781,84 @@ LRXCompiler::procRemove()
   }
 
   return;
+}
+
+
+void
+LRXCompiler::procRepeat()
+{
+  bool wasRepeating = inRepeat;
+  inRepeat = true;
+  wstring xfrom = this->attrib(LRX_COMPILER_FROM_ATTR);
+  wstring xupto = this->attrib(LRX_COMPILER_UPTO_ATTR);
+  int from = stoi(xfrom);
+  int upto = stoi(xupto);
+  if(from < 0 || upto < 0)
+  {
+    cerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+    cerr << L"): Number of repetitions cannot be negative." << endl;
+    exit(EXIT_FAILURE);
+  }
+  else if(from > upto)
+  {
+    cerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+    cerr << L"): Lower bound on number of repetitions cannot be larger than upper bound." << endl;
+    exit(EXIT_FAILURE);
+  }
+  int count = upto - from + 1;
+  int oldstate = currentState;
+  Transducer temp = transducer;
+  transducer.clear();
+  currentState = initialState;
+  lastState = initialState;
+  while(true)
+  {
+    int ret = xmlTextReaderRead(reader);
+    if(ret != 1)
+    {
+      cerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+      cerr << L"): Parse error." << endl;
+      exit(EXIT_FAILURE);
+    }
+
+    wstring name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+    skipBlanks(name);
+
+    if(name == LRX_COMPILER_MATCH_ELEM)
+    {
+      procMatch();
+    }
+    else if(name == LRX_COMPILER_OR_ELEM)
+    {
+      lastState = currentState;
+      procOr();
+    }
+    else if(name == LRX_COMPILER_REPEAT_ELEM)
+    {
+      transducer.setFinal(currentState);
+      break;
+    }
+    else
+    {
+      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+      wcerr << L"): Invalid inclusion of '<" << name << L">' into '<" << LRX_COMPILER_REPEAT_ELEM;
+      wcerr << L">'." << endl;
+      exit(EXIT_FAILURE);
+    }
+  }
+  for(int i = 0; i < from; i++)
+  {
+    oldstate = temp.insertTransducer(oldstate, transducer);
+  }
+  transducer.optional();
+  for(int i = 0; i < count; i++)
+  {
+    oldstate = temp.insertTransducer(oldstate, transducer);
+  }
+  currentState = oldstate;
+  lastState = oldstate;
+  transducer = temp;
+  inRepeat = wasRepeating;
 }
 
 
