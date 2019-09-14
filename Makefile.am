@@ -1,7 +1,5 @@
 AM_LDFLAGS=$(LIBS)
-#AM_CXXFLAGS=-Wall -g -ggdb -DDEBUG
 
-# bin_PROGRAMS = lrx-comp lrx-proc multitrans irstlm-ranker #apertium-ldx-proc
 bin_PROGRAMS = lrx-comp lrx-proc multitrans # irstlm-ranker apertium-ldx-proc
 
 lrx_comp_SOURCES = lrx_compiler.cc lrx_comp.cc
@@ -9,6 +7,9 @@ lrx_comp_SOURCES = lrx_compiler.cc lrx_comp.cc
 lrx_proc_SOURCES = lrx_processor.cc lrx_proc.cc
 
 multitrans_SOURCES = tagger_output_processor.cc multi_translator.cc multitrans.cc
+
+pkgconfigdir = $(libdir)/pkgconfig
+dist_pkgconfig_DATA = apertium-lex-tools.pc
 
 # g++ -Wall -Wextra -O3 -std=c++98 yasmet.cc -o yasmet
 if HAVE_YASMET

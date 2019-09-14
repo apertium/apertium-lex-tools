@@ -5,7 +5,7 @@ m4_define([required_apertium_version], [3.5.2])
 m4_define([required_lttoolbox_version], [3.5.0])
 
 AC_INIT([apertium-lex-tools], [0.2.1], [ftyers@prompsit.com])
-AM_INIT_AUTOMAKE([apertium-lex-tools], [0.2.1], no-define)
+AM_INIT_AUTOMAKE
 AC_CONFIG_HEADER([lrx_config.h])
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -108,4 +108,4 @@ then
   PYTHON_INSTALL_PARAMS="--prefix=\$(prefix) --root=\$(DESTDIR)/"
 fi
 
-AC_OUTPUT([Makefile python/Makefile])
+AC_OUTPUT([Makefile apertium-lex-tools.pc python/Makefile])
