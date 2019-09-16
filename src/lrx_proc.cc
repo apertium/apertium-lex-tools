@@ -52,10 +52,10 @@ int main(int argc, char *argv[])
 #if HAVE_GETOPT_LONG
   static struct option long_options[]=
     {
-      {"trace",        0, 0, 't'}
-      {"max-ent",      0, 0, 'm'} // deprecated cf. https://github.com/apertium/apertium-lex-tools/issues/24
-      {"debug",        0, 0, 'd'}
-      {"null-flush",   0, 0, 'z'}
+      {"trace",        0, 0, 't'},
+      {"max-ent",      0, 0, 'm'}, // deprecated cf. https://github.com/apertium/apertium-lex-tools/issues/24
+      {"debug",        0, 0, 'd'},
+      {"null-flush",   0, 0, 'z'},
     };
 #endif
 

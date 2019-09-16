@@ -18,8 +18,8 @@
 /m4/ltoptions.m4
 /m4/ltsugar.m4
 /m4/ltversion.m4
-/Makefile
-/Makefile.in
+Makefile
+Makefile.in
 /missing
 
 # Prerequisites
@@ -57,13 +57,10 @@
 
 lrx-comp
 lrx-proc
-lrx_config.h
-lrx_config.h.in*
+lrx_config.h*
 multitrans
 stamp-h1
 
-/python/Makefile.in
-/python/Makefile
 /python/lex_tools_wrap.cpp
 /python/lextools.py
 /python/setup.py
