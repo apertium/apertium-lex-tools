@@ -1,32 +1,13 @@
 AM_LDFLAGS=$(LIBS)
 
-bin_PROGRAMS = lrx-comp lrx-proc multitrans # irstlm-ranker apertium-ldx-proc
-
-lrx_comp_SOURCES = lrx_compiler.cc lrx_comp.cc
-
-lrx_proc_SOURCES = lrx_processor.cc lrx_proc.cc
-
-multitrans_SOURCES = tagger_output_processor.cc multi_translator.cc multitrans.cc
+SUBDIRS = src
 
 pkgconfigdir = $(libdir)/pkgconfig
 dist_pkgconfig_DATA = apertium-lex-tools.pc
 
-# g++ -Wall -Wextra -O3 -std=c++98 yasmet.cc -o yasmet
-if HAVE_YASMET
-    yasmet_SOURCES = yasmet.cc
-    bin_PROGRAMS += yasmet
-endif
-
-if HAVE_IRSTLM
-    irstlm_ranker_SOURCES = irstlm_ranker.cpp
-    bin_PROGRAMS += irstlm_ranker
-endif
-
 if HAVE_PYTHON_BINDINGS
-SUBDIRS = python
+SUBDIRS += python
 endif
-
-EXTRA_DIST = lrx_compiler.h lrx_processor.h multi_translator.h tagger_output_processor.h
 
 .PHONY: check
 check:

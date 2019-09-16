@@ -4,9 +4,8 @@ m4_define([required_libxml_version], [2.6.17])
 m4_define([required_apertium_version], [3.5.2])
 m4_define([required_lttoolbox_version], [3.5.0])
 
-AC_INIT([apertium-lex-tools], [0.2.1], [ftyers@prompsit.com])
+AC_INIT([apertium-lex-tools], [0.2.2], [ftyers@prompsit.com])
 AM_INIT_AUTOMAKE
-AC_CONFIG_HEADER([lrx_config.h])
 AC_CONFIG_MACRO_DIR([m4])
 
 AC_PROG_CXX
@@ -62,9 +61,9 @@ AC_SUBST(LIBXML_LIBS)
 # Checks for libraries.
 AC_CHECK_LIB(xml2, xmlReaderForFile)
 
-AC_CHECK_FUNCS([setlocale strdup getopt_long])
+AC_CHECK_FUNCS([setlocale strdup])
 
-AC_CHECK_DECLS([fread_unlocked, fwrite_unlocked, fgetc_unlocked, fputc_unlocked, fputs_unlocked, getopt_long, fgetwc_unlocked, fputwc_unlocked, fgetws_unlocked, fputws_unlocked])
+AC_CHECK_DECLS([fread_unlocked, fwrite_unlocked, fgetc_unlocked, fputc_unlocked, fputs_unlocked, fgetwc_unlocked, fputwc_unlocked, fgetws_unlocked, fputws_unlocked])
 
 CPPFLAGS="$CPPFLAGS $CFLAGS $APERTIUM_CFLAGS $LIBXML_CFLAGS"
 LIBS="$LIBS $APERTIUM_LIBS $LIBXML_LIBS -lz"
@@ -85,15 +84,11 @@ AX_CHECK_COMPILE_FLAG([-std=c++20], [CXXFLAGS="$CXXFLAGS -std=c++20"], [
  ])
 ])
 
-AC_CONFIG_FILES([python/setup.py])
-
 AS_IF([test "x$irstlm" == "xno"],
       [AC_MSG_NOTICE([IRSTLM is not enabled; you will not be able run monolingual rule-learning; enable using --with-irstlm])])
 
 AS_IF([test "x$yasmet" == "xno"],
       [AC_MSG_NOTICE([YASMET is not enabled; you will not be able run maximum-entropy training; enable using --with-yasmet])])
-
-AM_PATH_PYTHON([3.4], [], [AC_MSG_WARN([Can't generate SWIG wrapper without Python])])
 
 AC_ARG_ENABLE([python-bindings],
               AS_HELP_STRING([--enable-python-bindings],
@@ -102,10 +97,17 @@ AC_ARG_ENABLE([python-bindings],
               [enable_python_bindings=no])
 AM_CONDITIONAL([HAVE_PYTHON_BINDINGS], [test x$enable_python_bindings = xyes])
 
-AC_ARG_VAR([PYTHON_INSTALL_PARAMS], [Parameters to pass to the Python 3 module install step])
-if test "x$PYTHON_INSTALL_PARAMS" = "x"
+if test "x$enable_python_bindings" = "xyes"
 then
-  PYTHON_INSTALL_PARAMS="--prefix=\$(prefix) --root=\$(DESTDIR)/"
+	AM_PATH_PYTHON([3.4], [], [AC_MSG_WARN([Can't generate SWIG wrapper without Python])])
+	AC_CONFIG_FILES([python/Makefile python/setup.py])
+
+	AC_ARG_VAR([PYTHON_INSTALL_PARAMS], [Parameters to pass to the Python 3 module install step])
+	if test "x$PYTHON_INSTALL_PARAMS" = "x"
+	then
+	  PYTHON_INSTALL_PARAMS="--prefix=\$(prefix) --root=\$(DESTDIR)/"
+	fi
 fi
 
-AC_OUTPUT([Makefile apertium-lex-tools.pc python/Makefile])
+AC_CONFIG_FILES([Makefile apertium-lex-tools.pc src/Makefile])
+AC_OUTPUT

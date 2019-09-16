@@ -16,7 +16,6 @@
  */
 
 #include <lrx_processor.h>
-//#include <lrx_config.h>
 
 using namespace std;
 

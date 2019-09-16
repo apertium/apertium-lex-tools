@@ -16,7 +16,6 @@
  */
 
 #include <lrx_compiler.h>
-//#include <lrx_config.h>
 
 
 using namespace std;
@@ -688,7 +687,7 @@ LRXCompiler::procRemove()
     recogniser.linkStates(localCurrentState, localLast, 0);
     key = key + L"<ANY_CHAR>";
   }
-  
+
   for(wstring::iterator it = lemma.begin(); it != lemma.end(); it++)
   {
     currentState = transducer.insertSingleTransduction(alphabet(0, *it), currentState);
