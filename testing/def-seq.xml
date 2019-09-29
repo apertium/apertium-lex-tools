@@ -1,0 +1,21 @@
+<lrx>
+  <def-seqs>
+    <def-seq n="bloop">
+      <or>
+        <match lemma="bloop"/>
+        <match lemma="shoop"/>
+      </or>
+    </def-seq>
+  </def-seqs>
+  <rules>
+    <rule>
+	    <match lemma="free" tags="adj.*"><select lemma="gratis"/></match>
+    </rule>
+    <rule weight="3">
+      <match lemma="free" tags="adj.*">
+        <select lemma="libre"/>
+      </match>
+      <seq n="bloop"/>
+    </rule>
+  </rules>
+</lrx>

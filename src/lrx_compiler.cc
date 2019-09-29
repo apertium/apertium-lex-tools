@@ -20,6 +20,11 @@
 
 using namespace std;
 
+wstring const LRXCompiler::LRX_COMPILER_LRX_ELEM        = L"lrx";
+wstring const LRXCompiler::LRX_COMPILER_DEFMACROS_ELEM  = L"def-macros";
+wstring const LRXCompiler::LRX_COMPILER_DEFMACRO_ELEM   = L"def-macro";
+wstring const LRXCompiler::LRX_COMPILER_DEFSEQS_ELEM    = L"def-seqs";
+wstring const LRXCompiler::LRX_COMPILER_DEFSEQ_ELEM     = L"def-seq";
 wstring const LRXCompiler::LRX_COMPILER_RULES_ELEM      = L"rules";
 wstring const LRXCompiler::LRX_COMPILER_RULE_ELEM       = L"rule";
 wstring const LRXCompiler::LRX_COMPILER_MATCH_ELEM      = L"match";
@@ -27,6 +32,7 @@ wstring const LRXCompiler::LRX_COMPILER_SELECT_ELEM     = L"select";
 wstring const LRXCompiler::LRX_COMPILER_REMOVE_ELEM     = L"remove";
 wstring const LRXCompiler::LRX_COMPILER_OR_ELEM         = L"or";
 wstring const LRXCompiler::LRX_COMPILER_REPEAT_ELEM     = L"repeat";
+wstring const LRXCompiler::LRX_COMPILER_SEQ_ELEM        = L"seq";
 
 wstring const LRXCompiler::LRX_COMPILER_LEMMA_ATTR      = L"lemma";
 wstring const LRXCompiler::LRX_COMPILER_SURFACE_ATTR    = L"surface";
@@ -89,7 +95,7 @@ LRXCompiler::LRXCompiler()
   currentState = initialState;
   lastState = initialState;
 
-  inRepeat = false;
+  canSelect = true;
 
   alphabet.includeSymbol(L"<"+ LRX_COMPILER_TYPE_SELECT + L">");
   alphabet.includeSymbol(L"<"+ LRX_COMPILER_TYPE_REMOVE + L">");
@@ -198,6 +204,18 @@ LRXCompiler::procNode()
   {
     /* ignorar */
   }
+  else if(nombre == LRX_COMPILER_LRX_ELEM)
+  {
+    /* ignorar */
+  }
+  else if(nombre == LRX_COMPILER_DEFSEQS_ELEM)
+  {
+    /* ignorar */
+  }
+  else if(nombre == LRX_COMPILER_DEFSEQ_ELEM)
+  {
+    procDefSeq();
+  }
   else if(nombre == LRX_COMPILER_RULES_ELEM)
   {
     /* ignorar */
@@ -267,6 +285,10 @@ LRXCompiler::procRule()
     {
       procRepeat();
     }
+    else if(name == LRX_COMPILER_SEQ_ELEM)
+    {
+      procSeq();
+    }
     else if(name == LRX_COMPILER_RULE_ELEM)
     {
       currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<$>"), alphabet(L"<$>")), currentState);
@@ -321,6 +343,12 @@ LRXCompiler::procOr()
       procMatch();
       reachedStates.push_back(currentState);
     }
+    else if(name == LRX_COMPILER_SEQ_ELEM)
+    {
+      currentState = lastState;
+      procSeq();
+      reachedStates.push_back(currentState);
+    }
     else if(name == LRX_COMPILER_OR_ELEM)
     {
       if(reachedStates.size() > 1)
@@ -346,6 +374,63 @@ LRXCompiler::procOr()
   }
 
   return;
+}
+
+
+void
+LRXCompiler::procDefSeq()
+{
+  canSelect = false;
+  Transducer temp = transducer;
+  transducer.clear();
+  int oldstate = currentState;
+  currentState = initialState;
+  lastState = initialState;
+  wstring seqname = this->attrib(LRX_COMPILER_NAME_ATTR);
+  while(true)
+  {
+    int ret = xmlTextReaderRead(reader);
+    if(ret != 1)
+    {
+      cerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+      cerr << L"): Parse error." << endl;
+      exit(EXIT_FAILURE);
+    }
+
+    wstring name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+    skipBlanks(name);
+
+    if(name == LRX_COMPILER_MATCH_ELEM)
+    {
+      procMatch();
+    }
+    else if(name == LRX_COMPILER_OR_ELEM)
+    {
+      lastState = currentState;
+      procOr();
+    }
+    else if(name == LRX_COMPILER_REPEAT_ELEM)
+    {
+      procRepeat();
+    }
+    else if(name == LRX_COMPILER_DEFSEQ_ELEM)
+    {
+      transducer.setFinal(currentState);
+      break;
+    }
+    else
+    {
+      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+      wcerr << L"): Invalid inclusion of '<" << name << L">' into '<" << LRX_COMPILER_REPEAT_ELEM;
+      wcerr << L">'." << endl;
+      exit(EXIT_FAILURE);
+    }
+  }
+  sequences[seqname] = transducer;
+  currentState = oldstate;
+  lastState = oldstate;
+  transducer = temp;
+  canSelect = true;
 }
 
 
@@ -489,7 +574,7 @@ LRXCompiler::procMatch()
 
     if(name == LRX_COMPILER_SELECT_ELEM)
     {
-      if(inRepeat)
+      if(!canSelect)
       {
         cerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
         cerr << L"): <select> is not permitted inside <repeat>." << endl;
@@ -499,7 +584,7 @@ LRXCompiler::procMatch()
     }
     else if(name == LRX_COMPILER_REMOVE_ELEM)
     {
-      if(inRepeat)
+      if(!canSelect)
       {
         cerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
         cerr << L"): <remove> is not permitted inside <repeat>." << endl;
@@ -786,8 +871,8 @@ LRXCompiler::procRemove()
 void
 LRXCompiler::procRepeat()
 {
-  bool wasRepeating = inRepeat;
-  inRepeat = true;
+  bool couldSelect = canSelect;
+  canSelect = false;
   wstring xfrom = this->attrib(LRX_COMPILER_FROM_ATTR);
   wstring xupto = this->attrib(LRX_COMPILER_UPTO_ATTR);
   int from = stoi(xfrom);
@@ -832,6 +917,10 @@ LRXCompiler::procRepeat()
       lastState = currentState;
       procOr();
     }
+    else if(name == LRX_COMPILER_SEQ_ELEM)
+    {
+      procSeq();
+    }
     else if(name == LRX_COMPILER_REPEAT_ELEM)
     {
       transducer.setFinal(currentState);
@@ -857,7 +946,21 @@ LRXCompiler::procRepeat()
   currentState = oldstate;
   lastState = oldstate;
   transducer = temp;
-  inRepeat = wasRepeating;
+  canSelect = couldSelect;
+}
+
+
+void
+LRXCompiler::procSeq()
+{
+  wstring name = this->attrib(LRX_COMPILER_NAME_ATTR);
+  if(sequences.find(name) == sequences.end())
+  {
+    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+    wcerr << L"): Sequence '" << name << L"' not defined." << endl;
+    exit(EXIT_FAILURE);
+  }
+  currentState = transducer.insertTransducer(currentState, sequences[name]);
 }
 
 
