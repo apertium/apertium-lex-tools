@@ -89,9 +89,6 @@ private:
 
 public:
   static wstring const LRX_COMPILER_LRX_ELEM;
-  static wstring const LRX_COMPILER_METALRX_ELEM;
-  static wstring const LRX_COMPILER_DEFMACROS_ELEM;
-  static wstring const LRX_COMPILER_DEFMACRO_ELEM;
   static wstring const LRX_COMPILER_DEFSEQS_ELEM;
   static wstring const LRX_COMPILER_DEFSEQ_ELEM;
   static wstring const LRX_COMPILER_RULES_ELEM;

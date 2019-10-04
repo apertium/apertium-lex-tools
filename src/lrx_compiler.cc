@@ -21,9 +21,6 @@
 using namespace std;
 
 wstring const LRXCompiler::LRX_COMPILER_LRX_ELEM        = L"lrx";
-wstring const LRXCompiler::LRX_COMPILER_METALRX_ELEM        = L"metalrx";
-wstring const LRXCompiler::LRX_COMPILER_DEFMACROS_ELEM  = L"def-macros";
-wstring const LRXCompiler::LRX_COMPILER_DEFMACRO_ELEM   = L"def-macro";
 wstring const LRXCompiler::LRX_COMPILER_DEFSEQS_ELEM    = L"def-seqs";
 wstring const LRXCompiler::LRX_COMPILER_DEFSEQ_ELEM     = L"def-seq";
 wstring const LRXCompiler::LRX_COMPILER_RULES_ELEM      = L"rules";
@@ -206,10 +203,6 @@ LRXCompiler::procNode()
     /* ignorar */
   }
   else if(nombre == LRX_COMPILER_LRX_ELEM)
-  {
-    /* ignorar */
-  }
-  else if(nombre == LRX_COMPILER_METALRX_ELEM)
   {
     /* ignorar */
   }
