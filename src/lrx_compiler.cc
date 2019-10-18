@@ -887,7 +887,7 @@ LRXCompiler::procRepeat()
     cerr << L"): Lower bound on number of repetitions cannot be larger than upper bound." << endl;
     exit(EXIT_FAILURE);
   }
-  int count = upto - from + 1;
+  int count = upto - from;
   int oldstate = currentState;
   Transducer temp = transducer;
   transducer.clear();
