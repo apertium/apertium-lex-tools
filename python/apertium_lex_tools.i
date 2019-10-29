@@ -1,4 +1,4 @@
-%module lextools
+%module apertium_lex_tools
 
 %include <lrx_processor.h>
 %include <lttoolbox/lt_locale.h>

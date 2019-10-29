@@ -17,8 +17,6 @@
 
 #include <lrx_compiler.h>
 
-#define PACKAGE_VERSION "0.2.0"
-
 using namespace std;
 
 void endProgram(char *name)

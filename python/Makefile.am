@@ -1,4 +1,4 @@
-SWIG_INTERFACE = lex_tools.i
+SWIG_INTERFACE = apertium_lex_tools.i
 
 BUILT_SOURCES = %_wrap.cpp
 
