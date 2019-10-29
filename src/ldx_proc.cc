@@ -28,8 +28,6 @@
 #include <lttoolbox/ltstr.h>
 #include <lttoolbox/lt_locale.h>
 
-#define PACKAGE_VERSION "0.1.0"
-
 using namespace std;
 
 

@@ -18,7 +18,7 @@ class CustomBuild(build):
 
 
 def get_sources():
-    sources = ['lex_tools.i']
+    sources = ['apertium_lex_tools.i']
     cc_sources = ['lrx_processor.cc']
     rel_path = '../src'
     sources.extend(path.join(rel_path, f) for f in cc_sources)
@@ -31,10 +31,10 @@ def get_include_dirs():
     return dirs + ['../src']
 
 
-lextools_module = Extension(
-    name='_lextools',
+apertium_lex_tools_module = Extension(
+    name='_apertium_lex_tools',
     sources=get_sources(),
-    swig_opts=['-c++', '-I../src', '-Wall']+'@LTTOOLBOX_CFLAGS@'.split(),
+    swig_opts=['-c++', '-I../src', '-Wall']+'@LTTOOLBOX_CFLAGS@'.split()+'@LIBXML_CFLAGS@'.split(),
     include_dirs=get_include_dirs(),
     library_dirs=['/usr/include/libxml2', '/usr/local/lib'],
     extra_compile_args='@CXXFLAGS@'.split(),
@@ -51,6 +51,6 @@ setup(
     license='GPL-3.0+',
     maintainer_email='@PACKAGE_BUGREPORT@',
     cmdclass={'build': CustomBuild},
-    ext_modules=[lextools_module],
-    py_modules=['lextools'],
+    ext_modules=[apertium_lex_tools_module],
+    py_modules=['apertium_lex_tools'],
 )
