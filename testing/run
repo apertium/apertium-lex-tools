@@ -33,12 +33,8 @@ for xml in *.xml; do
                 diff -au "$test.expected" "$test.output" | colournul
         )
     then
-        if [[ "${test}" = issue3-prefix ]]; then
-            echo "$test: FAILED (expected, TODO)"
-        else
-            echo "$test: FAILED"
-            (( failures++ )) || true
-        fi
+        echo "$test: FAILED"
+        (( failures++ )) || true
     fi
 done
 if [[ $failures -gt 0 ]]; then
