@@ -805,6 +805,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
     if(nullFlush && val == L'\0')
     {
       processFlushME(output, sl, tl, blanks, scores, operations);
+      fwprintf(output, L"%S", blanks[pos].c_str());
       pos = 0;
       tl.clear();
       sl.clear();
@@ -929,15 +930,10 @@ LRXProcessor::processME(FILE *input, FILE *output)
                   operations[j].first = id;
                   if(it2->find(LRX_PROCESSOR_TAG_REMOVE) != wstring::npos) {
                     operations[j].second = Remove;
-                    std::wcerr << "\033[1;35mRemove=\t" << Remove << "\033[0m" << std::endl;
                   }
                   else {
                     operations[j].second = Select;
-                    std::wcerr << "\033[1;35mSelect=\t" << Select << "\033[0m" << std::endl;
                   }
-                  std::wcerr << "\033[1;33mj=\t" << j << "\033[0m\t" ;
-                  std::wcerr << "\033[1;34mop=\t" << *it2 << "\033[0m\t" ;
-                  std::wcerr << "\033[1;35mid=\t" << id << "\033[0m" << std::endl;
                 }
                 j++;
               }
@@ -977,96 +973,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
 
 
         // Here we actually apply the rules that we've matched
-
-        unsigned int spos = 0;
-        for(spos = 0; spos <= pos; spos++)
-        {
-          if(sl[spos] == L"")
-          {
-            continue;
-          }
-
-          fwprintf(output, L"%S^%S/", blanks[spos].c_str(), sl[spos].c_str());
-
-          vector<wstring>::iterator ti;
-          vector<wstring>::iterator penum = tl[spos].end(); penum--;
-
-          if (tl[spos].size() > 1) {
-            //--
-            set<wstring *> ti_keep;
-            vector<pair<wstring *, double>> spos_matches;
-            for (ti = tl[spos].begin(); ti != tl[spos].end(); ti++) {
-              ti_keep.insert(&*ti);
-              for (const auto &si : scores[spos]) {
-                if (debugMode) {
-                  fwprintf(stderr, L">>> %d -> %S -> %.5f\n", spos,
-                           si.first.c_str(), si.second);
-                }
-                if (recognisePattern(*ti, si.first)) {
-                  spos_matches.push_back(make_pair(&*ti, si.second));
-                }
-              }
-            }
-            if (!spos_matches.empty()) // If we actually got a winner
-            {
-              sort(spos_matches.begin(),
-                   spos_matches.end(),
-                   [](auto &a, auto &b) { return a.second > b.second; });
-              for (const auto &m : spos_matches) {
-                if (traceMode || debugMode) {
-                  wstring op = ((operations[spos].second == Select) ? L"SELECT" : L"REMOVE");
-                  fwprintf(
-                    stderr, L"%d:%S:%.5f:%S:%S\n\tspos:%d",
-                    lineno,
-                    op.c_str(),
-                    m.second,
-                    sl[spos].c_str(),
-                    m.first->c_str(),
-                    spos);
-                }
-                if (operations[spos].second == Select) {
-                  ti_keep.clear();
-                  ti_keep.insert(m.first);
-                  break;
-                } else if (ti_keep.size() > 1) {
-                  ti_keep.erase(m.first);
-                }
-              }
-              bool printed = false;
-              for(const auto& ti_max : ti_keep) {
-                if(printed) {
-                  fwprintf(output, L"/");
-                }
-                fwprintf(output, L"%S", ti_max->c_str());
-                printed = true;
-              }
-            } else {
-              for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
-              {
-                fwprintf(output, L"%S", ti->c_str());
-                if(ti != penum)
-                {
-                  fwprintf(output, L"/");
-                }
-              }
-            }
-          } else {
-            for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
-            {
-              fwprintf(output, L"%S", ti->c_str());
-              if(ti != penum)
-              {
-                fwprintf(output, L"/");
-              }
-            }
-          }
-
-          fwprintf(output, L"$");
-          if(debugMode)
-          {
-            fwprintf(output, L"%d", spos);
-          }
-        }
+        processFlushME(output, sl, tl, blanks, scores, operations);
 
         pos = 0;
         tl.clear();
@@ -1164,6 +1071,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
   }
 
   processFlushME(output, sl, tl, blanks, scores, operations);
+  fwprintf(output, L"%S", blanks[pos].c_str());
 }
 
 void
@@ -1270,5 +1178,4 @@ LRXProcessor::processFlushME(FILE *output,
 
   }
 
-  fwprintf(output, L"%S", blanks[pos].c_str());
 }
