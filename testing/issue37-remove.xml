@@ -1,0 +1,12 @@
+<rules>
+  <rule weight="3.14159">
+    <match lemma="a" tags="a"><remove lemma="removemefirst"/></match>
+  </rule>
+  <rule weight="2.71828">
+    <match lemma="a" tags="a"><remove lemma="thenremoveme"/></match>
+  </rule>
+
+  <rule weight="1.61803">
+    <match lemma="x" tags="x"><remove lemma="removemeonly"/></match>
+  </rule>
+</rules>
