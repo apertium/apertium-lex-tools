@@ -793,6 +793,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
   map<int, wstring > blanks; // map of the superblanks
 
   map<int, map<wstring, double> > scores; //
+  map<int, pair<wstring, AppType> > operations;
 
   vector<State*> alive_states ;
   alive_states.push_back(new State(*initial_state));
@@ -803,7 +804,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
 
     if(nullFlush && val == L'\0')
     {
-      processFlushME(output, sl, tl, blanks, scores);
+      processFlushME(output, sl, tl, blanks, scores, operations);
       pos = 0;
       tl.clear();
       sl.clear();
@@ -925,6 +926,18 @@ LRXProcessor::processME(FILE *input, FILE *output)
                   {
                     fwprintf(stderr, L"#[%d]SCORE %.5f / %S\n", j, scores[j][*it2], it2->c_str());
                   }
+                  operations[j].first = id;
+                  if(it2->find(LRX_PROCESSOR_TAG_REMOVE) != wstring::npos) {
+                    operations[j].second = Remove;
+                    std::wcerr << "\033[1;35mRemove=\t" << Remove << "\033[0m" << std::endl;
+                  }
+                  else {
+                    operations[j].second = Select;
+                    std::wcerr << "\033[1;35mSelect=\t" << Select << "\033[0m" << std::endl;
+                  }
+                  std::wcerr << "\033[1;33mj=\t" << j << "\033[0m\t" ;
+                  std::wcerr << "\033[1;34mop=\t" << *it2 << "\033[0m\t" ;
+                  std::wcerr << "\033[1;35mid=\t" << id << "\033[0m" << std::endl;
                 }
                 j++;
               }
@@ -978,43 +991,56 @@ LRXProcessor::processME(FILE *input, FILE *output)
           vector<wstring>::iterator ti;
           vector<wstring>::iterator penum = tl[spos].end(); penum--;
 
-          if(tl[spos].size() > 1)
-          {
+          if (tl[spos].size() > 1) {
             //--
-            double l_max = 0.0;
-            wstring ti_max;
-            for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
-            {
-
-                map<wstring, double>::iterator si;
-                for(si = scores[spos].begin(); si != scores[spos].end(); si++)
-                {
-                  if(debugMode)
-                  {
-                    fwprintf(stderr, L">>> %d -> %S -> %.5f\n", spos, si->first.c_str(), si->second);
-                  }
-                  bool matched = false;
-                  matched = recognisePattern(*ti, si->first);
-                  if(si->second > l_max && matched)
-                  {
-                    l_max = si->second;
-                    ti_max = *ti;
-                  }
+            set<wstring *> ti_keep;
+            vector<pair<wstring *, double>> spos_matches;
+            for (ti = tl[spos].begin(); ti != tl[spos].end(); ti++) {
+              ti_keep.insert(&*ti);
+              for (const auto &si : scores[spos]) {
+                if (debugMode) {
+                  fwprintf(stderr, L">>> %d -> %S -> %.5f\n", spos,
+                           si.first.c_str(), si.second);
                 }
-            }
-
-            if(l_max > 0.0)  // If we actually got a winner
-            {
-              if(traceMode || debugMode)
-              {
-                //fwprintf(stderr, L"%d: %d: %S -> %S (%d)\n", lineno, spos, sl[spos].c_str(), ti->c_str(), scores[spos].size());
-                //fwprintf(stderr, L"MAX: %.5f = %S\n", l_max, ti_max.c_str());
-                fwprintf(stderr, L"%d:SELECT:%.5f:%S:%S\n", lineno, l_max, sl[spos].c_str(), ti_max.c_str());
+                if (recognisePattern(*ti, si.first)) {
+                  spos_matches.push_back(make_pair(&*ti, si.second));
+                }
               }
-              fwprintf(output, L"%S", ti_max.c_str());
             }
-            else
+            if (!spos_matches.empty()) // If we actually got a winner
             {
+              sort(spos_matches.begin(),
+                   spos_matches.end(),
+                   [](auto &a, auto &b) { return a.second > b.second; });
+              for (const auto &m : spos_matches) {
+                if (traceMode || debugMode) {
+                  wstring op = ((operations[spos].second == Select) ? L"SELECT" : L"REMOVE");
+                  fwprintf(
+                    stderr, L"%d:%S:%.5f:%S:%S\n\tspos:%d",
+                    lineno,
+                    op.c_str(),
+                    m.second,
+                    sl[spos].c_str(),
+                    m.first->c_str(),
+                    spos);
+                }
+                if (operations[spos].second == Select) {
+                  ti_keep.clear();
+                  ti_keep.insert(m.first);
+                  break;
+                } else if (ti_keep.size() > 1) {
+                  ti_keep.erase(m.first);
+                }
+              }
+              bool printed = false;
+              for(const auto& ti_max : ti_keep) {
+                if(printed) {
+                  fwprintf(output, L"/");
+                }
+                fwprintf(output, L"%S", ti_max->c_str());
+                printed = true;
+              }
+            } else {
               for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
               {
                 fwprintf(output, L"%S", ti->c_str());
@@ -1024,9 +1050,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
                 }
               }
             }
-          }
-          else
-          {
+          } else {
             for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
             {
               fwprintf(output, L"%S", ti->c_str());
@@ -1139,7 +1163,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
 
   }
 
-  processFlushME(output, sl, tl, blanks, scores);
+  processFlushME(output, sl, tl, blanks, scores, operations);
 }
 
 void
@@ -1147,7 +1171,8 @@ LRXProcessor::processFlushME(FILE *output,
                              map<int, wstring > &sl,
                              map<int, vector<wstring> > &tl,
                              map<int, wstring > &blanks,
-                             map<int, map<wstring, double> > &scores) {
+                             map<int, map<wstring, double> > &scores,
+                             map<int, pair<wstring, AppType> > &operations) {
 
   unsigned int spos = 0;
   for(spos = 0; spos <= pos; spos++)
@@ -1165,37 +1190,52 @@ LRXProcessor::processFlushME(FILE *output,
     if(tl[spos].size() > 1)
     {
       //--
-      double l_max = 0.0;
-      wstring ti_max;
+      set<wstring*> ti_keep;
+      vector<pair<wstring*, double>> spos_matches;
       for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
       {
-
-        map<wstring, double>::iterator si;
-        for(si = scores[spos].begin(); si != scores[spos].end(); si++)
-        {
-          if(debugMode)
-          {
-            fwprintf(stderr, L">>> %d -> %S -> %.5f\n", spos, si->first.c_str(), si->second);
+        ti_keep.insert(&*ti);
+        for(const auto& si : scores[spos]) {
+          if (debugMode) {
+            fwprintf(stderr, L">>> %d -> %S -> %.5f\n", spos, si.first.c_str(), si.second);
           }
-          bool matched = false;
-          matched = recognisePattern(*ti, si->first);
-          if(si->second > l_max && matched)
-          {
-            l_max = si->second;
-            ti_max = *ti;
+          if(recognisePattern(*ti, si.first)) {
+            spos_matches.push_back(make_pair(&*ti, si.second));
           }
         }
       }
-
-      if(l_max > 0.0)  // If we actually got a winner
+      if(!spos_matches.empty())  // If we actually got a winner
       {
-        if(traceMode || debugMode)
-        {
-          //fwprintf(stderr, L"%d: %d: %S -> %S (%d)\n", lineno, spos, sl[spos].c_str(), ti->c_str(), scores[spos].size());
-          //fwprintf(stderr, L"MAX: %.5f = %S\n", l_max, ti_max.c_str());
-          fwprintf(stderr, L"%d:SELECT:%.5f:%S:%S\n", lineno, l_max, sl[spos].c_str(), ti_max.c_str());
+        sort(spos_matches.begin(),
+             spos_matches.end(),
+             [](auto &a, auto &b) { return a.second > b.second; });
+        for (const auto &m : spos_matches) {
+          if (traceMode || debugMode) {
+            wstring op = ((operations[spos].second == Select) ? L"SELECT" : L"REMOVE");
+            fwprintf(
+                stderr, L"%d:%S:%.5f:%S:%S\n",
+                lineno,
+                op.c_str(),
+                m.second,
+                sl[spos].c_str(),
+                m.first->c_str());
+          }
+          if (operations[spos].second == Select) {
+            ti_keep.clear();
+            ti_keep.insert(m.first);
+            break;
+          } else if(ti_keep.size() > 1) {
+            ti_keep.erase(m.first);
+          }
         }
-        fwprintf(output, L"%S", ti_max.c_str());
+        bool printed = false;
+        for(const auto& ti_max : ti_keep) {
+          if(printed) {
+            fwprintf(output, L"/");
+          }
+          fwprintf(output, L"%S", ti_max->c_str());
+          printed = true;
+        }
       }
       else
       {
