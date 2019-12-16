@@ -4,11 +4,11 @@
       <select lemma="" tags="adv"/>
     </match>
   </rule>
-  <rule c="even empty lemmas without tags">
-    <match lemma="emptier" tags="adv">
-      <select lemma=""/>
-    </match>
-  </rule>
+  <!-- <rule c="empty lemmas without tags TODO"> -->
+  <!--   <match lemma="emptier" tags="adv"> -->
+  <!--     <select lemma=""/> -->
+  <!--   </match> -->
+  <!-- </rule> -->
   <rule c="but unspecified lemmas should be equivalent to star lemmas">
     <match tags="vblex.*">
       <select lemma="pickme"/>
