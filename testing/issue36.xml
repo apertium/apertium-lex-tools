@@ -1,0 +1,22 @@
+<rules>
+  <rule c="check that we can select empty lemmas">
+    <match lemma="toempty" tags="adv">
+      <select lemma="" tags="adv"/>
+    </match>
+  </rule>
+  <rule c="even empty lemmas without tags">
+    <match lemma="emptier" tags="adv">
+      <select lemma=""/>
+    </match>
+  </rule>
+  <rule c="but unspecified lemmas should be equivalent to star lemmas">
+    <match tags="vblex.*">
+      <select lemma="pickme"/>
+    </match>
+  </rule>
+  <rule c="so star lemmas should be equivalent to unspecified lemmas">
+    <match lemma="*" tags="vblex.*">
+      <select lemma="andme"/>
+    </match>
+  </rule>
+</rules>

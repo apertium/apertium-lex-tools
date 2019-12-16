@@ -148,6 +148,27 @@ LRXCompiler::attrib(wstring const &name)
   return XMLParseUtil::attrib(reader, name);
 }
 
+wstring
+LRXCompiler::attrib(wstring const &name, const wstring fallback)
+{
+  string mystr = "";
+  for (int i = 0, limit = name.size(); i != limit; i++) {
+    mystr += static_cast<char>(name[i]);
+  }
+
+  xmlChar *attrname = xmlCharStrdup(mystr.c_str());
+  xmlChar *myattr = xmlTextReaderGetAttribute(reader, attrname);
+  wstring result = XMLParseUtil::towstring(myattr);
+  xmlFree(myattr);
+  xmlFree(attrname);
+  if(myattr == NULL) {
+    return fallback;
+  }
+  else {
+    return result;
+  }
+}
+
 bool
 LRXCompiler::allBlanks()
 {
@@ -435,7 +456,7 @@ LRXCompiler::procDefSeq()
 void
 LRXCompiler::procMatch()
 {
-  wstring lemma = this->attrib(LRX_COMPILER_LEMMA_ATTR);
+  wstring lemma = this->attrib(LRX_COMPILER_LEMMA_ATTR, L"*");
   wstring tags = this->attrib(LRX_COMPILER_TAGS_ATTR);
   wstring surface = this->attrib(LRX_COMPILER_SURFACE_ATTR);
 
@@ -459,11 +480,7 @@ LRXCompiler::procMatch()
     }
 
 
-    if(lemma == L"*") {
-      lemma = L"";
-    }
-
-    if(lemma == L"")
+    if(lemma == L"*")
     {
       if(debugMode)
       {
@@ -611,13 +628,8 @@ void
 LRXCompiler::procSelect()
 {
 
-  wstring lemma =this->attrib(LRX_COMPILER_LEMMA_ATTR);
+  wstring lemma =this->attrib(LRX_COMPILER_LEMMA_ATTR, L"*");
   wstring tags =this->attrib(LRX_COMPILER_TAGS_ATTR);
-
-  if(lemma == L"*")
-  {
-    lemma = L"";
-  }
 
   wstring key = L"<" + LRX_COMPILER_TYPE_SELECT + L">" + lemma;
 
@@ -633,7 +645,7 @@ LRXCompiler::procSelect()
   currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<" + LRX_COMPILER_TYPE_SELECT + L">")), currentState);
 
 
-  if(lemma == L"")
+  if(lemma == L"*")
   {
     currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_CHAR>")), currentState);
     int localLast = localCurrentState;
@@ -741,13 +753,8 @@ void
 LRXCompiler::procRemove()
 {
 
-  wstring lemma =this->attrib(LRX_COMPILER_LEMMA_ATTR);
+  wstring lemma =this->attrib(LRX_COMPILER_LEMMA_ATTR, L"*");
   wstring tags =this->attrib(LRX_COMPILER_TAGS_ATTR);
-
-  if(lemma == L"*")
-  {
-    lemma = L"";
-  }
 
   wstring key = L"<" + LRX_COMPILER_TYPE_REMOVE + L">" + lemma;
 
@@ -762,7 +769,7 @@ LRXCompiler::procRemove()
   currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<$>"), alphabet(L"<$>")), currentState);
   currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<" + LRX_COMPILER_TYPE_REMOVE + L">")), currentState);
 
-  if(lemma == L"")
+  if(lemma == L"*")
   {
     currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_CHAR>")), currentState);
     int localLast = localCurrentState;
