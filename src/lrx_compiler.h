@@ -81,7 +81,11 @@ private:
   void procRepeat();
   void procSeq();
 
+  /* If attrib does not exist (or other error), returns an empty string: */
   wstring attrib(wstring const &name);
+
+  /* If attrib does not exist (or other error), returns fallback: */
+  wstring attrib(wstring const &name, const wstring fallback);
 
   wstring itow(int i);
   int wtoi(wstring);
