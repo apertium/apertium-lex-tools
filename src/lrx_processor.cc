@@ -172,11 +172,6 @@ LRXProcessor::readFullBlock(FILE *input, wchar_t const delim1, wchar_t const del
 bool
 LRXProcessor::recognisePattern(const wstring lu, const wstring op)
 {
-  if(debugMode)
-  {
-    fwprintf(stderr, L"================================================\n");
-  }
-
   if(recognisers.count(op) < 1)
   {
     fwprintf(stderr, L"WARNING: Recogniser size 0 for key %S, skipping...\n", op.c_str());
