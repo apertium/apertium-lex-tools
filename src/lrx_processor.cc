@@ -793,7 +793,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
   map<int, wstring > blanks; // map of the superblanks
 
   map<int, map<wstring, double> > scores; //
-  map<int, pair<wstring, AppType> > operations;
+  map<int, map<wstring, OpType> > operations;
 
   vector<State*> alive_states ;
   alive_states.push_back(new State(*initial_state));
@@ -927,12 +927,11 @@ LRXProcessor::processME(FILE *input, FILE *output)
                   {
                     fwprintf(stderr, L"#[%d]SCORE %.5f / %S\n", j, scores[j][*it2], it2->c_str());
                   }
-                  operations[j].first = id;
-                  if(it2->find(LRX_PROCESSOR_TAG_REMOVE) != wstring::npos) {
-                    operations[j].second = Remove;
+                  if(it2->at(0) == L'<' && it2->at(1) == L'r') {
+                    operations[j][*it2] = Remove;
                   }
                   else {
-                    operations[j].second = Select;
+                    operations[j][*it2] = Select;
                   }
                 }
                 j++;
@@ -1080,7 +1079,13 @@ LRXProcessor::processFlushME(FILE *output,
                              map<int, vector<wstring> > &tl,
                              map<int, wstring > &blanks,
                              map<int, map<wstring, double> > &scores,
-                             map<int, pair<wstring, AppType> > &operations) {
+                             map<int, map<wstring, OpType> > &operations) {
+
+  struct ScoredMatch {
+      OpType op;
+      wstring* ti;              // matched target translation
+      double weight;
+  };
 
   unsigned int spos = 0;
   for(spos = 0; spos <= pos; spos++)
@@ -1099,16 +1104,20 @@ LRXProcessor::processFlushME(FILE *output,
     {
       //--
       set<wstring*> ti_keep;
-      vector<pair<wstring*, double>> spos_matches;
+      vector<ScoredMatch> spos_matches;
       for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
       {
         ti_keep.insert(&*ti);
         for(const auto& si : scores[spos]) {
+          bool matched = recognisePattern(*ti, si.first);
+          OpType op = operations[spos][si.first];
           if (debugMode) {
-            fwprintf(stderr, L">>> %d -> %S -> %.5f\n", spos, si.first.c_str(), si.second);
+            wstring checks = matched ? L"✔️ " : L"❎";
+            fwprintf(stderr, L"%S >>> %d -> %S -> %.5f\n", checks.c_str(), spos,
+                     si.first.c_str(), si.second);
           }
-          if(recognisePattern(*ti, si.first)) {
-            spos_matches.push_back(make_pair(&*ti, si.second));
+          if(matched) {
+            spos_matches.push_back({ op, &*ti, si.second });
           }
         }
       }
@@ -1116,24 +1125,24 @@ LRXProcessor::processFlushME(FILE *output,
       {
         sort(spos_matches.begin(),
              spos_matches.end(),
-             [](auto &a, auto &b) { return a.second > b.second; });
+             [](const auto &a, const auto &b) { return a.weight > b.weight; });
         for (const auto &m : spos_matches) {
           if (traceMode || debugMode) {
-            wstring op = ((operations[spos].second == Select) ? L"SELECT" : L"REMOVE");
+            wstring op = (m.op == Select ? L"SELECT" : L"REMOVE");
             fwprintf(
                 stderr, L"%d:%S:%.5f:%S:%S\n",
                 lineno,
                 op.c_str(),
-                m.second,
+                m.weight,
                 sl[spos].c_str(),
-                m.first->c_str());
+                m.ti->c_str());
           }
-          if (operations[spos].second == Select) {
+          if (m.op == Select) {
             ti_keep.clear();
-            ti_keep.insert(m.first);
+            ti_keep.insert(m.ti);
             break;
           } else if(ti_keep.size() > 1) {
-            ti_keep.erase(m.first);
+            ti_keep.erase(m.ti);
           }
         }
         bool printed = false;

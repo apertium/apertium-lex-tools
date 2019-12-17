@@ -1,0 +1,12 @@
+<rules>
+
+  <rule weight="1.61803">
+    <match lemma="inlem" tags="a"><select lemma="selectfallback"/></match>
+  </rule>
+
+  <rule weight="3.14159">
+    <match tags="*"/>
+    <match lemma="inlem" tags="a"><remove lemma="removeme"/></match>
+  </rule>
+
+</rules>
