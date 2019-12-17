@@ -115,14 +115,14 @@ private:
                     map<pair<int, int>, vector<State> > &spans,
                     int last_final);
 
-  enum AppType { Select, Remove };
+  enum OpType { Select, Remove };
 
   void processFlushME(FILE *output,
                       map<int, wstring > &sl,
                       map<int, vector<wstring> > &tl,
                       map<int, wstring > &blanks,
                       map<int, map<wstring, double> > &scores,
-                      map<int, pair<wstring, AppType> > &operations);
+                      map<int, map<wstring, OpType> > &operations);
 
 public:
   static wstring const LRX_PROCESSOR_TAG_SELECT;
