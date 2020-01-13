@@ -457,7 +457,7 @@ void
 LRXCompiler::procMatch()
 {
   wstring lemma = this->attrib(LRX_COMPILER_LEMMA_ATTR, L"*");
-  wstring tags = this->attrib(LRX_COMPILER_TAGS_ATTR);
+  wstring tags = this->attrib(LRX_COMPILER_TAGS_ATTR, L"*");
   wstring surface = this->attrib(LRX_COMPILER_SURFACE_ATTR);
 
   if(surface != L"")
@@ -498,49 +498,15 @@ LRXCompiler::procMatch()
       }
     }
 
-    if(tags != L"")
+    wstring tag = L"";
+    for(wstring::iterator it = tags.begin(); it != tags.end(); it++)
     {
-      wstring tag = L"";
-      for(wstring::iterator it = tags.begin(); it != tags.end(); it++)
+      if(*it == L'.')
       {
-        if(*it == L'.')
+        if(tag == L"")
         {
-          tag = L"<" + tag + L">";
-          if(!alphabet.isSymbolDefined(tag.c_str()))
-          {
-            alphabet.includeSymbol(tag.c_str());
-          }
-          if(debugMode)
-          {
-            fwprintf(stderr, L"        tag: %S\n", tag.c_str());
-          }
-          if(tag == L"<*>")
-          {
-	    int localLast = currentState;
-            currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"), 0), currentState);
-	    transducer.linkStates(currentState, localLast, 0);
-          }
-          else
-          {
-            currentState = transducer.insertSingleTransduction(alphabet(alphabet(tag.c_str()), 0), currentState);
-          }
-          tag = L"";
           continue;
         }
-        tag = tag + *it;
-      }
-      if(tag == L"*")
-      {
-        if(debugMode)
-        {
-          fwprintf(stderr, L"        tag: %S\n", tag.c_str());
-        }
-        int localLast = currentState;
-        currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"), 0), currentState);
-        transducer.linkStates(currentState, localLast, 0);
-      }
-      else
-      {
         tag = L"<" + tag + L">";
         if(!alphabet.isSymbolDefined(tag.c_str()))
         {
@@ -550,18 +516,46 @@ LRXCompiler::procMatch()
         {
           fwprintf(stderr, L"        tag: %S\n", tag.c_str());
         }
-        currentState = transducer.insertSingleTransduction(alphabet(alphabet(tag.c_str()), 0), currentState);
+        if(tag == L"<*>")
+        {
+          int localLast = currentState;
+          currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"), 0), currentState);
+          transducer.linkStates(currentState, localLast, 0);
+        }
+        else
+        {
+          currentState = transducer.insertSingleTransduction(alphabet(alphabet(tag.c_str()), 0), currentState);
+        }
+        tag = L"";
+        continue;
       }
+      tag = tag + *it;
     }
-    else
+    if(tag == L"*")
     {
       if(debugMode)
       {
-        fwprintf(stderr, L"        tag: -\n");
+        fwprintf(stderr, L"        tag: %S\n", tag.c_str());
       }
       int localLast = currentState;
       currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"), 0), currentState);
       transducer.linkStates(currentState, localLast, 0);
+    }
+    else if(tag == L"")
+    {
+    }
+    else
+    {
+      tag = L"<" + tag + L">";
+      if(!alphabet.isSymbolDefined(tag.c_str()))
+      {
+        alphabet.includeSymbol(tag.c_str());
+      }
+      if(debugMode)
+      {
+        fwprintf(stderr, L"        tag: %S\n", tag.c_str());
+      }
+      currentState = transducer.insertSingleTransduction(alphabet(alphabet(tag.c_str()), 0), currentState);
     }
   }
 

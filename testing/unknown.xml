@@ -1,0 +1,11 @@
+<rules>
+  <rule>
+	  <match lemma="potato"><select lemma="known"/></match>
+  </rule>
+  <rule weight="3">
+    <match lemma="potato">
+      <select lemma="unknown"/>
+    </match>
+    <match tags=""/>
+  </rule>
+</rules>
