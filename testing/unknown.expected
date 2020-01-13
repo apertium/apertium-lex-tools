@@ -1,0 +1,2 @@
+^potato<n>/known<n>$ ^normal_word<adj>/normal_word<adj>$
+^potato<n>/unknown<n>$ ^*unknown_word/*unknown_word$
