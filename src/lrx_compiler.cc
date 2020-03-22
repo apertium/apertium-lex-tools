@@ -975,7 +975,7 @@ LRXCompiler::write(FILE *fst)
     if(debugMode)
     {
       fwprintf(stderr, L"+ %d => %S\n", it->second.size(), it->first.c_str());
-      it->second.show(alphabet, stderr);
+      it->second.show(alphabet, stderr, 0, false);
     }
     it->second.write(fst);
   }
@@ -983,7 +983,7 @@ LRXCompiler::write(FILE *fst)
   Compression::wstring_write(L"main", fst);
   if(outputGraph)
   {
-    transducer.show(alphabet, stderr);
+    transducer.show(alphabet, stderr, 0, false);
   }
   transducer.write(fst);
 
