@@ -4,7 +4,7 @@ m4_define([required_libxml_version], [2.6.17])
 m4_define([required_apertium_version], [3.6.1])
 m4_define([required_lttoolbox_version], [3.5.1])
 
-AC_INIT([apertium-lex-tools], [0.2.3], [ftyers@prompsit.com])
+AC_INIT([apertium-lex-tools], [0.2.4], [ftyers@prompsit.com])
 AM_INIT_AUTOMAKE
 AC_CONFIG_MACRO_DIR([m4])
 

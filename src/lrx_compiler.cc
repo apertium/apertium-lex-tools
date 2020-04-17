@@ -283,8 +283,8 @@ LRXCompiler::procRule()
     int ret = xmlTextReaderRead(reader);
     if(ret != 1)
     {
-      cerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-      cerr << L"): Parse error." << endl;
+      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+      wcerr << L"): Parse error." << endl;
       exit(EXIT_FAILURE);
     }
 
@@ -348,8 +348,8 @@ LRXCompiler::procOr()
     int ret = xmlTextReaderRead(reader);
     if(ret != 1)
     {
-      cerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-      cerr << L"): Parse error." << endl;
+      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+      wcerr << L"): Parse error." << endl;
       exit(EXIT_FAILURE);
     }
 
@@ -411,8 +411,8 @@ LRXCompiler::procDefSeq()
     int ret = xmlTextReaderRead(reader);
     if(ret != 1)
     {
-      cerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-      cerr << L"): Parse error." << endl;
+      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+      wcerr << L"): Parse error." << endl;
       exit(EXIT_FAILURE);
     }
 
@@ -573,8 +573,8 @@ LRXCompiler::procMatch()
     int ret = xmlTextReaderRead(reader);
     if(ret != 1)
     {
-      cerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-      cerr << L"): Parse error." << endl;
+      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+      wcerr << L"): Parse error." << endl;
       exit(EXIT_FAILURE);
     }
 
@@ -585,8 +585,8 @@ LRXCompiler::procMatch()
     {
       if(!canSelect)
       {
-        cerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-        cerr << L"): <select> is not permitted inside <repeat>." << endl;
+        wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+        wcerr << L"): <select> is not permitted inside <repeat>." << endl;
         exit(EXIT_FAILURE);
       }
       procSelect();
@@ -595,8 +595,8 @@ LRXCompiler::procMatch()
     {
       if(!canSelect)
       {
-        cerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-        cerr << L"): <remove> is not permitted inside <repeat>." << endl;
+        wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+        wcerr << L"): <remove> is not permitted inside <repeat>." << endl;
         exit(EXIT_FAILURE);
       }
       procRemove();
@@ -878,14 +878,14 @@ LRXCompiler::procRepeat()
   int upto = stoi(xupto);
   if(from < 0 || upto < 0)
   {
-    cerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-    cerr << L"): Number of repetitions cannot be negative." << endl;
+    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+    wcerr << L"): Number of repetitions cannot be negative." << endl;
     exit(EXIT_FAILURE);
   }
   else if(from > upto)
   {
-    cerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-    cerr << L"): Lower bound on number of repetitions cannot be larger than upper bound." << endl;
+    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+    wcerr << L"): Lower bound on number of repetitions cannot be larger than upper bound." << endl;
     exit(EXIT_FAILURE);
   }
   int count = upto - from;
@@ -899,8 +899,8 @@ LRXCompiler::procRepeat()
     int ret = xmlTextReaderRead(reader);
     if(ret != 1)
     {
-      cerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-      cerr << L"): Parse error." << endl;
+      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
+      wcerr << L"): Parse error." << endl;
       exit(EXIT_FAILURE);
     }
 
