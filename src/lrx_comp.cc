@@ -60,6 +60,4 @@ int main (int argc, char **argv)
     FILE *output = fopen(argv[3], "wb");
     compiler.write(output);
   }
-
-  return 0;
 }
