@@ -1,0 +1,17 @@
+<lrx>
+  <rules>
+
+    <rule>
+      <match lemma="targetlm" tags="adv"><select lemma="rightlm"/></match>
+    </rule>
+
+    <rule weight="1.41421">
+      <or>
+        <match tags="sent.clb"/>
+        <match lemma="suffix" tags="cnjsub"/>
+      </or>
+      <match lemma="targetlm" tags="adv"><select lemma="wronglm"/></match>
+    </rule>
+
+  </rules>
+</lrx>
