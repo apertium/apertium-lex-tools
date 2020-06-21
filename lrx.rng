@@ -85,6 +85,11 @@
   <oneOrMore>
         <element name="match">
           <optional>
+            <attribute name="suffix">
+              <text/>
+            </attribute>
+          </optional>
+          <optional>
             <attribute name="lemma">
               <text/>
             </attribute>
