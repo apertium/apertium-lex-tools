@@ -342,6 +342,7 @@ LRXCompiler::procOr()
     fwprintf(stderr, L"    or: \n");
   }
 
+  int or_initial_state = currentState;
   vector<int> reachedStates;
   while(true)
   {
@@ -358,13 +359,13 @@ LRXCompiler::procOr()
 
     if(name == LRX_COMPILER_MATCH_ELEM)
     {
-      currentState = lastState;
+      currentState = transducer.insertNewSingleTransduction(0, or_initial_state);
       procMatch();
       reachedStates.push_back(currentState);
     }
     else if(name == LRX_COMPILER_SEQ_ELEM)
     {
-      currentState = lastState;
+      currentState = transducer.insertNewSingleTransduction(0, or_initial_state);
       procSeq();
       reachedStates.push_back(currentState);
     }
