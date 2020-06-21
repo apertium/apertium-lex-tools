@@ -89,6 +89,10 @@ LRXProcessor::load(FILE *in)
       len2--;
     }
     recognisers[name].read(in, alphabet);
+    if(debugMode)
+    {
+      fwprintf(stderr, L"Recogniser: %S, [finals: %d]\n", name.c_str(), recognisers[name].getFinals().size());
+    }
     len--;
   }
 
@@ -174,7 +178,7 @@ LRXProcessor::recognisePattern(const wstring lu, const wstring op)
 {
   if(recognisers.count(op) < 1)
   {
-    fwprintf(stderr, L"WARNING: Recogniser size 0 for key %S, skipping...\n", op.c_str());
+    fwprintf(stderr, L"WARNING: Recogniser size 0 for key %S, skipping... [LU: %S]\n", op.c_str(), lu.c_str());
     return false;
   }
 
@@ -1099,6 +1103,7 @@ LRXProcessor::processFlushME(FILE *output,
     {
       //--
       set<wstring*> ti_keep;
+      set<wstring*> ti_removed;
       vector<ScoredMatch> spos_matches;
       for(ti = tl[spos].begin(); ti != tl[spos].end(); ti++)
       {
@@ -1125,19 +1130,23 @@ LRXProcessor::processFlushME(FILE *output,
           if (traceMode || debugMode) {
             wstring op = (m.op == Select ? L"SELECT" : L"REMOVE");
             fwprintf(
-                stderr, L"%d:%S:%.5f:%S:%S\n",
+                stderr, L"%d:%S:%.5f:%S:%d:%S\n",
                 lineno,
                 op.c_str(),
                 m.weight,
                 sl[spos].c_str(),
+                ti_keep.size(),
                 m.ti->c_str());
           }
-          if (m.op == Select) {
+          // We have to keep track of translations that have been removed so
+          // that we don't end up adding back a translation that was removed.
+          if (m.op == Select && ti_removed.find(m.ti) == ti_removed.end()) {
             ti_keep.clear();
             ti_keep.insert(m.ti);
             break;
           } else if(ti_keep.size() > 1) {
             ti_keep.erase(m.ti);
+            ti_removed.insert(m.ti);
           }
         }
         bool printed = false;
