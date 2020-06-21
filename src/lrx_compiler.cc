@@ -33,6 +33,7 @@ wstring const LRXCompiler::LRX_COMPILER_REPEAT_ELEM     = L"repeat";
 wstring const LRXCompiler::LRX_COMPILER_SEQ_ELEM        = L"seq";
 
 wstring const LRXCompiler::LRX_COMPILER_LEMMA_ATTR      = L"lemma";
+wstring const LRXCompiler::LRX_COMPILER_SUFFIX_ATTR     = L"suffix";
 wstring const LRXCompiler::LRX_COMPILER_SURFACE_ATTR    = L"surface";
 wstring const LRXCompiler::LRX_COMPILER_TAGS_ATTR       = L"tags";
 wstring const LRXCompiler::LRX_COMPILER_WEIGHT_ATTR     = L"weight";
@@ -457,6 +458,7 @@ LRXCompiler::procDefSeq()
 void
 LRXCompiler::procMatch()
 {
+  wstring suffix = this->attrib(LRX_COMPILER_SUFFIX_ATTR);
   wstring lemma = this->attrib(LRX_COMPILER_LEMMA_ATTR, L"*");
   wstring tags = this->attrib(LRX_COMPILER_TAGS_ATTR, L"*");
   wstring surface = this->attrib(LRX_COMPILER_SURFACE_ATTR);
@@ -480,9 +482,9 @@ LRXCompiler::procMatch()
       fwprintf(stderr, L"      match: %S, %S\n", lemma.c_str(), tags.c_str());
     }
 
-
-    if(lemma == L"*")
+    if(lemma == L"*" && suffix == L"")
     {
+      // This is only if there is no suffix
       if(debugMode)
       {
         fwprintf(stderr, L"        char: -\n");
@@ -490,6 +492,17 @@ LRXCompiler::procMatch()
       int localLast = currentState;
       currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_CHAR>"), 0), currentState);
       transducer.linkStates(currentState, localLast, 0);
+    }
+    else if(suffix != L"")
+    {
+      // A suffix is <ANY_CHAR> any amount of times followed by whatever is in the suffix
+      int localLast = currentState;
+      currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_CHAR>"), 0), currentState);
+      transducer.linkStates(currentState, localLast, 0);
+      for(wstring::iterator it = suffix.begin(); it != suffix.end(); it++)
+      {
+        currentState = transducer.insertSingleTransduction(alphabet(*it, 0), currentState);
+      }
     }
     else
     {

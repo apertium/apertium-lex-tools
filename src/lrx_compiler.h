@@ -105,6 +105,7 @@ public:
   static wstring const LRX_COMPILER_SEQ_ELEM;
 
   static wstring const LRX_COMPILER_SURFACE_ATTR;
+  static wstring const LRX_COMPILER_SUFFIX_ATTR;
   static wstring const LRX_COMPILER_LEMMA_ATTR;
   static wstring const LRX_COMPILER_TAGS_ATTR;
   static wstring const LRX_COMPILER_COMMENT_ATTR;
