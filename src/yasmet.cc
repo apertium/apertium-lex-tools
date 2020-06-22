@@ -23,18 +23,20 @@
 #include <ext/hash_map>
 #include <assert.h>
 
-using namespace std;
+//using namespace std;
 using namespace __gnu_cxx;
+
+double exp2(const double &d);
 
 typedef double D;
 typedef pair<int, double> fea;
-typedef vector<fea> vfea;
+typedef std::vector<fea> vfea;
 size_t v = 0;
 
-template<class T> ostream &operator<<(ostream &out, const vector<T>&x)
+template<class T> std::ostream &operator<<(std::ostream &out, const std::vector<T>&x)
 {
-	copy(x.begin(), x.end(), ostream_iterator<T>(out, " "));
-	return out << endl;
+	copy(x.begin(), x.end(), std::ostream_iterator<T>(out, " "));
+	return out << std::endl;
 }
 
 struct Z {
@@ -42,53 +44,59 @@ struct Z {
 	Z(double a = 0, double b = -1, double c = 0): k(a), q(c), l((b < 0) ? 1 : log(b)) {};
 };
 
-ostream &operator << (ostream &o, const Z &x)
+std::ostream &operator << (std::ostream &o, const Z &x)
 {
 	return o << x.k << "," << x.l << ',' << x.q << ' ';
 }
 
 struct hash_str {
-	size_t operator()(const string &s) const {
+	size_t operator()(const std::string &s) const {
 		return hash<const char *>()(s.c_str());
 	}
 };
 
-double exp2(double d)
+// Deprecated, using std::exp ?
+double exp2(const double d)
 {
-	return exp(d);
+	return std::exp(d);
 }
 
 struct event {
-	vector<double> Ny;
+	std::vector<double> Ny;
 	size_t y;
-	vector<vfea > f;
-	vector<double> fs;
+	std::vector<vfea > f;
+	std::vector<double> fs;
 
-	vector<double> &computeProb(const vector<Z>&z, vector<double>&pr) const {
-		vector<double>::iterator p = pr.begin(), pb = pr.begin(), pe = pr.end();
-		for (vector<vfea >::const_iterator fi = f.begin(); fi != f.end(); ++fi, ++p) {
+	std::vector<double> &computeProb(const std::vector<Z>&z, std::vector<double>&pr) const
+        {
+		std::vector<double>::iterator p = pr.begin(), pb = pr.begin(), pe = pr.end();
+		for (std::vector<vfea >::const_iterator fi = f.begin(); fi != f.end(); ++fi, ++p)
+                {
 			*p = 0.0;
-			for (vfea::const_iterator j = fi->begin(); j != fi->end(); ++j) {
+			for (vfea::const_iterator j = fi->begin(); j != fi->end(); ++j)
+                        {
 				*p += z[j->first].l * j->second;
 			}
 		}
-		transform(pb, pe, pb, bind2nd(plus<double>(), -*max_element(pb, pe)));
-		transform(pb, pe, pb, exp2);
-		transform(pb, pe, pb, bind2nd(divides<double>(), accumulate(pb, pe, 0.0)));
+		std::transform(pb, pe, pb, bind2nd(std::plus<double>(), -*max_element(pb, pe)));
+		//std::transform(pb, pe, pb, std::exp2);
+		//std::transform(pb, pe, pb, std::exp);
+		std::transform(pb, pe, pb, [&](double x){ return std::exp(x); });
+		std::transform(pb, pe, pb, bind2nd(std::divides<double>(), accumulate(pb, pe, 0.0)));
 		return pr;
 	}
 };
 
 int main(int argc, char **argv)
 {
-	string s;
-	vector<pair<event, double> > E;
+	std::string s;
+	std::vector<pair<event, double> > E;
 	bool lN = 0;
 	double TRN = 0.0, TST = 0.0;
 	bool qt = 0, initmu = 0;
-	vector<pair<string, double> > s2f;
-	vector<Z> z;
-	ifstream *muf = 0; // Input stream of model file
+	std::vector<pair<std::string, double> > s2f;
+	std::vector<Z> z;
+	std::ifstream *muf = 0; // Input stream of model file
 	int mfc = -2, kfl = 0;
 	size_t st = 0; // State in input file
 	size_t C = 0, it = 0, maxIt = 1000, ts = 0, noF = 0, Es, I, N = 100000000;
@@ -96,7 +104,7 @@ int main(int argc, char **argv)
 	double d, l = 1e30, old_l, w = 0.0, dSmoothN = 0.0, minBetter = 0.01, lt = 0.0, wt = 0.0, F = 0.0;
 
 	for (int i = 1; i < argc; ++i) {
-		string si(argv[i]);
+		std::string si(argv[i]);
 		if (si == "-v" || si == "-V") {
 			v = 1 + (si == "-V");
 		}
@@ -110,7 +118,7 @@ int main(int argc, char **argv)
 		else if (si == "-kw" || si == "-kr") kfl = 1 + (si == "-kr");
 		else if (si == "-initmu") initmu = 1;
 		else if (argv[i][0] == '-') {
-			cerr << "\nUsage: " << argv[0] << "[-v|-V|-red n|-iter n|-dN d|-lNorm"
+			std::cerr << "\nUsage: " << argv[0] << "[-v|-V|-red n|-iter n|-dN d|-lNorm"
 			     "|-deltaPP dpp][mu]\n none: GIS \n -red: count-based feature sel"
 			     "ection\n   mu: test pp\n-iter: number of iterations\n  -dN: smoothing "
 			     "of event counts\n-lNorm: length normalisation\n-deltaPP: end criterion"
@@ -118,24 +126,27 @@ int main(int argc, char **argv)
 			return 0;
 		}
 		else {
-			muf = new ifstream(argv[i]);
+			muf = new std::ifstream(argv[i]);
 		}
 	}
 	{
-		hash_map<string, int, hash_str> f2s;
+		hash_map<std::string, int, hash_str> f2s;
 		event e;
 		size_t curY = 0;
 		double wi = 1.0;
-		s2f.push_back(pair<string, double>("@@@CORRECTIVE-FEATURE@@@", 0.0));
+		s2f.push_back(pair<std::string, double>("@@@CORRECTIVE-FEATURE@@@", 0.0));
 		z.push_back(Z());
 		f2s["@@@CORRECTIVE-FEATURE@@@"] = 0;
 
-		if (muf) { // Only called when scoring
-			while (*muf >> s >> d) {
-				cerr << *muf << endl;
+		if (muf) // Only called when scoring
+                {
+			while (*muf >> s >> d)
+                        {
+                                // this doesn't compile but it's only standard error
+				//std::cerr << *muf << std::endl;
 				size_t p = (!f2s.count(s)) ? (f2s[s] = s2f.size()) : (f2s[s]);
 				Z k(0, kfl ? 1 : d , 0);
-				pair<string, double> sd(s, 0.0);
+				pair<std::string, double> sd(s, 0.0);
 				if (p < s2f.size()) {
 					s2f[p] = sd;
 				}
@@ -152,12 +163,12 @@ int main(int argc, char **argv)
 			}
 		}
 
-		cerr << s2f.size() << " " << f2s.size() << " " << z.size() << endl;
+		std::cerr << s2f.size() << " " << f2s.size() << " " << z.size() << std::endl;
 
 		assert(s2f.size() == f2s.size());
 		assert(s2f.size() == z.size());
 
-		while (cin >> s) // Read in the training input
+		while (std::cin >> s) // Read in the training input
 			switch (st) {
 				case 0:
 					C = atoi(s.c_str());
@@ -192,20 +203,20 @@ int main(int argc, char **argv)
 						if ( ++curY == C ) {
 							st = 1;
 							{
-								E.push_back(make_pair(e, wi));
+								E.push_back(std::make_pair(e, wi));
 								e = event();
 							}
 							if (v == 2) {
-								cerr << "E:" << E.size() << " " << s2f.size() << "  \r";
-								cerr.flush();
+								std::cerr << "E:" << E.size() << " " << s2f.size() << "  \r";
+								std::cerr.flush();
 							}
 						}
 					}
 					else {
 						double fc = 1.0;
 						if (st == 4) {
-							string t;
-							cin >> t;
+							std::string t;
+							std::cin >> t;
 							fc = atof(t.c_str());
 						}
 						if (st == 4 && s == "@") {
@@ -214,18 +225,18 @@ int main(int argc, char **argv)
 						else {
 							if (!f2s.count(s)) {
 								if ((muf && kfl == 0) || E.size() >= N || kfl == 2) {
-									if (v > 1)cerr << "new " << s << " (igd)" << endl;
+									if (v > 1)std::cerr << "new " << s << " (igd)" << std::endl;
 									break;
 								}
 								else {
 									f2s[s] = s2f.size();
-									s2f.push_back(make_pair(s, 0.0));
+									s2f.push_back(std::make_pair(s, 0.0));
 								}
 							}
-							if (E.size() < N)s2f[f2s[s]].second += (curY == e.y);
-							if (kfl != 1 || curY == e.y)e.f[curY].push_back(make_pair(f2s[s], fc));
+							if (E.size() < N) {s2f[f2s[s]].second += (curY == e.y);}
+							if (kfl != 1 || curY == e.y)e.f[curY].push_back(std::make_pair(f2s[s], fc));
 							e.fs[curY] += fc;
-							if (E.size() < N)F = max(F, e.fs[curY]);
+							if (E.size() < N)F = std::max(F, e.fs[curY]);
 						}
 					}
 					break;
@@ -235,13 +246,13 @@ int main(int argc, char **argv)
 					break;
 			}
 		Es = E.size();
-		ts = max(int(Es - N), 0);
+		ts = std::max(int(Es - N), 0);
 		N = Es - ts;
 		I = s2f.size();
-		cerr << "I: " << I << " F: " << F << endl;
+		std::cerr << "I: " << I << " F: " << F << std::endl;
 		assert(f2s.size() == s2f.size());
 	}
-	vector<double> p(C);
+	std::vector<double> p(C);
 	assert(z.size() == 1 || z.size() == I);
 	z.resize(I);
 	if (initmu == 0 && muf && kfl != 2) {
@@ -253,23 +264,23 @@ int main(int argc, char **argv)
 		((n < N) ? TRN : TST) += E[n].second;
 		for (size_t c = 0; c < C; ++c) {
 			if (lN)for (size_t k = 0; k < en.f[c].size(); ++k)en.f[c][k].second /= en.fs[c];
-			else en.f[c].push_back(make_pair(0, F - en.fs[c]));
+			else en.f[c].push_back(std::make_pair(0, F - en.fs[c]));
 		}
 	}
 	if (lN)F = 1.0;
 	if ( mfc != -2) {
-		cout << C;
+		std::cout << C;
 		for (size_t n = 0; n < Es; ++n) {
 			const event &en = E[n].first;
-			cout << endl << en.y << " $ " << E[n].second << " @ ";
+			std::cout << std::endl << en.y << " $ " << E[n].second << " @ ";
 			for (size_t i = 0; i < C; ++i) {
-				cout << "@ " << en.Ny[i] << " ";
-				for (size_t j = 0; j < en.f[i].size(); ++j)if (s2f[en.f[i][j].first].second > mfc)
-						cout << s2f[en.f[i][j].first].first << " " << en.f[i][j].second << " " ;
-				cout << "# ";
+				std::cout << "@ " << en.Ny[i] << " ";
+				for (size_t j = 0; j < en.f[i].size(); ++j) {if (s2f[en.f[i][j].first].second > mfc)
+						std::cout << s2f[en.f[i][j].first].first << " " << en.f[i][j].second << " " ;}
+				std::cout << "# ";
 			}
 		}
-		cout << endl;
+		std::cout << std::endl;
 	}
 	else {
 		for (size_t i = 0; i < N; ++i) {
@@ -280,14 +291,14 @@ int main(int argc, char **argv)
 		}
 		if (kfl == 1) {
 			for (size_t i = 0; i < s2f.size(); ++i) {
-				cout << s2f[i].first << " " << z[i].k << endl;
+				std::cout << s2f[i].first << " " << z[i].k << std::endl;
 			}
 			exit(0);
 		}
 		for (size_t i = 0; i < I; ++i)if (!z[i].k)noF++;
-		if (noF && N)cerr << "I': " << I - noF << endl;
+		if (noF && N)std::cerr << "I': " << I - noF << std::endl;
 		if (v > 1) {
-			cerr << "Expected feature counts: " << z;
+			std::cerr << "Expected feature counts: " << z;
 		}
 
 		do {
@@ -308,9 +319,9 @@ int main(int argc, char **argv)
 				size_t pos0 = 0;
 				for (pos0 = 0; pos0 < ei.Ny.size(); pos0++)if (ei.Ny[pos0] == 0)break;
 				ei.computeProb(z, p);
-				vector<double>::const_iterator me = max_element(p.begin(), p.end());
+				std::vector<double>::const_iterator me = max_element(p.begin(), p.end());
 				if (!N) {
-					cout << me - p.begin() << " " << p;
+					std::cout << me - p.begin() << " " << p;
 				}
 				if (i < N) {
 					for (size_t j = 0; j < C; ++j) {
@@ -339,23 +350,26 @@ int main(int argc, char **argv)
 				}
 			}
 			if (v > 1) {
-				cerr << it << ". " << " KLQ:" << z << " " << p << "\n";
+				std::cerr << it << ". " << " KLQ:" << z << " " << p << "\n";
 			}
 			if (TRN && !qt) {
-				cerr << it << ". " << "pp: " << exp(l / TRN) << " er: " << w / TRN << " erx: "
+				std::cerr << it << ". " << "pp: " << exp(l / TRN) << " er: " << w / TRN << " erx: "
 				     << wx / TRN << " ppx: " << exp(lx / TRN);
-				if (!TST)cerr << endl;
+				if (!TST)
+                                {
+                                  std::cerr << std::endl;
+                                }
 			}
 			if (TST) {
-				cerr << " " << "tst-pp: " << exp(lt / TST) << " tst-er: " << wt / TST
-				     << " tst-erx: " << wtx / TST << " tst-ppx: " << exp(ltx / TST) << endl;
+				std::cerr << " " << "tst-pp: " << exp(lt / TST) << " tst-er: " << wt / TST
+				     << " tst-erx: " << wtx / TST << " tst-ppx: " << exp(ltx / TST) << std::endl;
 			}
 		}
 		while (fabs(exp(l / TRN) - exp(old_l / TRN)) > minBetter && it++ < maxIt && N);
 
 		if (N) {
 			for (size_t i = 0; i < I; ++i) {
-				cout << s2f[i].first << " " << exp(z[i].l - z[0].l) << '\n';
+				std::cout << s2f[i].first << " " << exp(z[i].l - z[0].l) << '\n';
 			}
 		}
 	} //?
