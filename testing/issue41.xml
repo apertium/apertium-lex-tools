@@ -1,0 +1,10 @@
+<rules>
+<rule weight="2.0">
+<match lemma="William" tags="np.*"><select lemma="Guillem" tags="np.*"/></match>
+<match tags="det.def.*"/>
+<or>
+  <match case="Aa" tags="n.*"/>
+  <match case="Aa" tags="adj.*"/>
+</or>
+</rule>
+</rules>
