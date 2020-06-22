@@ -106,6 +106,7 @@ private:
   void filterFinals();
   void evaluateRules();
 
+/*
   void processFlush(FILE *output,
                     map<int, wstring > &sl,
                     map<int, vector<wstring> > &tl,
@@ -114,10 +115,10 @@ private:
                     pair<double, vector<State> > &empty_seq,
                     map<pair<int, int>, vector<State> > &spans,
                     int last_final);
-
+*/
   enum OpType { Select, Remove };
 
-  void processFlushME(FILE *output,
+  void processFlush(FILE *output,
                       map<int, wstring > &sl,
                       map<int, vector<wstring> > &tl,
                       map<int, wstring > &blanks,
@@ -139,7 +140,7 @@ public:
   void init();
   void load(FILE *input);
   void process(FILE *input, FILE *output);
-  void processME(FILE *input, FILE *output);
+//  void processME(FILE *input, FILE *output);
 
 };
 
