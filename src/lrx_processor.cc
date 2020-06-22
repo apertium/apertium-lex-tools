@@ -278,7 +278,7 @@ LRXProcessor::recognisePattern(const wstring lu, const wstring op)
   return false;
 }
 
-
+/*
 void
 LRXProcessor::processFlush(FILE *output,
                            map<int, wstring > &sl,
@@ -474,8 +474,9 @@ LRXProcessor::processFlush(FILE *output,
     }
   }
 }
+*/
 
-
+/*
 void
 LRXProcessor::process(FILE *input, FILE *output)
 {
@@ -787,9 +788,10 @@ LRXProcessor::process(FILE *input, FILE *output)
 
   fwprintf(output, L"%S", blanks[pos].c_str());
 }
+*/
 
 void
-LRXProcessor::processME(FILE *input, FILE *output)
+LRXProcessor::process(FILE *input, FILE *output)
 {
   bool isEscaped = false;
 
@@ -809,7 +811,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
 
     if(nullFlush && val == L'\0')
     {
-      processFlushME(output, sl, tl, blanks, scores, operations);
+      processFlush(output, sl, tl, blanks, scores, operations);
       fwprintf(output, L"%S", blanks[pos].c_str());
       pos = 0;
       tl.clear();
@@ -977,7 +979,7 @@ LRXProcessor::processME(FILE *input, FILE *output)
 
 
         // Here we actually apply the rules that we've matched
-        processFlushME(output, sl, tl, blanks, scores, operations);
+        processFlush(output, sl, tl, blanks, scores, operations);
 
         pos = 0;
         tl.clear();
@@ -1086,12 +1088,12 @@ LRXProcessor::processME(FILE *input, FILE *output)
 
   }
 
-  processFlushME(output, sl, tl, blanks, scores, operations);
+  processFlush(output, sl, tl, blanks, scores, operations);
   fwprintf(output, L"%S", blanks[pos].c_str());
 }
 
 void
-LRXProcessor::processFlushME(FILE *output,
+LRXProcessor::processFlush(FILE *output,
                              map<int, wstring > &sl,
                              map<int, vector<wstring> > &tl,
                              map<int, wstring > &blanks,

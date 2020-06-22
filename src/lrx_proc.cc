@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
 #endif
 
   lrxp.init();
-  lrxp.processME(input, output);
+  lrxp.process(input, output);
   fclose(input);
   fclose(output);
   return EXIT_SUCCESS;
