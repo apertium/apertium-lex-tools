@@ -82,7 +82,7 @@ public:
           break;
       }
     }
-    processME(input, output);
+    process(input, output);
     fclose(input);
     fclose(output);
   }
