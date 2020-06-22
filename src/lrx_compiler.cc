@@ -34,6 +34,8 @@ wstring const LRXCompiler::LRX_COMPILER_SEQ_ELEM        = L"seq";
 
 wstring const LRXCompiler::LRX_COMPILER_LEMMA_ATTR      = L"lemma";
 wstring const LRXCompiler::LRX_COMPILER_SUFFIX_ATTR     = L"suffix";
+wstring const LRXCompiler::LRX_COMPILER_CONTAINS_ATTR   = L"contains";
+wstring const LRXCompiler::LRX_COMPILER_CASE_ATTR       = L"case";
 wstring const LRXCompiler::LRX_COMPILER_SURFACE_ATTR    = L"surface";
 wstring const LRXCompiler::LRX_COMPILER_TAGS_ATTR       = L"tags";
 wstring const LRXCompiler::LRX_COMPILER_WEIGHT_ATTR     = L"weight";
@@ -102,6 +104,8 @@ LRXCompiler::LRXCompiler()
 
   alphabet.includeSymbol(L"<ANY_TAG>");
   alphabet.includeSymbol(L"<ANY_CHAR>");
+  alphabet.includeSymbol(L"<ANY_UPPER>");
+  alphabet.includeSymbol(L"<ANY_LOWER>");
   alphabet.includeSymbol(L"<$>");
 
 }
@@ -458,10 +462,16 @@ LRXCompiler::procDefSeq()
 void
 LRXCompiler::procMatch()
 {
-  wstring suffix = this->attrib(LRX_COMPILER_SUFFIX_ATTR);
+  // These are mutually exclusive
   wstring lemma = this->attrib(LRX_COMPILER_LEMMA_ATTR, L"*");
-  wstring tags = this->attrib(LRX_COMPILER_TAGS_ATTR, L"*");
+  wstring contains = this->attrib(LRX_COMPILER_SUFFIX_ATTR);
+  wstring suffix = this->attrib(LRX_COMPILER_CONTAINS_ATTR);
+  wstring _case = this->attrib(LRX_COMPILER_CASE_ATTR); // This could potentially be non-exclusive
+
+  // This is currently disabled: Future use
   wstring surface = this->attrib(LRX_COMPILER_SURFACE_ATTR);
+
+  wstring tags = this->attrib(LRX_COMPILER_TAGS_ATTR, L"*");
 
   if(surface != L"")
   {
@@ -479,12 +489,34 @@ LRXCompiler::procMatch()
   {
     if(debugMode)
     {
-      fwprintf(stderr, L"      match: %S, %S\n", lemma.c_str(), tags.c_str());
+      fwprintf(stderr, L"      match: [%S, %S, %S, %S] %S\n", lemma.c_str(), suffix.c_str(), contains.c_str(), _case.c_str(), tags.c_str());
     }
 
-    if(lemma == L"*" && suffix == L"")
+    if(_case != L"") 
     {
-      // This is only if there is no suffix
+      if(_case == L"AA") // <ANY_UPPER>+  
+      {
+        int localLast = currentState;
+        currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_UPPER>"), 0), currentState);
+        transducer.linkStates(currentState, localLast, 0);
+      }
+      else if(_case == L"aa")  // <ANY_LOWER>+
+      { 
+        int localLast = currentState;
+        currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_LOWER>"), 0), currentState);
+        transducer.linkStates(currentState, localLast, 0);
+      }
+      else if(_case == L"Aa") // <ANY_UPPER>+ <ANY_LOWER>+
+      {
+        currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_UPPER>"), 0), currentState);
+        int localLast = currentState;
+        currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_LOWER>"), 0), currentState);
+        transducer.linkStates(currentState, localLast, 0);
+      }
+    }
+    if(lemma == L"*" && suffix == L"" && contains == L"" && _case == L"")
+    {
+      // This is only if there is no suffix or case or contains
       if(debugMode)
       {
         fwprintf(stderr, L"        char: -\n");
@@ -504,12 +536,30 @@ LRXCompiler::procMatch()
         currentState = transducer.insertSingleTransduction(alphabet(*it, 0), currentState);
       }
     }
-    else
+    else if(contains != L"")
+    {
+      // A contains is <ANY_CHAR> any amount of times followed by whatever is in the attribute 
+      // followed by <ANY_CHAR> any amount of times
+      int localLast = currentState;
+      currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_CHAR>"), 0), currentState);
+      transducer.linkStates(currentState, localLast, 0);
+      for(wstring::iterator it = suffix.begin(); it != suffix.end(); it++)
+      {
+        currentState = transducer.insertSingleTransduction(alphabet(*it, 0), currentState);
+      }
+      currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_CHAR>"), 0), currentState);
+      transducer.linkStates(currentState, localLast, 0);
+    }
+    else if(lemma != L"*")
     {
       for(wstring::iterator it = lemma.begin(); it != lemma.end(); it++)
       {
         currentState = transducer.insertSingleTransduction(alphabet(*it, 0), currentState);
       }
+    }
+    else
+    {
+      fwprintf(stderr, L"Something surprising happened in <match> compilation\n");
     }
 
     wstring tag = L"";

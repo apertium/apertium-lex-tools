@@ -178,7 +178,7 @@ LRXProcessor::recognisePattern(const wstring lu, const wstring op)
 {
   if(recognisers.count(op) < 1)
   {
-    fwprintf(stderr, L"WARNING: Recogniser size 0 for key %S, skipping... [LU: %S]\n", op.c_str(), lu.c_str());
+    fwprintf(stderr, L"WARNING: Recogniser not found for key %S, skipping... [LU: %S]\n", op.c_str(), lu.c_str());
     return false;
   }
 
@@ -237,6 +237,7 @@ LRXProcessor::recognisePattern(const wstring lu, const wstring op)
     }
     else
     {
+      // We're not in a tag, so were just reading characters
       int val = static_cast<int>(*it);
 /*
       if(debugMode)
@@ -246,14 +247,19 @@ LRXProcessor::recognisePattern(const wstring lu, const wstring op)
 */
       //cur.step(val, a(L"<ANY_CHAR>"));
       //cur.step(val);
+      set<int> alts;
       if(!iswupper(val))
       {
-        cur.step(val, alphabet(L"<ANY_CHAR>"));
+        alts.insert(alphabet(L"<ANY_CHAR>"));
+        alts.insert(alphabet(L"<ANY_LOWER>"));
       }
       else
       {
-        cur.step(val, towlower(val), alphabet(L"<ANY_CHAR>"));
+        alts.insert(alphabet(L"<ANY_CHAR>"));
+        alts.insert(alphabet(L"<ANY_UPPER>"));
+        alts.insert(tolower(val));
       }
+      cur.step(val, alts);
 
     }
   }
@@ -1031,11 +1037,23 @@ LRXProcessor::processME(FILE *input, FILE *output)
         }
         else
         {
+
+          set<int> alts;
+          alts.insert(alphabet(L"<ANY_CHAR>"));
+          if(iswupper(val))
+          {
+            alts.insert(tolower(val));
+            alts.insert(alphabet(L"<ANY_UPPER>"));
+          }
+          else
+          {
+            alts.insert(alphabet(L"<ANY_LOWER>"));
+          }
           if(debugMode)
           {
-            fwprintf(stderr, L"  step: %C\n", val);
+            fwprintf(stderr, L"  step: %C [alts: %d]\n", val, alts.size());
           }
-          s->step_case(val, alphabet(L"<ANY_CHAR>"), false);
+          s->step(val, alts);
         }
       }
       // In the middle of a word, don't push initial state here cf. https://github.com/apertium/apertium-lex-tools/issues/19
