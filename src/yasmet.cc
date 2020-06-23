@@ -8,28 +8,24 @@
 #include <list>
 #include <algorithm>
 #include <set>
+#include <iterator>
 #include <math.h>
 
 /* YASMET 1.0 toolkit Copyright (C) 2002 Franz Josef Och */
 #include <fstream> /* This program is free software; you can redistribute */
 #include <cmath>   /* it and/or modify it under the terms of the GNU General */
 #include <string>  /* Public License. */
-#include <hash_map>/* This program is distributed WITHOUT ANY WARRANTY */
+#include <unordered_map>/* This program is distributed WITHOUT ANY WARRANTY */
 #include <iostream>
 #include <vector>
 #include <functional>
 #include <numeric>
-#include <ext/hash_set>
-#include <ext/hash_map>
 #include <assert.h>
-
-//using namespace std;
-using namespace __gnu_cxx;
 
 double exp2(const double &d);
 
 typedef double D;
-typedef pair<int, double> fea;
+typedef std::pair<int, double> fea;
 typedef std::vector<fea> vfea;
 size_t v = 0;
 
@@ -48,12 +44,6 @@ std::ostream &operator << (std::ostream &o, const Z &x)
 {
 	return o << x.k << "," << x.l << ',' << x.q << ' ';
 }
-
-struct hash_str {
-	size_t operator()(const std::string &s) const {
-		return hash<const char *>()(s.c_str());
-	}
-};
 
 // Deprecated, using std::exp ?
 double exp2(const double d)
@@ -78,11 +68,9 @@ struct event {
 				*p += z[j->first].l * j->second;
 			}
 		}
-		std::transform(pb, pe, pb, bind2nd(std::plus<double>(), -*max_element(pb, pe)));
-		//std::transform(pb, pe, pb, std::exp2);
-		//std::transform(pb, pe, pb, std::exp);
-		std::transform(pb, pe, pb, [&](double x){ return std::exp(x); });
-		std::transform(pb, pe, pb, bind2nd(std::divides<double>(), accumulate(pb, pe, 0.0)));
+		std::transform(pb, pe, pb, [&](double x){ return -*std::max_element(pb, pe) + x; });
+		std::transform(pb, pe, pb, [](double x){ return std::exp(x); });
+		std::transform(pb, pe, pb, [&](double x){ return std::accumulate(pb, pe, 0.0) / x; });
 		return pr;
 	}
 };
@@ -90,11 +78,11 @@ struct event {
 int main(int argc, char **argv)
 {
 	std::string s;
-	std::vector<pair<event, double> > E;
+	std::vector<std::pair<event, double> > E;
 	bool lN = 0;
 	double TRN = 0.0, TST = 0.0;
 	bool qt = 0, initmu = 0;
-	std::vector<pair<std::string, double> > s2f;
+	std::vector<std::pair<std::string, double> > s2f;
 	std::vector<Z> z;
 	std::ifstream *muf = 0; // Input stream of model file
 	int mfc = -2, kfl = 0;
@@ -130,11 +118,11 @@ int main(int argc, char **argv)
 		}
 	}
 	{
-		hash_map<std::string, int, hash_str> f2s;
+		std::unordered_map<std::string, int> f2s;
 		event e;
 		size_t curY = 0;
 		double wi = 1.0;
-		s2f.push_back(pair<std::string, double>("@@@CORRECTIVE-FEATURE@@@", 0.0));
+		s2f.push_back(std::pair<std::string, double>("@@@CORRECTIVE-FEATURE@@@", 0.0));
 		z.push_back(Z());
 		f2s["@@@CORRECTIVE-FEATURE@@@"] = 0;
 
@@ -146,7 +134,7 @@ int main(int argc, char **argv)
 				//std::cerr << *muf << std::endl;
 				size_t p = (!f2s.count(s)) ? (f2s[s] = s2f.size()) : (f2s[s]);
 				Z k(0, kfl ? 1 : d , 0);
-				pair<std::string, double> sd(s, 0.0);
+				std::pair<std::string, double> sd(s, 0.0);
 				if (p < s2f.size()) {
 					s2f[p] = sd;
 				}
