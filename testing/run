@@ -23,6 +23,7 @@ colournul () {
 
 
 cd "$(dirname "$0")"
+declare -i tests=0
 declare -i failures=0
 for xml in *.xml; do
     test=${xml%%.xml}
@@ -36,7 +37,24 @@ for xml in *.xml; do
         echo "$test: FAILED"
         (( failures++ )) || true
     fi
+    (( tests++ )) || true
 done
+for bin in bincompat/*.bin; do
+    test=$(basename "${bin%%.bin}")
+    rm -f "$test.output"
+    if ! (
+            ../src/lrx-proc -m -z "${bin}" < "$test.input" > "$test.output" 2> >(err "$test") &&
+                diff -au "$test.expected" "$test.output" | colournul
+        )
+    then
+        echo "$test: FAILED"
+        (( failures++ )) || true
+    fi
+    (( tests++ )) || true
+done
+
+$VERBOSE && printf "\nPASS: %s\nFAIL: %s\nTOTAL: %s\n" $(( tests - failures )) ${failures} ${tests}
+
 if [[ $failures -gt 0 ]]; then
     exit 1
 fi
