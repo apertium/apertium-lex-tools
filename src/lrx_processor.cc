@@ -257,7 +257,7 @@ LRXProcessor::recognisePattern(const wstring lu, const wstring op)
       {
         alts.insert(alphabet(L"<ANY_CHAR>"));
         alts.insert(alphabet(L"<ANY_UPPER>"));
-        alts.insert(tolower(val));
+        alts.insert(towlower(val));
       }
       cur.step(val, alts);
 
@@ -1044,7 +1044,7 @@ LRXProcessor::process(FILE *input, FILE *output)
           alts.insert(alphabet(L"<ANY_CHAR>"));
           if(iswupper(val))
           {
-            alts.insert(tolower(val));
+            alts.insert(towlower(val));
             alts.insert(alphabet(L"<ANY_UPPER>"));
           }
           else
