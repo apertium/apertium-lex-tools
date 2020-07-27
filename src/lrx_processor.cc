@@ -16,7 +16,7 @@
  */
 
 #include <lrx_processor.h>
-
+#include <cstdint>
 using namespace std;
 
 wstring const LRXProcessor::LRX_PROCESSOR_TAG_SELECT     = L"<select>";
@@ -114,15 +114,14 @@ LRXProcessor::load(FILE *in)
 
   // Now read in weights
   struct weight {
-        int id;
+        int32_t id;
+        char _pad[4]{};
         double pisu;
   };
 
-  while(!feof(in))
+  weight record;
+  while(fread(&record, sizeof(weight), 1, in))
   {
-    weight record;
-    fread(&record, sizeof(weight), 1, in);
-
     wstring sid = L"<" + itow(record.id) + L">";
     weights[sid] = record.pisu;
 
@@ -130,7 +129,6 @@ LRXProcessor::load(FILE *in)
     {
       //fwprintf(stderr, L"%S %d weight(%.4f)\n", sid.c_str(), record.id, record.pisu);
     }
-
   }
 
   return;
@@ -192,7 +190,7 @@ LRXProcessor::recognisePattern(const wstring lu, const wstring op)
   bool readingTag = false;
   wstring tag = L"";
   int val = 0;
-  for(wstring::const_iterator it = lu.begin(); it != lu.end(); it++)
+  for(auto& it : lu)
   {
 /*
     if(debugMode)
@@ -205,16 +203,16 @@ LRXProcessor::recognisePattern(const wstring lu, const wstring op)
     {
       return false;
     }
-    if(*it == L'<')
+    if(it == L'<')
     {
       tag = L"";
       readingTag = true;
-      tag = tag + *it;
+      tag = tag + it;
       continue;
     }
-    if(*it == L'>')
+    if(it == L'>')
     {
-      tag = tag + *it;
+      tag = tag + it;
       val = static_cast<int>(alphabet(tag));
       if(val == 0)
       {
@@ -233,12 +231,12 @@ LRXProcessor::recognisePattern(const wstring lu, const wstring op)
     }
     if(readingTag)
     {
-      tag = tag + *it;
+      tag = tag + it;
     }
     else
     {
       // We're not in a tag, so were just reading characters
-      int val = static_cast<int>(*it);
+      int val = static_cast<int>(it);
 /*
       if(debugMode)
       {
@@ -853,9 +851,9 @@ LRXProcessor::process(FILE *input, FILE *output)
 
       if(debugMode)
       {
-        for(vector<wstring>::iterator it = tl[pos].begin(); it != tl[pos].end(); it++)
+        for(auto& it : tl[pos])
         {
-          fwprintf(stderr, L"trad[%d]: %S\n", pos, it->c_str());
+          fwprintf(stderr, L"trad[%d]: %S\n", pos, it.c_str());
         }
       }
     }
@@ -870,9 +868,9 @@ LRXProcessor::process(FILE *input, FILE *output)
         vector<State *> new_states; // TODO: Can we avoid the State-copying here?
         // \forall s \in A
         set<wstring> seen_ids;
-        for(vector<State *>::const_iterator it = alive_states.begin(); it != alive_states.end(); it++)
+        for(auto& it : alive_states)
         {
-          State s = **it;
+          State s = *it;
           // \IF \exists c \in Q : \delta(s, sent[i]) = c
           s.step(alphabet(L"<$>"));
 
@@ -897,13 +895,11 @@ LRXProcessor::process(FILE *input, FILE *output)
             set<pair<wstring, vector<wstring>>> outpaths;
             outpaths = s.filterFinalsLRX(anfinals, alphabet, escaped_chars, false, false, 0);
 
-            set<pair<wstring, vector<wstring>>>::iterator it;
-            for (it = outpaths.begin(); it != outpaths.end(); it++)
+            for (auto& it : outpaths)
             {
               vector<State> reached;
-
-              vector<wstring> path = (*it).second;
-              wstring id = (*it).first;
+              vector<wstring> path = it.second;
+              wstring id = it.first;
 
               if (seen_ids.find(id) != seen_ids.end())
               {
@@ -917,28 +913,28 @@ LRXProcessor::process(FILE *input, FILE *output)
               {
                 fwprintf(stderr, L"id:      %S: (lambda: %.5f)\n", id.c_str(), weights[id.c_str()]);
               }
-              for (vector<wstring>::iterator it2 = path.begin(); it2 != path.end(); it2++)
+              for (auto& it2 : path)
               {
                 if (debugMode)
                 {
-                  fwprintf(stderr, L"op:        %S\n", it2->c_str());
+                  fwprintf(stderr, L"op:        %S\n", it2.c_str());
                 }
-                if (*it2 != LRX_PROCESSOR_TAG_SKIP)
+                if (it2 != LRX_PROCESSOR_TAG_SKIP)
                 {
-                  if (scores[j].count(*it2) == 0)
+                  if (scores[j].count(it2) == 0)
                   {
-                    scores[j][*it2] = 0.0;
+                    scores[j][it2] = 0.0;
                   }
-                  scores[j][*it2] += weights[id.c_str()];
+                  scores[j][it2] += weights[id.c_str()];
                   if (debugMode)
                   {
-                    fwprintf(stderr, L"#[%d]SCORE %.5f / %S\n", j, scores[j][*it2], it2->c_str());
+                    fwprintf(stderr, L"#[%d]SCORE %.5f / %S\n", j, scores[j][it2], it2.c_str());
                   }
-                  if(it2->at(0) == L'<' && it2->at(1) == L'r') {
-                    operations[j][*it2] = Remove;
+                  if(it2.at(0) == L'<' && it2.at(1) == L'r') {
+                    operations[j][it2] = Remove;
                   }
                   else {
-                    operations[j][*it2] = Select;
+                    operations[j][it2] = Select;
                   }
                 }
                 j++;
@@ -949,7 +945,7 @@ LRXProcessor::process(FILE *input, FILE *output)
         }
         alive_states.swap(new_states);
         alive_states.push_back(new State(*initial_state));
-        for (State *s : new_states) {
+        for (auto& s : new_states) {
           if (s != initial_state) {
             delete s;
           }
@@ -958,9 +954,9 @@ LRXProcessor::process(FILE *input, FILE *output)
         if (debugMode)
         {
           fwprintf(stderr, L"seen:");
-          for (set<wstring>::iterator it = seen_ids.begin(); it != seen_ids.end(); it++)
+          for (auto& it : seen_ids)
           {
-            fwprintf(stderr, L" %S ", it->c_str());
+            fwprintf(stderr, L" %S ", it.c_str());
           }
           fwprintf(stderr, L"\n");
           fwprintf(stderr, L"#CURRENT_ALIVE: %d\n", alive_states.size());
@@ -1024,10 +1020,9 @@ LRXProcessor::process(FILE *input, FILE *output)
       }
 
       wstring res = L"";
-      for(vector<State*>::const_iterator it = alive_states.begin(); it != alive_states.end(); it++)
+      for(auto& s : alive_states)
       {
         res = L"";
-        State* s = *it;
         if(val < 0)
         {
           alphabet.getSymbol(res, val,  false);
@@ -1117,7 +1112,8 @@ LRXProcessor::processFlush(FILE *output,
     fwprintf(output, L"%S^%S/", blanks[spos].c_str(), sl[spos].c_str());
 
     vector<wstring>::iterator ti;
-    vector<wstring>::iterator penum = tl[spos].end(); penum--;
+    auto penum = tl[spos].end();
+    penum--;
 
     if(tl[spos].size() > 1)
     {

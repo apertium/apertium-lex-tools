@@ -23,8 +23,8 @@ MultiTranslator::~MultiTranslator() {}
 
 int MultiTranslator::calculateFertility(vector<BiltransToken> sent) {
 	unsigned int fertility = 1;
-	for (unsigned int i = 0; i < sent.size(); i++) {
-		fertility *= sent[i].targetTokens.size();
+	for (auto& si : sent) {
+		fertility *= si.targetTokens.size();
 	}
 	return fertility;
 }
@@ -37,8 +37,8 @@ BiltransToken MultiTranslator::parseBiltransToken(wstring bt) {
 
 	token.sourceToken = parseTaggerToken(tokens[0]);
 
-	for (unsigned int i = 1; i < tokens.size(); i++) {
-		token.targetTokens.push_back(parseTaggerToken(tokens[i]));
+	for (auto& t : tokens) {
+		token.targetTokens.push_back(parseTaggerToken(t));
 	}
 	return token;
 
@@ -128,7 +128,7 @@ BiltransToken MultiTranslator::getTrimmedToken(wstring source)
 
 
 	if(this->trimmed) {
-		for(unsigned int i = 0; i < ftoken.targetTokens.size(); i++ ) {
+		for(size_t i = 0; i < ftoken.targetTokens.size(); ++i ) {
 			if(ttoken.targetTokens[i].tags.size() <
 			   ftoken.targetTokens[i].tags.size()) {
 				ttoken.targetTokens[i].tags.push_back(L"*");
@@ -138,7 +138,7 @@ BiltransToken MultiTranslator::getTrimmedToken(wstring source)
 
 	vector<wstring> newTags;
 	//bool sourceTrimmed = false;
-	for(unsigned int i = 0; i < ttoken.sourceToken.tags.size(); i++) {
+	for(size_t i = 0; i < ttoken.sourceToken.tags.size(); ++i) {
 		wstring tag = ttoken.sourceToken.tags[i];
 		if (find(ttoken.targetTokens[0].tags, tag) ==
 			find(ftoken.targetTokens[0].tags, tag)) {
@@ -162,10 +162,10 @@ void MultiTranslator::biltransToMultiTranslator(int sn, int &tn, unsigned int id
 		tn += 1;
 		return;
 	}
-	int n = s[idx].targetTokens.size();
+	auto n = s[idx].targetTokens.size();
 	wstring base;
 	base = s[idx].sourceToken.toString(false) + L"/";
-	for(int i = 0; i < n; i++) {
+	for(size_t i = 0; i < n; ++i) {
 		wstring token = L"^" + base + s[idx].targetTokens[i].toString(false) + L"$";
 		if(idx != s.size() - 1) {
 			token += L" ";
@@ -177,7 +177,7 @@ void MultiTranslator::printBiltransSentence(int n, vector<BiltransToken> s) {
 	if (number_lines) {
 		wcout << n << "\t";
 	}
-	for(unsigned int i = 0; i < s.size(); i++) {
+	for(size_t i = 0; i < s.size(); ++i) {
 		wcout << s[i].toString(true);
 		if (i != s.size() - 1) {
 			wcout << L" ";
@@ -191,7 +191,7 @@ void MultiTranslator::printTaggerOutput(int n, vector<BiltransToken> sentence) {
 		wcout << n << "\t";
 	}
 
-	for(unsigned int i = 0; i < sentence.size(); i++) {
+	for(size_t i = 0; i < sentence.size(); ++i) {
 		wcout << sentence[i].sourceToken.toString(true);
 		if (i != sentence.size() -1) {
 			wcout << L" ";
@@ -206,7 +206,7 @@ void MultiTranslator::processSentence(vector<TaggerToken> sentence) {
 	bool hasAmbigPos = false;
 	int numberOfUnknown = 0;
 	int fertility = 1;
-	for(unsigned int i = 0; i < sentence.size(); i++) {
+	for(size_t i = 0; i < sentence.size(); ++i) {
 		wstring token = sentence[i].toString(false);
 		wstring target;
 
@@ -245,6 +245,6 @@ void MultiTranslator::processSentence(vector<TaggerToken> sentence) {
 			biltransToMultiTranslator(this->sn, tn, 0, outputSentence, outBuffer);
 		}
 	}
-	this->sn ++;
+	++this->sn;
 
 }

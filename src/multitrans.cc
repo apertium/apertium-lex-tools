@@ -43,7 +43,7 @@ void parseArguments(int argc, char **argv) {
       exit(1);
     }
 
-    for (int i=2; i < argc; i++) {
+    for (int i=2; i < argc; ++i) {
       if (strcmp(argv[i], "-t") == 0 || strcmp(argv[i], "--trim-lines") == 0) {
         trim = true;
       } else if (strcmp(argv[i], "-f") == 0 || strcmp(argv[i], "--filter-lines") == 0) {

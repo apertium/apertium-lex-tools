@@ -239,7 +239,7 @@ int main(int argc, char **argv)
   escaped_chars.insert(L'>');
 
 
-  FILE *t_rl = fopen(argv[1], "r");
+  FILE *t_rl = fopen(argv[1], "rb");
 
   fstp.load(t_rl);
   fclose(t_rl);
@@ -308,9 +308,9 @@ int main(int argc, char **argv)
           wstring trad = fstp.biltrans(in);
           int j = 0;
           bool tlout = false;
-          for(set<wstring>::const_iterator it = tllu.begin(), j = tllu.end(); it != j; it++)
+          for(auto& it : tllu)
           {
-            wstring t = L"^" + *it + L"$";
+            wstring t = L"^" + it + L"$";
             if(t == trad)
             {
               fputws_unlocked(L"/", output);
@@ -324,14 +324,13 @@ int main(int argc, char **argv)
           j = 0;
           if(!tlout)  // if we haven't found a default translation, then output all
           {
-            for(set<wstring>::const_iterator it = tllu.begin(), j = tllu.end(); it != j; it++)
+            for(auto it = tllu.begin(); it != tllu.end(); ++it)
             {
               if(it != tllu.end())
               {
                 fputws_unlocked(L"/", output);
               }
-              wstring t = *it;
-              fputws_unlocked(t.c_str(), output);
+              fputws_unlocked(it->c_str(), output);
             }
           }
 

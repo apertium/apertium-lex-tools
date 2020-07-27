@@ -16,7 +16,7 @@
  */
 
 #include <lrx_compiler.h>
-
+#include <cstdint>
 
 using namespace std;
 
@@ -378,13 +378,13 @@ LRXCompiler::procOr()
     {
       if(reachedStates.size() > 1)
       {
-        for(vector<int>::iterator it = reachedStates.begin(); it != reachedStates.end(); it++)
+        for(auto& it : reachedStates)
         {
-          if(*it == currentState)
+          if(it == currentState)
           {
             continue;
           }
-          transducer.linkStates(*it, currentState, 0);
+          transducer.linkStates(it, currentState, 0);
         }
       }
       break;
@@ -480,9 +480,9 @@ LRXCompiler::procMatch()
       fwprintf(stderr, L"      match: %S\n", surface.c_str());
     }
 
-    for(wstring::iterator it = surface.begin(); it != surface.end(); it++)
+    for(auto& it : surface)
     {
-      currentState = transducer.insertSingleTransduction(alphabet(*it, 0), currentState);
+      currentState = transducer.insertSingleTransduction(alphabet(it, 0), currentState);
     }
   }
   else
@@ -492,16 +492,16 @@ LRXCompiler::procMatch()
       fwprintf(stderr, L"      match: [%S, %S, %S, %S] %S\n", lemma.c_str(), suffix.c_str(), contains.c_str(), _case.c_str(), tags.c_str());
     }
 
-    if(_case != L"") 
+    if(_case != L"")
     {
-      if(_case == L"AA") // <ANY_UPPER>+  
+      if(_case == L"AA") // <ANY_UPPER>+
       {
         int localLast = currentState;
         currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_UPPER>"), 0), currentState);
         transducer.linkStates(currentState, localLast, 0);
       }
       else if(_case == L"aa")  // <ANY_LOWER>+
-      { 
+      {
         int localLast = currentState;
         currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_LOWER>"), 0), currentState);
         transducer.linkStates(currentState, localLast, 0);
@@ -531,30 +531,30 @@ LRXCompiler::procMatch()
       int localLast = currentState;
       currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_CHAR>"), 0), currentState);
       transducer.linkStates(currentState, localLast, 0);
-      for(wstring::iterator it = suffix.begin(); it != suffix.end(); it++)
+      for(auto& it : suffix)
       {
-        currentState = transducer.insertSingleTransduction(alphabet(*it, 0), currentState);
+        currentState = transducer.insertSingleTransduction(alphabet(it, 0), currentState);
       }
     }
     else if(contains != L"")
     {
-      // A contains is <ANY_CHAR> any amount of times followed by whatever is in the attribute 
+      // A contains is <ANY_CHAR> any amount of times followed by whatever is in the attribute
       // followed by <ANY_CHAR> any amount of times
       int localLast = currentState;
       currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_CHAR>"), 0), currentState);
       transducer.linkStates(currentState, localLast, 0);
-      for(wstring::iterator it = suffix.begin(); it != suffix.end(); it++)
+      for(auto& it : suffix)
       {
-        currentState = transducer.insertSingleTransduction(alphabet(*it, 0), currentState);
+        currentState = transducer.insertSingleTransduction(alphabet(it, 0), currentState);
       }
       currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_CHAR>"), 0), currentState);
       transducer.linkStates(currentState, localLast, 0);
     }
     else if(lemma != L"*")
     {
-      for(wstring::iterator it = lemma.begin(); it != lemma.end(); it++)
+      for(auto& it : lemma)
       {
-        currentState = transducer.insertSingleTransduction(alphabet(*it, 0), currentState);
+        currentState = transducer.insertSingleTransduction(alphabet(it, 0), currentState);
       }
     }
     else
@@ -563,9 +563,9 @@ LRXCompiler::procMatch()
     }
 
     wstring tag = L"";
-    for(wstring::iterator it = tags.begin(); it != tags.end(); it++)
+    for(auto& it : tags)
     {
-      if(*it == L'.')
+      if(it == L'.')
       {
         if(tag == L"")
         {
@@ -593,7 +593,7 @@ LRXCompiler::procMatch()
         tag = L"";
         continue;
       }
-      tag = tag + *it;
+      tag = tag + it;
     }
     if(tag == L"*")
     {
@@ -712,18 +712,18 @@ LRXCompiler::procSelect()
     key = key + L"<ANY_CHAR>";
   }
 
-  for(wstring::iterator it = lemma.begin(); it != lemma.end(); it++)
+  for(auto& it : lemma)
   {
-    currentState = transducer.insertSingleTransduction(alphabet(0, *it), currentState);
-    localCurrentState = recogniser.insertSingleTransduction(alphabet(*it, 0), localCurrentState);
+    currentState = transducer.insertSingleTransduction(alphabet(0, it), currentState);
+    localCurrentState = recogniser.insertSingleTransduction(alphabet(it, 0), localCurrentState);
   }
 
   if(tags != L"")
   {
     wstring tag = L"";
-    for(wstring::iterator it = tags.begin(); it != tags.end(); it++)
+    for(auto& it : tags)
     {
-      if(*it == L'.')
+      if(it == L'.')
       {
         tag = L"<" + tag + L">";
         if(!alphabet.isSymbolDefined(tag.c_str()))
@@ -751,7 +751,7 @@ LRXCompiler::procSelect()
         tag = L"";
         continue;
       }
-      tag = tag + *it;
+      tag = tag + it;
     }
     if(tag == L"*")
     {
@@ -839,21 +839,21 @@ LRXCompiler::procRemove()
     recogniser.linkStates(localCurrentState, localLast, 0);
     key = key + L"<ANY_CHAR>";
   }
-  else 
+  else
   {
-    for(wstring::iterator it = lemma.begin(); it != lemma.end(); it++)
+    for(auto& it : lemma)
     {
-      currentState = transducer.insertSingleTransduction(alphabet(0, *it), currentState);
-      localCurrentState = recogniser.insertSingleTransduction(alphabet(*it, 0), localCurrentState);
+      currentState = transducer.insertSingleTransduction(alphabet(0, it), currentState);
+      localCurrentState = recogniser.insertSingleTransduction(alphabet(it, 0), localCurrentState);
     }
   }
 
   if(tags != L"")
   {
     wstring tag = L"";
-    for(wstring::iterator it = tags.begin(); it != tags.end(); it++)
+    for(auto& it : tags)
     {
-      if(*it == L'.')
+      if(it == L'.')
       {
         tag = L"<" + tag + L">";
         if(!alphabet.isSymbolDefined(tag.c_str()))
@@ -881,7 +881,7 @@ LRXCompiler::procRemove()
         tag = L"";
         continue;
       }
-      tag = tag + *it;
+      tag = tag + it;
     }
     if(tag == L"*")
     {
@@ -1039,15 +1039,15 @@ LRXCompiler::write(FILE *fst)
   alphabet.write(fst);
 
   Compression::multibyte_write(recognisers.size(), fst);
-  for(map<wstring, Transducer>::iterator it = recognisers.begin(); it != recognisers.end(); it++)
+  for(auto& it : recognisers)
   {
-    Compression::wstring_write(it->first, fst);
+    Compression::wstring_write(it.first, fst);
     if(debugMode)
     {
-      fwprintf(stderr, L"+ %d => %S\n", it->second.size(), it->first.c_str());
-      it->second.show(alphabet, stderr, 0, false);
+      fwprintf(stderr, L"+ %d => %S\n", it.second.size(), it.first.c_str());
+      it.second.show(alphabet, stderr, 0, false);
     }
-    it->second.write(fst);
+    it.second.write(fst);
   }
 
   Compression::wstring_write(L"main", fst);
@@ -1058,17 +1058,18 @@ LRXCompiler::write(FILE *fst)
   transducer.write(fst);
 
   struct weight {
-        int id;
+        int32_t id;
+        char _pad[4]{};
         double pisu;
   };
 
-  for(map<int, double>::iterator it = weights.begin(); it != weights.end(); it++)
+  for(auto& it : weights)
   {
     if(debugMode)
     {
-      fwprintf(stderr, L"%.4f %d\n", it->second, it->first);
+      fwprintf(stderr, L"%.4f %d\n", it.second, it.first);
     }
-    weight record = {it->first, it->second};
+    weight record{it.first, "", it.second};
     fwrite((void *)&record, 1, sizeof(weight), fst);
   }
 
