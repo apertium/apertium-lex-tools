@@ -4,7 +4,7 @@ m4_define([required_libxml_version], [2.6.17])
 m4_define([required_apertium_version], [3.6.1])
 m4_define([required_lttoolbox_version], [3.5.1])
 
-AC_INIT([apertium-lex-tools], [0.2.4], [ftyers@prompsit.com])
+AC_INIT([apertium-lex-tools], [0.2.5], [apertium-stuff@lists.sourceforge.net])
 AM_INIT_AUTOMAKE
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -65,8 +65,8 @@ AC_CHECK_FUNCS([setlocale strdup])
 
 AC_CHECK_DECLS([fread_unlocked, fwrite_unlocked, fgetc_unlocked, fputc_unlocked, fputs_unlocked, fgetwc_unlocked, fputwc_unlocked, fgetws_unlocked, fputws_unlocked])
 
-CPPFLAGS="$CPPFLAGS $CFLAGS $APERTIUM_CFLAGS $LIBXML_CFLAGS"
-LIBS="$LIBS $APERTIUM_LIBS $LIBXML_LIBS -lz"
+CPPFLAGS="$CPPFLAGS $CFLAGS $LTTOOLBOX_CFLAGS $APERTIUM_CFLAGS $LIBXML_CFLAGS"
+LIBS="$LIBS $LTTOOLBOX_LIBS $APERTIUM_LIBS $LIBXML_LIBS -lz"
 
 # Checks for highest supported C++ standard
 AC_LANG(C++)
@@ -75,9 +75,7 @@ AX_CHECK_COMPILE_FLAG([-std=c++20], [CXXFLAGS="$CXXFLAGS -std=c++20"], [
   AX_CHECK_COMPILE_FLAG([-std=c++17], [CXXFLAGS="$CXXFLAGS -std=c++17"], [
    AX_CHECK_COMPILE_FLAG([-std=c++1z], [CXXFLAGS="$CXXFLAGS -std=c++1z"], [
     AX_CHECK_COMPILE_FLAG([-std=c++14], [CXXFLAGS="$CXXFLAGS -std=c++14"], [
-     AX_CHECK_COMPILE_FLAG([-std=c++1y], [CXXFLAGS="$CXXFLAGS -std=c++1y"], [
-      AX_CHECK_COMPILE_FLAG([-std=c++11], [CXXFLAGS="$CXXFLAGS -std=c++11"], [])
-     ])
+     AX_CHECK_COMPILE_FLAG([-std=c++1y], [CXXFLAGS="$CXXFLAGS -std=c++1y"], [])
     ])
    ])
   ])
