@@ -55,9 +55,9 @@ Makefile.in
 *.out
 *.app
 
-lrx-comp
-lrx-proc
-lrx_config.h*
+src/lrx-comp
+src/lrx-proc
+
 multitrans
 stamp-h1
 

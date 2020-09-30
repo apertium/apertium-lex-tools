@@ -815,6 +815,10 @@ LRXProcessor::process(FILE *input, FILE *output)
       tl.clear();
       sl.clear();
       blanks.clear();
+      scores.clear();
+      operations.clear();
+      alive_states.clear();
+      alive_states.push_back(new State(*initial_state));
 
       fputwc_unlocked(val, output);
       fflush(output);
