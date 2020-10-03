@@ -438,6 +438,10 @@ LRXCompiler::procDefSeq()
     {
       procRepeat();
     }
+    else if(name == LRX_COMPILER_SEQ_ELEM)
+    {
+      procSeq();
+    }
     else if(name == LRX_COMPILER_DEFSEQ_ELEM)
     {
       transducer.setFinal(currentState);
