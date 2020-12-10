@@ -27,7 +27,7 @@ def get_sources():
 def get_include_dirs():
     # Remove '-I' from Flags, as python add '-I' on its own
     dirs = '@LTTOOLBOX_CFLAGS@'.replace('-I', '').split()
-    dirs += '@LIBXML_LIBS@'.replace('-I', '').split()
+    dirs += '@LIBXML_CFLAGS@'.replace('-I', '').split()
     return dirs + ['../src']
 
 
