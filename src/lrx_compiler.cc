@@ -15,6 +15,7 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <weight.h>
 #include <lrx_compiler.h>
 #include <cstdint>
 
@@ -1061,12 +1062,6 @@ LRXCompiler::write(FILE *fst)
   }
   transducer.write(fst);
 
-  struct weight {
-        int32_t id;
-        char _pad[4]{};
-        double pisu;
-  };
-
   for(auto& it : weights)
   {
     if(debugMode)
@@ -1074,6 +1069,7 @@ LRXCompiler::write(FILE *fst)
       fwprintf(stderr, L"%.4f %d\n", it.second, it.first);
     }
     weight record{it.first, "", it.second};
+    weight_to_le(record);
     fwrite((void *)&record, 1, sizeof(weight), fst);
   }
 
