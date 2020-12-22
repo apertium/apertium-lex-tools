@@ -15,6 +15,7 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <weight.h>
 #include <lrx_processor.h>
 #include <cstdint>
 using namespace std;
@@ -113,15 +114,10 @@ LRXProcessor::load(FILE *in)
   transducer.read(in, alphabet);
 
   // Now read in weights
-  struct weight {
-        int32_t id;
-        char _pad[4]{};
-        double pisu;
-  };
-
   weight record;
   while(fread(&record, sizeof(weight), 1, in))
   {
+    weight_from_le(record);
     wstring sid = L"<" + itow(record.id) + L">";
     weights[sid] = record.pisu;
 
