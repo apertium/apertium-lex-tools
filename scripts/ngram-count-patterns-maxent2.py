@@ -4,9 +4,6 @@
 
 import sys, codecs, copy;
 import common
-# sys.stdin  = codecs.getreader('utf-8')(sys.stdin);
-# sys.stdout = codecs.getwriter('utf-8')(sys.stdout);
-# sys.stderr = codecs.getwriter('utf-8')(sys.stderr);
 
 # Read the corpus, make a note of all ambiguous words, their frequency and their possible translations
 
@@ -178,11 +175,10 @@ for line in open(sys.argv[2], 'r').readlines(): #{
 						meoutcomes[slword][event_counter] = '';
 					#}
 					for ni in ngrams[slword]: #{
-						if ni not in features: #and ni != "": {
+						if ni not in features: #{
 							feature_counter = feature_counter + 1;
 							features[ni] = feature_counter;
 						#}
-						# if ni != "":
 						meevents[slword][event_counter].append(features[ni]);
 						#meevents[slword][event_counter].append(feat);
 						meoutcomes[slword][event_counter] = tlword;
