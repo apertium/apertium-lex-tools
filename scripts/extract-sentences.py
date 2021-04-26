@@ -5,7 +5,7 @@
 import sys, codecs;
 import common;
 
-if len(sys.argv) < 2: #{
+if len(sys.argv) < 3: #{
 	print('extact-sentences.py <phrasetable> <biltrans>');
 	sys.exit(-1);
 #}
@@ -84,8 +84,8 @@ while reading: #{
 		print(lineno, '\t' + row[2]);
 		print('-------------------------------------------------------------------------------');
 		total_valid += 1
-	except:
-		print ("error in line", lineno, file=sys.stderr);
+	except Exception as e:
+		print ("error in line", lineno, ": ", e, file=sys.stderr);
 		total_errors += 1
 		continue
 

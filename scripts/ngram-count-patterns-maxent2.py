@@ -2,17 +2,14 @@
 # coding=utf-8
 # -*- encoding: utf-8 -*-
 
-import sys, codecs, copy, commands;
+import sys, codecs, copy;
 import common
-sys.stdin  = codecs.getreader('utf-8')(sys.stdin);
-sys.stdout = codecs.getwriter('utf-8')(sys.stdout);
-sys.stderr = codecs.getwriter('utf-8')(sys.stderr);
 
 # Read the corpus, make a note of all ambiguous words, their frequency and their possible translations
 
 # sl_tl[sl_word][tl_word] = tl_freq
 
-# Then we want to make a list ofpython $SCRIPTS/ngram-count-patterns-maxent.py $TRAIN/$CORPUS.lex.$SL-$TL $TRAIN/$CORPUS.candidates.$SL-$TL 2>ngrams > events n-grams around the source words, with which target word they want, and the freq.
+# Then we want to make a list of python $SCRIPTS/ngram-count-patterns-maxent.py $TRAIN/$CORPUS.lex.$SL-$TL $TRAIN/$CORPUS.candidates.$SL-$TL 2>ngrams > events n-grams around the source words, with which target word they want, and the freq.
 
 # ngrams[ngram][tl_word] = freq
 
@@ -24,7 +21,7 @@ sys.stderr = codecs.getwriter('utf-8')(sys.stderr);
 
 THRESHOLD = 0
 if len(sys.argv) not in [3, 4]: #{
-	print 'count-patterns.py <lex> <extracted> [threshold]'
+	print('count-patterns.py <lex> <extracted> [threshold]')
 	sys.exit(-1);
 #}
 
@@ -51,15 +48,15 @@ trad_counter = {};
 def wrap (x):
 	return '^' + x + '$'
 
-for line in file(sys.argv[1]).readlines(): #{
+for line in open(sys.argv[1], 'r').readlines(): #{
 	if len(line) < 1: #{
 		continue;
 	#}
-	w = int(line.decode('utf-8').split(' ')[0])
+	w = int(line.split(' ')[0])
 	if w < THRESHOLD:
 		continue;
 
-	row = common.tokenise_tagger_line(line.decode('utf-8'));
+	row = common.tokenise_tagger_line(line);
 	sl = wrap(row[0]).lower();
 	tl = wrap(row[1].strip()).lower();
 	if tl[1] == '*':
@@ -86,8 +83,8 @@ cur_bt_row = [];
 cur_al_row = [];
 
 
-for line in file(sys.argv[2]).readlines(): #{
-	line = line.strip().decode('utf-8');
+for line in open(sys.argv[2], 'r').readlines(): #{
+	line = line.strip()
 	if line[0] == '-': #{
 #		print len(cur_sl_row), len(cur_tl_row), len(cur_bt_row), len(cur_al_row);
 #		print cur_sl_row;
@@ -200,7 +197,7 @@ for line in file(sys.argv[2]).readlines(): #{
 							#}
 							outline = outline + ' # '
 						#}
-						print slword , '\t', len(sl_tl[slword]),'\t', outline;
+						print(slword , '\t', len(sl_tl[slword]),'\t', outline);
 					#}
 					del meevents;
 					del meoutcomes;
@@ -230,6 +227,7 @@ for line in file(sys.argv[2]).readlines(): #{
 	#}
 
 	line = line.split('\t')[1];
+	line = line.strip()
 
 	if cur_line == 0: #{
 		cur_sl_row = common.tokenise_tagger_line(line);
@@ -245,7 +243,7 @@ for line in file(sys.argv[2]).readlines(): #{
 #}
 
 for feature in features: #{
-	print >> sys.stderr, features[feature] , '\t' , feature;
+	print(features[feature] , '\t' , feature, file=sys.stderr);
 #}
 
 sys.exit(-1);
@@ -262,6 +260,6 @@ for slword in meevents: #{
 			#}
 			outline = outline + ' # '
 		#}
-		print slword , '\t', len(sl_tl[slword]),'\t', outline;
+		print(slword , '\t', len(sl_tl[slword]),'\t', outline);
 	#}
 #}
