@@ -24,6 +24,12 @@ UString const LRXProcessor::LRX_PROCESSOR_TAG_SELECT     = "<select>"_u;
 UString const LRXProcessor::LRX_PROCESSOR_TAG_REMOVE     = "<remove>"_u;
 UString const LRXProcessor::LRX_PROCESSOR_TAG_SKIP       = "<skip>"_u;
 
+UString const LRXProcessor::LRX_PROCESSOR_TAG_ANY_CHAR       = "<ANY_CHAR>"_u;
+UString const LRXProcessor::LRX_PROCESSOR_TAG_ANY_TAG        = "<ANY_TAG>"_u;
+UString const LRXProcessor::LRX_PROCESSOR_TAG_ANY_UPPER      = "<ANY_UPPER>"_u;
+UString const LRXProcessor::LRX_PROCESSOR_TAG_ANY_LOWER      = "<ANY_LOWER>"_u;
+UString const LRXProcessor::LRX_PROCESSOR_TAG_WORD_BOUNDARY  = "<$>"_u;
+
 UString
 LRXProcessor::itow(int i)
 {
@@ -76,6 +82,11 @@ void
 LRXProcessor::load(FILE *in)
 {
   alphabet.read(in);
+  any_char      = alphabet(LRX_PROCESSOR_TAG_ANY_CHAR);
+  any_tag       = alphabet(LRX_PROCESSOR_TAG_ANY_TAG);
+  any_upper     = alphabet(LRX_PROCESSOR_TAG_ANY_UPPER);
+  any_lower     = alphabet(LRX_PROCESSOR_TAG_ANY_LOWER);
+  word_boundary = alphabet(LRX_PROCESSOR_TAG_WORD_BOUNDARY);
 
   int len = Compression::multibyte_read(in);
 
@@ -181,10 +192,10 @@ LRXProcessor::recognisePattern(const UString lu, const UString op)
     if(it == '>')
     {
       tag = tag + it;
-      val = static_cast<int>(alphabet(tag));
+      val = alphabet(tag);
       if(val == 0)
       {
-        val = static_cast<int>(alphabet("<ANY_TAG>"_u));
+        val = any_tag;
       }
 /*
       if(debugMode)
@@ -193,13 +204,13 @@ LRXProcessor::recognisePattern(const UString lu, const UString op)
         cerr << "  step: " << tag << endl;
       }
 */
-      cur.step(val, alphabet("<ANY_TAG>"_u));
+      cur.step(val, any_tag);
       readingTag = false;
       continue;
     }
     if(readingTag)
     {
-      tag = tag + it;
+      tag += it;
     }
     else
     {
@@ -214,16 +225,15 @@ LRXProcessor::recognisePattern(const UString lu, const UString op)
       //cur.step(val, a("<ANY_CHAR>"));
       //cur.step(val);
       set<int> alts;
-      if(!iswupper(val))
+      alts.insert(any_char);
+      if(!u_isupper(val))
       {
-        alts.insert(alphabet("<ANY_CHAR>"_u));
-        alts.insert(alphabet("<ANY_LOWER>"_u));
+        alts.insert(any_lower);
       }
       else
       {
-        alts.insert(alphabet("<ANY_CHAR>"_u));
-        alts.insert(alphabet("<ANY_UPPER>"_u));
-        alts.insert(towlower(val));
+        alts.insert(any_upper);
+        alts.insert(u_tolower(val));
       }
       cur.step(val, alts);
 
@@ -331,7 +341,7 @@ LRXProcessor::process(InputFile& input, UFILE *output)
         {
           State s = *it;
           // \IF \exists c \in Q : \delta(s, sent[i]) = c
-          s.step(alphabet("<$>"_u));
+          s.step(word_boundary);
 
           // A \gets A \cup {c}
           if (s.size() > 0) // If the current state has outgoing transitions,
@@ -339,7 +349,7 @@ LRXProcessor::process(InputFile& input, UFILE *output)
           {
             new_states.push_back(new State(s));
           }
-          s.step(alphabet("<$>"_u));
+          s.step(word_boundary);
 
           // \IF c \in F
           if (s.isFinal(anfinals))
@@ -460,10 +470,9 @@ LRXProcessor::process(InputFile& input, UFILE *output)
     {
       UString tag = input.readBlock('<', '>');
       sl[pos] = sl[pos] + tag;
-      val = static_cast<int>(alphabet(tag));
-      if(val == 0)
-      {
-        val = static_cast<int>(alphabet("<ANY_TAG>"_u));
+      val = alphabet(tag);
+      if (val == 0) {
+        val = any_tag;
       }
       if(debugMode)
       {
@@ -489,21 +498,21 @@ LRXProcessor::process(InputFile& input, UFILE *output)
           {
             cerr << "  step: " << res << endl;
           }
-          s->step(val, alphabet("<ANY_TAG>"_u));
+          s->step(val, any_tag);
         }
         else
         {
 
           set<int> alts;
-          alts.insert(alphabet("<ANY_CHAR>"_u));
-          if(iswupper(val))
+          alts.insert(any_char);
+          if(u_isupper(val))
           {
-            alts.insert(towlower(val));
-            alts.insert(alphabet("<ANY_UPPER>"_u));
+            alts.insert(u_tolower(val));
+            alts.insert(any_upper);
           }
           else
           {
-            alts.insert(alphabet("<ANY_LOWER>"_u));
+            alts.insert(any_lower);
           }
           if(debugMode)
           {
@@ -653,12 +662,12 @@ LRXProcessor::processFlush(UFILE *output,
         u_fprintf(output, "%S", ti->c_str());
         if(ti != penum)
         {
-          u_fprintf(output, "/");
+          u_fputc('/', output);
         }
       }
     }
 
-    u_fprintf(output, "$");
+    u_fputc('$', output);
     if(debugMode)
     {
       u_fprintf(output, "%d", spos);

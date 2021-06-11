@@ -69,6 +69,12 @@ private:
   bool nullFlush;
   bool outOfWord;
 
+  int32_t any_char;
+  int32_t any_upper;
+  int32_t any_lower;
+  int32_t any_tag;
+  int32_t word_boundary;
+
   unsigned int pos;
   unsigned long lineno;
 
@@ -93,6 +99,11 @@ public:
   static UString const LRX_PROCESSOR_TAG_SELECT;
   static UString const LRX_PROCESSOR_TAG_REMOVE;
   static UString const LRX_PROCESSOR_TAG_SKIP;
+  static UString const LRX_PROCESSOR_TAG_ANY_CHAR;
+  static UString const LRX_PROCESSOR_TAG_ANY_TAG;
+  static UString const LRX_PROCESSOR_TAG_ANY_UPPER;
+  static UString const LRX_PROCESSOR_TAG_ANY_LOWER;
+  static UString const LRX_PROCESSOR_TAG_WORD_BOUNDARY;
 
   LRXProcessor();
   ~LRXProcessor();
