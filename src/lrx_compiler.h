@@ -43,6 +43,8 @@
 #include <lttoolbox/trans_exe.h>
 #include <lttoolbox/my_stdio.h>
 
+#include <unicode/ustdio.h>
+
 using namespace std;
 
 class LRXCompiler
@@ -52,10 +54,10 @@ private:
   Alphabet alphabet;
   Transducer transducer;
 
-  map<wstring, Transducer> recognisers; // keyed on pattern
+  map<UString, Transducer> recognisers; // keyed on pattern
   map<int, double> weights; // keyed on rule id
 
-  map<wstring, Transducer> sequences;
+  map<UString, Transducer> sequences;
 
   int initialState;
   int lastState;
@@ -66,9 +68,11 @@ private:
 
   bool debugMode;
   bool outputGraph;
+  UFILE* debug_output;
+  void debug(const char* fmt, ...);
   bool allBlanks();
 
-  void skipBlanks(wstring &name);
+  void skipBlanks(UString &name);
   void procNode();
   void procList();
   void procListMatch();
@@ -82,43 +86,43 @@ private:
   void procSeq();
 
   /* If attrib does not exist (or other error), returns an empty string: */
-  wstring attrib(wstring const &name);
+  UString attrib(UString const &name);
 
   /* If attrib does not exist (or other error), returns fallback: */
-  wstring attrib(wstring const &name, const wstring fallback);
+  UString attrib(UString const &name, const UString fallback);
 
-  wstring itow(int i);
-  int wtoi(wstring);
-  double wtod(wstring);
+  UString itow(int i);
+  int wtoi(UString);
+  double wtod(UString);
 
 public:
-  static wstring const LRX_COMPILER_LRX_ELEM;
-  static wstring const LRX_COMPILER_DEFSEQS_ELEM;
-  static wstring const LRX_COMPILER_DEFSEQ_ELEM;
-  static wstring const LRX_COMPILER_RULES_ELEM;
-  static wstring const LRX_COMPILER_RULE_ELEM;
-  static wstring const LRX_COMPILER_MATCH_ELEM;
-  static wstring const LRX_COMPILER_SELECT_ELEM;
-  static wstring const LRX_COMPILER_REMOVE_ELEM;
-  static wstring const LRX_COMPILER_OR_ELEM;
-  static wstring const LRX_COMPILER_REPEAT_ELEM;
-  static wstring const LRX_COMPILER_SEQ_ELEM;
+  static UString const LRX_COMPILER_LRX_ELEM;
+  static UString const LRX_COMPILER_DEFSEQS_ELEM;
+  static UString const LRX_COMPILER_DEFSEQ_ELEM;
+  static UString const LRX_COMPILER_RULES_ELEM;
+  static UString const LRX_COMPILER_RULE_ELEM;
+  static UString const LRX_COMPILER_MATCH_ELEM;
+  static UString const LRX_COMPILER_SELECT_ELEM;
+  static UString const LRX_COMPILER_REMOVE_ELEM;
+  static UString const LRX_COMPILER_OR_ELEM;
+  static UString const LRX_COMPILER_REPEAT_ELEM;
+  static UString const LRX_COMPILER_SEQ_ELEM;
 
-  static wstring const LRX_COMPILER_SURFACE_ATTR;
-  static wstring const LRX_COMPILER_SUFFIX_ATTR;
-  static wstring const LRX_COMPILER_LEMMA_ATTR;
-  static wstring const LRX_COMPILER_CONTAINS_ATTR;
-  static wstring const LRX_COMPILER_CASE_ATTR;
-  static wstring const LRX_COMPILER_TAGS_ATTR;
-  static wstring const LRX_COMPILER_COMMENT_ATTR;
-  static wstring const LRX_COMPILER_NAME_ATTR;
-  static wstring const LRX_COMPILER_WEIGHT_ATTR;
-  static wstring const LRX_COMPILER_FROM_ATTR;
-  static wstring const LRX_COMPILER_UPTO_ATTR;
+  static UString const LRX_COMPILER_SURFACE_ATTR;
+  static UString const LRX_COMPILER_SUFFIX_ATTR;
+  static UString const LRX_COMPILER_LEMMA_ATTR;
+  static UString const LRX_COMPILER_CONTAINS_ATTR;
+  static UString const LRX_COMPILER_CASE_ATTR;
+  static UString const LRX_COMPILER_TAGS_ATTR;
+  static UString const LRX_COMPILER_COMMENT_ATTR;
+  static UString const LRX_COMPILER_NAME_ATTR;
+  static UString const LRX_COMPILER_WEIGHT_ATTR;
+  static UString const LRX_COMPILER_FROM_ATTR;
+  static UString const LRX_COMPILER_UPTO_ATTR;
 
-  static wstring const LRX_COMPILER_TYPE_SELECT;
-  static wstring const LRX_COMPILER_TYPE_REMOVE;
-  static wstring const LRX_COMPILER_TYPE_SKIP;
+  static UString const LRX_COMPILER_TYPE_SELECT;
+  static UString const LRX_COMPILER_TYPE_REMOVE;
+  static UString const LRX_COMPILER_TYPE_SKIP;
 
   static double  const LRX_COMPILER_DEFAULT_WEIGHT;
 

@@ -9,7 +9,7 @@ TaggerOutputProcessor::~TaggerOutputProcessor() {
 
 }
 
-int TaggerOutputProcessor::find(vector<wstring> xs, wstring x) {
+int TaggerOutputProcessor::find(vector<UString> xs, UString x) {
 	for (size_t i = 0; i < xs.size(); ++i) {
 		if (xs[i] == x)
 			return i;
@@ -17,10 +17,10 @@ int TaggerOutputProcessor::find(vector<wstring> xs, wstring x) {
 	return -1;
 }
 
-TaggerToken TaggerOutputProcessor::parseTaggerToken(wstring str) {
+TaggerToken TaggerOutputProcessor::parseTaggerToken(UString str) {
 	TaggerToken token;
 	int state = 0; // lemma;
-	wstring buffer;
+	UString buffer;
 	for (auto& c : str) {
 		if(c == L'<' && state == 0) {
 			state = 1;
@@ -41,10 +41,10 @@ TaggerToken TaggerOutputProcessor::parseTaggerToken(wstring str) {
 	return token;
 }
 
-vector<wstring> TaggerOutputProcessor::parseTags(wstring token) {
+vector<UString> TaggerOutputProcessor::parseTags(UString token) {
 	int state = 0; // outside
-	vector<wstring> tags;
-	wstring buffer;
+	vector<UString> tags;
+	UString buffer;
 	for (auto& c : token) {
 		if (state == 0) {
 			if (c == '<') {
@@ -53,7 +53,7 @@ vector<wstring> TaggerOutputProcessor::parseTags(wstring token) {
 		} else if (state == 1) {
 			if (c == '>') {
 				tags.push_back(buffer);
-				buffer = L"";
+				buffer.clear();
 				state = 0;
 			} else {
 				buffer += c;
@@ -63,26 +63,26 @@ vector<wstring> TaggerOutputProcessor::parseTags(wstring token) {
 	return tags;
 }
 
-vector<wstring> TaggerOutputProcessor::wsplit(wstring wstr, wchar_t delim) {
-	vector<wstring> tokens;
-	wstring buffer;
+vector<UString> TaggerOutputProcessor::wsplit(UString wstr, wchar_t delim) {
+	vector<UString> tokens;
+	UString buffer;
 
 	for(size_t i = 0; i < wstr.size(); ++i) {
 		if(wstr[i] == delim && (i == 0 || wstr[i-1] != L'\\')) {
 			tokens.push_back(buffer);
-			buffer = L"";
+			buffer.clear();
 		} else {
 			buffer += wstr[i];
 		}
 	}
-	if(buffer != L"") {
+	if(!buffer.empty()) {
 		tokens.push_back(buffer);
 	}
 	return tokens;
 }
 
-wstring TaggerOutputProcessor::getLemma(wstring token) {
-	wstring buffer;
+UString TaggerOutputProcessor::getLemma(UString token) {
+	UString buffer;
 	for (auto& c : token) {
 		if(c != '<') {
 			buffer += c;
@@ -94,7 +94,7 @@ wstring TaggerOutputProcessor::getLemma(wstring token) {
 }
 
 void TaggerOutputProcessor::processTaggerOutput(bool nullFlush) {
-	wstring buffer;
+	UString buffer;
 	vector<TaggerToken> sentence;
 	bool escaped = false;
 	int state = 0; // outside
@@ -126,7 +126,7 @@ void TaggerOutputProcessor::processTaggerOutput(bool nullFlush) {
 		} else if (state == 1) {
 			if(c == L'$' && !escaped) {
 				sentence.push_back(parseTaggerToken(buffer));
-				buffer = L"";
+				buffer.clear();
 				state = 0;
 			} else if (c == '\\' && !escaped) {
 				escaped = true;

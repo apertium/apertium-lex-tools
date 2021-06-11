@@ -7,33 +7,38 @@
 
 class BiltransToken {
 public:
-	TaggerToken sourceToken;
-	vector<TaggerToken> targetTokens;
-	wstring blanks;
+  TaggerToken sourceToken;
+  vector<TaggerToken> targetTokens;
+  UString blanks;
+  
+  bool isEOF;
+  
+  BiltransToken() {
+    isEOF = false;
+  }
 
-	bool isEOF;
-
-	BiltransToken() {
-		isEOF = false;
-	}
-
-	wstring toString(bool delimiter) {
-		wstring out = sourceToken.toString(false);
-		for(unsigned int i = 0; i < targetTokens.size(); i++) {
-			out += L'/' + targetTokens[i].toString(false);
-		}
-		if (delimiter) {
-			out = L"^" + out + L"$";
-		}
-		return out;
-	}
+  UString toString(bool delimiter) {
+    UString out;
+    if (delimiter) {
+      out += '^';
+    }
+    out.append(sourceToken.toString(false));
+    for (auto& tok : targetTokens) {
+      out += '/';
+      out.append(tok.toString(false));
+    }
+    if (delimiter) {
+      out += '$';
+    }
+    return out;
+  }
 };
 
 class MultiTranslator : public TaggerOutputProcessor {
 private:
 	FSTProcessor bilingual;
-	map<wstring, wstring> f_cache;
-	map<wstring, wstring> t_cache;
+	map<UString, UString> f_cache;
+	map<UString, UString> t_cache;
 	string path;
 
 	bool trimmed;
@@ -44,10 +49,10 @@ private:
 
 	bool isPosAmbig(BiltransToken token);
 
-	BiltransToken getTrimmedToken(wstring str);
-	BiltransToken getFullToken(wstring str);
+	BiltransToken getTrimmedToken(UString str);
+	BiltransToken getFullToken(UString str);
 
-	BiltransToken parseBiltransToken(wstring bt);
+	BiltransToken parseBiltransToken(UString bt);
 
 	void processSentence(vector<TaggerToken> s);
 
@@ -56,7 +61,7 @@ private:
 	void printTaggerOutput(int i, vector<BiltransToken> s);
 
 	void biltransToMultiTranslator(int sn, int &tn, unsigned int idx,
-			vector<BiltransToken> s, wstring buffer);
+			vector<BiltransToken> s, UString buffer);
 
 
 

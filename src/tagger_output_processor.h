@@ -18,30 +18,36 @@ using namespace std;
 
 class TaggerToken {
 public:
-	wstring lemma;
-	vector<wstring> tags;
-	wstring toString(bool delimiters) {
-		wstring out = lemma;
-		for (auto& tag : tags) {
-			out += L"<" + tag + L">";
-		}
-		if (delimiters) {
-			out = L"^" + out + L"$";
-		}
-		return out;
-	}
+  UString lemma;
+  vector<UString> tags;
+  UString toString(bool delimiters) {
+    UString out;
+    if (delimiters) {
+      out += '^';
+    }
+    out.append(lemma);
+    for (auto& tag : tags) {
+      out += '<';
+      out.append(tag);
+      out += '>';
+    }
+    if (delimiters) {
+      out += '$';
+    }
+    return out;
+  }
 };
 
 class TaggerOutputProcessor {
 protected:
 	int sn;
 
-	vector<wstring> parseTags(wstring token);
-	vector<wstring> wsplit(wstring wstr, wchar_t delim);
-	TaggerToken parseTaggerToken(wstring buffer);
+	vector<UString> parseTags(UString token);
+	vector<UString> wsplit(UString wstr, wchar_t delim);
+	TaggerToken parseTaggerToken(UString buffer);
 
-	int find(vector<wstring> xs, wstring x);
-	wstring getLemma(wstring token);
+	int find(vector<UString> xs, UString x);
+	UString getLemma(UString token);
 
 	virtual void processSentence(vector<TaggerToken>) =0;
 public:

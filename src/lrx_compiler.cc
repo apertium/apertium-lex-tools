@@ -21,67 +21,55 @@
 
 using namespace std;
 
-wstring const LRXCompiler::LRX_COMPILER_LRX_ELEM        = L"lrx";
-wstring const LRXCompiler::LRX_COMPILER_DEFSEQS_ELEM    = L"def-seqs";
-wstring const LRXCompiler::LRX_COMPILER_DEFSEQ_ELEM     = L"def-seq";
-wstring const LRXCompiler::LRX_COMPILER_RULES_ELEM      = L"rules";
-wstring const LRXCompiler::LRX_COMPILER_RULE_ELEM       = L"rule";
-wstring const LRXCompiler::LRX_COMPILER_MATCH_ELEM      = L"match";
-wstring const LRXCompiler::LRX_COMPILER_SELECT_ELEM     = L"select";
-wstring const LRXCompiler::LRX_COMPILER_REMOVE_ELEM     = L"remove";
-wstring const LRXCompiler::LRX_COMPILER_OR_ELEM         = L"or";
-wstring const LRXCompiler::LRX_COMPILER_REPEAT_ELEM     = L"repeat";
-wstring const LRXCompiler::LRX_COMPILER_SEQ_ELEM        = L"seq";
+UString const LRXCompiler::LRX_COMPILER_LRX_ELEM        = "lrx"_u;
+UString const LRXCompiler::LRX_COMPILER_DEFSEQS_ELEM    = "def-seqs"_u;
+UString const LRXCompiler::LRX_COMPILER_DEFSEQ_ELEM     = "def-seq"_u;
+UString const LRXCompiler::LRX_COMPILER_RULES_ELEM      = "rules"_u;
+UString const LRXCompiler::LRX_COMPILER_RULE_ELEM       = "rule"_u;
+UString const LRXCompiler::LRX_COMPILER_MATCH_ELEM      = "match"_u;
+UString const LRXCompiler::LRX_COMPILER_SELECT_ELEM     = "select"_u;
+UString const LRXCompiler::LRX_COMPILER_REMOVE_ELEM     = "remove"_u;
+UString const LRXCompiler::LRX_COMPILER_OR_ELEM         = "or"_u;
+UString const LRXCompiler::LRX_COMPILER_REPEAT_ELEM     = "repeat"_u;
+UString const LRXCompiler::LRX_COMPILER_SEQ_ELEM        = "seq"_u;
 
-wstring const LRXCompiler::LRX_COMPILER_LEMMA_ATTR      = L"lemma";
-wstring const LRXCompiler::LRX_COMPILER_SUFFIX_ATTR     = L"suffix";
-wstring const LRXCompiler::LRX_COMPILER_CONTAINS_ATTR   = L"contains";
-wstring const LRXCompiler::LRX_COMPILER_CASE_ATTR       = L"case";
-wstring const LRXCompiler::LRX_COMPILER_SURFACE_ATTR    = L"surface";
-wstring const LRXCompiler::LRX_COMPILER_TAGS_ATTR       = L"tags";
-wstring const LRXCompiler::LRX_COMPILER_WEIGHT_ATTR     = L"weight";
-wstring const LRXCompiler::LRX_COMPILER_COMMENT_ATTR    = L"c";
-wstring const LRXCompiler::LRX_COMPILER_NAME_ATTR       = L"n";
-wstring const LRXCompiler::LRX_COMPILER_FROM_ATTR       = L"from";
-wstring const LRXCompiler::LRX_COMPILER_UPTO_ATTR       = L"upto";
+UString const LRXCompiler::LRX_COMPILER_LEMMA_ATTR      = "lemma"_u;
+UString const LRXCompiler::LRX_COMPILER_SUFFIX_ATTR     = "suffix"_u;
+UString const LRXCompiler::LRX_COMPILER_CONTAINS_ATTR   = "contains"_u;
+UString const LRXCompiler::LRX_COMPILER_CASE_ATTR       = "case"_u;
+UString const LRXCompiler::LRX_COMPILER_SURFACE_ATTR    = "surface"_u;
+UString const LRXCompiler::LRX_COMPILER_TAGS_ATTR       = "tags"_u;
+UString const LRXCompiler::LRX_COMPILER_WEIGHT_ATTR     = "weight"_u;
+UString const LRXCompiler::LRX_COMPILER_COMMENT_ATTR    = "c"_u;
+UString const LRXCompiler::LRX_COMPILER_NAME_ATTR       = "n"_u;
+UString const LRXCompiler::LRX_COMPILER_FROM_ATTR       = "from"_u;
+UString const LRXCompiler::LRX_COMPILER_UPTO_ATTR       = "upto"_u;
 
-wstring const LRXCompiler::LRX_COMPILER_TYPE_SELECT     = L"select";
-wstring const LRXCompiler::LRX_COMPILER_TYPE_REMOVE     = L"remove";
-wstring const LRXCompiler::LRX_COMPILER_TYPE_SKIP       = L"skip";
+UString const LRXCompiler::LRX_COMPILER_TYPE_SELECT     = "select"_u;
+UString const LRXCompiler::LRX_COMPILER_TYPE_REMOVE     = "remove"_u;
+UString const LRXCompiler::LRX_COMPILER_TYPE_SKIP       = "skip"_u;
 
 double const  LRXCompiler::LRX_COMPILER_DEFAULT_WEIGHT  = 1.0;
 
-wstring
+void
+LRXCompiler::debug(const char* fmt, ...)
+{
+  if (debugMode) {
+    va_list argptr;
+    va_start(argptr, fmt);
+    u_vfprintf(debug_output, fmt, argptr);
+    va_end(argptr);
+  }
+}
+
+UString
 LRXCompiler::itow(int i)
 {
-  // Convert an int to a wstring
-  wchar_t buf[50];
-  memset(buf, '\0', sizeof(buf));
-  swprintf(buf, 50, L"%d", i);
-  wstring id(buf);
+  // Convert an int to a UString
+  UChar buf[50];
+  u_snprintf(buf, 50, "%d", i);
+  UString id(buf);
   return id;
-}
-
-int
-LRXCompiler::wtoi(wstring w)
-{
-  // Convert a wstring to an int
-  wistringstream wstrm(w);
-  int i_name = -numeric_limits<int>::max();
-  wstrm >> i_name;
-
-  return i_name;
-}
-
-double
-LRXCompiler::wtod(wstring w)
-{
-  // Convert a wstring to a double
-  wistringstream wstrm(w);
-  double d_name = -numeric_limits<double>::max();
-  wstrm >> d_name;
-
-  return d_name;
 }
 
 LRXCompiler::LRXCompiler()
@@ -90,6 +78,7 @@ LRXCompiler::LRXCompiler()
 
   debugMode = false;
   outputGraph = false;
+  debug_output = u_finit(stderr, NULL, NULL);
 
   currentRuleId = 0;
 
@@ -99,15 +88,15 @@ LRXCompiler::LRXCompiler()
 
   canSelect = true;
 
-  alphabet.includeSymbol(L"<"+ LRX_COMPILER_TYPE_SELECT + L">");
-  alphabet.includeSymbol(L"<"+ LRX_COMPILER_TYPE_REMOVE + L">");
-  alphabet.includeSymbol(L"<"+ LRX_COMPILER_TYPE_SKIP + L">");
+  alphabet.includeSymbol("<"_u+ LRX_COMPILER_TYPE_SELECT + ">"_u);
+  alphabet.includeSymbol("<"_u+ LRX_COMPILER_TYPE_REMOVE + ">"_u);
+  alphabet.includeSymbol("<"_u+ LRX_COMPILER_TYPE_SKIP + ">"_u);
 
-  alphabet.includeSymbol(L"<ANY_TAG>");
-  alphabet.includeSymbol(L"<ANY_CHAR>");
-  alphabet.includeSymbol(L"<ANY_UPPER>");
-  alphabet.includeSymbol(L"<ANY_LOWER>");
-  alphabet.includeSymbol(L"<$>");
+  alphabet.includeSymbol("<ANY_TAG>"_u);
+  alphabet.includeSymbol("<ANY_CHAR>"_u);
+  alphabet.includeSymbol("<ANY_UPPER>"_u);
+  alphabet.includeSymbol("<ANY_LOWER>"_u);
+  alphabet.includeSymbol("<$>"_u);
 
 }
 
@@ -129,64 +118,47 @@ LRXCompiler::setOutputGraph(bool o)
 }
 
 void
-LRXCompiler::skipBlanks(wstring &name)
+LRXCompiler::skipBlanks(UString &name)
 {
-  while(name == L"#text" || name == L"#comment")
+  while(name == "#text"_u || name == "#comment"_u)
   {
-    if(name != L"#comment")
+    if(name != "#comment"_u)
     {
       if(!allBlanks())
       {
-        wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-        wcerr << L"): Invalid construction." << endl;
+        cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+        cerr << "): Invalid construction." << endl;
         exit(EXIT_FAILURE);
       }
     }
 
     xmlTextReaderRead(reader);
-    name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+    name = XMLParseUtil::readName(reader);
   }
 }
 
-wstring
-LRXCompiler::attrib(wstring const &name)
+UString
+LRXCompiler::attrib(UString const &name)
 {
   return XMLParseUtil::attrib(reader, name);
 }
 
-wstring
-LRXCompiler::attrib(wstring const &name, const wstring fallback)
+UString
+LRXCompiler::attrib(UString const &name, const UString fallback)
 {
-  string mystr = "";
-  for (int i = 0, limit = name.size(); i != limit; i++) {
-    mystr += static_cast<char>(name[i]);
-  }
-
-  xmlChar *attrname = xmlCharStrdup(mystr.c_str());
-  xmlChar *myattr = xmlTextReaderGetAttribute(reader, attrname);
-  wstring result = XMLParseUtil::towstring(myattr);
-  xmlFree(myattr);
-  xmlFree(attrname);
-  if(myattr == NULL) {
-    return fallback;
-  }
-  else {
-    return result;
-  }
+  return XMLParseUtil::attrib(reader, name, fallback);
 }
 
 bool
 LRXCompiler::allBlanks()
 {
-  bool flag = true;
-  wstring text = XMLParseUtil::towstring(xmlTextReaderConstValue(reader));
-
-  for(unsigned int i = 0, limit = text.size(); i < limit; i++)
-  {
-    flag = flag && iswspace(text[i]);
+  UString text = XMLParseUtil::readValue(reader);
+  for (auto& c : text) {
+    if (!u_isspace(c)) {
+      return false;
+    }
   }
-
-  return flag;
+  return true;
 }
 
 void
@@ -210,7 +182,7 @@ LRXCompiler::parse(string const &fitxer)
 
   if(ret != 0)
   {
-    wcerr << L"Error: Parse error at the end of input." << endl;
+    cerr << "Error: Parse error at the end of input." << endl;
   }
 
 }
@@ -218,14 +190,13 @@ LRXCompiler::parse(string const &fitxer)
 void
 LRXCompiler::procNode()
 {
-  xmlChar const *xnombre = xmlTextReaderConstName(reader);
-  wstring nombre = XMLParseUtil::towstring(xnombre);
+  UString nombre = XMLParseUtil::readName(reader);
 
-  if(nombre == L"#text")
+  if(nombre == "#text"_u)
   {
     /* ignorar */
   }
-  else if(nombre== L"#comment")
+  else if(nombre== "#comment"_u)
   {
     /* ignorar */
   }
@@ -251,8 +222,8 @@ LRXCompiler::procNode()
   }
   else
   {
-    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-    wcerr << L"): Invalid node '<" << nombre << L">'." << endl;
+    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    cerr << "): Invalid node '<" << nombre << ">'." << endl;
     exit(EXIT_FAILURE);
   }
 
@@ -262,10 +233,13 @@ LRXCompiler::procNode()
 void
 LRXCompiler::procRule()
 {
-  wstring comment = this->attrib(LRX_COMPILER_COMMENT_ATTR);
-  wstring xweight = this->attrib(LRX_COMPILER_WEIGHT_ATTR);
-  wstring nombre = this->attrib(LRX_COMPILER_NAME_ATTR);
-  double weight =  wtod (xweight);
+  UString comment = this->attrib(LRX_COMPILER_COMMENT_ATTR);
+  UString xweight = this->attrib(LRX_COMPILER_WEIGHT_ATTR);
+  UString nombre = this->attrib(LRX_COMPILER_NAME_ATTR);
+  double weight = LRX_COMPILER_DEFAULT_WEIGHT;
+  if (!xweight.empty()) {
+    weight = stod(xweight);
+  }
 
   if(weight <= -numeric_limits<int>::max())
   {
@@ -276,25 +250,22 @@ LRXCompiler::procRule()
   currentState = transducer.insertNewSingleTransduction(alphabet(0, 0), currentState);
 
   currentRuleId++;
-  wstring ruleId = L"<" + itow(currentRuleId) + L">";
+  UString ruleId = "<"_u + itow(currentRuleId) + ">"_u;
   weights[currentRuleId] = weight;
 
-  if(debugMode)
-  {
-    fwprintf(stderr, L"  rule: %d, weight: %.2f \n", currentRuleId, weight);
-  }
+  debug("  rule: %d, weight: %.2f \n", currentRuleId, weight);
 
   while(true)
   {
     int ret = xmlTextReaderRead(reader);
     if(ret != 1)
     {
-      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-      wcerr << L"): Parse error." << endl;
+      cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+      cerr << "): Parse error." << endl;
       exit(EXIT_FAILURE);
     }
 
-    wstring name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+    UString name = XMLParseUtil::readName(reader);
     skipBlanks(name);
 
     if(name == LRX_COMPILER_MATCH_ELEM)
@@ -316,7 +287,7 @@ LRXCompiler::procRule()
     }
     else if(name == LRX_COMPILER_RULE_ELEM)
     {
-      currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<$>"), alphabet(L"<$>")), currentState);
+      currentState = transducer.insertSingleTransduction(alphabet(alphabet("<$>"_u), alphabet("<$>"_u)), currentState);
       if(!alphabet.isSymbolDefined(ruleId.c_str()))
       {
         alphabet.includeSymbol(ruleId.c_str());
@@ -328,9 +299,9 @@ LRXCompiler::procRule()
     }
     else
     {
-      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-      wcerr << L"): Invalid inclusion of '<" << name << L">' into '<" << LRX_COMPILER_RULE_ELEM;
-      wcerr << L">'." << endl;
+      cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+      cerr << "): Invalid inclusion of '<" << name << ">' into '<" << LRX_COMPILER_RULE_ELEM;
+      cerr << ">'." << endl;
       exit(EXIT_FAILURE);
     }
   }
@@ -343,10 +314,7 @@ void
 LRXCompiler::procOr()
 {
 
-  if(debugMode)
-  {
-    fwprintf(stderr, L"    or: \n");
-  }
+  debug("    or: \n");
 
   int or_initial_state = currentState;
   vector<int> reachedStates;
@@ -355,12 +323,12 @@ LRXCompiler::procOr()
     int ret = xmlTextReaderRead(reader);
     if(ret != 1)
     {
-      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-      wcerr << L"): Parse error." << endl;
+      cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+      cerr << "): Parse error." << endl;
       exit(EXIT_FAILURE);
     }
 
-    wstring name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+    UString name = XMLParseUtil::readName(reader);
     skipBlanks(name);
 
     if(name == LRX_COMPILER_MATCH_ELEM)
@@ -392,9 +360,9 @@ LRXCompiler::procOr()
     }
     else
     {
-      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-      wcerr << L"): Invalid inclusion of '<" << name << L">' into '<" << LRX_COMPILER_OR_ELEM;
-      wcerr << L">'." << endl;
+      cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+      cerr << "): Invalid inclusion of '<" << name << ">' into '<" << LRX_COMPILER_OR_ELEM;
+      cerr << ">'." << endl;
       exit(EXIT_FAILURE);
     }
   }
@@ -412,18 +380,18 @@ LRXCompiler::procDefSeq()
   int oldstate = currentState;
   currentState = initialState;
   lastState = initialState;
-  wstring seqname = this->attrib(LRX_COMPILER_NAME_ATTR);
+  UString seqname = this->attrib(LRX_COMPILER_NAME_ATTR);
   while(true)
   {
     int ret = xmlTextReaderRead(reader);
     if(ret != 1)
     {
-      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-      wcerr << L"): Parse error." << endl;
+      cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+      cerr << "): Parse error." << endl;
       exit(EXIT_FAILURE);
     }
 
-    wstring name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+    UString name = XMLParseUtil::readName(reader);
     skipBlanks(name);
 
     if(name == LRX_COMPILER_MATCH_ELEM)
@@ -450,9 +418,9 @@ LRXCompiler::procDefSeq()
     }
     else
     {
-      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-      wcerr << L"): Invalid inclusion of '<" << name << L">' into '<" << LRX_COMPILER_REPEAT_ELEM;
-      wcerr << L">'." << endl;
+      cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+      cerr << "): Invalid inclusion of '<" << name << ">' into '<" << LRX_COMPILER_REPEAT_ELEM;
+      cerr << ">'." << endl;
       exit(EXIT_FAILURE);
     }
   }
@@ -468,22 +436,19 @@ void
 LRXCompiler::procMatch()
 {
   // These are mutually exclusive
-  wstring lemma = this->attrib(LRX_COMPILER_LEMMA_ATTR, L"*");
-  wstring contains = this->attrib(LRX_COMPILER_SUFFIX_ATTR);
-  wstring suffix = this->attrib(LRX_COMPILER_CONTAINS_ATTR);
-  wstring _case = this->attrib(LRX_COMPILER_CASE_ATTR); // This could potentially be non-exclusive
+  UString lemma = this->attrib(LRX_COMPILER_LEMMA_ATTR, "*"_u);
+  UString contains = this->attrib(LRX_COMPILER_SUFFIX_ATTR);
+  UString suffix = this->attrib(LRX_COMPILER_CONTAINS_ATTR);
+  UString _case = this->attrib(LRX_COMPILER_CASE_ATTR); // This could potentially be non-exclusive
 
   // This is currently disabled: Future use
-  wstring surface = this->attrib(LRX_COMPILER_SURFACE_ATTR);
+  UString surface = this->attrib(LRX_COMPILER_SURFACE_ATTR);
 
-  wstring tags = this->attrib(LRX_COMPILER_TAGS_ATTR, L"*");
+  UString tags = this->attrib(LRX_COMPILER_TAGS_ATTR, "*"_u);
 
-  if(surface != L"")
+  if(!surface.empty())
   {
-    if(debugMode)
-    {
-      fwprintf(stderr, L"      match: %S\n", surface.c_str());
-    }
+    debug("      match: %S\n", surface.c_str());
 
     for(auto& it : surface)
     {
@@ -492,70 +457,64 @@ LRXCompiler::procMatch()
   }
   else
   {
-    if(debugMode)
-    {
-      fwprintf(stderr, L"      match: [%S, %S, %S, %S] %S\n", lemma.c_str(), suffix.c_str(), contains.c_str(), _case.c_str(), tags.c_str());
-    }
+    debug("      match: [%S, %S, %S, %S] %S\n", lemma.c_str(), suffix.c_str(), contains.c_str(), _case.c_str(), tags.c_str());
 
-    if(_case != L"")
+    if(_case != ""_u)
     {
-      if(_case == L"AA") // <ANY_UPPER>+
+      if(_case == "AA"_u) // <ANY_UPPER>+
       {
         int localLast = currentState;
-        currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_UPPER>"), 0), currentState);
+        currentState = transducer.insertSingleTransduction(alphabet(alphabet("<ANY_UPPER>"_u), 0), currentState);
         transducer.linkStates(currentState, localLast, 0);
       }
-      else if(_case == L"aa")  // <ANY_LOWER>+
+      else if(_case == "aa"_u)  // <ANY_LOWER>+
       {
         int localLast = currentState;
-        currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_LOWER>"), 0), currentState);
+        currentState = transducer.insertSingleTransduction(alphabet(alphabet("<ANY_LOWER>"_u), 0), currentState);
         transducer.linkStates(currentState, localLast, 0);
       }
-      else if(_case == L"Aa") // <ANY_UPPER>+ <ANY_LOWER>+
+      else if(_case == "Aa"_u) // <ANY_UPPER>+ <ANY_LOWER>+
       {
-        currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_UPPER>"), 0), currentState);
+        currentState = transducer.insertSingleTransduction(alphabet(alphabet("<ANY_UPPER>"_u), 0), currentState);
         int localLast = currentState;
-        currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_LOWER>"), 0), currentState);
+        currentState = transducer.insertSingleTransduction(alphabet(alphabet("<ANY_LOWER>"_u), 0), currentState);
         transducer.linkStates(currentState, localLast, 0);
       }
     }
-    if(lemma == L"*" && suffix == L"" && contains == L"" && _case == L"")
+    if(lemma == "*"_u && suffix.empty() && contains.empty() && _case.empty())
     {
       // This is only if there is no suffix or case or contains
-      if(debugMode)
-      {
-        fwprintf(stderr, L"        char: -\n");
-      }
+      debug("        char: -\n");
       int localLast = currentState;
-      currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_CHAR>"), 0), currentState);
+      currentState = transducer.insertSingleTransduction(alphabet(alphabet("<ANY_CHAR>"_u), 0), currentState);
       transducer.linkStates(currentState, localLast, 0);
     }
-    else if(suffix != L"")
+    else if(suffix != ""_u)
     {
       // A suffix is <ANY_CHAR> any amount of times followed by whatever is in the suffix
       int localLast = currentState;
-      currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_CHAR>"), 0), currentState);
+      currentState = transducer.insertSingleTransduction(alphabet(alphabet("<ANY_CHAR>"_u), 0), currentState);
       transducer.linkStates(currentState, localLast, 0);
       for(auto& it : suffix)
       {
         currentState = transducer.insertSingleTransduction(alphabet(it, 0), currentState);
       }
     }
-    else if(contains != L"")
+    else if(!contains.empty())
     {
       // A contains is <ANY_CHAR> any amount of times followed by whatever is in the attribute
       // followed by <ANY_CHAR> any amount of times
       int localLast = currentState;
-      currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_CHAR>"), 0), currentState);
+      currentState = transducer.insertSingleTransduction(alphabet(alphabet("<ANY_CHAR>"_u), 0), currentState);
       transducer.linkStates(currentState, localLast, 0);
       for(auto& it : suffix)
       {
         currentState = transducer.insertSingleTransduction(alphabet(it, 0), currentState);
       }
-      currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_CHAR>"), 0), currentState);
+      currentState = transducer.insertSingleTransduction(alphabet(alphabet("<ANY_CHAR>"_u), 0), currentState);
       transducer.linkStates(currentState, localLast, 0);
     }
-    else if(lemma != L"*")
+    else if(lemma != "*"_u)
     {
       for(auto& it : lemma)
       {
@@ -564,66 +523,57 @@ LRXCompiler::procMatch()
     }
     else
     {
-      fwprintf(stderr, L"Something surprising happened in <match> compilation\n");
+      cerr << "Something surprising happened in <match> compilation\n";
     }
 
-    wstring tag = L"";
+    UString tag;
     for(auto& it : tags)
     {
-      if(it == L'.')
+      if(it == '.')
       {
-        if(tag == L"")
+        if(tag.empty())
         {
           continue;
         }
-        tag = L"<" + tag + L">";
+        tag = "<"_u + tag + ">"_u;
         if(!alphabet.isSymbolDefined(tag.c_str()))
         {
           alphabet.includeSymbol(tag.c_str());
         }
-        if(debugMode)
-        {
-          fwprintf(stderr, L"        tag: %S\n", tag.c_str());
-        }
-        if(tag == L"<*>")
+        debug("        tag: %S\n", tag.c_str());
+        if(tag == "<*>"_u)
         {
           int localLast = currentState;
-          currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"), 0), currentState);
+          currentState = transducer.insertSingleTransduction(alphabet(alphabet("<ANY_TAG>"_u), 0), currentState);
           transducer.linkStates(currentState, localLast, 0);
         }
         else
         {
           currentState = transducer.insertSingleTransduction(alphabet(alphabet(tag.c_str()), 0), currentState);
         }
-        tag = L"";
+        tag = ""_u;
         continue;
       }
       tag = tag + it;
     }
-    if(tag == L"*")
+    if(tag == "*"_u)
     {
-      if(debugMode)
-      {
-        fwprintf(stderr, L"        tag: %S\n", tag.c_str());
-      }
+      debug("        tag: %S\n", tag.c_str());
       int localLast = currentState;
-      currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"), 0), currentState);
+      currentState = transducer.insertSingleTransduction(alphabet(alphabet("<ANY_TAG>"_u), 0), currentState);
       transducer.linkStates(currentState, localLast, 0);
     }
-    else if(tag == L"")
+    else if(tag.empty())
     {
     }
     else
     {
-      tag = L"<" + tag + L">";
+      tag = "<"_u + tag + ">"_u;
       if(!alphabet.isSymbolDefined(tag.c_str()))
       {
         alphabet.includeSymbol(tag.c_str());
       }
-      if(debugMode)
-      {
-        fwprintf(stderr, L"        tag: %S\n", tag.c_str());
-      }
+      debug("        tag: %S\n", tag.c_str());
       currentState = transducer.insertSingleTransduction(alphabet(alphabet(tag.c_str()), 0), currentState);
     }
   }
@@ -631,31 +581,31 @@ LRXCompiler::procMatch()
   if(xmlTextReaderIsEmptyElement(reader))
   {
     // If self-closing
-    currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<$>"), alphabet(L"<$>")), currentState);
-    currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<skip>")), currentState);
+    currentState = transducer.insertSingleTransduction(alphabet(alphabet("<$>"_u), alphabet("<$>"_u)), currentState);
+    currentState = transducer.insertSingleTransduction(alphabet(0, alphabet("<skip>"_u)), currentState);
     return;
   }
 
-  wstring name = L"";
+  UString name = ""_u;
   while(true)
   {
     int ret = xmlTextReaderRead(reader);
     if(ret != 1)
     {
-      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-      wcerr << L"): Parse error." << endl;
+      cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+      cerr << "): Parse error." << endl;
       exit(EXIT_FAILURE);
     }
 
-    name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+    name = XMLParseUtil::readName(reader);
     skipBlanks(name);
 
     if(name == LRX_COMPILER_SELECT_ELEM)
     {
       if(!canSelect)
       {
-        wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-        wcerr << L"): <select> is not permitted inside <repeat>." << endl;
+        cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+        cerr << "): <select> is not permitted inside <repeat>." << endl;
         exit(EXIT_FAILURE);
       }
       procSelect();
@@ -664,8 +614,8 @@ LRXCompiler::procMatch()
     {
       if(!canSelect)
       {
-        wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-        wcerr << L"): <remove> is not permitted inside <repeat>." << endl;
+        cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+        cerr << "): <remove> is not permitted inside <repeat>." << endl;
         exit(EXIT_FAILURE);
       }
       procRemove();
@@ -676,9 +626,9 @@ LRXCompiler::procMatch()
     }
     else
     {
-      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-      wcerr << L"): Invalid inclusion of '<" << name << L">' into '<" << LRX_COMPILER_MATCH_ELEM;
-      wcerr << L">'." << endl;
+      cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+      cerr << "): Invalid inclusion of '<" << name << ">' into '<" << LRX_COMPILER_MATCH_ELEM;
+      cerr << ">'." << endl;
       exit(EXIT_FAILURE);
     }
   }
@@ -691,11 +641,11 @@ void
 LRXCompiler::procSelect()
 {
 
-  wstring lemma =this->attrib(LRX_COMPILER_LEMMA_ATTR, L"*");
-  wstring tags =this->attrib(LRX_COMPILER_TAGS_ATTR);
+  UString lemma =this->attrib(LRX_COMPILER_LEMMA_ATTR, "*"_u);
+  UString tags =this->attrib(LRX_COMPILER_TAGS_ATTR);
 
-  wstring key = L"<" + LRX_COMPILER_TYPE_SELECT + L">";
-  if(lemma != L"*")
+  UString key = "<"_u + LRX_COMPILER_TYPE_SELECT + ">"_u;
+  if(lemma != "*"_u)
   {
     key += lemma;
   }
@@ -703,22 +653,19 @@ LRXCompiler::procSelect()
   Transducer recogniser;
   int localCurrentState = recogniser.getInitial();
 
-  if(debugMode)
+  debug("        select: %S, %S\n", lemma.c_str(), tags.c_str());
+
+  currentState = transducer.insertSingleTransduction(alphabet(alphabet("<$>"_u), alphabet("<$>"_u)), currentState);
+  currentState = transducer.insertSingleTransduction(alphabet(0, alphabet("<"_u + LRX_COMPILER_TYPE_SELECT + ">"_u)), currentState);
+
+
+  if(lemma == "*"_u)
   {
-    fwprintf(stderr, L"        select: %S, %S\n", lemma.c_str(), tags.c_str());
-  }
-
-  currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<$>"), alphabet(L"<$>")), currentState);
-  currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<" + LRX_COMPILER_TYPE_SELECT + L">")), currentState);
-
-
-  if(lemma == L"*")
-  {
-    currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_CHAR>")), currentState);
+    currentState = transducer.insertSingleTransduction(alphabet(0, alphabet("<ANY_CHAR>"_u)), currentState);
     int localLast = localCurrentState;
-    localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(L"<ANY_CHAR>"),0), localCurrentState);
+    localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet("<ANY_CHAR>"_u),0), localCurrentState);
     recogniser.linkStates(localCurrentState, localLast, 0);
-    key = key + L"<ANY_CHAR>";
+    key = key + "<ANY_CHAR>"_u;
   }
   else {
     for (auto &it : lemma) {
@@ -727,29 +674,26 @@ LRXCompiler::procSelect()
     }
   }
 
-  if(tags != L"")
+  if(tags != ""_u)
   {
-    wstring tag = L"";
+    UString tag = ""_u;
     for(auto& it : tags)
     {
-      if(it == L'.')
+      if(it == '.')
       {
-        tag = L"<" + tag + L">";
+        tag = "<"_u + tag + ">"_u;
         if(!alphabet.isSymbolDefined(tag.c_str()))
         {
           alphabet.includeSymbol(tag.c_str());
         }
-        if(debugMode)
+        debug("        tag: %S\n", tag.c_str());
+        if(tag == "<*>"_u)
         {
-          fwprintf(stderr, L"        tag: %S\n", tag.c_str());
-        }
-        if(tag == L"<*>")
-        {
-          currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_TAG>")), currentState);
+          currentState = transducer.insertSingleTransduction(alphabet(0, alphabet("<ANY_TAG>"_u)), currentState);
 	  int localLast = localCurrentState;
-          localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"),0), localCurrentState);
+          localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet("<ANY_TAG>"_u),0), localCurrentState);
 	  recogniser.linkStates(localCurrentState, localLast, 0);
-          key = key + L"<ANY_TAG>";
+          key = key + "<ANY_TAG>"_u;
         }
         else
         {
@@ -757,34 +701,28 @@ LRXCompiler::procSelect()
           localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(tag.c_str()),0), localCurrentState);
           key = key + tag;
         }
-        tag = L"";
+        tag = ""_u;
         continue;
       }
       tag = tag + it;
     }
-    if(tag == L"*")
+    if(tag == "*"_u)
     {
-      if(debugMode)
-      {
-        fwprintf(stderr, L"        tag: %S\n", tag.c_str());
-      }
-      currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_TAG>")), currentState);
+      debug("        tag: %S\n", tag.c_str());
+      currentState = transducer.insertSingleTransduction(alphabet(0, alphabet("<ANY_TAG>"_u)), currentState);
       int localLast = localCurrentState;
-      localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"),0), localCurrentState);
+      localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet("<ANY_TAG>"_u),0), localCurrentState);
       recogniser.linkStates(localCurrentState, localLast, 0);
-      key = key + L"<ANY_TAG>";
+      key = key + "<ANY_TAG>"_u;
     }
     else
     {
-      tag = L"<" + tag + L">";
+      tag = "<"_u + tag + ">"_u;
       if(!alphabet.isSymbolDefined(tag.c_str()))
       {
         alphabet.includeSymbol(tag.c_str());
       }
-      if(debugMode)
-      {
-        fwprintf(stderr, L"        tag: %S\n", tag.c_str());
-      }
+      debug("        tag: %S\n", tag.c_str());
       currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(tag.c_str())), currentState);
       localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(tag.c_str()),0), localCurrentState);
       key = key + tag;
@@ -792,26 +730,20 @@ LRXCompiler::procSelect()
   }
   else
   {
-    if(debugMode)
-    {
-      fwprintf(stderr, L"        tag: -\n");
-    }
-    currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_TAG>")), currentState);
+    debug("        tag: -\n");
+    currentState = transducer.insertSingleTransduction(alphabet(0, alphabet("<ANY_TAG>"_u)), currentState);
     int localLast = localCurrentState;
-    localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"),0), localCurrentState);
+    localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet("<ANY_TAG>"_u),0), localCurrentState);
     recogniser.linkStates(localCurrentState, localLast, 0);
-    key = key + L"<ANY_TAG>";
+    key = key + "<ANY_TAG>"_u;
   }
 
 
   recogniser.setFinal(localCurrentState);
 
   recognisers[key] = recogniser;
-  if(debugMode)
-  {
-    fwprintf(stderr, L"        select: %d\n", recognisers[key].size());
-  }
-  //currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<$>"), alphabet(L"<$>")), currentState);
+  debug("        select: %d\n", recognisers[key].size());
+  //currentState = transducer.insertSingleTransduction(alphabet(alphabet("<$>"_u), alphabet("<$>"_u)), currentState);
 
   return;
 }
@@ -820,11 +752,11 @@ void
 LRXCompiler::procRemove()
 {
 
-  wstring lemma =this->attrib(LRX_COMPILER_LEMMA_ATTR, L"*");
-  wstring tags =this->attrib(LRX_COMPILER_TAGS_ATTR);
+  UString lemma =this->attrib(LRX_COMPILER_LEMMA_ATTR, "*"_u);
+  UString tags =this->attrib(LRX_COMPILER_TAGS_ATTR);
 
-  wstring key = L"<" + LRX_COMPILER_TYPE_REMOVE + L">";
-  if(lemma != L"*")
+  UString key = "<"_u + LRX_COMPILER_TYPE_REMOVE + ">"_u;
+  if(lemma != "*"_u)
   {
     key += lemma;
   }
@@ -832,21 +764,18 @@ LRXCompiler::procRemove()
   Transducer recogniser;
   int localCurrentState = recogniser.getInitial();
 
-  if(debugMode)
-  {
-    fwprintf(stderr, L"        remove: %S, %S\n", lemma.c_str(), tags.c_str());
-  }
+  debug("        remove: %S, %S\n", lemma.c_str(), tags.c_str());
 
-  currentState = transducer.insertSingleTransduction(alphabet(alphabet(L"<$>"), alphabet(L"<$>")), currentState);
-  currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<" + LRX_COMPILER_TYPE_REMOVE + L">")), currentState);
+  currentState = transducer.insertSingleTransduction(alphabet(alphabet("<$>"_u), alphabet("<$>"_u)), currentState);
+  currentState = transducer.insertSingleTransduction(alphabet(0, alphabet("<"_u + LRX_COMPILER_TYPE_REMOVE + ">"_u)), currentState);
 
-  if(lemma == L"*")
+  if(lemma == "*"_u)
   {
-    currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_CHAR>")), currentState);
+    currentState = transducer.insertSingleTransduction(alphabet(0, alphabet("<ANY_CHAR>"_u)), currentState);
     int localLast = localCurrentState;
-    localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(L"<ANY_CHAR>"),0), localCurrentState);
+    localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet("<ANY_CHAR>"_u),0), localCurrentState);
     recogniser.linkStates(localCurrentState, localLast, 0);
-    key = key + L"<ANY_CHAR>";
+    key = key + "<ANY_CHAR>"_u;
   }
   else
   {
@@ -857,29 +786,26 @@ LRXCompiler::procRemove()
     }
   }
 
-  if(tags != L"")
+  if(tags != ""_u)
   {
-    wstring tag = L"";
+    UString tag = ""_u;
     for(auto& it : tags)
     {
-      if(it == L'.')
+      if(it == '.')
       {
-        tag = L"<" + tag + L">";
+        tag = "<"_u + tag + ">"_u;
         if(!alphabet.isSymbolDefined(tag.c_str()))
         {
           alphabet.includeSymbol(tag.c_str());
         }
-        if(debugMode)
+        debug("        tag: %S\n", tag.c_str());
+        if(tag == "<*>"_u)
         {
-          fwprintf(stderr, L"        tag: %S\n", tag.c_str());
-        }
-        if(tag == L"<*>")
-        {
-          currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_TAG>")), currentState);
+          currentState = transducer.insertSingleTransduction(alphabet(0, alphabet("<ANY_TAG>"_u)), currentState);
 	  int localLast = localCurrentState;
-          localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"),0), localCurrentState);
+          localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet("<ANY_TAG>"_u),0), localCurrentState);
 	  recogniser.linkStates(localCurrentState, localLast, 0);
-          key = key + L"<ANY_TAG>";
+          key = key + "<ANY_TAG>"_u;
         }
         else
         {
@@ -887,34 +813,28 @@ LRXCompiler::procRemove()
           localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(tag.c_str()),0), localCurrentState);
           key = key + tag;
         }
-        tag = L"";
+        tag = ""_u;
         continue;
       }
       tag = tag + it;
     }
-    if(tag == L"*")
+    if(tag == "*"_u)
     {
-      if(debugMode)
-      {
-        fwprintf(stderr, L"        tag: %S\n", tag.c_str());
-      }
-      currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_TAG>")), currentState);
+      debug("        tag: %S\n", tag.c_str());
+      currentState = transducer.insertSingleTransduction(alphabet(0, alphabet("<ANY_TAG>"_u)), currentState);
       int localLast = localCurrentState;
-      localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"),0), localCurrentState);
+      localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet("<ANY_TAG>"_u),0), localCurrentState);
       recogniser.linkStates(localCurrentState, localLast, 0);
-      key = key + L"<ANY_TAG>";
+      key = key + "<ANY_TAG>"_u;
     }
     else
     {
-      tag = L"<" + tag + L">";
+      tag = "<"_u + tag + ">"_u;
       if(!alphabet.isSymbolDefined(tag.c_str()))
       {
-        alphabet.includeSymbol(tag.c_str());
+        alphabet.includeSymbol(tag);
       }
-      if(debugMode)
-      {
-        fwprintf(stderr, L"        tag: %S\n", tag.c_str());
-      }
+      debug("        tag: %S\n", tag.c_str());
       currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(tag.c_str())), currentState);
       localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(tag.c_str()),0), localCurrentState);
       key = key + tag;
@@ -922,25 +842,19 @@ LRXCompiler::procRemove()
   }
   else
   {
-    if(debugMode)
-    {
-      fwprintf(stderr, L"        tag: -\n");
-    }
-    currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(L"<ANY_TAG>")), currentState);
+    debug("        tag: -\n");
+    currentState = transducer.insertSingleTransduction(alphabet(0, alphabet("<ANY_TAG>"_u)), currentState);
     int localLast = localCurrentState;
-    localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(L"<ANY_TAG>"),0), localCurrentState);
+    localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet("<ANY_TAG>"_u),0), localCurrentState);
     recogniser.linkStates(localCurrentState, localLast, 0);
-    key = key + L"<ANY_TAG>";
+    key = key + "<ANY_TAG>"_u;
   }
 
 
   recogniser.setFinal(localCurrentState);
 
   recognisers[key] = recogniser;
-  if(debugMode)
-  {
-    fwprintf(stderr, L"        remove: %d\n", recognisers[key].size());
-  }
+  debug("        remove: %d\n", recognisers[key].size());
 
   return;
 }
@@ -951,20 +865,20 @@ LRXCompiler::procRepeat()
 {
   bool couldSelect = canSelect;
   canSelect = false;
-  wstring xfrom = this->attrib(LRX_COMPILER_FROM_ATTR);
-  wstring xupto = this->attrib(LRX_COMPILER_UPTO_ATTR);
+  UString xfrom = this->attrib(LRX_COMPILER_FROM_ATTR);
+  UString xupto = this->attrib(LRX_COMPILER_UPTO_ATTR);
   int from = stoi(xfrom);
   int upto = stoi(xupto);
   if(from < 0 || upto < 0)
   {
-    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-    wcerr << L"): Number of repetitions cannot be negative." << endl;
+    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    cerr << "): Number of repetitions cannot be negative." << endl;
     exit(EXIT_FAILURE);
   }
   else if(from > upto)
   {
-    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-    wcerr << L"): Lower bound on number of repetitions cannot be larger than upper bound." << endl;
+    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    cerr << "): Lower bound on number of repetitions cannot be larger than upper bound." << endl;
     exit(EXIT_FAILURE);
   }
   int count = upto - from;
@@ -978,12 +892,12 @@ LRXCompiler::procRepeat()
     int ret = xmlTextReaderRead(reader);
     if(ret != 1)
     {
-      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-      wcerr << L"): Parse error." << endl;
+      cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+      cerr << "): Parse error." << endl;
       exit(EXIT_FAILURE);
     }
 
-    wstring name = XMLParseUtil::towstring(xmlTextReaderConstName(reader));
+    UString name = XMLParseUtil::readName(reader);
     skipBlanks(name);
 
     if(name == LRX_COMPILER_MATCH_ELEM)
@@ -1006,9 +920,9 @@ LRXCompiler::procRepeat()
     }
     else
     {
-      wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-      wcerr << L"): Invalid inclusion of '<" << name << L">' into '<" << LRX_COMPILER_REPEAT_ELEM;
-      wcerr << L">'." << endl;
+      cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+      cerr << "): Invalid inclusion of '<" << name << ">' into '<" << LRX_COMPILER_REPEAT_ELEM;
+      cerr << ">'." << endl;
       exit(EXIT_FAILURE);
     }
   }
@@ -1031,11 +945,11 @@ LRXCompiler::procRepeat()
 void
 LRXCompiler::procSeq()
 {
-  wstring name = this->attrib(LRX_COMPILER_NAME_ATTR);
+  UString name = this->attrib(LRX_COMPILER_NAME_ATTR);
   if(sequences.find(name) == sequences.end())
   {
-    wcerr << L"Error (" << xmlTextReaderGetParserLineNumber(reader);
-    wcerr << L"): Sequence '" << name << L"' not defined." << endl;
+    cerr << "Error (" << xmlTextReaderGetParserLineNumber(reader);
+    cerr << "): Sequence '" << name << "' not defined." << endl;
     exit(EXIT_FAILURE);
   }
   currentState = transducer.insertTransducer(currentState, sequences[name]);
@@ -1050,28 +964,24 @@ LRXCompiler::write(FILE *fst)
   Compression::multibyte_write(recognisers.size(), fst);
   for(auto& it : recognisers)
   {
-    Compression::wstring_write(it.first, fst);
-    if(debugMode)
-    {
-      fwprintf(stderr, L"+ %d => %S\n", it.second.size(), it.first.c_str());
-      it.second.show(alphabet, stderr, 0, false);
+    Compression::string_write(it.first, fst);
+    debug("+ %d => %S\n", it.second.size(), it.first.c_str());
+    if (debugMode) {
+      it.second.show(alphabet, debug_output, 0, false);
     }
     it.second.write(fst);
   }
 
-  Compression::wstring_write(L"main", fst);
+  Compression::string_write("main"_u, fst);
   if(outputGraph)
   {
-    transducer.show(alphabet, stderr, 0, false);
+    transducer.show(alphabet, debug_output, 0, false);
   }
   transducer.write(fst);
 
   for(auto& it : weights)
   {
-    if(debugMode)
-    {
-      fwprintf(stderr, L"%.4f %d\n", it.second, it.first);
-    }
+    debug("%.4f %d\n", it.second, it.first);
     weight record{it.first, "", it.second};
     weight_to_le(record);
     fwrite((void *)&record, 1, sizeof(weight), fst);
@@ -1079,6 +989,6 @@ LRXCompiler::write(FILE *fst)
 
   if(!outputGraph)
   {
-    fwprintf(stderr, L"%d: %d@%d\n", currentRuleId, transducer.size(), transducer.numberOfTransitions());
+    u_fprintf(debug_output, "%d: %d@%d\n", currentRuleId, transducer.size(), transducer.numberOfTransitions());
   }
 }

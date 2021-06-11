@@ -56,7 +56,9 @@ int main (int argc, char **argv)
       compiler.setDebugMode(true);
     }
 
+    cerr << "parse!" << endl;
     compiler.parse(argv[2]);
+    cerr << "write!" << endl;
     FILE *output = fopen(argv[3], "wb");
     compiler.write(output);
   }

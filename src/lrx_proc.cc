@@ -92,7 +92,8 @@ int main(int argc, char *argv[])
     }
   }
 
-  FILE *input = stdin, *output = stdout;
+  InputFile input;
+  UFILE* output = u_finit(stdout, NULL, NULL);
   LtLocale::tryToSetLocale();
 
   if(optind == (argc - 3))
@@ -103,14 +104,12 @@ int main(int argc, char *argv[])
       endProgram(argv[0]);
     }
 
-    input = fopen(argv[optind+1], "rb");
-    if(input == NULL || ferror(input))
-    {
+    if (!input.open(argv[optind+1])) {
       endProgram(argv[0]);
     }
 
-    output= fopen(argv[optind+2], "wb");
-    if(output == NULL || ferror(output))
+    output = u_fopen(argv[optind+2], "w", NULL, NULL);
+    if(output == NULL)
     {
       endProgram(argv[0]);
     }
@@ -126,9 +125,7 @@ int main(int argc, char *argv[])
       endProgram(argv[0]);
     }
 
-    input = fopen(argv[optind+1], "rb");
-    if(input == NULL || ferror(input))
-    {
+    if (!input.open(argv[optind+1])) {
       endProgram(argv[0]);
     }
 
@@ -150,14 +147,8 @@ int main(int argc, char *argv[])
     endProgram(argv[0]);
   }
 
-#ifdef _MSC_VER
-        _setmode(_fileno(input), _O_U8TEXT);
-        _setmode(_fileno(output), _O_U8TEXT);
-#endif
-
   lrxp.init();
   lrxp.process(input, output);
-  fclose(input);
-  fclose(output);
+  u_fclose(output);
   return EXIT_SUCCESS;
 }

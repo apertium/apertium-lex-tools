@@ -34,7 +34,6 @@
 
 #include <libxml/xmlreader.h>
 
-#include <lttoolbox/ltstr.h>
 #include <lttoolbox/lt_locale.h>
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/xml_parse_util.h>
@@ -46,46 +45,23 @@
 #include <lttoolbox/match_exe.h>
 #include <lttoolbox/trans_exe.h>
 #include <lttoolbox/my_stdio.h>
+#include <lttoolbox/input_file.h>
 
 using namespace std;
-/*
-class BiltransToken {
-public:
-	bool isEOF = false;
-	wstring source;
-	wstring blanks;
-	vector<wstring> target;
 
-	wstring toString(bool delim) {
-		wstring out = source;
-		for(int i = 0; i < target.size(); i++) {
-			out += L'/' + target[i];
-		}
-		if (delim && (source.size() > 0 || target.size() > 0)) {
-			out = blanks + L'^' + out + L'$';
-		} else {
-			out = blanks + out;
-		}
-		return out;
-	}
-};
-
-*/
 class LRXProcessor
 {
 private:
 
   Alphabet alphabet;
   TransExe transducer;
-  map<wstring, TransExe> recognisers;
-  map<wstring, double> weights;
-
-//  map<int, BiltransToken> bts;
+  map<UString, TransExe> recognisers;
+  map<UString, double> weights;
 
   vector<State> alive_states;
 
   map<Node *, double> anfinals;
-  set<wchar_t> escaped_chars;
+  set<UChar32> escaped_chars;
   State *initial_state;
 
   bool traceMode;
@@ -96,39 +72,27 @@ private:
   unsigned int pos;
   unsigned long lineno;
 
-  wstring itow(int i);
-  bool recognisePattern(const wstring lu, const wstring op);
-  wstring readFullBlock(FILE *input, wchar_t const delim1, wchar_t const delim2);
-
-//  BiltransToken readBiltransToken(FILE *input = stdin);
+  UString itow(int i);
+  bool recognisePattern(const UString lu, const UString op);
+  UString readFullBlock(InputFile& input, UChar32 const delim1, UChar32 const delim2);
 
   void makeTransition(int);
   void filterFinals();
   void evaluateRules();
 
-/*
-  void processFlush(FILE *output,
-                    map<int, wstring > &sl,
-                    map<int, vector<wstring> > &tl,
-                    map<int, wstring > &blanks,
-                    map<int, pair<double, vector<State> > > &covers,
-                    pair<double, vector<State> > &empty_seq,
-                    map<pair<int, int>, vector<State> > &spans,
-                    int last_final);
-*/
   enum OpType { Select, Remove };
 
-  void processFlush(FILE *output,
-                      map<int, wstring > &sl,
-                      map<int, vector<wstring> > &tl,
-                      map<int, wstring > &blanks,
-                      map<int, map<wstring, double> > &scores,
-                      map<int, map<wstring, OpType> > &operations);
+  void processFlush(UFILE *output,
+                      map<int, UString > &sl,
+                      map<int, vector<UString> > &tl,
+                      map<int, UString > &blanks,
+                      map<int, map<UString, double> > &scores,
+                      map<int, map<UString, OpType> > &operations);
 
 public:
-  static wstring const LRX_PROCESSOR_TAG_SELECT;
-  static wstring const LRX_PROCESSOR_TAG_REMOVE;
-  static wstring const LRX_PROCESSOR_TAG_SKIP;
+  static UString const LRX_PROCESSOR_TAG_SELECT;
+  static UString const LRX_PROCESSOR_TAG_REMOVE;
+  static UString const LRX_PROCESSOR_TAG_SKIP;
 
   LRXProcessor();
   ~LRXProcessor();
@@ -139,9 +103,7 @@ public:
 
   void init();
   void load(FILE *input);
-  void process(FILE *input, FILE *output);
-//  void processME(FILE *input, FILE *output);
-
+  void process(InputFile& input, UFILE *output);
 };
 
 #endif /* __LRX_PROCESSOR_H__ */
