@@ -25,7 +25,6 @@
 
 #include <lttoolbox/exception.h>
 #include <lttoolbox/fst_processor.h>
-#include <lttoolbox/ltstr.h>
 #include <lttoolbox/lt_locale.h>
 
 using namespace std;

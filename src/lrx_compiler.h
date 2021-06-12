@@ -32,7 +32,6 @@
 
 #include <libxml/xmlreader.h>
 
-#include <lttoolbox/ltstr.h>
 #include <lttoolbox/lt_locale.h>
 #include <lttoolbox/transducer.h>
 #include <lttoolbox/xml_parse_util.h>

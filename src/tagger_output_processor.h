@@ -7,7 +7,6 @@
 
 #include <lttoolbox/fst_processor.h>
 #include <lttoolbox/lt_locale.h>
-#include <lttoolbox/ltstr.h>
 
 #include <cwchar>
 #include <set>
