@@ -16,6 +16,7 @@
  */
 
 #include <lrx_compiler.h>
+#include <cstring>
 
 using namespace std;
 
