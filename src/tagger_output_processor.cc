@@ -1,13 +1,6 @@
 #include "tagger_output_processor.h"
-
-TaggerOutputProcessor::TaggerOutputProcessor() {
-	sn = 0;
-	LtLocale::tryToSetLocale();
-}
-
-TaggerOutputProcessor::~TaggerOutputProcessor() {
-
-}
+#include <lttoolbox/string_utils.h>
+#include <lttoolbox/input_file.h>
 
 int TaggerOutputProcessor::find(vector<UString> xs, UString x) {
 	for (size_t i = 0; i < xs.size(); ++i) {
@@ -22,16 +15,16 @@ TaggerToken TaggerOutputProcessor::parseTaggerToken(UString str) {
 	int state = 0; // lemma;
 	UString buffer;
 	for (auto& c : str) {
-		if(c == L'<' && state == 0) {
+		if(c == '<' && state == 0) {
 			state = 1;
 			token.lemma = buffer;
 			buffer.clear();
 		}
 
-		if (c == L'>') {
+		if (c == '>') {
 			token.tags.push_back(buffer);
 			buffer.clear();
-		} else if (c != L'<') {
+		} else if (c != '<') {
 			buffer += c;
 		}
 	}
@@ -63,12 +56,12 @@ vector<UString> TaggerOutputProcessor::parseTags(UString token) {
 	return tags;
 }
 
-vector<UString> TaggerOutputProcessor::wsplit(UString wstr, wchar_t delim) {
+vector<UString> TaggerOutputProcessor::wsplit(UString wstr, UChar delim) {
 	vector<UString> tokens;
 	UString buffer;
 
 	for(size_t i = 0; i < wstr.size(); ++i) {
-		if(wstr[i] == delim && (i == 0 || wstr[i-1] != L'\\')) {
+		if(wstr[i] == delim && (i == 0 || wstr[i-1] != '\\')) {
 			tokens.push_back(buffer);
 			buffer.clear();
 		} else {
@@ -94,47 +87,19 @@ UString TaggerOutputProcessor::getLemma(UString token) {
 }
 
 void TaggerOutputProcessor::processTaggerOutput(bool nullFlush) {
-	UString buffer;
 	vector<TaggerToken> sentence;
-	bool escaped = false;
-	int state = 0; // outside
-	wchar_t c;
-	while((c = fgetwc(stdin))) {
-		if (c == -1) {
-			break;
-		}
+	UChar32 c;
+  InputFile in;
+	while (!in.eof()) {
+    c = in.get();
 
-		if (nullFlush && c == L'\0') {
+		if ((c == '\n') || (nullFlush && c == '\0')) {
 		  processSentence(sentence);
 		  sentence.clear();
-		  buffer.clear();
-		}
-
-		if(c == L'\n') {
-			processSentence(sentence);
-			sentence.clear();
-			buffer.clear();
-		}
-		if (state == 0) {
-			if (c == '^' && !escaped) {
-				state = 1; // inside
-			} else if (c == '\\' && !escaped) {
-				escaped = true;
-			} else {
-				escaped = false;
-			}
-		} else if (state == 1) {
-			if(c == L'$' && !escaped) {
-				sentence.push_back(parseTaggerToken(buffer));
-				buffer.clear();
-				state = 0;
-			} else if (c == '\\' && !escaped) {
-				escaped = true;
-				buffer += c;
-			} else {
-				buffer += c;
-				escaped = false;
-			}
+		} else if (c == '\\') {
+      in.get();
+    } else if (c == '^') {
+      sentence.push_back(parseTaggerToken(in.readBlock('^', '$')));
 		}
 	}
 }

@@ -2,16 +2,7 @@
 #define TAGGER_OUTPUT_PROCESSOR
 
 #include <stdio.h>
-#include <string>
-#include <iostream>
-
-#include <lttoolbox/fst_processor.h>
-#include <lttoolbox/lt_locale.h>
-
-#include <cwchar>
-#include <set>
-#include <apertium/tsx_reader.h>
-#include <apertium/string_utils.h>
+#include <lttoolbox/ustring.h>
 
 using namespace std;
 
@@ -39,10 +30,10 @@ public:
 
 class TaggerOutputProcessor {
 protected:
-	int sn;
+	int sn = 0;
 
 	vector<UString> parseTags(UString token);
-	vector<UString> wsplit(UString wstr, wchar_t delim);
+	vector<UString> wsplit(UString wstr, UChar delim);
 	TaggerToken parseTaggerToken(UString buffer);
 
 	int find(vector<UString> xs, UString x);
@@ -50,11 +41,7 @@ protected:
 
 	virtual void processSentence(vector<TaggerToken>) =0;
 public:
-	TaggerOutputProcessor();
-	~TaggerOutputProcessor();
-
 	void processTaggerOutput(bool nullFlush=false);
-
 };
 
 #endif

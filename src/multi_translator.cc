@@ -1,4 +1,5 @@
 #include "multi_translator.h"
+#include <iostream>
 
 MultiTranslator::MultiTranslator(string path, string mode, bool trimmed, bool filter, bool number_lines) {
 	this->trimmed = trimmed;

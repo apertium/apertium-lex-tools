@@ -4,15 +4,16 @@
 #define BILTRANS_WITHOUT_QUEUE
 
 #include "tagger_output_processor.h"
+#include <lttoolbox/fst_processor.h>
 
 class BiltransToken {
 public:
   TaggerToken sourceToken;
   vector<TaggerToken> targetTokens;
   UString blanks;
-  
+
   bool isEOF;
-  
+
   BiltransToken() {
     isEOF = false;
   }
@@ -74,4 +75,3 @@ public:
 };
 
 #endif
-

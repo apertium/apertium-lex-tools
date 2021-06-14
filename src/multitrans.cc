@@ -1,4 +1,5 @@
 #include "multi_translator.h"
+#include <lttoolbox/lt_locale.h>
 
 bool trim = false;
 bool filter = false;
@@ -59,6 +60,7 @@ void parseArguments(int argc, char **argv) {
 }
 
 int main(int argc, char** argv) {
+  LtLocale::tryToSetLocale();
     parseArguments(argc, argv);
 
     MultiTranslator mt(path, mode, trim, filter, number_lines);
