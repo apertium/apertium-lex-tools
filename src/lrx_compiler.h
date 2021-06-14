@@ -18,30 +18,11 @@
 #ifndef __LRX_COMPILER_H__
 #define __LRX_COMPILER_H__
 
-#include <cwchar>
-#include <cstdio>
-#include <libgen.h>
-#include <cerrno>
 #include <string>
-#include <iostream>
-#include <limits>
-#include <sstream>
-#include <cstdlib>
-#include <list>
-#include <set>
-
+#include <cstdint>
 #include <libxml/xmlreader.h>
-
-#include <lttoolbox/lt_locale.h>
 #include <lttoolbox/transducer.h>
-#include <lttoolbox/xml_parse_util.h>
 #include <lttoolbox/alphabet.h>
-#include <lttoolbox/compression.h>
-#include <lttoolbox/regexp_compiler.h>
-#include <lttoolbox/state.h>
-#include <lttoolbox/trans_exe.h>
-#include <lttoolbox/my_stdio.h>
-
 #include <unicode/ustdio.h>
 
 using namespace std;
@@ -54,21 +35,29 @@ private:
   Transducer transducer;
 
   map<UString, Transducer> recognisers; // keyed on pattern
-  map<int, double> weights; // keyed on rule id
+  map<int32_t, double> weights; // keyed on rule id
 
   map<UString, Transducer> sequences;
 
-  int initialState;
-  int lastState;
-  int currentState;
-  bool canSelect; // disallow <select>, <remove> inside <def-seq>, <repeat>
+  int32_t initialState;
+  int32_t lastState;
+  int32_t currentState;
+  // disallow <select>, <remove> inside <def-seq>, <repeat>
+  bool canSelect = true;
 
-  int currentRuleId;
+  int32_t currentRuleId = 0;
 
-  bool debugMode;
-  bool outputGraph;
+  int32_t any_tag = 0;
+  int32_t any_char = 0;
+  int32_t any_upper = 0;
+  int32_t any_lower = 0;
+  int32_t word_boundary = 0;
+
+  bool debugMode = false;
+  bool outputGraph = false;
   UFILE* debug_output;
   void debug(const char* fmt, ...);
+  void error(const char* fmt, ...);
   bool allBlanks();
 
   void skipBlanks(UString &name);
@@ -89,10 +78,6 @@ private:
 
   /* If attrib does not exist (or other error), returns fallback: */
   UString attrib(UString const &name, const UString fallback);
-
-  UString itow(int i);
-  int wtoi(UString);
-  double wtod(UString);
 
 public:
   static UString const LRX_COMPILER_LRX_ELEM;
