@@ -61,6 +61,8 @@ src/lrx-proc
 multitrans
 stamp-h1
 
+/python/apertium_lex_tools.py
+/python/apertium_lex_tools_wrap.cpp
 /python/lex_tools_wrap.cpp
 /python/lextools.py
 /python/setup.py
