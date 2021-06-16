@@ -48,11 +48,6 @@ PKG_CHECK_MODULES([LTTOOLBOX], [lttoolbox >= required_lttoolbox_version])
 AC_SUBST(LTTOOLBOX_CFLAGS)
 AC_SUBST(LTTOOLBOX_LIBS)
 
-PKG_CHECK_MODULES([APERTIUM], [apertium >= required_apertium_version])
-
-AC_SUBST(APERTIUM_CFLAGS)
-AC_SUBST(APERTIUM_LIBS)
-
 PKG_CHECK_MODULES([LIBXML], [libxml-2.0 >= required_libxml_version])
 
 AC_SUBST(LIBXML_CFLAGS)
@@ -70,10 +65,10 @@ AC_CHECK_HEADER([utf8.h], [], [AC_MSG_ERROR([You don't have utfcpp installed.])]
 
 AC_CHECK_FUNCS([setlocale strdup])
 
-AC_CHECK_DECLS([fread_unlocked, fwrite_unlocked, fgetc_unlocked, fputc_unlocked, fputs_unlocked, fgetwc_unlocked, fputwc_unlocked, fgetws_unlocked, fputws_unlocked])
+AC_CHECK_DECLS([fread_unlocked, fwrite_unlocked, fgetc_unlocked, fputc_unlocked, fputs_unlocked])
 
-CPPFLAGS="$CPPFLAGS $CFLAGS $LTTOOLBOX_CFLAGS $APERTIUM_CFLAGS $LIBXML_CFLAGS $ICU_CFLAGS"
-LIBS="$LIBS $LTTOOLBOX_LIBS $APERTIUM_LIBS $LIBXML_LIBS $ICU_LIBS -lz"
+CPPFLAGS="$CPPFLAGS $CFLAGS $LTTOOLBOX_CFLAGS $LIBXML_CFLAGS $ICU_CFLAGS"
+LIBS="$LIBS $LTTOOLBOX_LIBS $LIBXML_LIBS $ICU_LIBS -lz"
 
 # Checks for highest supported C++ standard
 AC_LANG(C++)
