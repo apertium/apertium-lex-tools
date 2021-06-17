@@ -20,11 +20,7 @@
 #include <getopt.h>
 #include <iostream>
 #include <libgen.h>
-
-#ifdef _MSC_VER
-#include <io.h>
-#include <fcntl.h>
-#endif
+#include <lttoolbox/lt_locale.h>
 
 using namespace std;
 

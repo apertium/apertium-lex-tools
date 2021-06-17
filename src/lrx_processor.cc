@@ -17,7 +17,9 @@
 
 #include <weight.h>
 #include <lrx_processor.h>
-#include <cstdint>
+#include <iostream>
+#include <lttoolbox/compression.h>
+
 using namespace std;
 
 UString const LRXProcessor::LRX_PROCESSOR_TAG_SELECT     = "<select>"_u;
@@ -564,7 +566,7 @@ LRXProcessor::processFlush(UFILE *output,
                            map<int, UString > &blanks,
                            map<int, map<UString, double> > &scores,
                            map<int, map<UString, OpType> > &operations) {
-  
+
   struct ScoredMatch {
       OpType op;
       UString* ti;              // matched target translation

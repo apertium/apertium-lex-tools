@@ -18,33 +18,16 @@
 #ifndef __LRX_PROCESSOR_H__
 #define __LRX_PROCESSOR_H__
 
-#include <cwchar>
 #include <cstdio>
 #include <libgen.h>
-#include <cerrno>
-#include <string>
-#include <iostream>
-#include <cmath>
-#include <sstream>
-#include <limits>
-#include <cstdlib>
-#include <list>
-#include <algorithm>
 #include <set>
+#include <cstdint>
 
 #include <libxml/xmlreader.h>
 
-#include <lttoolbox/lt_locale.h>
-#include <lttoolbox/transducer.h>
-#include <lttoolbox/xml_parse_util.h>
 #include <lttoolbox/alphabet.h>
-#include <lttoolbox/exception.h>
-#include <lttoolbox/compression.h>
-#include <lttoolbox/regexp_compiler.h>
 #include <lttoolbox/state.h>
-#include <lttoolbox/match_exe.h>
 #include <lttoolbox/trans_exe.h>
-#include <lttoolbox/my_stdio.h>
 #include <lttoolbox/input_file.h>
 
 using namespace std;

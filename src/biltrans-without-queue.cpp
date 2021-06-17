@@ -3,8 +3,8 @@
 int main(int argc, char** argv) {
 
 	if (argc != 2 && argc != 3) {
-		wcout << "Usage: " << argv[0];
-		wcout << "<path to a binary bilingual transducer> [--trimmed | -t]" << endl;
+		cout << "Usage: " << argv[0];
+		cout << "<path to a binary bilingual transducer> [--trimmed | -t]" << endl;
 		exit(1);
 	}
 	string path(argv[1]);
