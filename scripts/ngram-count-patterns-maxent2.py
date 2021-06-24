@@ -247,7 +247,8 @@ def ngram_count_patterns(freq_lexicon, candidates):
         print(features[feature], '\t', feature, file=sys.stderr)
     # }
 
-    exit(1)
+    # exit(1)
+    return
 
     for slword in meevents:  # {
         if len(sl_tl[slword]) < 2:  # {
