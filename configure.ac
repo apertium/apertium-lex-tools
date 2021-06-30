@@ -60,14 +60,12 @@ AC_SUBST(ICU_LIBS)
 # Checks for libraries.
 AC_CHECK_LIB(xml2, xmlReaderForFile)
 
-AC_CHECK_HEADER([utf8.h], [], [AC_MSG_ERROR([You don't have utfcpp installed.])])
-
 AC_CHECK_FUNCS([setlocale strdup])
 
 AC_CHECK_DECLS([fread_unlocked, fwrite_unlocked, fgetc_unlocked, fputc_unlocked, fputs_unlocked])
 
 CPPFLAGS="$CPPFLAGS $CFLAGS $LTTOOLBOX_CFLAGS $LIBXML_CFLAGS $ICU_CFLAGS"
-LIBS="$LIBS $LTTOOLBOX_LIBS $LIBXML_LIBS $ICU_LIBS -lz"
+LIBS="$LIBS $LTTOOLBOX_LIBS $LIBXML_LIBS $ICU_LIBS"
 
 # Checks for highest supported C++ standard
 AC_LANG(C++)

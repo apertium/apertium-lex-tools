@@ -18,6 +18,7 @@
 #include <weight.h>
 #include <lrx_processor.h>
 #include <iostream>
+#include <algorithm>
 #include <lttoolbox/compression.h>
 
 using namespace std;

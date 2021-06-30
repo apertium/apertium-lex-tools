@@ -12,11 +12,11 @@ jobs:
            sudo apt-get -qy update
            sudo apt-get -qfy install wget ca-certificates
            wget -q https://apertium.projectjj.com/apt/install-nightly.sh -O - | sudo bash
-           sudo apt-get -qfy install --no-install-recommends build-essential automake autotools-dev pkg-config libxml2-dev libxml2-utils apertium-dev zlib1g-dev
+           sudo apt-get -qfy install --no-install-recommends build-essential automake autotools-dev pkg-config libxml2-dev lttoolbox-dev python3-dev python3-setuptools swig
     - name: autoreconf
       run: autoreconf -fvi
     - name: configure
-      run: ./configure --with-yasmet
+      run: ./configure --with-yasmet --enable-python-bindings
     - name: build
       run: make -j4 V=1 VERBOSE=1
     - name: tests
