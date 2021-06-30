@@ -16,6 +16,9 @@
  */
 
 #include <lrx_compiler.h>
+#include <cstring>
+#include <iostream>
+#include <lttoolbox/lt_locale.h>
 
 using namespace std;
 
@@ -31,6 +34,8 @@ void endProgram(char *name)
 
 int main (int argc, char **argv)
 {
+  LtLocale::tryToSetLocale();
+
   LRXCompiler compiler;
 
   if(argc != 3 && argc != 4)

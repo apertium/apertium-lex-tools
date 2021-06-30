@@ -34,7 +34,7 @@ def get_include_dirs():
 apertium_lex_tools_module = Extension(
     name='_apertium_lex_tools',
     sources=get_sources(),
-    swig_opts=['-c++', '-I../src', '-Wall']+'@LTTOOLBOX_CFLAGS@'.split()+'@LIBXML_CFLAGS@'.split(),
+    swig_opts=['-c++', '-I../src', '-Wall']+'@LTTOOLBOX_CFLAGS@'.split()+'@LIBXML_CFLAGS@'.split()+'@ICU_CFLAGS@'.split(),
     include_dirs=get_include_dirs(),
     library_dirs=['/usr/include/libxml2', '/usr/local/lib'],
     extra_compile_args='@CXXFLAGS@'.split(),

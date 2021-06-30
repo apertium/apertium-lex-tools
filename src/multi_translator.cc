@@ -1,4 +1,5 @@
 #include "multi_translator.h"
+#include <iostream>
 
 MultiTranslator::MultiTranslator(string path, string mode, bool trimmed, bool filter, bool number_lines) {
 	this->trimmed = trimmed;
@@ -30,10 +31,10 @@ int MultiTranslator::calculateFertility(vector<BiltransToken> sent) {
 }
 
 
-BiltransToken MultiTranslator::parseBiltransToken(wstring bt) {
+BiltransToken MultiTranslator::parseBiltransToken(UString bt) {
 
 	BiltransToken token;
-	vector<wstring> tokens = wsplit(bt, L'/');
+	vector<UString> tokens = wsplit(bt, '/');
 
 	token.sourceToken = parseTaggerToken(tokens[0]);
 
@@ -49,9 +50,9 @@ bool MultiTranslator::isPosAmbig(BiltransToken bt) {
 	bool isPos;
 	if (bt.sourceToken.tags.size() > 0) {
 		isPos =
-		bt.sourceToken.tags[0] == L"n" ||
-		bt.sourceToken.tags[0] == L"vblex" ||
-		bt.sourceToken.tags[0] == L"adj";
+		bt.sourceToken.tags[0] == "n"_u ||
+		bt.sourceToken.tags[0] == "vblex"_u ||
+		bt.sourceToken.tags[0] == "adj"_u;
 	} else {
 		isPos = false;
 	}
@@ -60,10 +61,10 @@ bool MultiTranslator::isPosAmbig(BiltransToken bt) {
 
 }
 
-BiltransToken MultiTranslator::getFullToken(wstring source) {
+BiltransToken MultiTranslator::getFullToken(UString source) {
 
 	BiltransToken token;
-	if (source[0] == L'*') {
+	if (source[0] == '*') {
 		token.sourceToken.lemma = source;
 		TaggerToken tmp;
 		tmp.lemma = source;
@@ -71,21 +72,22 @@ BiltransToken MultiTranslator::getFullToken(wstring source) {
 		return token;
 	}
 
-	wstring target = bilingual.biltrans(source, false);
-	if (target == L"") {
-		target = L"@" + source;
+	UString target = bilingual.biltrans(source, false);
+	if (target.empty()) {
+      target += '@';
+      target.append(source);
 	}
-	token = parseBiltransToken(source + L"/" + target);
+	token = parseBiltransToken(source + "/"_u + target);
 	return token;
 
 }
 
-BiltransToken MultiTranslator::getTrimmedToken(wstring source)
+BiltransToken MultiTranslator::getTrimmedToken(UString source)
 {
 	BiltransToken ttoken;
 	BiltransToken ftoken;
 
-	if (source[0] == L'*') {
+	if (source[0] == '*') {
 		ttoken.sourceToken.lemma = source;
 		TaggerToken tmp;
 		tmp.lemma = source;
@@ -99,8 +101,8 @@ BiltransToken MultiTranslator::getTrimmedToken(wstring source)
         // the bilingual.* methods in FSTProcessor. Unknown why we get the
         // leaks in the first place...
 
-        wstring fstr = L"";
-        wstring tstr = L"";
+        UString fstr;
+        UString tstr;
 
 	if((f_cache.find(source) == f_cache.end()))
         {
@@ -116,37 +118,39 @@ BiltransToken MultiTranslator::getTrimmedToken(wstring source)
 
         /*---------------------------------------------*/
 
-	if (fstr == L"") {
-		fstr = L"@" + source;
-	}
-	if (tstr == L"") {
-		tstr = L"@" + source;
-	}
+        if (fstr.empty()) {
+          fstr += '@';
+          fstr.append(source);
+        }
+        if (tstr.empty()) {
+          tstr += '@';
+          tstr.append(source);
+        }
 
-	ttoken = parseBiltransToken(source + L"/" + tstr);
-	ftoken = parseBiltransToken(source + L"/" + fstr);
+	ttoken = parseBiltransToken(source + "/"_u + tstr);
+	ftoken = parseBiltransToken(source + "/"_u + fstr);
 
 
 	if(this->trimmed) {
 		for(size_t i = 0; i < ftoken.targetTokens.size(); ++i ) {
 			if(ttoken.targetTokens[i].tags.size() <
 			   ftoken.targetTokens[i].tags.size()) {
-				ttoken.targetTokens[i].tags.push_back(L"*");
+				ttoken.targetTokens[i].tags.push_back("*"_u);
 			}
 		}
 	}
 
-	vector<wstring> newTags;
+	vector<UString> newTags;
 	//bool sourceTrimmed = false;
 	for(size_t i = 0; i < ttoken.sourceToken.tags.size(); ++i) {
-		wstring tag = ttoken.sourceToken.tags[i];
+		UString tag = ttoken.sourceToken.tags[i];
 		if (find(ttoken.targetTokens[0].tags, tag) ==
 			find(ftoken.targetTokens[0].tags, tag)) {
 			newTags.push_back(tag);
 		}
 	}
 	if(ttoken.sourceToken.tags.size() > newTags.size()) {
-		newTags.push_back(L"*");
+		newTags.push_back("*"_u);
 	}
 	ttoken.sourceToken.tags = newTags;
 
@@ -154,50 +158,50 @@ BiltransToken MultiTranslator::getTrimmedToken(wstring source)
 }
 
 void MultiTranslator::biltransToMultiTranslator(int sn, int &tn, unsigned int idx,
-	vector<BiltransToken> s, wstring buffer)
+	vector<BiltransToken> s, UString buffer)
 {
 
 	if (idx == s.size() ) {
-		wcout << L".[][" <<  sn << L" " << tn << L"].[]\t" << buffer << endl;
+		cout << ".[][" <<  sn << " " << tn << "].[]\t" << buffer << endl;
 		tn += 1;
 		return;
 	}
 	auto n = s[idx].targetTokens.size();
-	wstring base;
-	base = s[idx].sourceToken.toString(false) + L"/";
+	UString base;
+	base = s[idx].sourceToken.toString(false) + "/"_u;
 	for(size_t i = 0; i < n; ++i) {
-		wstring token = L"^" + base + s[idx].targetTokens[i].toString(false) + L"$";
+		UString token = "^"_u + base + s[idx].targetTokens[i].toString(false) + "$"_u;
 		if(idx != s.size() - 1) {
-			token += L" ";
+			token += ' ';
 		}
 		biltransToMultiTranslator(sn, tn, idx+1, s, buffer + token);
 	}
 }
 void MultiTranslator::printBiltransSentence(int n, vector<BiltransToken> s) {
 	if (number_lines) {
-		wcout << n << "\t";
+		cout << n << "\t";
 	}
 	for(size_t i = 0; i < s.size(); ++i) {
-		wcout << s[i].toString(true);
+		cout << s[i].toString(true);
 		if (i != s.size() - 1) {
-			wcout << L" ";
+			cout << " ";
 		}
 	}
-	wcout << endl;
+	cout << endl;
 }
 
 void MultiTranslator::printTaggerOutput(int n, vector<BiltransToken> sentence) {
 	if (number_lines) {
-		wcout << n << "\t";
+		cout << n << "\t";
 	}
 
 	for(size_t i = 0; i < sentence.size(); ++i) {
-		wcout << sentence[i].sourceToken.toString(true);
+		cout << sentence[i].sourceToken.toString(true);
 		if (i != sentence.size() -1) {
-			wcout << L" ";
+			cout << " ";
 		}
 	}
-	wcout << endl;
+	cout << endl;
 }
 
 void MultiTranslator::processSentence(vector<TaggerToken> sentence) {
@@ -207,8 +211,8 @@ void MultiTranslator::processSentence(vector<TaggerToken> sentence) {
 	int numberOfUnknown = 0;
 	int fertility = 1;
 	for(size_t i = 0; i < sentence.size(); ++i) {
-		wstring token = sentence[i].toString(false);
-		wstring target;
+		UString token = sentence[i].toString(false);
+		UString target;
 
 		BiltransToken bt;
 		if(this->trimmed){
@@ -220,7 +224,7 @@ void MultiTranslator::processSentence(vector<TaggerToken> sentence) {
 		if (isPosAmbig(bt)) {
 			hasAmbigPos = true;
 		}
-		if(token[0] == L'*') {
+		if(token[0] == '*') {
 			numberOfUnknown ++;
 		}
 		fertility *= bt.targetTokens.size();
@@ -240,7 +244,7 @@ void MultiTranslator::processSentence(vector<TaggerToken> sentence) {
 		} else if(mode == "-b") {
 			printBiltransSentence(this->sn, outputSentence);
 		} else if (mode == "-m") {
-			wstring outBuffer = L"";
+			UString outBuffer;
 			int tn = 0;
 			biltransToMultiTranslator(this->sn, tn, 0, outputSentence, outBuffer);
 		}
