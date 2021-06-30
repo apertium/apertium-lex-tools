@@ -21,6 +21,7 @@
 #include <lttoolbox/xml_parse_util.h>
 #include <lttoolbox/compression.h>
 #include <iostream>
+#include <limits>
 
 using namespace std;
 
