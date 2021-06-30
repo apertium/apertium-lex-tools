@@ -19,7 +19,6 @@ IrstlmRanker::IrstlmRanker(const string &filePath,
 		exit(-1);
 	}
     cout.precision(10);
-    wcout.precision(10);
 
 	lineno = 0;
 	sublineno = 0;
@@ -387,7 +386,7 @@ int main(int argc, char ** argv) {
 	// I don't know :)
 
     if(setlocale(LC_CTYPE, "") == NULL) {
-        wcerr << L"Warning: unsupported locale, fallback to \"C\"" << endl;
+        cerr << "Warning: unsupported locale, fallback to \"C\"" << endl;
         setlocale(LC_ALL, "C");
     }
 
@@ -410,4 +409,3 @@ int main(int argc, char ** argv) {
 
     return 0;
 }
-

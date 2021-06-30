@@ -18,30 +18,12 @@
 #ifndef __LRX_COMPILER_H__
 #define __LRX_COMPILER_H__
 
-#include <cwchar>
-#include <cstdio>
-#include <libgen.h>
-#include <cerrno>
 #include <string>
-#include <iostream>
-#include <limits>
-#include <sstream>
-#include <cstdlib>
-#include <list>
-#include <set>
-
+#include <cstdint>
 #include <libxml/xmlreader.h>
-
-#include <lttoolbox/ltstr.h>
-#include <lttoolbox/lt_locale.h>
 #include <lttoolbox/transducer.h>
-#include <lttoolbox/xml_parse_util.h>
 #include <lttoolbox/alphabet.h>
-#include <lttoolbox/compression.h>
-#include <lttoolbox/regexp_compiler.h>
-#include <lttoolbox/state.h>
-#include <lttoolbox/trans_exe.h>
-#include <lttoolbox/my_stdio.h>
+#include <unicode/ustdio.h>
 
 using namespace std;
 
@@ -52,23 +34,33 @@ private:
   Alphabet alphabet;
   Transducer transducer;
 
-  map<wstring, Transducer> recognisers; // keyed on pattern
-  map<int, double> weights; // keyed on rule id
+  map<UString, Transducer> recognisers; // keyed on pattern
+  map<int32_t, double> weights; // keyed on rule id
 
-  map<wstring, Transducer> sequences;
+  map<UString, Transducer> sequences;
 
-  int initialState;
-  int lastState;
-  int currentState;
-  bool canSelect; // disallow <select>, <remove> inside <def-seq>, <repeat>
+  int32_t initialState;
+  int32_t lastState;
+  int32_t currentState;
+  // disallow <select>, <remove> inside <def-seq>, <repeat>
+  bool canSelect = true;
 
-  int currentRuleId;
+  int32_t currentRuleId = 0;
 
-  bool debugMode;
-  bool outputGraph;
+  int32_t any_tag = 0;
+  int32_t any_char = 0;
+  int32_t any_upper = 0;
+  int32_t any_lower = 0;
+  int32_t word_boundary = 0;
+
+  bool debugMode = false;
+  bool outputGraph = false;
+  UFILE* debug_output;
+  void debug(const char* fmt, ...);
+  void error(const char* fmt, ...);
   bool allBlanks();
 
-  void skipBlanks(wstring &name);
+  void skipBlanks(UString &name);
   void procNode();
   void procList();
   void procListMatch();
@@ -82,43 +74,39 @@ private:
   void procSeq();
 
   /* If attrib does not exist (or other error), returns an empty string: */
-  wstring attrib(wstring const &name);
+  UString attrib(UString const &name);
 
   /* If attrib does not exist (or other error), returns fallback: */
-  wstring attrib(wstring const &name, const wstring fallback);
-
-  wstring itow(int i);
-  int wtoi(wstring);
-  double wtod(wstring);
+  UString attrib(UString const &name, const UString fallback);
 
 public:
-  static wstring const LRX_COMPILER_LRX_ELEM;
-  static wstring const LRX_COMPILER_DEFSEQS_ELEM;
-  static wstring const LRX_COMPILER_DEFSEQ_ELEM;
-  static wstring const LRX_COMPILER_RULES_ELEM;
-  static wstring const LRX_COMPILER_RULE_ELEM;
-  static wstring const LRX_COMPILER_MATCH_ELEM;
-  static wstring const LRX_COMPILER_SELECT_ELEM;
-  static wstring const LRX_COMPILER_REMOVE_ELEM;
-  static wstring const LRX_COMPILER_OR_ELEM;
-  static wstring const LRX_COMPILER_REPEAT_ELEM;
-  static wstring const LRX_COMPILER_SEQ_ELEM;
+  static UString const LRX_COMPILER_LRX_ELEM;
+  static UString const LRX_COMPILER_DEFSEQS_ELEM;
+  static UString const LRX_COMPILER_DEFSEQ_ELEM;
+  static UString const LRX_COMPILER_RULES_ELEM;
+  static UString const LRX_COMPILER_RULE_ELEM;
+  static UString const LRX_COMPILER_MATCH_ELEM;
+  static UString const LRX_COMPILER_SELECT_ELEM;
+  static UString const LRX_COMPILER_REMOVE_ELEM;
+  static UString const LRX_COMPILER_OR_ELEM;
+  static UString const LRX_COMPILER_REPEAT_ELEM;
+  static UString const LRX_COMPILER_SEQ_ELEM;
 
-  static wstring const LRX_COMPILER_SURFACE_ATTR;
-  static wstring const LRX_COMPILER_SUFFIX_ATTR;
-  static wstring const LRX_COMPILER_LEMMA_ATTR;
-  static wstring const LRX_COMPILER_CONTAINS_ATTR;
-  static wstring const LRX_COMPILER_CASE_ATTR;
-  static wstring const LRX_COMPILER_TAGS_ATTR;
-  static wstring const LRX_COMPILER_COMMENT_ATTR;
-  static wstring const LRX_COMPILER_NAME_ATTR;
-  static wstring const LRX_COMPILER_WEIGHT_ATTR;
-  static wstring const LRX_COMPILER_FROM_ATTR;
-  static wstring const LRX_COMPILER_UPTO_ATTR;
+  static UString const LRX_COMPILER_SURFACE_ATTR;
+  static UString const LRX_COMPILER_SUFFIX_ATTR;
+  static UString const LRX_COMPILER_LEMMA_ATTR;
+  static UString const LRX_COMPILER_CONTAINS_ATTR;
+  static UString const LRX_COMPILER_CASE_ATTR;
+  static UString const LRX_COMPILER_TAGS_ATTR;
+  static UString const LRX_COMPILER_COMMENT_ATTR;
+  static UString const LRX_COMPILER_NAME_ATTR;
+  static UString const LRX_COMPILER_WEIGHT_ATTR;
+  static UString const LRX_COMPILER_FROM_ATTR;
+  static UString const LRX_COMPILER_UPTO_ATTR;
 
-  static wstring const LRX_COMPILER_TYPE_SELECT;
-  static wstring const LRX_COMPILER_TYPE_REMOVE;
-  static wstring const LRX_COMPILER_TYPE_SKIP;
+  static UString const LRX_COMPILER_TYPE_SELECT;
+  static UString const LRX_COMPILER_TYPE_REMOVE;
+  static UString const LRX_COMPILER_TYPE_SKIP;
 
   static double  const LRX_COMPILER_DEFAULT_WEIGHT;
 

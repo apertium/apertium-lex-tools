@@ -1,4 +1,5 @@
 #include "multi_translator.h"
+#include <lttoolbox/lt_locale.h>
 
 bool trim = false;
 bool filter = false;
@@ -9,18 +10,18 @@ string path;
 string mode;
 
 void printError(char *name) {
-    wcout << "Usage: " << name << " ";
-    wcout << "<mode> [options] <path to a binary bilingual transducer>" << endl;
-    wcout << "Modes: " << endl;
-    wcout << "  --biltrans           | -b" << endl;
-    wcout << "  --multitrans         | -m" << endl;
-    wcout << "  --trim-tagger-output | -p" << endl;
+    cout << "Usage: " << name << " ";
+    cout << "<mode> [options] <path to a binary bilingual transducer>" << endl;
+    cout << "Modes: " << endl;
+    cout << "  --biltrans           | -b" << endl;
+    cout << "  --multitrans         | -m" << endl;
+    cout << "  --trim-tagger-output | -p" << endl;
 
-    wcout << "Options: " << endl;
-    wcout << "  --filter-lines | -f" << endl;
-    wcout << "  --trim-lines   | -t" << endl;
-    wcout << "  --number-lines | -n" << endl;
-    wcout << "  --null-flush   | -z" << endl;
+    cout << "Options: " << endl;
+    cout << "  --filter-lines | -f" << endl;
+    cout << "  --trim-lines   | -t" << endl;
+    cout << "  --number-lines | -n" << endl;
+    cout << "  --null-flush   | -z" << endl;
 }
 
 void parseArguments(int argc, char **argv) {
@@ -59,6 +60,7 @@ void parseArguments(int argc, char **argv) {
 }
 
 int main(int argc, char** argv) {
+  LtLocale::tryToSetLocale();
     parseArguments(argc, argv);
 
     MultiTranslator mt(path, mode, trim, filter, number_lines);

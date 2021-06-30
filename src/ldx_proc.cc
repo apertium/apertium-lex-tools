@@ -25,114 +25,53 @@
 
 #include <lttoolbox/exception.h>
 #include <lttoolbox/fst_processor.h>
-#include <lttoolbox/ltstr.h>
 #include <lttoolbox/lt_locale.h>
+#include <lttoolbox/input_file.h>
+#include <unicode/uchar.h>
+#include <unicode/ustdio.h>
 
 using namespace std;
 
 
-int readGeneration(FILE *input, FILE *output);
-void skipUntil(FILE *input, FILE *output, wint_t const character);
-wstring readFullBlock(FILE *input, wchar_t const delim1, wchar_t const delim2);
-wchar_t readEscaped(FILE *input);
-void streamError();
+int32_t readGeneration(InputFile& input, UFILE *output);
+void skipUntil(InputFile& input, UFILE *output, UChar32 const character);
 
 
 FSTProcessor fstp;
 bool outOfWord = true;
-set<wchar_t> escaped_chars;
+set<int32_t> escaped_chars;
 
 
 void
-streamError()
-{
-  throw Exception("Error: Malformed input stream.");
-}
-
-wchar_t
-readEscaped(FILE *input)
-{
-  if(feof(input))
-  {
-    streamError();
-  }
-
-  wchar_t val = static_cast<wchar_t>(fgetwc_unlocked(input));
-
-  if(feof(input) || escaped_chars.find(val) == escaped_chars.end())
-  {
-    streamError();
-  }
-
-  return val;
-}
-
-
-wstring
-readFullBlock(FILE *input, wchar_t const delim1, wchar_t const delim2)
-{
-  wstring result = L"";
-  result += delim1;
-  wchar_t c = delim1;
-
-  while(!feof(input) && c != delim2)
-  {
-    c = static_cast<wchar_t>(fgetwc_unlocked(input));
-    result += c;
-    if(c != L'\\')
-    {
-      continue;
-    }
-    else
-    {
-      result += static_cast<wchar_t>(readEscaped(input));
-    }
-  }
-
-  if(c != delim2)
-  {
-    streamError();
-  }
-
-  return result;
-}
-
-
-void
-skipUntil(FILE *input, FILE *output, wint_t const character)
+skipUntil(InputFile& input, UFILE* output, UChar32 const character)
 {
   while(true)
   {
-    wint_t val = fgetwc_unlocked(input);
-    if(feof(input))
-    {
+    UChar32 val = input.get();
+    if (input.eof()) {
       return;
     }
 
     switch(val)
     {
-      case L'\\':
-        val = fgetwc_unlocked(input);
-        if(feof(input))
-        {
+      case '\\':
+        val = input.get();
+        if (input.eof()) {
           return;
         }
-        fputwc_unlocked(L'\\', output);
-        fputwc_unlocked(val, output);
+        u_fputc('\\', ouput);
+        u_fputc(val, output);
         break;
 
-      case L'\0':
-        fputwc_unlocked(val, output);
+      case '\0':
+        u_fputc(val, output);
         break;
 
       default:
-        if(val == character)
-        {
+        if (val == character) {
           return;
-        }
-        else
-        {
-          fputwc_unlocked(val, output);
+        } else {
+          u_fputc(val, output);
         }
         break;
     }
@@ -140,48 +79,47 @@ skipUntil(FILE *input, FILE *output, wint_t const character)
 }
 
 
-int
-readGeneration(FILE *input, FILE *output)
+int32_t
+readGeneration(InputFile& input, UFILE* output)
 {
-  wint_t val = fgetwc_unlocked(input);
+  UChar32 val = input.get();
 
-  if(feof(input))
-  {
+  if (input.eof()) {
     return 0x7fffffff;
   }
 
   if(outOfWord)
   {
-    if(val == L'^')
+    if(val == '^')
     {
-      val = fgetwc_unlocked(input);
-      if(feof(input))
+      val = input.get();
+      if(input.eof())
       {
         return 0x7fffffff;
       }
     }
-    else if(val == L'\\')
+    else if(val == '\\')
     {
-      fputwc_unlocked(val, output);
-      val = fgetwc_unlocked(input);
-      if(feof(input))
+      u_fputc(val, ouput);
+      val = input.get();
+      if(input.eof())
       {
         return 0x7fffffff;
       }
-      fputwc_unlocked(val,output);
-      skipUntil(input, output, L'^');
-      val = fgetwc_unlocked(input);
-      if(feof(input))
+      u_fputc(val,output);
+      skipUntil(input, output, '^');
+      val = input.get();
+      if(input.eof())
       {
         return 0x7fffffff;
       }
     }
     else
     {
-      fputwc_unlocked(val, output);
-      skipUntil(input, output, L'^');
-      val = fgetwc_unlocked(input);
-      if(feof(input))
+      u_fputc(val, output);
+      skipUntil(input, output, '^');
+      val = input.get();
+      if(input.eof())
       {
         return 0x7fffffff;
       }
@@ -189,24 +127,24 @@ readGeneration(FILE *input, FILE *output)
     outOfWord = false;
   }
 
-  if(val == L'\\')
+  if(val == '\\')
   {
-    val = fgetwc_unlocked(input);
-    return static_cast<int>(val);
+    val = input.get();
+    return static_cast<int32_t>(val);
   }
-  else if(val == L'$')
+  else if(val == '$')
   {
     outOfWord = true;
-    return static_cast<int>(L'$');
+    return static_cast<int32_t>('$');
   }
-  else if(val == L'[')
+  else if(val == '[')
   {
-    fputws_unlocked(readFullBlock(input, L'[', L']').c_str(), output);
+    write(input.readBlock('[', ']'), output);
     return readGeneration(input, output);
   }
   else
   {
-    return static_cast<int>(val);
+    return static_cast<int32_t>(val);
   }
 
   return 0x7fffffff;
@@ -215,7 +153,8 @@ readGeneration(FILE *input, FILE *output)
 
 int main(int argc, char **argv)
 {
-  FILE *input = stdin, *output = stdout;
+  InputFile input;
+  UFILE* output = u_finit(stdout, NULL, NULL);
 
   LtLocale::tryToSetLocale();
 
@@ -226,17 +165,17 @@ int main(int argc, char **argv)
     exit(-1);
   }
 
-  escaped_chars.insert(L'[');
-  escaped_chars.insert(L']');
-  escaped_chars.insert(L'{');
-  escaped_chars.insert(L'}');
-  escaped_chars.insert(L'^');
-  escaped_chars.insert(L'$');
-  escaped_chars.insert(L'/');
-  escaped_chars.insert(L'\\');
-  escaped_chars.insert(L'@');
-  escaped_chars.insert(L'<');
-  escaped_chars.insert(L'>');
+  escaped_chars.insert('[');
+  escaped_chars.insert(']');
+  escaped_chars.insert('{');
+  escaped_chars.insert('}');
+  escaped_chars.insert('^');
+  escaped_chars.insert('$');
+  escaped_chars.insert('/');
+  escaped_chars.insert('\\');
+  escaped_chars.insert('@');
+  escaped_chars.insert('<');
+  escaped_chars.insert('>');
 
 
   FILE *t_rl = fopen(argv[1], "rb");
@@ -253,25 +192,25 @@ int main(int argc, char **argv)
   // read until '/', then read each from '/' adding to a map, then look up first in transducer, and if the result
   // is found in the map, then output it, otherwise error.
 
-  int val = 0, i = 0;
+  int32_t val = 0, i = 0;
   bool seenFirst = false;
-  wstring sl = L"";
-  wstring tl = L"";
-  set<wstring> tllu;
-  set<wstring> tllu_defaults;
+  UString sl;
+  UString tl;
+  set<UString> tllu;
+  set<UString> tllu_defaults;
 
-  skipUntil(input, output, L'^');
+  skipUntil(input, output, '^');
   outOfWord = false;
 
   while((val = readGeneration(input, output)) != 0x7fffffff)
   {
     switch(val)
     {
-      case L'^':
+      case '^':
         outOfWord = false;
-	val = readGeneration(input, output);
+        val = readGeneration(input, output);
         break;
-      case L'/':
+      case '/':
         if(!seenFirst)
         {
           seenFirst = true;
@@ -281,13 +220,13 @@ int main(int argc, char **argv)
           tllu.insert(tl);
         }
         i++;
-        tl = L"";
-	val = readGeneration(input, output);
-        if(val != L'$')
+        tl.clear();
+        val = readGeneration(input, output);
+        if(val != '$')
         {
           break;
         }
-      case L'$':
+      case '$':
         outOfWord = true;
         if(!seenFirst)
         {
@@ -299,23 +238,28 @@ int main(int argc, char **argv)
         }
 
         seenFirst = false;
-        fputws_unlocked(L"^", output);
-        fputws_unlocked(sl.c_str(), output);
+        u_fputc('^', output);
+        write(sl, output);
         if(tllu.size() > 1)
         {
-          tl = L"";
-          wstring in = L"^" + sl + L"$";
-          wstring trad = fstp.biltrans(in);
+          tl.clear();
+          UString in;
+          in += '^';
+          in.append(sl);
+          in += '$';
+          UString trad = fstp.biltrans(in);
           int j = 0;
           bool tlout = false;
           for(auto& it : tllu)
           {
-            wstring t = L"^" + it + L"$";
+            UString t;
+            t += '^';
+            t.append(it);
+            t += '$';
             if(t == trad)
             {
-              fputws_unlocked(L"/", output);
-              wstring to = t.substr(1, wcslen(t.c_str())-2);
-              fputws_unlocked(to.c_str(), output);
+              u_fputc('/', output);
+              write(it, output);
               tlout = true;
               break;
             }
@@ -328,36 +272,35 @@ int main(int argc, char **argv)
             {
               if(it != tllu.end())
               {
-                fputws_unlocked(L"/", output);
+                u_fputc('/', output);
               }
-              fputws_unlocked(it->c_str(), output);
+              write(*it, output);
             }
           }
 
         }
         else
         {
-          fputws_unlocked(L"/", output);
-          fputws_unlocked(tl.c_str(), output);
+          u_fputc('/', output);
+          write(tl, output);
         }
-        fputws_unlocked(L"$", output);
+        u_fputc('$', output);
 
-        sl = L""; tl = L"";
+        sl.clear();
+        tl.clear();
         tllu.clear();
         i = 0;
         break;
     }
     if(!seenFirst && !outOfWord)
     {
-      sl.append(1, static_cast<wchar_t>(val));
+      sl += static_cast<UChar32>(val);
     }
     else if(!outOfWord)
     {
-      tl.append(1, static_cast<wchar_t>(val));
+      tl += static_cast<UChar32>(val);
     }
   }
 
   return 0;
 }
-
-

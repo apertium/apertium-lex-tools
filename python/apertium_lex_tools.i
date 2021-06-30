@@ -51,8 +51,9 @@ public:
 
   void lrx_proc(int argc, char **argv, char *input_path, char *output_path)
   {
-    FILE* input = fopen(input_path, "rb");
-    FILE* output = fopen(output_path, "wb");
+	InputFile input;
+	input.open(input_path);
+	UFILE* output = u_fopen(output_path, "w", NULL, NULL);
     optind = 1;
     while(true)
     {
@@ -83,8 +84,7 @@ public:
       }
     }
     process(input, output);
-    fclose(input);
-    fclose(output);
+    u_fclose(output);
   }
 };
 
