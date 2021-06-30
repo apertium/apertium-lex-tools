@@ -33,6 +33,7 @@
 %inline%{
 #define SWIG_FILE_WITH_INIT
 #include <lrx_processor.h>
+#include <lttoolbox/lt_locale.h>
 
 #include <getopt.h>
 
