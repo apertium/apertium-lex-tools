@@ -18,6 +18,7 @@
 #include <lrx_compiler.h>
 #include <cstring>
 #include <iostream>
+#include <libgen.h>
 #include <lttoolbox/lt_locale.h>
 
 using namespace std;
