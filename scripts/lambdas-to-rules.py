@@ -83,7 +83,7 @@ def lambdas_to_rules(freq_lexicon, rules):
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:  # {
-        print('lambdas-to-rules.py <lex> <rules>')
+        print('Usage: lambdas-to-rules.py <lex> <rules>', file=sys.stderr)
         exit(1)
     # }
     lambdas_to_rules(sys.argv[1], sys.argv[2])

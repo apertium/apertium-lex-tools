@@ -47,7 +47,7 @@ def merge_ngrams_lambdas(ngf, ldf):
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:  # {
-        print('merge-ngrams-lambdas.py <ngrams> <lambdas>')
+        print('Usage: merge-ngrams-lambdas.py <ngrams> <lambdas>', file=sys.stderr)
         exit(1)
     # }
     merge_ngrams_lambdas(sys.argv[1], sys.argv[2])

@@ -269,7 +269,8 @@ def ngram_count_patterns(freq_lexicon, candidates):
 
 if __name__ == '__main__':
     if len(sys.argv) not in [3, 4]:  # {
-        print('count-patterns.py <lex> <extracted> [threshold]')
+        print(
+            'Usage: count-patterns.py <lex> <extracted> [threshold]', file=sys.stderr)
         exit(1)
     # }
 
