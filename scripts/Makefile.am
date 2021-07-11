@@ -1,3 +1,12 @@
 bin_PROGRAMS = process-tagger-output
 
 process_tagger_output_SOURCES = process_tagger_output.cc
+
+apertium_lex_toolsdir = $(prefix)/share/apertium-lex-tools
+apertium_lex_tools_DATA = \
+	extract-sentences.py \
+	extract-freq-lexicon.py \
+	ngram-count-patterns-maxent2.py \
+	merge-ngrams-lambdas.py \
+	lambdas-to-rules.py \
+	ngrams-to-rules-me.py

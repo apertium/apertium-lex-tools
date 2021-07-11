@@ -1,6 +1,6 @@
 AM_LDFLAGS=$(LIBS)
 
-SUBDIRS = src
+SUBDIRS = src scripts
 
 pkgconfigdir = $(libdir)/pkgconfig
 dist_pkgconfig_DATA = apertium-lex-tools.pc

@@ -1,53 +1,46 @@
-#include <stdio.h>
-#include <string>
-#include <iostream>
-
 #include <lttoolbox/fst_processor.h>
 #include <lttoolbox/lt_locale.h>
-#include <lttoolbox/ltstr.h>
+#include <lttoolbox/input_file.h>
+#include <lttoolbox/string_utils.h>
+#include <cstdio>
+#include <string>
+#include <iostream>
+#include <vector>
 
-#include <cwchar>
-#include <set>
-//#include <apertium/tagger.h>
-#include <apertium/tsx_reader.h>
-#include <apertium/string_utils.h>
-
-using namespace std;
-
-int find(vector<wstring> xs, wstring x) {
+int find(std::vector<UString> xs, UString x) {
 	for (size_t i = 0; i < xs.size(); i++) {
 		if (xs[i] == x)
 			return i;
 	}
 	return -1;
-
 }
 
 FSTProcessor loadBilingual(char *path) {
 	FSTProcessor bilingual;
 
-	FILE *f_bin = fopen(path, "r");
+	auto f_bin = fopen(path, "rb");
 	bilingual.load(f_bin);
 	fclose(f_bin);
 	bilingual.initBiltrans();
 	return bilingual;
 }
 
-vector<wstring> parseTags(wstring token) {
-	int state = 0; // outside
-	vector<wstring> tags;
-	wstring buffer;
+std::vector<UString> parseTags(UString token) {
+	bool in_tag = false;
+	std::vector<UString> tags;
+	UString buffer;
 	for (size_t i = 0; i < token.size(); i++) {
-		wchar_t c = token[i];
-		if (state == 0) {
+		UChar c = token[i];
+		if (!in_tag) {
 			if (c == '<') {
-				state = 1;
+				in_tag = true;
 			}
-		} else if (state == 1) {
+		}
+		else {
 			if (c == '>') {
 				tags.push_back(buffer);
-				buffer = L"";
-				state = 0;
+				buffer.clear();
+				in_tag = false;
 			} else {
 				buffer += c;
 			}
@@ -56,28 +49,10 @@ vector<wstring> parseTags(wstring token) {
 	return tags;
 }
 
-vector<wstring> wsplit(wstring wstr, wchar_t delim) {
-	vector<wstring> tokens;
-	wstring buffer;
-
-	for (size_t i = 0; i < wstr.size(); i++) {
-		buffer += wstr[i];
-		if(wstr[i] == delim) {
-			tokens.push_back(buffer);
-			buffer = L"";
-		}
-	}
-	if(buffer != L"") {
-		tokens.push_back(buffer);
-	}
-	return tokens;
-
-}
-
-wstring getLemma(wstring token) {
-	wstring buffer;
+UString getLemma(UString token) {
+	UString buffer;
 	for (size_t i = 0; i < token.size(); i++) {
-		if(token[i] != '<') {
+		if (token[i] != '<') {
 			buffer += token[i];
 		} else {
 			break;
@@ -87,64 +62,61 @@ wstring getLemma(wstring token) {
 }
 
 void processTaggerOutput(FSTProcessor *bilingual) {
-
-	wstring buffer;
+	UString buffer;
 
 	bool escaped = false;
-	int state = 0; // outside
-	wchar_t c;
+	bool in_token = false;
+	UChar32 c;
 	bilingual->setBiltransSurfaceForms(true);
-	while((wcin.get(c))) {
-
-		if (state == 0) {
+	InputFile in;
+	while((c = in.get()) != U_EOF) {
+		if (!in_token) {
 			if (c == '^' && !escaped) {
-				state = 1; // inside
+				in_token = true;
 				buffer += c;
 			} else if (c == '\\' && !escaped) {
-				wcout << c;
+				std::cout << c;
 				escaped = true;
 			} else {
-				wcout << c;
+				std::cout << c;
 				escaped = false;
 			}
-		} else if (state == 1) {
-			if(c == L'$' && !escaped) {
-
-				vector<wstring> sourceTags = parseTags(buffer);
-				wstring target = bilingual->biltrans(buffer + L"$", true);
-				vector<wstring> targetTags = parseTags(target);
-				wstring targetTrimmed = bilingual->biltransWithoutQueue(buffer + L"$", true);
-				vector<wstring> trimmedTags = parseTags(targetTrimmed);
-				vector<wstring> newTags;
+		}
+		else {
+			if (c == '$' && !escaped) {
+				auto sourceTags = parseTags(buffer);
+				auto target = bilingual->biltrans(buffer + "$"_u, true);
+				auto targetTags = parseTags(target);
+				auto targetTrimmed = bilingual->biltransWithoutQueue(buffer + "$"_u, true);
+				auto trimmedTags = parseTags(targetTrimmed);
+				std::vector<UString> newTags;
 
 				for (size_t i = 0; i < sourceTags.size(); i++) {
-					wstring sourceTag = sourceTags[i];
-					int idx_1 = find(targetTags, sourceTag);
-					int idx_2 = find(trimmedTags, sourceTag);
+					UString sourceTag = sourceTags[i];
+					auto idx_1 = find(targetTags, sourceTag);
+					auto idx_2 = find(trimmedTags, sourceTag);
 					if (idx_1 == idx_2){
 						newTags.push_back(sourceTag);
 					}
 				}
-				wcout << getLemma(buffer);
+				std::cout << getLemma(buffer);
 				for (size_t i = 0; i < newTags.size(); i++) {
-					wcout << '<' << newTags[i] << '>';
+					std::cout << '<' << newTags[i] << '>';
 				}
 				targetTrimmed[0] = '/';
-				if(targetTrimmed == L"/") {
-					buffer[0] = L'@';
-					wcout << L"/" + buffer + L"$";
+				if (targetTrimmed.size() == 1) {
+					buffer[0] = '@';
+					std::cout << '/' << buffer << '$';
 				} else {
-					vector<wstring> tokens = wsplit(targetTrimmed, '/');
-					for (size_t i = 0; i < tokens.size(); i++) {
-						wcout << tokens[i];
+					auto tokens = StringUtils::split(targetTrimmed, "/"_u);
+					for (auto& token : tokens) {
+						std::cout << token;
 					}
 				}
 
-				buffer = L"";
-				state = 0;
+				buffer.clear();
+				in_token = false;
 				escaped = false;
-
-
 			} else if (c == '\\' && !escaped) {
 				escaped = true;
 				buffer += c;
@@ -156,17 +128,14 @@ void processTaggerOutput(FSTProcessor *bilingual) {
 	}
 }
 
-int main(int argc, char **argv)
-{
-	if(argc != 2) {
-		wcout << L"Usage: " << argv[0] << " bidix_bin_file" << endl;
-		wcout << L"with output from pretransfer on standard input." << endl;
+int main(int argc, char **argv) {
+	if (argc != 2) {
+		std::cout << "Usage: " << argv[0] << " bidix_bin_file" << endl;
+		std::cout << "with output from pretransfer on standard input." << endl;
 		exit(-1);
 	}
 
     LtLocale::tryToSetLocale();
 	FSTProcessor bilingual = loadBilingual(argv[1]);
 	processTaggerOutput(&bilingual);
-
-	return 0;
 }
