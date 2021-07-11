@@ -177,7 +177,7 @@ def ngrams_to_rules(ngrams):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:  # {
-        print('ngrams-to-rules.py <ngrams>')
+        print('Usage: ngrams-to-rules.py <ngrams>', file=sys.stderr)
         exit(1)
     # }
     ngrams_to_rules(sys.argv[1])

@@ -4,6 +4,7 @@
 
 import sys
 import common
+import traceback
 
 # Read the corpus, make a note of all ambiguous words, their frequency and their possible translations
 
@@ -69,6 +70,7 @@ def extract_freq_lexicon(canditates):
                                     tlword = cur_tl_row[al_tl]
                                 else:
                                     tlword = cur_tl_row[-1]
+                                    traceback.print_stack()
                                     print("alignment out",
                                           "of",
                                           "range", al_tl,
@@ -77,6 +79,7 @@ def extract_freq_lexicon(canditates):
                                           cur_tl_row,
                                           ")",
                                           file=sys.stderr)
+                                    exit(1)
                                 slword = slword
                                 if slword not in sl_tl:  # {
                                     sl_tl[slword] = {}
@@ -107,9 +110,10 @@ def extract_freq_lexicon(canditates):
                 # }
 
                 cur_line = cur_line + 1
-            except Exception as e:
-                print("Error in line", lineno, ":", e, file=sys.stderr)
-                sys.exit(-1)
+            except Exception:
+                # print("Error in line", lineno, ":", e, file=sys.stderr)
+                traceback.print_exc()
+                exit(1)
         # }
     # }
 
@@ -142,7 +146,7 @@ def extract_freq_lexicon(canditates):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:  # {
-        print('extract-freq-lexicon.py <candidate sent>')
+        print('Usage: extract-freq-lexicon.py <candidate sent>', file=sys.stderr)
         exit(1)
     # }
     extract_freq_lexicon(sys.argv[1])

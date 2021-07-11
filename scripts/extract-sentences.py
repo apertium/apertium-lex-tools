@@ -23,21 +23,19 @@ def ambiguous(bt):  # {
 
 
 def extract_sentences(phrase_table_file, biltrans_out_file):
-    reading = True
     lineno = 0
     total_valid = 0
     total_errors = 0
 
     not_ambiguous = []
     with open(phrase_table_file) as phrase_table, open(biltrans_out_file) as biltrans_out:
-        while reading:  # {
+        while True:  # {
             try:
                 lineno = lineno + 1
                 pt_line = phrase_table.readline().strip()
                 bt_line = biltrans_out.readline().strip()
 
                 if not bt_line.strip() and not pt_line.strip():  # {
-                    reading = False
                     break
                 elif not bt_line.strip() or not pt_line.strip():  # {
                     continue
@@ -83,8 +81,7 @@ def extract_sentences(phrase_table_file, biltrans_out_file):
                 print(lineno, '\t' + bt_line)
                 print(lineno, '\t' + row[0])
                 print(lineno, '\t' + row[2])
-                print(
-                    '-------------------------------------------------------------------------------')
+                print('-'*(len(bt_line)+5))
                 total_valid += 1
             except Exception as e:
                 print("Error in line", lineno, ": ", e, file=sys.stderr)
@@ -102,7 +99,7 @@ def extract_sentences(phrase_table_file, biltrans_out_file):
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:  # {
-        print('extact-sentences.py <phrasetable> <biltrans>')
+        print('Usage: extact-sentences.py <phrasetable> <biltrans>', file=sys.stderr)
         exit(1)
     # }
 
