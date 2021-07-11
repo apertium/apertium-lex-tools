@@ -89,14 +89,14 @@ double IrstlmRanker::score(const string &frame, double &pp) {
     // It is assumed that sentences start with <s>
     buffer.push_back(s_unigrams.at(0));
 
-    for (unsigned i = 1; i < s_unigrams.size(); i++) {
+    for (size_t i = 1; i < s_unigrams.size(); i++) {
         buffer.push_back(s_unigrams.at(i));
         if (buffer.size() > m_nGramOrder)
             buffer.pop_front();
 
         string buffer_str="";
         m_lmtb_ng = new ngram(m_lmtb->getDict()); // ngram of words
-        for (unsigned j = 0; j < buffer.size(); j++) {
+        for (size_t j = 0; j < buffer.size(); j++) {
             if (j>0) buffer_str += " ";
             buffer_str += buffer[j];
             lmId = m_lmtb->getDict()->encode(buffer[j].c_str());
@@ -154,8 +154,7 @@ bool IrstlmRanker::load(const string &filePath, float weight) {
 }
 
 void IrstlmRanker::normalizeProbabilities() {
-
-	for(int i = 0; i < probs.size(); i++) {
+	for (size_t i = 0; i < probs.size(); i++) {
 		probs[i] = probs[i] / this->norm;
 		if (probs[i] != probs[i]) {
 			probs[i] = 0;
@@ -171,7 +170,7 @@ void IrstlmRanker::printScores(vector<long double> scores)
 	set<int> positiveIndex;
 	long double probSum = 0.0;
 
-	for(int i = 0; i < sortedIndex.size(); i++) {
+	for (size_t i = 0; i < sortedIndex.size(); i++) {
 		int idx = sortedIndex[i];
 		probSum += probs[idx];
 		if (probSum > thr) {
@@ -192,14 +191,14 @@ void IrstlmRanker::printScores(vector<long double> scores)
 		}
 	}
 
-    for(int i = 0; i < batch.size(); i++)
+    for (size_t i = 0; i < batch.size(); i++)
     {
         long double score = scores[i];
         string line = batch[i];
 
 		double c = 5;
 		int rank = find(sortedIndex.begin(), sortedIndex.end(), i) - sortedIndex.begin();
-		for(int j = 0; j < thresholds.size(); j++) {
+		for (size_t j = 0; j < thresholds.size(); j++) {
 			if (rank <= thresholds[j]) {
 				c = j;
 				break;
@@ -212,7 +211,7 @@ void IrstlmRanker::printScores(vector<long double> scores)
 		}
 		cout << line;
         cout << "\t" << score;
-		if(i == maxlineno) {
+		if (i == maxlineno) {
            cout << "\t|@|\t";
 		} else if (inside) {
 			cout << "\t|+|\t";

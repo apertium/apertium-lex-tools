@@ -57,7 +57,9 @@ Makefile.in
 
 src/lrx-comp
 src/lrx-proc
-scripts/process-tagger-output
+src/irstlm-ranker
+src/process-tagger-output
+src/yasmet
 src/multitrans
 stamp-h1
 

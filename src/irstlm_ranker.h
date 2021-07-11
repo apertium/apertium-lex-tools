@@ -15,9 +15,9 @@
 #include <istream>
 #include <limits>
 
-#include "lmContainer.h"
-#include "lmmacro.h"
-#include "lmtable.h"
+#include <irstlm/lmContainer.h>
+#include <irstlm/lmmacro.h>
+#include <irstlm/lmtable.h>
 
 class lmtable;  // irst lm table
 class lmmacro;  // irst lm for macro tags
@@ -27,22 +27,22 @@ private:
 
 	double probMassThr;
 
-    vector<long double> logScores;
-    vector<long double> probs;
-	vector<int> sortedIndex;
+	std::vector<long double> logScores;
+	std::vector<long double> probs;
+	std::vector<int> sortedIndex;
 
-    vector<string> batch;
+	std::vector<string> batch;
 
 	int current_line;
-    int maxlineno;
+	int maxlineno;
 	int lineno;
 	int sublineno;
 
 	long double norm;
-    long double current_max;
+	long double current_max;
 
 protected:
-	lmContainer        *m_lmtb;
+	irstlm::lmContainer        *m_lmtb;
 
 	int            m_unknownId;
 	int            m_lmtb_size;          // max ngram stored in the table
@@ -52,21 +52,21 @@ protected:
 	std::string    m_filePath; // for debugging purposes.
 	size_t         m_nGramOrder; // max n-gram length contained in this LM.
 
-	vector<std::string> parseLine(std::string);
-	void printScores(vector<long double> scores);
+	std::vector<std::string> parseLine(std::string);
+	void printScores(std::vector<long double> scores);
 	void insertSortedIndex(long double prob);
 
 	void reset();
 	void normalizeProbabilities();
 
-	ifstream tmtrans;
+	std::ifstream tmtrans;
 
 	std::string trim(const std::string& o);
 	bool load(const std::string &filePath, float weight);
 	double score(const std::string &frame, double &pp);
 
 public:
-	IrstlmRanker(const string &filePath, char *mtransPath, vector<double> params);
+	IrstlmRanker(const std::string &filePath, char *mtransPath, std::vector<double> params);
 	~IrstlmRanker();
 
 	int standard();

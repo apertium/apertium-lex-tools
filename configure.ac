@@ -18,28 +18,18 @@ AC_ARG_ENABLE(debug,
               [  --enable-debug  Enable "-g -Wall" compiler options],
               [CXXFLAGS="-g -Wall";CFLAGS="-g -Wall"])
 
-# This doesn't work yet
 dnl IRSTLM support
 AH_TEMPLATE(HAVE_IRSTLM, [Have IRSTLM])
-AC_ARG_WITH(irstlm, AC_HELP_STRING([--with-irstlm=PATH],
+AC_ARG_ENABLE(irstlm, AC_HELP_STRING([--enable-irstlm],
 	[enable IRSTLM ranker (needed for monolingual rule-learning)]),
-	[irstlm=${withval}], [irstlm=no])
+	[irstlm=${enableval}], [irstlm=no])
 AM_CONDITIONAL([HAVE_IRSTLM], [test "x$irstlm" != "xno"])
-AC_DEFINE(HAVE_IRSTLM, 0)
-AS_IF([test "x$irstlm" != "xno"], [
-        CXXFLAGS="$CXXFLAGS -I$withval/include"
-        LIBS="$LIBS -lirstlm"
-        AC_CHECK_HEADERS([lmmacro.h], AC_DEFINE(HAVE_IRSTLM, 1), [])
-        AC_CHECK_HEADERS([lmtable.h], AC_DEFINE(HAVE_IRSTLM, 1), [])
-          CXXFLAGS="$CXXFLAGS $IRSTLM_CFLAGS"
-        ])
 
 AH_TEMPLATE(HAVE_YASMET, [Have YASMET])
-AC_ARG_WITH(yasmet, AC_HELP_STRING([--with-yasmet=PATH],
+AC_ARG_ENABLE(yasmet, AC_HELP_STRING([--enable-yasmet],
 	[enable YASMET (needed for maximum-entropy training)]),
-	[yasmet=${withval}], [yasmet=no])
+	[yasmet=${enableval}], [yasmet=no])
 AM_CONDITIONAL([HAVE_YASMET], [test "x$yasmet" != "xno"])
-AC_DEFINE(HAVE_YASMET, 0)
 
 
 PKG_CHECK_MODULES([LTTOOLBOX], [lttoolbox >= required_lttoolbox_version])
