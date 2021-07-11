@@ -106,5 +106,5 @@ then
 	fi
 fi
 
-AC_CONFIG_FILES([Makefile apertium-lex-tools.pc src/Makefile])
+AC_CONFIG_FILES([Makefile apertium-lex-tools.pc src/Makefile scripts/Makefile])
 AC_OUTPUT
