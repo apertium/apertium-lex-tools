@@ -2,74 +2,41 @@
 # coding=utf-8
 # -*- encoding: utf-8 -*-
 
-import sys, codecs, copy;
-import common;
+import sys
+import common
+import biltrans_count_common as BCC
+from collections import defaultdict
 
 # Input:
 #        a) Biltrans output
 #        b) Disambiguated biltrans output
 
-#
+# The sl-tl possible combinations
+sl_tl = defaultdict(lambda: defaultdict(lambda: 0))
 
-sl_tl = {}; # The sl-tl possible combinations
-am_file = open(sys.argv[1]); # File with ambiguous biltrans output
-dm_file = open(sys.argv[2]); # File with disambiguated biltrans output
-reading = True;
+class Counter(BCC.BiltransCounter):
+	tokenizer = 'biltrans'
+	line_ids = False
 
-while reading: #{
-	am_line = am_file.readline();
-	dm_line = dm_file.readline();
+	def processs_row(self, frac_count=0):
+		global sl_tl
+		for i in range(len(self.am_row)):
+			if self.am_row[i].count('/') > 1:
+				sl = BCC.strip_tags(self.am_row[i], 'sl')
+				tl = BCC.strip_tags(self.dm_row[i], 'tl')
+				sl_tl[sl][tl] += 1
 
-	if am_line == '' and dm_line == '': #{
-		reading = False;
-		continue;
-	#}
+c = Counter()
+c.read_files(sys.argv[1], # File with ambiguous biltrans output
+			 sys.argv[2]) # File with disambiguated biltrans output
 
-	am_row = common.tokenize_biltrans_line(am_line);
-	dm_row = common.tokenize_biltrans_line(dm_line);
-
-	if len(am_row) != len(dm_row): #{
-		print('Mismatch in number of LUs between analysis and training', file=sys.stderr);
-		print('\t' + am_line, file=sys.stderr);
-		print('\t' + dm_line, file=sys.stderr);
-		print('...skipping', file=sys.stderr);
-		continue;
-	#}
-
-	limit = len(am_row);
-	for i in range(0, limit): #{
-		if am_row[i].count('/') > 1: #{
-			#print(am_row[i] , dm_row[i]);
-			sl = am_row[i].split('/')[0].replace(' ', '~');
-			tl = dm_row[i].split('/')[1].replace(' ', '~');
-			if sl.count('><') > 0: #{
-				sl = sl.split('><')[0] + '>';
-			#}
-			if tl.count('><') > 0: #{
-				tl = tl.split('><')[0] + '>';
-			#}
-			if sl not in sl_tl: #{
-				sl_tl[sl] = {};
-			#}
-			if tl not in sl_tl[sl]: #{
-				sl_tl[sl][tl] = 0;
-			#}
-			sl_tl[sl][tl] = sl_tl[sl][tl] + 1;
-		#}
-	#}
-#}
-
-for sl in sl_tl: #{
+for sl in sl_tl:
 	newtl = sorted(sl_tl[sl], key=lambda x: sl_tl[sl][x])
 	newtl.reverse()
-	first = True;
-	for tl in newtl: #{
-		if first: #{
-			print(sl_tl[sl][tl] , sl , tl , '@');
+	first = True
+	for tl in newtl:
+		if first:
+			print(sl_tl[sl][tl] , sl , tl , '@')
 			first = False
-		else: #{
-			print(sl_tl[sl][tl] , sl , tl);
-		#}
-	#}
-#}
-
+		else:
+			print(sl_tl[sl][tl] , sl , tl)

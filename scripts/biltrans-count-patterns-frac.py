@@ -2,8 +2,10 @@
 # coding=utf-8
 # -*- encoding: utf-8 -*-
 
-import sys, codecs, copy, re;
-import common;
+import sys, re
+import common
+from collections import defaultdict
+import biltrans_count_common as BCC
 
 # Input:
 #        a) Frequency lexicon
@@ -28,202 +30,43 @@ import common;
 
 #	 d) Crispiness threshold
 
-MAX_NGRAMS = 3; # Max = 5-grams
+crisphold = 3.0  # Default
+only_max = True
+#only_max = False
+cache_counts = open('/tmp/cache_counts.log', 'w+')
 
-cur_line = 0;
-crisphold = 3.0 ; # Default
-only_max = True;
-#only_max = False;
-cache_counts = open('/tmp/cache_counts.log', 'w+');
-
-if len(sys.argv) == 5: #{
-	crisphold = float(sys.argv[4]);
-	print('crisp:', crisphold, file=sys.stderr);
-#}
-
-sl_tl_defaults = {};
-sl_tl = {};
-ngrams = {};
+if len(sys.argv) == 5:
+	crisphold = float(sys.argv[4])
+	print('crisp:', crisphold, file=sys.stderr)
 
 # First read in the frequency defaults
 
-for line in open(sys.argv[1]).readlines(): #{
-	if len(line) < 1: #{
-		continue;
-	#}
-	row = line.split(' ');
-	sl = row[1];
-	tl = row[2];
-	fr = float(row[0]);
-	if line.count('@') and fr == 0.0: #{
-		print('!!! Prolly something went wrong here, the default has a freq of 0.0', file=sys.stderr);
-		print('    %s => %s = %.10f' % (sl, tl, fr), file=sys.stderr);
-	#}
-	if line.count('@') > 0: #{
-		print('default:', sl, tl, file=sys.stderr);
-		sl_tl_defaults[sl] = tl;
-	else: #{
-		sl_tl[sl] = tl;
-	#}
+sl_tl, sl_tl_defaults, _ = BCC.read_frequencies(sys.argv[1])
 
-#}
+print('Reading...', file=sys.stderr)
+sys.stderr.flush()
 
-print('Reading...', file=sys.stderr);
-sys.stderr.flush();
+class Counter(BCC.BiltransCounter):
+	tokenizer = 'biltrans'
+	line_ids = True
+	count_ngrams = True
+	max_ngrams = 3
 
-am_file = open(sys.argv[2]); # File with ambiguous biltrans output
-dm_file = open(sys.argv[3]); # File with disambiguated biltrans output
-reading = True;
+c = Counter()
+c.read_files(sys.argv[2], # File with ambiguous biltrans output
+			 sys.argv[3]) # File with disambiguated biltrans output
+ngrams = c.ngrams
 
-current_am_line_id = -1;
-current_dm_line_id = -1;
+print('Caching counts...', file=sys.stderr)
+for sl in ngrams:
+	for ngram in ngrams[sl]:
+		for tl in ngrams[sl][ngram]:
+			print('%.10f\t%s\t%s\t%s' % (ngrams[sl][ngram][tl], ngram, sl, tl), file=cache_counts)
 
-rsep = re.compile('\$[^\^]*\^');
+print('\n', file=sys.stderr)
 
-dm_line = dm_file.readline();
-current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
-
-am_counter = 0;
-dm_counter = 0;
-
-
-while reading: #{
-	am_line = am_file.readline();
-
-	if am_line == '': #{
-		reading = False;
-		continue;
-	#}
-
-	current_am_line_id += 1
-
-#	# to skip lines in the frac corpus if we have a sub-corpus
-#	if current_dm_line_id != current_am_line_id: #{
-#		print('line_id_mismatch: %d != %d' % (current_am_line_id, current_dm_line_id), file=sys.stderr);
-#		while current_dm_line_id != current_am_line_id: #{
-#			dm_line = dm_file.readline();
-#			current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
-#			print('skipping %d ...' % (current_dm_line_id), file=sys.stderr);
-#		#}
-#	#}
-	while current_dm_line_id == current_am_line_id: #{
-
-		am_row = common.tokenize_biltrans_line(am_line);
-		dm_row = common.tokenize_biltrans_line(dm_line);
-
-		if len(am_row) != len(dm_row): #{
-			print('Mismatch in number of LUs between analysis and training', file=sys.stderr);
-			print('\t' + am_line, file=sys.stderr);
-			print('\t' + dm_line, file=sys.stderr);
-			print('...skipping', file=sys.stderr);
-			continue;
-		#}
-
-		cur_sl_row = [];
-		for lu in am_row: #{
-			sl = lu.split('/')[0];
-			if sl.count('><') > 0: #{
-				sl = sl.split('><')[0] + '>';
-			#}
-			cur_sl_row.append(sl);
-		#}
-
-		try:
-			frac_count = float(dm_line.split('\t')[2]);
-		except:
-			break;
-
-		limit = len(am_row);
-		for i in range(0, limit): #{
-			if am_row[i].count('/') > 1: #{
-				#print(am_row[i] , dm_row[i]);
-				sl = am_row[i].split('/')[0].replace(' ', '~');
-				tl = dm_row[i].split('/')[1].replace(' ', '~');
-				if sl.count('><') > 0: #{
-					sl = sl.split('><')[0] + '>';
-				#}
-				if tl.count('><') > 0: #{
-					tl = tl.split('><')[0] + '>';
-				#}
-
-#				if tl !=  sl_tl_defaults[sl]: #{
-#					print('+' , sl , sl_tl_defaults[sl] , tl, file=sys.stderr);
-#				else: #{
-#					print('-' , sl , sl_tl_defaults[sl] , tl, file=sys.stderr);
-#				#}
-
-				for j in range(1, MAX_NGRAMS): #{
-					pregram = ' '.join(cur_sl_row[i-j:i+1]);
-					postgram = ' '.join(cur_sl_row[i:i+j+1]);
-					roundgram = ' '.join(cur_sl_row[i-j:i+j+1]);
-
-					if sl not in ngrams: #{
-						ngrams[sl] = {};
-					#}
-					if pregram not in ngrams[sl]: #{
-						ngrams[sl][pregram] = {};
-					#}
-					if postgram not in ngrams[sl]: #{
-						ngrams[sl][postgram] = {};
-					#}
-					if roundgram not in ngrams[sl]: #{
-						ngrams[sl][roundgram] = {};
-					#}
-
-					if tl not in ngrams[sl][pregram]: #{
-						ngrams[sl][pregram][tl] = 0.0;
-					#}
-					if tl not in ngrams[sl][postgram]: #{
-						ngrams[sl][postgram][tl] = 0.0;
-					#}
-					if tl not in ngrams[sl][roundgram]: #{
-						ngrams[sl][roundgram][tl] = 0.0;
-					#}
-					ngrams[sl][pregram][tl] = ngrams[sl][pregram][tl] + frac_count;
-					ngrams[sl][postgram][tl] = ngrams[sl][postgram][tl] + frac_count;
-					ngrams[sl][roundgram][tl] = ngrams[sl][roundgram][tl] + frac_count;
-
-#					print('=> %s\t[%.10f] %s' % (tl, ngrams[sl][pregram][tl], pregram), file=sys.stderr);
-#					print('=> %s\t[%.10f] %s' % (tl, ngrams[sl][roundgram][tl], roundgram), file=sys.stderr);
-#					print('=> %s\t[%.10f] %s' % (tl, ngrams[sl][postgram][tl], postgram), file=sys.stderr);
-
-
-				#}
-			#}
-		#}
-
-		dm_line = dm_file.readline();
-		if dm_line == '': #{
-			reading = False;
-			break;
-		#}
-		current_dm_line_id = int(dm_line.split('.[][')[1].split(' ')[0]);
-
-		dm_counter += 1;
-	#}
-	am_counter += 1;
-
-	if am_counter % 10000 == 0: #{
-		print('=> %d SL and %d TL lines [id: %d] [ngrams: %d].' % (am_counter, dm_counter, current_am_line_id, len(ngrams)), file=sys.stderr);
-		sys.stderr.flush();
-	#}
-#}
-
-print('Caching counts...', file=sys.stderr);
-for sl in ngrams: #{
-
-	for ngram in ngrams[sl]: #{
-
-		for tl in ngrams[sl][ngram]: #{
-			print('%.10f\t%s\t%s\t%s' % (ngrams[sl][ngram][tl], ngram, sl, tl), file=cache_counts);
-		#}
-	#}
-#}
-print('\n', file=sys.stderr);
-
-for sl in ngrams: #{
-
-	for ngram in ngrams[sl]: #{
+for sl in ngrams:
+	for ngram in ngrams[sl]:
 		try:
 			#> If for each of the rules we include
 			#> the amount of time the translation is seen with that pattern over the
@@ -241,74 +84,65 @@ for sl in ngrams: #{
 			#It would be "2" in this case: the alternative is seen twice as often as
 			#the default.
 
-			total = 0.0;
-			max_freq = 0.0;
-			max_tl = '';
-			for tl in ngrams[sl][ngram]: #{
-				if ngrams[sl][ngram][tl] > max_freq: #{
-					max_freq = ngrams[sl][ngram][tl];
-					max_tl = tl;
-				#}
-				total = total + ngrams[sl][ngram][tl];
-			#}
+			total = 0.0
+			max_freq = 0.0
+			max_tl = ''
+			for tl in ngrams[sl][ngram]:
+				if ngrams[sl][ngram][tl] > max_freq:
+					max_freq = ngrams[sl][ngram][tl]
+					max_tl = tl
 
-			if only_max == True: #{
-				crispiness = 0.0;
-				default = sl_tl_defaults[sl];
-	#			if default == max_tl: #{
-	#				print('default=max_tl', default, max_tl, '\t', ngram, file=sys.stderr);
-	#			else:#{
-	#				print('default!=max_tl', default, max_tl, '\t', ngram, file=sys.stderr);
-	#			#}
-				alt_crisp = float(ngrams[sl][ngram][max_tl]) / float(total);
-				def_crisp = 1.0;
-				if default in ngrams[sl][ngram]: #{
-					def_crisp = float(ngrams[sl][ngram][default] / float(total));
-				#}
-				weight = float(ngrams[sl][ngram][max_tl]) / float(total);
-				crispiness = alt_crisp/def_crisp;
+				total += ngrams[sl][ngram][tl]
 
-				if crispiness < crisphold: #{
-					print('- %.10f %.10f %.10f %.10f %.10f %.10f\t%s\t%s\t%s\t%.10f' % (crispiness, weight, total, ngrams[sl][ngram][default] , max_freq, ngrams[sl][ngram][max_tl], sl, ngram, max_tl, ngrams[sl][ngram][max_tl]));
-	#				print('-', crispiness , weight , total, ngrams[sl][ngram][default] , max_freq, ngrams[sl][ngram][max_tl], '\t'+ sl + '\t' + ngram + '\t' + max_tl + '\t' + str(ngrams[sl][ngram][max_tl]));
-				else: #{
+			if only_max == True:
+				crispiness = 0.0
+				default = sl_tl_defaults[sl]
+	#			if default == max_tl:
+	#				print('default=max_tl', default, max_tl, '\t', ngram, file=sys.stderr)
+	#			else:
+	#				print('default!=max_tl', default, max_tl, '\t', ngram, file=sys.stderr)
+	#
+				alt_crisp = float(ngrams[sl][ngram][max_tl]) / float(total)
+				def_crisp = 1.0
+				if default in ngrams[sl][ngram]:
+					def_crisp = float(ngrams[sl][ngram][default] / float(total))
 
-					print('+ %.10f %.10f %.10f %.10f %.10f %.10f\t%s\t%s\t%s\t%.10f' % (crispiness, weight, total, ngrams[sl][ngram][default] , max_freq, ngrams[sl][ngram][max_tl], sl, ngram, max_tl, ngrams[sl][ngram][max_tl]));
-					#print('+', crispiness , weight , total, ngrams[sl][ngram][default] , max_freq, ngrams[sl][ngram][max_tl], '\t' +  sl + '\t' + ngram + '\t' + max_tl + '\t' + str(ngrams[sl][ngram][max_tl]));
-				#}
+				weight = float(ngrams[sl][ngram][max_tl]) / float(total)
+				crispiness = alt_crisp/def_crisp
+
+				if crispiness < crisphold:
+					print('- %.10f %.10f %.10f %.10f %.10f %.10f\t%s\t%s\t%s\t%.10f' % (crispiness, weight, total, ngrams[sl][ngram][default] , max_freq, ngrams[sl][ngram][max_tl], sl, ngram, max_tl, ngrams[sl][ngram][max_tl]))
+	#				print('-', crispiness , weight , total, ngrams[sl][ngram][default] , max_freq, ngrams[sl][ngram][max_tl], '\t'+ sl + '\t' + ngram + '\t' + max_tl + '\t' + str(ngrams[sl][ngram][max_tl]))
+				else:
+
+					print('+ %.10f %.10f %.10f %.10f %.10f %.10f\t%s\t%s\t%s\t%.10f' % (crispiness, weight, total, ngrams[sl][ngram][default] , max_freq, ngrams[sl][ngram][max_tl], sl, ngram, max_tl, ngrams[sl][ngram][max_tl]))
+					#print('+', crispiness , weight , total, ngrams[sl][ngram][default] , max_freq, ngrams[sl][ngram][max_tl], '\t' +  sl + '\t' + ngram + '\t' + max_tl + '\t' + str(ngrams[sl][ngram][max_tl]))
+
 
 	#   crispiness   weight      total default     max_freq     tl_freq            sl
 	#+ 2.61845457309 0.7236389238 1.0 0.2763610762 0.7236389238 0.7236389238         aozer<n>        aozer<n> an<det> levr<n>        organisateur<n> 0.7236389238
 	#- 14736.0468727 0.9999321438 1.0 0.9999321438 0.9999321438      treuzkas<n>     treuzkas<n> teknologel<adj>     transfert<n>    0.9999321438
 
+			else:
+				for tl in ngrams[sl][ngram]:
+					crispiness = 0.0
+					default = sl_tl_defaults[sl]
+					alt_crisp = float(ngrams[sl][ngram][tl]) / float(total)
+					def_crisp = 1.0
+					if default in ngrams[sl][ngram]:
+						def_crisp = float(ngrams[sl][ngram][default] / float(total))
 
+					weight = float(ngrams[sl][ngram][tl]) / float(total)
+					crispiness = alt_crisp/def_crisp
 
-			else: #{
+					#print '%%%' , crispiness , alt_crisp , def_crisp , tl , default , ngrams[sl][ngram]
 
-				for tl in ngrams[sl][ngram]: #{
+					if crispiness < crisphold:
+						print('- %.10f %.10f %.10f %.10f %.10f %.10f\t%s\t%s\t%s\t%.10f' % (crispiness, weight, total, ngrams[sl][ngram][default] , max_freq, ngrams[sl][ngram][tl], sl, ngram, tl, ngrams[sl][ngram][tl]))
+					else:
+						print('+ %.10f %.10f %.10f %.10f %.10f %.10f\t%s\t%s\t%s\t%.10f' % (crispiness, weight, total, ngrams[sl][ngram][default] , max_freq, ngrams[sl][ngram][tl], sl, ngram, tl, ngrams[sl][ngram][tl]))
 
-					crispiness = 0.0;
-					default = sl_tl_defaults[sl];
-					alt_crisp = float(ngrams[sl][ngram][tl]) / float(total);
-					def_crisp = 1.0;
-					if default in ngrams[sl][ngram]: #{
-						def_crisp = float(ngrams[sl][ngram][default] / float(total));
-					#}
-					weight = float(ngrams[sl][ngram][tl]) / float(total);
-					crispiness = alt_crisp/def_crisp;
-
-					#print '%%%' , crispiness , alt_crisp , def_crisp , tl , default , ngrams[sl][ngram] ;
-
-					if crispiness < crisphold: #{
-						print('- %.10f %.10f %.10f %.10f %.10f %.10f\t%s\t%s\t%s\t%.10f' % (crispiness, weight, total, ngrams[sl][ngram][default] , max_freq, ngrams[sl][ngram][tl], sl, ngram, tl, ngrams[sl][ngram][tl]));
-					else: #{
-						print('+ %.10f %.10f %.10f %.10f %.10f %.10f\t%s\t%s\t%s\t%.10f' % (crispiness, weight, total, ngrams[sl][ngram][default] , max_freq, ngrams[sl][ngram][tl], sl, ngram, tl, ngrams[sl][ngram][tl]));
-					#}
 	#+ 1013.01568891 0.9989973752 2.0 1.9979947504 1.9979947504 	galloud<n>	ha<cnjcoo> an<det> galloud<n>	puissance<n>	1.9979947504
 
-				#}
-			#}
 		except:
 			pass
-	#}
-#}

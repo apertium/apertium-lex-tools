@@ -2,7 +2,9 @@
 # coding=utf-8
 # -*- encoding: utf-8 -*-
 
-import sys, codecs, copy;
+import sys
+import biltrans_count_common as BCC
+from collections import defaultdict
 
 # Input:
 #        a) Biltrans output
@@ -14,72 +16,39 @@ import sys, codecs, copy;
 
 #11 	si<cnjadv> el<det><def> asamblea<n> estar#~de~acuerdo<vblex> ,<cm> hacer<vblex> lo~que<rel><nn> el<det><def> señor<n> Evans<np><cog> acabar<vblex> de<pr> sugerir<vblex><inf> .<sent>
 
+# The sl-tl possible combinations
+sl_tl = defaultdict(lambda: defaultdict(lambda: 0))
 
-sl_tl = {}; # The sl-tl possible combinations
-am_file = open(sys.argv[1]); # File with ambiguous biltrans output
-dm_file = open(sys.argv[2]); # File with biltrans output
-reading = True;
+class Counter(BCC.BiltransCounter):
+	tokenizer = 'biltrans'
+	line_ids = False
 
-while reading: #{
-	am_line = am_file.readline();
-	dm_line = dm_file.readline();
+	def process_row(self, frac_count=0):
+		global sl_tl
+		for i in range(len(self.am_row)):
+			if self.am_row[i].count('/') > 1:
+				sl = BCC.strip_tags(am_row[i], 'sl', space=True)
 
-	if am_line == '' and dm_line == '': #{
-		reading = False;
-		continue;
-	#}
+				bts = am_row[i].split('/')[1:]
+				valid_trads = set(BCC.strip_tags(b, 'sl', space=True)
+								  for b in bts)
 
-	am_row = am_line.split('\t')[1].split(' ');
-	dm_row = list(set(dm_line.split('\t')[1].split(' ')));
+				for tl_ in dm_row:
+					tl = BCC.strip_tags(tl_, 'sl', space=True)
+					if tl in valid_trads:
+						sl_tl[sl][tl] += 1
 
-	limit = len(am_row);
-	for i in range(0, limit): #{
-		if am_row[i].count('/') > 1: #{
-			#print(am_row[i] , dm_row[i]);
-			sl = am_row[i].split('/')[0];
-			if sl.count('><') > 0: #{
-				sl = sl.split('><')[0] + '>';
-			#}
-			if sl not in sl_tl: #{
-				sl_tl[sl] = {};
-			#}
-			bts = am_row[i].split('/')[1:];
-			valid_trads = set();
-			for bt in bts: #{
-				if bt.count('><') > 0: #{
-					bt = bt.split('><')[0] + '>';
-				#}
-				valid_trads.add(bt);
-			#}
-			limit2 = len(dm_row);
-			for j in range(0, limit2): #{
-				tl = dm_row[j];
-				if tl.count('><') > 0: #{
-					tl = tl.split('><')[0] + '>';
-				#}
-				if tl not in valid_trads: #{
-					continue;
-				#}
-				if tl not in sl_tl[sl]: #{
-					sl_tl[sl][tl] = 0;
-				#}
-				sl_tl[sl][tl] = sl_tl[sl][tl] + 1;
-			#}
-		#}
-	#}
-#}
+c = Counter()
+c.read_files(sys.argv[1], # File with ambiguous biltrans output
+			 sys.argv[2]) # File with biltrans output
 
-for sl in sl_tl: #{
+for sl in sl_tl:
 	newtl = sorted(sl_tl[sl], key=lambda x: sl_tl[sl][x])
 	newtl.reverse()
-	first = True;
-	for tl in newtl: #{
-		if first: #{
-			print(sl_tl[sl][tl] , sl , tl , '@');
+	first = True
+	for tl in newtl:
+		if first:
+			print(sl_tl[sl][tl] , sl , tl , '@')
 			first = False
-		else: #{
-			print(sl_tl[sl][tl] , sl , tl);
-		#}
-	#}
-#}
-
+		else:
+			print(sl_tl[sl][tl] , sl , tl)
