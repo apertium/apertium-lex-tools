@@ -2,115 +2,65 @@
 # coding=utf-8
 # -*- encoding: utf-8 -*-
 
-import sys, codecs, copy, commands;
+import sys
 
-sys.stdin  = codecs.getreader('utf-8')(sys.stdin);
-sys.stdout = codecs.getwriter('utf-8')(sys.stdout);
-sys.stderr = codecs.getwriter('utf-8')(sys.stderr);
+def process_biltrans_unit(lu, sents):
+	new_paths = {}
 
+	state = 0
+	tl = {}
+	ls = lu[1:-1].split('/')
+	sl = ls[0]
+	for i in range(1, len(ls)):
+		tl[i] = '/' + ls[i]
 
-output_sentences = {};
-output_sentences[''] = '';
-reading_word = False;
-lineno = 1;
-lu = '';
-c = sys.stdin.read(1);
+	if len(tl) == 0:
+		print('ERROR:', lu, file=sys.stderr)
+	elif len(tl) > 1:
+		for tid, trad in tl.items():
+			for path, sent in sents.items():
+				new_paths[path + trad] = sent + '^' + sl + trad + '$'
+	else:
+		for path in sents:
+			new_paths[path] = sents[path] + '^' + sl + tl[1] + '$'
+	return new_paths
 
-def process_biltrans_unit(lu, sents): #{
-	new_paths = {};
+def process_line(line):
+	escaped = False
+	in_word = False
+	cur_id = line.split()[0]
+	idx = len(cur_id) + 1
+	lu = ''
+	output_sentences = {'':''}
+	while idx < len(line):
+		c = line[idx]
+		if c == '\\':
+			if in_word:
+				lu += c
+				idx += 1
+				lu += line[idx]
+			else:
+				idx += 1
+		elif c == '^':
+			in_word = True
+		elif c == '$':
+			in_word = False
+			new_paths = process_biltrans_line(lu, output_sentences)
+			output_sentences = new_paths
+			lu = ''
+		elif in_word:
+			lu += c
+		elif c.isspace() and c != '\n':
+			for s in output_sentences:
+				output_sentences[s] += c
+		idx += 1
+	return cur_id, output_sentences
 
-	state = 0;
-	sl = '';
-	tl = {};
-	for c in lu[1:-1]: #{
-		#^worth<n><sg>/valor<n><m><sg>$ ^\$<mon>/\$<mon>$^20<num>/20<num>$^*m/*m$
-		#print c , sl , tl;
-		if c == '/': #{
-			state = state + 1;
-			if state not in tl: #{
-				tl[state] = '';
-			#}
-		#}
-		if state == 0: #{
-			sl = sl + c;
-		#}
-		if state >= 1: #{
-			tl[state] = tl[state] + c;
-		#}
-	#}
-
-	if len(tl) > 1: #{
-		for trad in tl: #{
-			for path in sents: #{
-				new_paths[path + tl[trad]] = sents[path] + '^' + sl + tl[trad] + '$';
-			#}
-		#}
-	else: #{
-		for path in sents: #{
-			if state not in tl: #{
-				print >> sys.stderr, 'ERROR: ';
-				print >> sys.stderr, sl ;
-				print >> sys.stderr, tl ;
-			#}
-			new_paths[path] = sents[path] + '^' + sl + tl[state] + '$';
-		#}
-	#}
-
-
-	return new_paths;
-#}
-
-escaped = False;
-seen_newline = True;
-cur_id = '';
-while c: #{
-	if c == '\\': #{
-		escaped = True;
-		lu = lu + c;
-		c = sys.stdin.read(1);
-	#}
-	if c == '^': #{
-		reading_word = True;
-	#}
-	if c == '$' and escaped == False: #{
-		lu = lu + c;
-		new_paths = process_biltrans_unit(lu, output_sentences);
-		del output_sentences;
-		output_sentences = new_paths;
-		reading_word = False;
-		lu = '';
-	#}
-	if c != '\\' and escaped == True: #{
-		escaped = False;
-	#}
-	if c.isspace(): #{
-		seen_newline = False;
-		if c == '\n': #{
-			print >> sys.stderr, 'output_sentences: ', len(output_sentences);
-			i = 0;
-			for sentence in output_sentences: #{
-				#print '.[][' + str(lineno) + ' ' + str(i) + ' ' + cur_id +'].[]\t' , output_sentences[sentence];
-				print '.[][' + cur_id + ' ' + str(i) + '].[]\t' , output_sentences[sentence];
-				i = i + 1;
-			#}
-			lineno = lineno + 1;
-
-			output_sentences = {};
-			output_sentences[''] = '';
-			seen_newline = True;
-			cur_id = '';
-
-		elif reading_word == False: #{
-			for sentence in output_sentences: #{
-				output_sentences[sentence] = output_sentences[sentence] + c;
-			#}
-		#}
-	#}
-	if reading_word: #{
-		lu = lu + c;
-	#}
-	if seen_newline and c != '\n': #{
-		cur_id = cur_id + c;
-	#}
-	c = sys.stdin.read(1);
-#}
+while True:
+	ln = sys.stdin.readline()
+	if not ln:
+		break
+	cur_id, sentences = process_line(ln)
+	print('output_sentences:', len(sentences), file=sys.stderr)
+	for i, sent in enumerate(sentences.values()):
+		print('.[][%s %s].[]\t%s' % (cur_id, i, sent))

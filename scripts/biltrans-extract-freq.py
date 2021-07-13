@@ -18,13 +18,9 @@ class Counter(BCC.BiltransCounter):
 	tokenizer = 'biltrans'
 	line_ids = False
 
-	def processs_row(self, frac_count=0):
+	def process_lu(self, sl, tl, idx, cur_sl_row, frac_count=0):
 		global sl_tl
-		for i in range(len(self.am_row)):
-			if self.am_row[i].count('/') > 1:
-				sl = BCC.strip_tags(self.am_row[i], 'sl')
-				tl = BCC.strip_tags(self.dm_row[i], 'tl')
-				sl_tl[sl][tl] += 1
+		sl_tl[sl][tl] += 1
 
 c = Counter()
 c.read_files(sys.argv[1], # File with ambiguous biltrans output
