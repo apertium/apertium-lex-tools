@@ -63,68 +63,49 @@ UString getLemma(UString token) {
 
 void processTaggerOutput(FSTProcessor *bilingual) {
 	UString buffer;
-
-	bool escaped = false;
-	bool in_token = false;
 	UChar32 c;
 	bilingual->setBiltransSurfaceForms(true);
 	InputFile in;
-	while((c = in.get()) != U_EOF) {
-		if (!in_token) {
-			if (c == '^' && !escaped) {
-				in_token = true;
-				buffer += c;
-			} else if (c == '\\' && !escaped) {
-				std::cout << c;
-				escaped = true;
-			} else {
-				std::cout << c;
-				escaped = false;
-			}
-		}
-		else {
-			if (c == '$' && !escaped) {
-				auto sourceTags = parseTags(buffer);
-				auto target = bilingual->biltrans(buffer + "$"_u, true);
-				auto targetTags = parseTags(target);
-				auto targetTrimmed = bilingual->biltransWithoutQueue(buffer + "$"_u, true);
-				auto trimmedTags = parseTags(targetTrimmed);
-				std::vector<UString> newTags;
+  while (!in.eof()) {
+    std::cout << in.readBlank(true);
+    if (in.eof()) {
+      break;
+    }
+    c = in.get();
+    if (c == '^') {
+      buffer = in.readBlock('^', '$');
+      auto sourceTags = parseTags(buffer);
+      auto target = bilingual->biltrans(buffer, true);
+      auto targetTags = parseTags(target);
+      auto targetTrimmed = bilingual->biltransWithoutQueue(buffer, true);
+      auto trimmedTags = parseTags(targetTrimmed);
+      std::vector<UString> newTags;
 
-				for (size_t i = 0; i < sourceTags.size(); i++) {
-					UString sourceTag = sourceTags[i];
-					auto idx_1 = find(targetTags, sourceTag);
-					auto idx_2 = find(trimmedTags, sourceTag);
-					if (idx_1 == idx_2){
-						newTags.push_back(sourceTag);
-					}
-				}
-				std::cout << getLemma(buffer);
-				for (size_t i = 0; i < newTags.size(); i++) {
-					std::cout << '<' << newTags[i] << '>';
-				}
-				targetTrimmed[0] = '/';
-				if (targetTrimmed.size() == 1) {
-					buffer[0] = '@';
-					std::cout << '/' << buffer << '$';
-				} else {
-					auto tokens = StringUtils::split(targetTrimmed, "/"_u);
-					for (auto& token : tokens) {
-						std::cout << token;
-					}
-				}
+      for (size_t i = 0; i < sourceTags.size(); i++) {
+        UString sourceTag = sourceTags[i];
+        auto idx_1 = find(targetTags, sourceTag);
+        auto idx_2 = find(trimmedTags, sourceTag);
+        if (idx_1 == idx_2){
+          newTags.push_back(sourceTag);
+        }
+      }
+      std::cout << getLemma(buffer);
+      for (size_t i = 0; i < newTags.size(); i++) {
+        std::cout << '<' << newTags[i] << '>';
+      }
+      targetTrimmed[0] = '/';
+      if (targetTrimmed.size() == 1) {
+        buffer[0] = '@';
+        std::cout << '/' << buffer;
+      } else {
+        auto tokens = StringUtils::split(targetTrimmed, "/"_u);
+        for (auto& token : tokens) {
+          std::cout << '/' << token;
+        }
+      }
 
-				buffer.clear();
-				in_token = false;
-				escaped = false;
-			} else if (c == '\\' && !escaped) {
-				escaped = true;
-				buffer += c;
-			} else {
-				buffer += c;
-				escaped = false;
-			}
-		}
+      buffer.clear();
+    }
 	}
 }
 
@@ -135,7 +116,7 @@ int main(int argc, char **argv) {
 		exit(-1);
 	}
 
-    LtLocale::tryToSetLocale();
+  LtLocale::tryToSetLocale();
 	FSTProcessor bilingual = loadBilingual(argv[1]);
 	processTaggerOutput(&bilingual);
 }
