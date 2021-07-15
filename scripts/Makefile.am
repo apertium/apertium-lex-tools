@@ -5,4 +5,5 @@ apertium_lex_tools_DATA = \
 	ngram-count-patterns-maxent2.py \
 	merge-ngrams-lambdas.py \
 	lambdas-to-rules.py \
+	common.py \
 	ngrams-to-rules-me.py
