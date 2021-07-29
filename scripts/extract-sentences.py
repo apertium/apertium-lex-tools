@@ -3,23 +3,19 @@
 # -*- encoding: utf-8 -*-
 
 import sys
-import codecs
 import common
 
 
-def ambiguous(bt):  # {
+def ambiguous(bt):
     # legislation<n><sg>/legislación<n><f><sg>/ordenamiento<n><m><sg>
 
     ambig = False
-    for token in bt:  # {
+    for token in bt:
         tls = token['tls']
-        if len(tls) > 1:  # {
+        if len(tls) > 1:
             return True
-        # }
-    # }
 
     return ambig
-# }
 
 
 def extract_sentences(phrase_table_file, biltrans_out_file):
@@ -29,42 +25,39 @@ def extract_sentences(phrase_table_file, biltrans_out_file):
 
     not_ambiguous = []
     with open(phrase_table_file) as phrase_table, open(biltrans_out_file) as biltrans_out:
-        while True:  # {
+        while True:
             try:
                 lineno = lineno + 1
                 pt_line = phrase_table.readline().strip()
                 bt_line = biltrans_out.readline().strip()
 
-                if not bt_line.strip() and not pt_line.strip():  # {
+                if not bt_line.strip() and not pt_line.strip():
                     break
-                elif not bt_line.strip() or not pt_line.strip():  # {
+                elif not bt_line.strip() or not pt_line.strip():
                     continue
 
-                # }
                 row = pt_line.split('|||')
                 bt = common.tokenise_biltrans_line(bt_line.strip())
                 sl = common.tokenise_tagger_line(row[1].strip())
                 tl = common.tokenise_tagger_line(row[0].strip())
 
-                if not ambiguous(bt):  # {
+                if not ambiguous(bt):
                     not_ambiguous.append(str(lineno))
-                    if len(not_ambiguous) >= 10:  # {
+                    if len(not_ambiguous) >= 10:
                         print("not ambiguous:", ' '.join(
                             not_ambiguous), file=sys.stderr)
                         not_ambiguous = []
-                    # }
+
                     continue
-                # }
-                if len(sl) < 2 and len(tl) < 2:  # {
+
+                if len(sl) < 2 and len(tl) < 2:
                     continue
-                # }
 
                 # Check that the number of words in the lexical transfer, and in the phrasetable matches up
-                if len(sl) != len(bt):  # {
+                if len(sl) != len(bt):
                     print("Error in line", lineno,
                           ": len(sl) != len(bt)", file=sys.stderr)
                     continue
-                # }
 
                 # cheking if the alignments are empty
                 if not row[2].strip():
@@ -88,8 +81,6 @@ def extract_sentences(phrase_table_file, biltrans_out_file):
                 total_errors += 1
                 continue
 
-        # }
-
     print('total:', lineno, file=sys.stderr)
     print('valid:', total_valid,
           '(' + str((total_valid/lineno)*100) + '%)', file=sys.stderr)
@@ -98,9 +89,8 @@ def extract_sentences(phrase_table_file, biltrans_out_file):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 3:  # {
+    if len(sys.argv) < 3:
         print('Usage: extact-sentences.py <phrasetable> <biltrans>', file=sys.stderr)
         exit(1)
-    # }
 
     extract_sentences(sys.argv[1], sys.argv[2])
