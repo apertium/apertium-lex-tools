@@ -3,8 +3,6 @@
 # -*- encoding: utf-8 -*-
 
 import sys
-import codecs
-import copy
 import common
 
 # Read the corpus, make a note of all ambiguous words, their frequency and their possible translations
@@ -46,61 +44,52 @@ def ngram_count_patterns(freq_lexicon, candidates):
 
     indexes = {}
     trad_counter = {}
-    for line in open(freq_lexicon, 'r').readlines():  # {
-        if len(line) < 1:  # {
+    for line in open(freq_lexicon, 'r').readlines():
+        if len(line) < 1:
             continue
-        # }
+
         w = int(line.split(' ')[0])
         if w < THRESHOLD:
             continue
 
         row = common.tokenise_tagger_line(line)
         sl = wrap(row[0]).lower()
-        tl = wrap(row[1].strip()).lower()
+        tl = wrap(row[1]).lower()
         if tl[1] == '*':
             tl = tl[:-3] + '$'
 
-        if sl not in sl_tl:  # {
+        if sl not in sl_tl:
             sl_tl[sl] = []
-        # }
-        if sl not in trad_counter:  # {
+        
+        if sl not in trad_counter:
             trad_counter[sl] = 0
-        # }
-        if line.count('@') > 0:  # {
+
+        if line.count('@') > 0:
             sl_tl_defaults[sl] = tl
         sl_tl[sl].append(tl)
         indexes[(sl, tl)] = trad_counter[sl]
         trad_counter[sl] = trad_counter[sl] + 1
-
-        # }
-    # }
 
     cur_sl_row = []
     cur_tl_row = []
     cur_bt_row = []
     cur_al_row = []
 
-    for line in open(candidates, 'r').readlines():  # {
+    for line in open(candidates, 'r').readlines():
         line = line.strip()
-        if line[0] == '-':  # {
-            #		print len(cur_sl_row), len(cur_tl_row), len(cur_bt_row), len(cur_al_row);
-            #		print cur_sl_row;
-            #		print cur_bt_row;
-            #		print cur_tl_row;
-            #		print cur_al_row;
-            #
+        if line[0] == '-':
             # Read the corpus, make a note of all ambiguous words, their frequency and their possible translations
             #
             # sl_tl[sl_word][tl_word] = tl_freq
             i = 0
-            for slword in cur_sl_row:  # {
-                if len(cur_bt_row[i]['tls']) > 1:  # {
-                    for al in cur_al_row:  # {
+            for slword in cur_sl_row:
+                if len(cur_bt_row[i]['tls']) > 1:
+                    for al in cur_al_row:
                         al_sl = int(al.split('-')[1])
                         al_tl = int(al.split('-')[0])
-                        if al_sl != i:  # {
+                        if al_sl != i:
                             continue
-                        # }
+                        
 
                         tlword = wrap(cur_tl_row[al_tl].lower())
                         slword = wrap(slword.lower())
@@ -108,21 +97,20 @@ def ngram_count_patterns(freq_lexicon, candidates):
                         if tlword[1] == '*' or slword[1] == '*':
                             continue
 
-                        if slword not in sl_tl_defaults:  # {
-                            #						print >>sys.stderr, 'WARNING: "' + slword + '" not in sl_tl_defaults, skipping';
+                        if slword not in sl_tl_defaults:
+                            #						print >>sys.stderr, 'WARNING: "' + slword + '" not in sl_tl_defaults, skipping'
                             continue
-                        # }
-                        if (slword, tlword) not in indexes:  # {
-                            #						print >>sys.stderr, 'WARNING: pair (%s, %s) not found in index' % (slword, tlword);
+                        
+                        if (slword, tlword) not in indexes:
+                            #						print >>sys.stderr, 'WARNING: pair (%s, %s) not found in index' % (slword, tlword)
                             continue
-                        # }
-    #					if tlword !=  sl_tl_defaults[slword]: #{
-    #						print >>sys.stderr, '+' , slword , sl_tl_defaults[slword] , tlword;
-    #					else: #{
-    #						print >>sys.stderr, '-' , slword , sl_tl_defaults[slword] , tlword;
-    #					#}
-    #					print >>sys.stderr, cur_sl_row;
-                        for j in range(1, MAX_NGRAMS):  # {
+                        
+    #					if tlword !=  sl_tl_defaults[slword]:
+    #						print >>sys.stderr, '+' , slword , sl_tl_defaults[slword] , tlword
+    #					else:
+    #						print >>sys.stderr, '-' , slword , sl_tl_defaults[slword] , tlword
+    #					print >>sys.stderr, cur_sl_row
+                        for j in range(1, MAX_NGRAMS):
                             #						print >>sys.stderr, cur_sl_row[i] , cur_sl_row[i-j:i+1]
                             #						print >>sys.stderr, cur_sl_row[i] , cur_sl_row[i:i+j+1]
                             #						print >>sys.stderr, cur_sl_row[i] , cur_sl_row[i-j:i+j+1]
@@ -132,147 +120,145 @@ def ngram_count_patterns(freq_lexicon, candidates):
                             roundgram = ' '.join(
                                 map(wrap, cur_sl_row[i-j:i+j+1]))
 
-                            if slword not in ngrams:  # {
+                            if slword not in ngrams:
                                 ngrams[slword] = {}
-                            # }
-                            if pregram not in ngrams[slword]:  # {
+                            
+                            if pregram not in ngrams[slword]:
                                 ngrams[slword][pregram] = {}
-                            # }
-                            if postgram not in ngrams[slword]:  # {
+                            
+                            if postgram not in ngrams[slword]:
                                 ngrams[slword][postgram] = {}
-                            # }
-                            if roundgram not in ngrams[slword]:  # {
+                            
+                            if roundgram not in ngrams[slword]:
                                 ngrams[slword][roundgram] = {}
-                            # }
-                            if tlword not in ngrams[slword][pregram]:  # {
+                            
+                            if tlword not in ngrams[slword][pregram]:
                                 ngrams[slword][pregram][tlword] = 0
-                            # }
-                            if tlword not in ngrams[slword][postgram]:  # {
+                            
+                            if tlword not in ngrams[slword][postgram]:
                                 ngrams[slword][postgram][tlword] = 0
-                            # }
-                            if tlword not in ngrams[slword][roundgram]:  # {
+                            
+                            if tlword not in ngrams[slword][roundgram]:
                                 ngrams[slword][roundgram][tlword] = 0
-                            # }
+                            
 
                             ngrams[slword][pregram][tlword] = ngrams[slword][pregram][tlword] + 1
                             ngrams[slword][postgram][tlword] = ngrams[slword][postgram][tlword] + 1
                             ngrams[slword][roundgram][tlword] = ngrams[slword][roundgram][tlword] + 1
-                        # }
-                        # print ',' , len(ngrams[slword]);
-                        if slword not in meevents:  # {
+                        
+                        # print ',' , len(ngrams[slword])
+                        if slword not in meevents:
                             meevents[slword] = {}
-                        # }
-                        if slword not in meoutcomes:  # {
+                        
+                        if slword not in meoutcomes:
                             meoutcomes[slword] = {}
-                        # }
-                        if event_counter not in meevents:  # {
+                        
+                        if event_counter not in meevents:
                             meevents[slword][event_counter] = []
-                        # }
-                        if event_counter not in meoutcomes[slword]:  # {
+                        
+                        if event_counter not in meoutcomes[slword]:
                             meoutcomes[slword][event_counter] = ''
-                        # }
-                        for ni in ngrams[slword]:  # {
-                            if ni not in features:  # {
+                        
+                        for ni in ngrams[slword]:
+                            if ni not in features:
                                 feature_counter = feature_counter + 1
                                 features[ni] = feature_counter
-                            # }
+                            
                             meevents[slword][event_counter].append(
                                 features[ni])
-                            # meevents[slword][event_counter].append(feat);
+                            # meevents[slword][event_counter].append(feat)
                             meoutcomes[slword][event_counter] = tlword
 
-                        # }
+                        
                         del ngrams
                         ngrams = {}
-                        if len(sl_tl[slword]) < 2:  # {
+                        if len(sl_tl[slword]) < 2:
                             continue
-                        # }
-                        for event in meevents[slword]:  # {
+                        
+                        for event in meevents[slword]:
                             outline = str(
                                 indexes[(slword, meoutcomes[slword][event])]) + ' # '
-                            for j in range(0,  len(sl_tl[slword])):  # {
-                                for feature in meevents[slword][event]:  # {
+                            for j in range(0,  len(sl_tl[slword])):
+                                for feature in meevents[slword][event]:
                                     outline = outline + \
                                         str(feature) + ':' + str(j) + ' '
-                                # }
+                                
                                 outline = outline + ' # '
-                            # }
+                            
                             print(slword, '\t', len(
                                 sl_tl[slword]), '\t', outline)
-                        # }
+                        
                         del meevents
                         del meoutcomes
                         meevents = {}
                         meoutcomes = {}
 
-    #					for f in features: #{
-    #						print >>sys.stderr, features[f] , f;
-    #					#}
+    #					for f in features:
+    #						print >>sys.stderr, features[f] , f
 
-                    # }
+                    
 
-    #				for j in range(0, MAX_NGRAMS): #{
-    #					print cur_sl_row[i-j:i+1];
-    #					print cur_sl_row[i:i+j];
-    #				#}
-                    # print ngrams[slword];
-                # }
+    #				for j in range(0, MAX_NGRAMS):
+    #					print cur_sl_row[i-j:i+1]
+    #					print cur_sl_row[i:i+j]
+                    # print ngrams[slword]
+                
                 i = i + 1
 
-            # }
+            
 
             cur_line = 0
             event_counter = event_counter + 1
-            # print line;
+            # print line
             continue
-        # }
+        
 
         line = line.split('\t')[1]
         line = line.strip()
 
-        if cur_line == 0:  # {
+        if cur_line == 0:
             cur_sl_row = common.tokenise_tagger_line(line)
-        elif cur_line == 1:  # {
+        elif cur_line == 1:
             cur_bt_row = common.tokenise_biltrans_line(line)
-        elif cur_line == 2:  # {
+        elif cur_line == 2:
             cur_tl_row = common.tokenise_tagger_line(line)
-        elif cur_line == 3:  # {
+        elif cur_line == 3:
             cur_al_row = line.split(' ')
-        # }
+        
 
         cur_line = cur_line + 1
-    # }
+    
 
-    for feature in features:  # {
+    for feature in features:
         print(features[feature], '\t', feature, file=sys.stderr)
-    # }
+    
 
     # exit(1)
     return
 
-    for slword in meevents:  # {
-        if len(sl_tl[slword]) < 2:  # {
-            continue
-        # }
-        for event in meevents[slword]:  # {
-            outline = str(indexes[(slword, meoutcomes[slword][event])]) + ' # '
-            for j in range(0,  len(sl_tl[slword])):  # {
-                for feature in meevents[slword][event]:  # {
-                    outline = outline + str(feature) + ':' + str(j) + ' '
-                # }
-                outline = outline + ' # '
-            # }
-            print(slword, '\t', len(sl_tl[slword]), '\t', outline)
-        # }
-    # }
+    # for slword in meevents:
+    #     if len(sl_tl[slword]) < 2:
+    #         continue
+        
+    #     for event in meevents[slword]:
+    #         outline = str(indexes[(slword, meoutcomes[slword][event])]) + ' # '
+    #         for j in range(0,  len(sl_tl[slword])):
+    #             for feature in meevents[slword][event]:
+    #                 outline = outline + str(feature) + ':' + str(j) + ' '
+                
+    #             outline = outline + ' # '
+            
+    #         print(slword, '\t', len(sl_tl[slword]), '\t', outline)
+        
+    
 
 
 if __name__ == '__main__':
-    if len(sys.argv) not in [3, 4]:  # {
+    if len(sys.argv) not in [3, 4]:
         print(
-            'Usage: count-patterns.py <lex> <extracted> [threshold]', file=sys.stderr)
+            'Usage: count-patterns.py <lex> <candidates> [threshold]', file=sys.stderr)
         exit(1)
-    # }
+    
 
     if len(sys.argv) == 4:
         THRESHOLD = int(sys.argv[3])
