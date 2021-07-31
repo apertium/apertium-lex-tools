@@ -47,7 +47,7 @@ class BiltransCounter:
 		self.dm_line = None
 		self.dm_row = None
 		self.dm_id = None
-		self.am_linenum = 0
+		self.dm_linenum = 0
 
 		self.clear_ngrams()
 
@@ -79,6 +79,7 @@ class BiltransCounter:
 			self.dm_id, self.dm_row = None, []
 			self.reading = False
 			return
+		ls = self.dm_line.split('\t')
 		if self.line_ids:
 			self.dm_id = int(self.dm_line.split('.[][')[1].split()[0])
 		if self.tokenizer == 'regex':
@@ -93,13 +94,13 @@ class BiltransCounter:
 	def check_rows(self):
 		if len(self.am_row) != len(self.dm_row):
 			print('Mismatch in number of LUs between analysis and training', file=sys.stderr)
-			print('\t' + am_line, file=sys.stderr)
-			print('\t' + dm_line, file=sys.stderr)
+			print('\t' + self.am_line, file=sys.stderr)
+			print('\t' + self.dm_line, file=sys.stderr)
 			print('...skipping', file=sys.stderr)
 			return False
 		return True
 
-	def read_files_multi_dm(am_fname, dm_fname):
+	def read_files_multi_dm(self, am_fname, dm_fname):
 		self.next_dm_line()
 		while self.reading:
 			self.next_am_line()
@@ -113,7 +114,7 @@ class BiltransCounter:
 			if self.am_linenum % 1000 == 0:
 				print('=> %d SL and %d TL lines read' % (self.am_linenum, self.dm_linenum), file=sys.stderr)
 
-	def read_files(am_fname, dm_fname):
+	def read_files(self, am_fname, dm_fname):
 		self.am_file = open(am_fname)
 		self.dm_file = open(dm_fname)
 		self.reading = True
