@@ -6,4 +6,10 @@ apertium_lex_tools_DATA = \
 	merge-ngrams-lambdas.py \
 	lambdas-to-rules.py \
 	common.py \
-	ngrams-to-rules-me.py
+	ngrams-to-rules-me.py \
+	biltrans-extract-frac-freq.py \
+	extract-alig-lrx.py \
+	biltrans-count-patterns-ngrams.py \
+	ngram-pruning-frac.py \
+	ngrams-to-rules.py \
+	biltrans_count_common.py
