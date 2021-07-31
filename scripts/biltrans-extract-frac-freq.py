@@ -5,6 +5,7 @@
 import sys
 from collections import defaultdict
 import biltrans_count_common as BCC
+import common
 
 # Input:
 #        a) Biltrans output
