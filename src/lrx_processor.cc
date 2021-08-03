@@ -15,11 +15,14 @@
  * along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <weight.h>
+#include <binary_header.h>
 #include <lrx_processor.h>
 #include <iostream>
 #include <algorithm>
 #include <lttoolbox/compression.h>
+#include <lttoolbox/alphabet.h>
+#include <cstring>
+#include <lttoolbox/mmap.h>
 
 using namespace std;
 
@@ -45,22 +48,15 @@ LRXProcessor::itow(int i)
 
 
 LRXProcessor::LRXProcessor()
-{
-
-  initial_state = new State();
-
-  lineno = 1; // Used for rule tracing
-  pos = 0;
-
-  traceMode = false;
-  debugMode = false;
-  outOfWord = true;
-  nullFlush = false;
-}
+  : alphabet(&str_write), initial_state(new State())
+{}
 
 LRXProcessor::~LRXProcessor()
 {
   delete initial_state;
+  if (mmapping) {
+    munmap(mmap_pointer, mmap_len);
+  }
 }
 
 void
@@ -84,60 +80,119 @@ LRXProcessor::setDebugMode(bool m)
 void
 LRXProcessor::load(FILE *in)
 {
-  alphabet.read(in);
+  bool mmap = false;
+  fpos_t pos;
+  if (fgetpos(in, &pos) == 0) {
+    char header[4]{};
+    if (fread_unlocked(header, 1, 4, in) == 4 &&
+        strncmp(header, HEADER_LRX, 4) == 0) {
+      auto features = read_le_64(in);
+      if (features >= LRX_UNKNOWN) {
+        throw std::runtime_error("Rule file has features that are unknown to this version of apertium-lex-tools - upgrade!");
+      }
+      mmap = features & LRX_MMAP;
+    } else {
+      fsetpos(in, &pos);
+    }
+  }
+
+  if(mmap) {
+    fgetpos(in, &pos);
+    rewind(in);
+    mmapping = mmap_file(in, mmap_pointer, mmap_len);
+    if (mmapping) {
+      void* ptr = mmap_pointer + 12;
+      ptr = str_write.init(ptr);
+
+      ptr = alphabet.init(ptr);
+
+      uint64_t recognizer_count = reinterpret_cast<uint64_t*>(ptr)[0];
+      ptr += sizeof(uint64_t);
+      for (uint64_t i = 0; i < recognizer_count; i++) {
+        StringRef tn = reinterpret_cast<StringRef*>(ptr)[0];
+        ptr += sizeof(StringRef);
+        UString name = UString{str_write.get(tn)};
+        ptr = recognisers[name].init(ptr);
+      }
+
+      ptr = transducer.init(ptr);
+
+      uint64_t weight_count = reinterpret_cast<uint64_t*>(ptr)[0];
+      ptr += sizeof(uint64_t);
+      double* weight_list = reinterpret_cast<double*>(ptr);
+      for (uint64_t i = 0; i < weight_count; i++) {
+        UString sid = "<"_u + itow(i + 1) + ">"_u;
+        weights[sid] = weight_list[i];
+      }
+    } else {
+      fsetpos(in, &pos);
+
+      str_write.read(in);
+
+      alphabet.read(in, true);
+
+      uint64_t recognizer_count = read_le_64(in);
+      for (uint64_t i = 0; i < recognizer_count; i++) {
+        uint32_t s = read_le_32(in);
+        uint32_t c = read_le_32(in);
+        UString name = UString{str_write.get(s, c)};
+        recognisers[name].read(in);
+      }
+
+      transducer.read(in);
+
+      uint64_t weight_count = read_le_double(in);
+      for (uint64_t i = 0; i < weight_count; i++) {
+        UString sid = "<"_u + itow(i + 1) + ">"_u;
+        weights[sid] = read_le_double(in);
+      }
+    }
+  } else {
+    Alphabet temp_alpha;
+    temp_alpha.read(in);
+    fsetpos(in, &pos);
+    alphabet.read(in, false);
+
+    int len = Compression::multibyte_read(in);
+
+    while(len > 0) {
+      UString name = Compression::string_read(in);
+      recognisers[name].read_compressed(in, temp_alpha);
+      if(debugMode) {
+        //cerr << "Recogniser: " << name << ", [finals: " << recognisers[name].getFinals().size() << "]\n";
+      }
+      len--;
+    }
+
+    if(debugMode) {
+      cerr << "recognisers: " << recognisers.size() << endl;
+    }
+
+    UString name = Compression::string_read(in);
+
+    transducer.read_compressed(in, temp_alpha);
+
+    // Now read in weights
+    weight record;
+    while(fread(&record, sizeof(weight), 1, in)) {
+      weight_from_le(record);
+      UString sid = "<"_u + itow(record.id) + ">"_u;
+      weights[sid] = record.pisu;
+    }
+  }
+
   any_char      = alphabet(LRX_PROCESSOR_TAG_ANY_CHAR);
   any_tag       = alphabet(LRX_PROCESSOR_TAG_ANY_TAG);
   any_upper     = alphabet(LRX_PROCESSOR_TAG_ANY_UPPER);
   any_lower     = alphabet(LRX_PROCESSOR_TAG_ANY_LOWER);
   word_boundary = alphabet(LRX_PROCESSOR_TAG_WORD_BOUNDARY);
-
-  int len = Compression::multibyte_read(in);
-
-  while(len > 0)
-  {
-    UString name = Compression::string_read(in);
-    recognisers[name].read(in, alphabet);
-    if(debugMode)
-    {
-      cerr << "Recogniser: " << name << ", [finals: " << recognisers[name].getFinals().size() << "]\n";
-    }
-    len--;
-  }
-
-  if(debugMode)
-  {
-    cerr << "recognisers: " << recognisers.size() << endl;
-  }
-
-  UString name = Compression::string_read(in);
-
-  transducer.read(in, alphabet);
-
-  // Now read in weights
-  weight record;
-  while(fread(&record, sizeof(weight), 1, in))
-  {
-    weight_from_le(record);
-    UString sid = "<"_u + itow(record.id) + ">"_u;
-    weights[sid] = record.pisu;
-
-    /*
-    if(debugMode)
-    {
-      cerr << sid << " " << record.id << " weight(" << record.pisu << ")\n";
-    }
-    */
-  }
-
-  return;
 }
 
 void
 LRXProcessor::init()
 {
-  initial_state->init(transducer.getInitial());
-
-  anfinals.insert(transducer.getFinals().begin(), transducer.getFinals().end());
+  anfinals.insert(&transducer);
+  initial_state->init(anfinals);
 
   escaped_chars.insert('[');
   escaped_chars.insert(']');
@@ -162,12 +217,11 @@ LRXProcessor::recognisePattern(const UString lu, const UString op)
     return false;
   }
 
+  set<TransducerExe*> exes;
+  exes.insert(&recognisers[op]);
   State *first_state = new State();
-  first_state->init(recognisers[op].getInitial());
+  first_state->init(exes);
   State cur = *first_state;
-
-  map<Node *, double> end_states;
-  end_states.insert(recognisers[op].getFinals().begin(), recognisers[op].getFinals().end());
 
   bool readingTag = false;
   UString tag;
@@ -249,12 +303,7 @@ LRXProcessor::recognisePattern(const UString lu, const UString op)
     cerr << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
   }
 */
-  if(cur.isFinal(end_states))
-  {
-    return true;
-  }
-
-  return false;
+  return cur.isFinal(exes);
 }
 
 void

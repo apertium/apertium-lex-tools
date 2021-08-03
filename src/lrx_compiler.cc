@@ -16,12 +16,11 @@
  */
 
 #include <lrx_compiler.h>
-#include <weight.h>
 #include <lttoolbox/string_utils.h>
 #include <lttoolbox/xml_parse_util.h>
-#include <lttoolbox/compression.h>
 #include <iostream>
 #include <limits>
+#include <binary_header.h>
 
 using namespace std;
 
@@ -908,32 +907,45 @@ LRXCompiler::procSeq()
 void
 LRXCompiler::write(FILE *fst)
 {
-  alphabet.write(fst);
+  fwrite_unlocked(HEADER_LRX, 1, 4, fst);
+  uint64_t features = 0;
+  features |= LRX_MMAP;
+  write_le_64(fst, features);
 
-  Compression::multibyte_write(recognisers.size(), fst);
-  for(auto& it : recognisers)
-  {
-    Compression::string_write(it.first, fst);
+  StringWriter sw;
+  for (auto& it : alphabet.getTags()) {
+    sw.add(it);
+  }
+  for (auto& it : recognisers) {
+    sw.add(it.first);
+  }
+  sw.write(fst);
+
+  alphabet.write_mmap(fst, sw);
+
+  write_le_64(fst, recognisers.size());
+  for (auto& it : recognisers) {
+    StringRef loc = sw.add(it.first);
+    write_le_32(fst, loc.start);
+    write_le_32(fst, loc.count);
+    it.second.write_mmap(fst, alphabet);
     debug("+ %d => %S\n", it.second.size(), it.first.c_str());
     if (debugMode) {
       it.second.show(alphabet, debug_output, 0, false);
     }
-    it.second.write(fst);
   }
 
-  Compression::string_write("main"_u, fst);
   if(outputGraph)
   {
     transducer.show(alphabet, debug_output, 0, false);
   }
-  transducer.write(fst);
+  transducer.write_mmap(fst, alphabet);
 
+  write_le_64(fst, weights.size());
   for(auto& it : weights)
   {
     debug("%.4f %d\n", it.second, it.first);
-    weight record{it.first, "", it.second};
-    weight_to_le(record);
-    fwrite((void *)&record, 1, sizeof(weight), fst);
+    write_le_double(fst, it.second);
   }
 
   if(!outputGraph)
