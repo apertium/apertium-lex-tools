@@ -54,8 +54,6 @@ AC_CHECK_FUNCS([setlocale strdup])
 
 AC_CHECK_DECLS([fread_unlocked, fwrite_unlocked, fgetc_unlocked, fputc_unlocked, fputs_unlocked])
 
-AC_CHECK_HEADERS([string_view])
-
 CPPFLAGS="$CPPFLAGS $CFLAGS $LTTOOLBOX_CFLAGS $LIBXML_CFLAGS $ICU_CFLAGS"
 LIBS="$LIBS $LTTOOLBOX_LIBS $LIBXML_LIBS $ICU_LIBS"
 
