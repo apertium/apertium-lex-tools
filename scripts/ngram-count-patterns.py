@@ -24,9 +24,8 @@ def wrap(x):
     return '^' + x + '$'
 
 
-def ngram_count_patterns(freq_lexicon, candidates, crisphold):
+def ngram_count_patterns(freq_lexicon, candidates, crisphold, max_rules):
     MAX_NGRAMS = 2
-
     cur_line = 0
 
     sl_tl_defaults = {}
@@ -145,12 +144,14 @@ def ngram_count_patterns(freq_lexicon, candidates, crisphold):
         cur_line = cur_line + 1
 
     for sl in ngrams:
-
         for ngram in ngrams[sl]:
             total = 0
             max_freq = -1
             current_tl = ''
-            for tl in ngrams[sl][ngram]:
+            newtl = sorted(ngrams[sl][ngram], key=lambda x: ngrams[sl][ngram][x])
+            newtl.reverse()
+            newtl = newtl[:max_rules]
+            for tl in newtl:
                 if ngrams[sl][ngram][tl] > max_freq:
                     max_freq = ngrams[sl][ngram][tl]
                     current_tl = tl
@@ -173,7 +174,7 @@ def ngram_count_patterns(freq_lexicon, candidates, crisphold):
             # It would be "2" in this case: the alternative is seen twice as often as
             # the default.
 
-            for tl in ngrams[sl][ngram]:
+            for tl in newtl:
                 crispiness = 0.0
                 default = sl_tl_defaults[sl]
                 alt_crisp = float(ngrams[sl][ngram][tl]) / float(total)
@@ -197,9 +198,9 @@ def ngram_count_patterns(freq_lexicon, candidates, crisphold):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 4:
+    if len(sys.argv) < 5:
         print(
-            'Usage: count-patterns.py <lex> <candidates> <crispiness threshold>', file=sys.stderr)
+            'Usage: count-patterns.py <lex> <candidates> <crispiness threshold> <max_rules>', file=sys.stderr)
         exit(1)
 
-    ngram_count_patterns(sys.argv[1], sys.argv[2], sys.argv[3])
+    ngram_count_patterns(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
