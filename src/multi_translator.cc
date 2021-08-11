@@ -38,8 +38,8 @@ BiltransToken MultiTranslator::parseBiltransToken(UString bt) {
 
 	token.sourceToken = parseTaggerToken(tokens[0]);
 
-	for (auto& t : tokens) {
-		token.targetTokens.push_back(parseTaggerToken(t));
+	for (size_t i = 1; i < tokens.size(); i++){
+		token.targetTokens.push_back(parseTaggerToken(tokens[i]));
 	}
 	return token;
 
@@ -144,7 +144,7 @@ BiltransToken MultiTranslator::getTrimmedToken(UString source)
 	//bool sourceTrimmed = false;
 	for(size_t i = 0; i < ttoken.sourceToken.tags.size(); ++i) {
 		UString tag = ttoken.sourceToken.tags[i];
-		if (find(ttoken.targetTokens[0].tags, tag) ==
+		if ((int)i ==
 			find(ftoken.targetTokens[0].tags, tag)) {
 			newTags.push_back(tag);
 		}
