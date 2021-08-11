@@ -624,7 +624,7 @@ LRXProcessor::processFlush(UFILE *output,
             std::string op = (m.op == Select ? "SELECT" : "REMOVE");
             cerr << lineno << ":" << op << ":" << m.weight;
             cerr << ":" << sl[spos] << ":" << ti_keep.size();
-            cerr << ":" << m.ti << endl;
+            cerr << ":" << *m.ti << endl;
           }
           // We have to keep track of translations that have been removed so
           // that we don't end up adding back a translation that was removed.
