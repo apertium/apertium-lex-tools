@@ -8,14 +8,11 @@ import common
 
 def ambiguous(bt):
     # legislation<n><sg>/legislación<n><f><sg>/ordenamiento<n><m><sg>
-
-    ambig = False
     for token in bt:
-        tls = token['tls']
-        if len(tls) > 1:
+        if len(token['tls']) > 1:
             return True
 
-    return ambig
+    return False
 
 
 def extract_sentences(phrase_table_file, biltrans_out_file):
