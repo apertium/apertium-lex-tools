@@ -19,11 +19,6 @@ import common
 # 5 	0-0 4-2 5-3 8-1 9-5 10-6 12-7 13-8 14-9 15-10
 # -------------------------------------------------------------------------------
 
-
-def wrap(x):
-    return '^' + x + '$'
-
-
 def ngram_count_patterns(freq_lexicon, candidates, crisphold, max_rules):
     MAX_NGRAMS = 2
     cur_line = 0
@@ -41,8 +36,8 @@ def ngram_count_patterns(freq_lexicon, candidates, crisphold, max_rules):
             continue
 
         row = common.tokenise_tagger_line(line)
-        sl = wrap(row[0])
-        tl = wrap(row[1])
+        sl = common.wrap(row[0])
+        tl = common.wrap(row[1])
         if tl[1] == '*':
             tl = tl[:-3] + '$'
         if line.count('@') > 0:
@@ -81,19 +76,18 @@ def ngram_count_patterns(freq_lexicon, candidates, crisphold, max_rules):
                         if al_sl != i:
                             continue
 
-                        tlword = wrap(cur_tl_row[al_tl])
-                        slword = wrap(slword)
+                        tlword = common.wrap(cur_tl_row[al_tl])
+                        slword = common.wrap(slword)
 
                         if slword not in sl_tl_defaults:
                             print('!', file=sys.stderr)
                             continue
 
                         for j in range(1, MAX_NGRAMS):
-
-                            pregram = ' '.join(map(wrap, cur_sl_row[i-j:i+1]))
-                            postgram = ' '.join(map(wrap, cur_sl_row[i:i+j+1]))
+                            pregram = ' '.join(map(common.wrap, cur_sl_row[i-j:i+1]))
+                            postgram = ' '.join(map(common.wrap, cur_sl_row[i:i+j+1]))
                             roundgram = ' '.join(
-                                map(wrap, cur_sl_row[i-j:i+j+1]))
+                                map(common.wrap, cur_sl_row[i-j:i+j+1]))
 
                             if slword not in ngrams:
                                 ngrams[slword] = {}
@@ -119,10 +113,6 @@ def ngram_count_patterns(freq_lexicon, candidates, crisphold, max_rules):
                             ngrams[slword][pregram][tlword] = ngrams[slword][pregram][tlword] + 1
                             ngrams[slword][postgram][tlword] = ngrams[slword][postgram][tlword] + 1
                             ngrams[slword][roundgram][tlword] = ngrams[slword][roundgram][tlword] + 1
-
-    #				for j in range(0, MAX_NGRAMS):
-    #					print cur_sl_row[i-j:i+1]
-    #					print cur_sl_row[i:i+j]
 
                 i = i + 1
 

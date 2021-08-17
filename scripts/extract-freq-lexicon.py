@@ -20,25 +20,17 @@ import traceback
 # 5 	0-0 4-2 5-3 8-1 9-5 10-6 12-7 13-8 14-9 15-10
 # -------------------------------------------------------------------------------
 
-
-def wrap(x):
-    return '^' + x + '$'
-
-
 def extract_freq_lexicon(canditates):
-    # MAX_NGRAMS = 3
 
     cur_line = 0
     lineno = 0
     sl_tl = {}
-    # ngrams = {}
 
     cur_sl_row = []
     cur_tl_row = []
     cur_bt_row = []
     cur_al_row = []
 
-    # for line in open(sys.argv[1]).readlines():
     with open(canditates) as infile:
         for line in infile:
             line = line.strip()
@@ -130,10 +122,10 @@ def extract_freq_lexicon(canditates):
                 continue
 
             if first:
-                print(sl_tl[sl][tl], wrap(sl), wrap(tl), '@')
+                print(sl_tl[sl][tl], common.wrap(sl), common.wrap(tl), '@')
                 first = False
             else:
-                print(sl_tl[sl][tl], wrap(sl), wrap(tl))
+                print(sl_tl[sl][tl], common.wrap(sl), common.wrap(tl))
 
 
 if __name__ == '__main__':
