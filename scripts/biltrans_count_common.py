@@ -204,6 +204,7 @@ def read_frequencies(fname):
             if not line:
                 continue
             row = line.split(' ')
+            fr = float(row[0])
             sl = row[1].strip()
             tl = row[2].strip()
             indexes[(sl, tl)] = trad_counter[sl]
@@ -213,6 +214,7 @@ def read_frequencies(fname):
                 if float(row[0]) == 0.0:
                     print(
                         '!!! Prolly something went wrong here, the default has freq of 0.0', file=sys.stderr)
+                else:
                     print('    %s => %s = %.10f' %
                           (sl, tl, fr), file=sys.stderr)
             else:
