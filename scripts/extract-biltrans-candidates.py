@@ -47,21 +47,6 @@ def pos_equal(s, t):
 
 	return spos == tpos;
 
-
-def ambiguous(bt): #{
-	# legislation<n><sg>/legislación<n><f><sg>/ordenamiento<n><m><sg>
-
-	ambig = False;
-	for token in bt: #{
-		tls = token['tls']
-		if len(tls) > 1: #{
-			return True;
-		#}
-	#}
-
-	return ambig;
-#}
-
 reading = True;
 lineno = 0;
 total_valid = 0;
@@ -82,7 +67,7 @@ while reading: #{
 		alignments = row[2].strip();
 		bt = common.tokenise_biltrans_line(bt_line);
 
-		if not ambiguous(bt): #{
+		if not common.ambiguous(bt): #{
 			continue;
 		#}
 		if len(sl) < 2 and len(tl) < 2: #{

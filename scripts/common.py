@@ -7,6 +7,15 @@ import re
 import sys
 
 re_start = re.compile('(^[^\^]*)');
+
+def ambiguous(bt):
+    # legislation<n><sg>/legislación<n><f><sg>/ordenamiento<n><m><sg>
+    for token in bt:
+        if len(token['tls']) > 1:
+            return True
+
+    return False
+	
 def wrap (x):
 	return '^' + x + '$'
 
