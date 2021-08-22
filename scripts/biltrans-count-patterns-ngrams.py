@@ -34,10 +34,8 @@ class Counter(BCC.BiltransCounter):
     count_ngrams = True
     max_ngrams = 3
     
-def biltrans_count_patterns_ngrams(lex_freq, biltrans_ambig, biltrans_annotated, crisphold=3.0):
+def biltrans_count_patterns_ngrams(biltrans_ambig, biltrans_annotated, crisphold=3.0):
     # First read in the frequency defaults
-
-    BCC.read_frequencies(lex_freq)
 
     print('Reading...', file=sys.stderr)
     sys.stderr.flush()
@@ -56,12 +54,12 @@ def biltrans_count_patterns_ngrams(lex_freq, biltrans_ambig, biltrans_annotated,
     print('\n', file=sys.stderr)
 
 if __name__ == '__main__':
-    if len(sys.argv) < 4:
-        print('Usage: biltrans-count-patterns-ngrams.py <lex_freq> <biltrans_ambig> <biltrans_annotated> [crisphold]', file=sys.stderr)
+    if len(sys.argv) < 3:
+        print('Usage: biltrans-count-patterns-ngrams.py <biltrans_ambig> <biltrans_annotated> [crisphold]', file=sys.stderr)
         exit(1)
     
-    if len(sys.argv) == 5:
-        print('crisp:', sys.argv[4], file=sys.stderr)
-        biltrans_count_patterns_ngrams(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
-    else:
+    if len(sys.argv) == 4:
+        print('crisp:', sys.argv[3], file=sys.stderr)
         biltrans_count_patterns_ngrams(sys.argv[1], sys.argv[2], sys.argv[3])
+    else:
+        biltrans_count_patterns_ngrams(sys.argv[1], sys.argv[2])

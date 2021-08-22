@@ -4,6 +4,8 @@
 
 import sys
 import common
+import biltrans_count_common as BCC
+
 # Input:
 
 # 0.6000015452	k<post> bukatu<vblex> ari izan<vbper>	bukatu<vblex>	acabar<vblex>
@@ -20,36 +22,14 @@ import common
 def ngram_pruning_frac(lex_freq, ngrams_file, crisphold=3.0):
     cur_line = 0
     only_max = True
-    #only_max = False;
 
-    sl_tl_defaults = {}
-    sl_tl = {}
     ngrams = {}
 
     # First read in the frequency defaults
-
-    for line in open(lex_freq).readlines():
-        if len(line) < 1:
-            continue
-
-        row = common.tokenize_tagger_line(line)
-        sl = row[0]
-        tl = row[1]
-        fr = float(line.split(' ')[0])
-        if line.count('@') and fr == 0.0:
-            print('!!! Prolly something went wrong here, the default has a freq of 0.0', file=sys.stderr)
-            print('    %s => %s = %.10f' % (sl, tl, fr), file=sys.stderr)
-
-        if line.count('@') > 0:
-            print('default:', sl, tl, file=sys.stderr)
-            sl_tl_defaults[sl] = tl
-        else:
-            sl_tl[sl] = tl
-
+    _, sl_tl_defaults, _ = BCC.read_frequencies(lex_freq)
 
     max_crispiness = 0.0
     print('Reading...', file=sys.stderr)
-    sys.stderr.flush()
 
     # Load counts from cached file
 
