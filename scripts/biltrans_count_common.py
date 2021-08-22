@@ -203,15 +203,15 @@ def read_frequencies(fname):
             line = line_.strip()
             if not line:
                 continue
-            row = line.split(' ')
-            fr = float(row[0])
-            sl = row[1].strip()
-            tl = row[2].strip()
+            row = common.tokenize_tagger_line(line)
+            sl = row[0]
+            tl = row[1]
+            fr = float(line.split(' ')[0])
             indexes[(sl, tl)] = trad_counter[sl]
             trad_counter[sl] += 1
             if '@' in line:
                 sl_tl_defaults[sl] = tl
-                if float(row[0]) == 0.0:
+                if fr == 0.0:
                     print(
                         '!!! Prolly something went wrong here, the default has freq of 0.0', file=sys.stderr)
                 else:
