@@ -1,0 +1,7 @@
+<rules>
+  <rule weight="2.0">
+    <match tags="*.cmp">
+      <remove contains="#"/>
+    </match>
+  </rule>
+</rules>

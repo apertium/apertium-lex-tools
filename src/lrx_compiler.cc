@@ -49,6 +49,7 @@ UString const LRXCompiler::LRX_COMPILER_NAME_ATTR       = "n"_u;
 UString const LRXCompiler::LRX_COMPILER_FROM_ATTR       = "from"_u;
 UString const LRXCompiler::LRX_COMPILER_UPTO_ATTR       = "upto"_u;
 
+UString const LRXCompiler::LRX_COMPILER_TYPE_MATCH      = "match"_u;
 UString const LRXCompiler::LRX_COMPILER_TYPE_SELECT     = "select"_u;
 UString const LRXCompiler::LRX_COMPILER_TYPE_REMOVE     = "remove"_u;
 UString const LRXCompiler::LRX_COMPILER_TYPE_SKIP       = "skip"_u;
@@ -410,151 +411,134 @@ LRXCompiler::procDefSeq()
 }
 
 
-void
-LRXCompiler::procMatch()
+int add_loop(Transducer* t, int state, int32_t sym)
 {
-  // These are mutually exclusive
-  UString lemma = this->attrib(LRX_COMPILER_LEMMA_ATTR, "*"_u);
-  UString contains = this->attrib(LRX_COMPILER_SUFFIX_ATTR);
-  UString suffix = this->attrib(LRX_COMPILER_CONTAINS_ATTR);
-  UString _case = this->attrib(LRX_COMPILER_CASE_ATTR); // This could potentially be non-exclusive
+  state = t->insertSingleTransduction(sym, state);
+  t->linkStates(state, state, sym);
+  return state;
+}
 
-  // This is currently disabled: Future use
-  UString surface = this->attrib(LRX_COMPILER_SURFACE_ATTR);
+int add_str(Transducer* t, int state, Alphabet& alpha, const UString& s)
+{
+  for (auto& c : s) {
+    state = t->insertSingleTransduction(alpha(c, 0), state);
+  }
+  return state;
+}
+
+
+int
+LRXCompiler::compileSpecifier(const UString& type, Transducer* t, int state,
+                              UString* key)
+{
+  UString lemma = this->attrib(LRX_COMPILER_LEMMA_ATTR, "*"_u);
+  UString suffix = this->attrib(LRX_COMPILER_SUFFIX_ATTR);
+  UString contains = this->attrib(LRX_COMPILER_CONTAINS_ATTR);
+  UString _case = this->attrib(LRX_COMPILER_CASE_ATTR);
+  // case could in principle be non-exclusive with the others
+
+  if ((lemma != "*"_u ? 1 : 0) + (suffix.empty() ? 0 : 1) +
+      (contains.empty() ? 0 : 1) + (_case.empty() ? 0 : 1) > 1) {
+    error("Only 1 of lemma=, suffix=, contains=, case= is supported on a single element.");
+  }
+
+  // for future use
+  //UString surface = this->attrib(LRX_COMPILER_SURFACE_ATTR);
 
   UString tags = this->attrib(LRX_COMPILER_TAGS_ATTR, "*"_u);
 
-  if(!surface.empty())
-  {
-    debug("      match: %S\n", surface.c_str());
+  debug("      %S: [%S, %S, %S, %S] %S\n", type.c_str(), lemma.c_str(), suffix.c_str(), contains.c_str(), _case.c_str(), tags.c_str());
 
-    for(auto& it : surface)
-    {
-      currentState = transducer.insertSingleTransduction(alphabet(it, 0), currentState);
+  if (!_case.empty()) {
+    for (auto& c : _case) {
+      if (u_isupper(c)) {
+        state = add_loop(t, state, alphabet(any_upper, 0));
+        if (key) {
+          *key = *key + "<ANY_UPPER>"_u;
+          currentState = transducer.insertSingleTransduction(alphabet(0, any_upper), currentState);
+        }
+      } else {
+        state = add_loop(t, state, alphabet(any_lower, 0));
+        if (key) {
+          *key = *key + "<ANY_LOWER>"_u;
+          currentState = transducer.insertSingleTransduction(alphabet(0, any_lower), currentState);
+        }
+      }
+    }
+  } else if (!suffix.empty()) {
+    state = add_loop(t, state, alphabet(any_char, 0));
+    state = add_str(t, state, alphabet, suffix);
+    if (key) {
+      *key = *key + "<ANY_CHAR>"_u;
+      *key = *key + suffix;
+      currentState = transducer.insertSingleTransduction(alphabet(0, any_char), currentState);
+      for (auto& c : suffix) {
+        currentState = transducer.insertSingleTransduction(alphabet(0, c), currentState);
+      }
+    }
+  } else if (!contains.empty()) {
+    state = add_loop(t, state, alphabet(any_char, 0));
+    state = add_str(t, state, alphabet, contains);
+    state = add_loop(t, state, alphabet(any_char, 0));
+    if (key) {
+      *key = *key + "<ANY_CHAR>"_u;
+      *key = *key + contains;
+      *key = *key + "<ANY_CHAR>"_u;
+      currentState = transducer.insertSingleTransduction(alphabet(0, any_char), currentState);
+      for (auto& c : contains) {
+        currentState = transducer.insertSingleTransduction(alphabet(0, c), currentState);
+      }
+      currentState = transducer.insertSingleTransduction(alphabet(0, any_char), currentState);
+    }
+  } else if (lemma == "*"_u) {
+    state = add_loop(t, state, alphabet(any_char, 0));
+    if (key) {
+      *key = *key + "<ANY_CHAR>"_u;
+      currentState = transducer.insertSingleTransduction(alphabet(0, any_char), currentState);
+    }
+  } else {
+    state = add_str(t, state, alphabet, lemma);
+    if (key) {
+      *key = *key + lemma;
+      for (auto& c : lemma) {
+        currentState = transducer.insertSingleTransduction(alphabet(0, c), currentState);
+      }
     }
   }
-  else
-  {
-    debug("      match: [%S, %S, %S, %S] %S\n", lemma.c_str(), suffix.c_str(), contains.c_str(), _case.c_str(), tags.c_str());
 
-    if(_case != ""_u)
-    {
-      if(_case == "AA"_u) // <ANY_UPPER>+
-      {
-        int localLast = currentState;
-        currentState = transducer.insertSingleTransduction(alphabet(any_upper, 0), currentState);
-        transducer.linkStates(currentState, localLast, 0);
+  for (auto& it : StringUtils::split(tags, "."_u)) {
+    if (it.empty()) {
+      continue;
+    }
+    UString tag = "<"_u + it + ">"_u;
+    debug("        tag: %S\n", tag.c_str());
+    if (tag == "<*>"_u) {
+      state = add_loop(t, state, alphabet(any_tag, 0));
+      if (key) {
+        *key = *key + "<ANY_TAG>"_u;
+        currentState = transducer.insertSingleTransduction(alphabet(0, any_tag), currentState);
       }
-      else if(_case == "aa"_u)  // <ANY_LOWER>+
-      {
-        int localLast = currentState;
-        currentState = transducer.insertSingleTransduction(alphabet(any_lower, 0), currentState);
-        transducer.linkStates(currentState, localLast, 0);
+    } else {
+      if (!alphabet.isSymbolDefined(tag)) {
+        alphabet.includeSymbol(tag);
       }
-      else if(_case == "Aa"_u) // <ANY_UPPER>+ <ANY_LOWER>+
-      {
-        currentState = transducer.insertSingleTransduction(alphabet(any_upper, 0), currentState);
-        int localLast = currentState;
-        currentState = transducer.insertSingleTransduction(alphabet(any_lower, 0), currentState);
-        transducer.linkStates(currentState, localLast, 0);
+      state = t->insertSingleTransduction(alphabet(alphabet(tag), 0), state);
+      if (key) {
+        *key = *key + tag;
+        currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(tag)), currentState);
       }
-    }
-    if(lemma == "*"_u && suffix.empty() && contains.empty() && _case.empty())
-    {
-      // This is only if there is no suffix or case or contains
-      debug("        char: -\n");
-      int localLast = currentState;
-      currentState = transducer.insertSingleTransduction(alphabet(any_char, 0), currentState);
-      transducer.linkStates(currentState, localLast, 0);
-    }
-    else if(suffix != ""_u)
-    {
-      // A suffix is <ANY_CHAR> any amount of times followed by whatever is in the suffix
-      int localLast = currentState;
-      currentState = transducer.insertSingleTransduction(alphabet(any_char, 0), currentState);
-      transducer.linkStates(currentState, localLast, 0);
-      for(auto& it : suffix)
-      {
-        currentState = transducer.insertSingleTransduction(alphabet(it, 0), currentState);
-      }
-    }
-    else if(!contains.empty())
-    {
-      // A contains is <ANY_CHAR> any amount of times followed by whatever is in the attribute
-      // followed by <ANY_CHAR> any amount of times
-      int localLast = currentState;
-      currentState = transducer.insertSingleTransduction(alphabet(any_char, 0), currentState);
-      transducer.linkStates(currentState, localLast, 0);
-      for(auto& it : suffix)
-      {
-        currentState = transducer.insertSingleTransduction(alphabet(it, 0), currentState);
-      }
-      currentState = transducer.insertSingleTransduction(alphabet(any_char, 0), currentState);
-      transducer.linkStates(currentState, localLast, 0);
-    }
-    else if(lemma != "*"_u)
-    {
-      for(auto& it : lemma)
-      {
-        currentState = transducer.insertSingleTransduction(alphabet(it, 0), currentState);
-      }
-    }
-    else
-    {
-      cerr << "Something surprising happened in <match> compilation\n";
-    }
-
-    UString tag;
-    for(auto& it : tags)
-    {
-      if(it == '.')
-      {
-        if(tag.empty())
-        {
-          continue;
-        }
-        tag = "<"_u + tag + ">"_u;
-        if(!alphabet.isSymbolDefined(tag.c_str()))
-        {
-          alphabet.includeSymbol(tag.c_str());
-        }
-        debug("        tag: %S\n", tag.c_str());
-        if(tag == "<*>"_u)
-        {
-          int localLast = currentState;
-          currentState = transducer.insertSingleTransduction(alphabet(any_tag, 0), currentState);
-          transducer.linkStates(currentState, localLast, 0);
-        }
-        else
-        {
-          currentState = transducer.insertSingleTransduction(alphabet(alphabet(tag.c_str()), 0), currentState);
-        }
-        tag = ""_u;
-        continue;
-      }
-      tag = tag + it;
-    }
-    if(tag == "*"_u)
-    {
-      debug("        tag: %S\n", tag.c_str());
-      int localLast = currentState;
-      currentState = transducer.insertSingleTransduction(alphabet(any_tag, 0), currentState);
-      transducer.linkStates(currentState, localLast, 0);
-    }
-    else if(tag.empty())
-    {
-    }
-    else
-    {
-      tag = "<"_u + tag + ">"_u;
-      if(!alphabet.isSymbolDefined(tag.c_str()))
-      {
-        alphabet.includeSymbol(tag.c_str());
-      }
-      debug("        tag: %S\n", tag.c_str());
-      currentState = transducer.insertSingleTransduction(alphabet(alphabet(tag.c_str()), 0), currentState);
     }
   }
+
+  return state;
+}
+
+
+void
+LRXCompiler::procMatch()
+{
+  currentState = compileSpecifier(LRX_COMPILER_TYPE_MATCH, &transducer,
+                                  currentState, nullptr);
 
   if(xmlTextReaderIsEmptyElement(reader))
   {
@@ -606,102 +590,15 @@ LRXCompiler::procMatch()
 void
 LRXCompiler::procSelect()
 {
-
-  UString lemma =this->attrib(LRX_COMPILER_LEMMA_ATTR, "*"_u);
-  UString tags =this->attrib(LRX_COMPILER_TAGS_ATTR);
-
   UString key = "<"_u + LRX_COMPILER_TYPE_SELECT + ">"_u;
-  if(lemma != "*"_u)
-  {
-    key += lemma;
-  }
-
   Transducer recogniser;
   int localCurrentState = recogniser.getInitial();
-
-  debug("        select: %S, %S\n", lemma.c_str(), tags.c_str());
 
   currentState = transducer.insertSingleTransduction(word_boundary, currentState);
   currentState = transducer.insertSingleTransduction(alphabet(0, alphabet("<"_u + LRX_COMPILER_TYPE_SELECT + ">"_u)), currentState);
 
-
-  if(lemma == "*"_u)
-  {
-    currentState = transducer.insertSingleTransduction(alphabet(0, any_char), currentState);
-    int localLast = localCurrentState;
-    localCurrentState = recogniser.insertSingleTransduction(alphabet(any_char ,0), localCurrentState);
-    recogniser.linkStates(localCurrentState, localLast, 0);
-    key = key + "<ANY_CHAR>"_u;
-  }
-  else {
-    for (auto &it : lemma) {
-      currentState = transducer.insertSingleTransduction(alphabet(0, it), currentState);
-      localCurrentState = recogniser.insertSingleTransduction(alphabet(it, 0), localCurrentState);
-    }
-  }
-
-  if(!tags.empty()) {
-    UString tag;
-    for(auto& it : tags) {
-      if(it == '.')
-      {
-        tag = "<"_u + tag + ">"_u;
-        if(!alphabet.isSymbolDefined(tag.c_str()))
-        {
-          alphabet.includeSymbol(tag.c_str());
-        }
-        debug("        tag: %S\n", tag.c_str());
-        if(tag == "<*>"_u)
-        {
-          currentState = transducer.insertSingleTransduction(alphabet(0, any_tag), currentState);
-	  int localLast = localCurrentState;
-          localCurrentState = recogniser.insertSingleTransduction(alphabet(any_tag ,0), localCurrentState);
-	  recogniser.linkStates(localCurrentState, localLast, 0);
-          key = key + "<ANY_TAG>"_u;
-        }
-        else
-        {
-          currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(tag.c_str())), currentState);
-          localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(tag.c_str()),0), localCurrentState);
-          key = key + tag;
-        }
-        tag = ""_u;
-        continue;
-      }
-      tag = tag + it;
-    }
-    if(tag == "*"_u)
-    {
-      debug("        tag: %S\n", tag.c_str());
-      currentState = transducer.insertSingleTransduction(alphabet(0, any_tag), currentState);
-      int localLast = localCurrentState;
-      localCurrentState = recogniser.insertSingleTransduction(alphabet(any_tag ,0), localCurrentState);
-      recogniser.linkStates(localCurrentState, localLast, 0);
-      key = key + "<ANY_TAG>"_u;
-    }
-    else
-    {
-      tag = "<"_u + tag + ">"_u;
-      if(!alphabet.isSymbolDefined(tag.c_str()))
-      {
-        alphabet.includeSymbol(tag.c_str());
-      }
-      debug("        tag: %S\n", tag.c_str());
-      currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(tag.c_str())), currentState);
-      localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(tag.c_str()),0), localCurrentState);
-      key = key + tag;
-    }
-  }
-  else
-  {
-    debug("        tag: -\n");
-    currentState = transducer.insertSingleTransduction(alphabet(0, any_tag), currentState);
-    int localLast = localCurrentState;
-    localCurrentState = recogniser.insertSingleTransduction(alphabet(any_tag ,0), localCurrentState);
-    recogniser.linkStates(localCurrentState, localLast, 0);
-    key = key + "<ANY_TAG>"_u;
-  }
-
+  localCurrentState = compileSpecifier(LRX_COMPILER_TYPE_SELECT, &recogniser,
+                                       localCurrentState, &key);
 
   recogniser.setFinal(localCurrentState);
 
@@ -715,105 +612,15 @@ LRXCompiler::procSelect()
 void
 LRXCompiler::procRemove()
 {
-
-  UString lemma =this->attrib(LRX_COMPILER_LEMMA_ATTR, "*"_u);
-  UString tags =this->attrib(LRX_COMPILER_TAGS_ATTR);
-
   UString key = "<"_u + LRX_COMPILER_TYPE_REMOVE + ">"_u;
-  if(lemma != "*"_u)
-  {
-    key += lemma;
-  }
-
   Transducer recogniser;
   int localCurrentState = recogniser.getInitial();
-
-  debug("        remove: %S, %S\n", lemma.c_str(), tags.c_str());
 
   currentState = transducer.insertSingleTransduction(word_boundary, currentState);
   currentState = transducer.insertSingleTransduction(alphabet(0, alphabet("<"_u + LRX_COMPILER_TYPE_REMOVE + ">"_u)), currentState);
 
-  if(lemma == "*"_u)
-  {
-    currentState = transducer.insertSingleTransduction(alphabet(0, any_char), currentState);
-    int localLast = localCurrentState;
-    localCurrentState = recogniser.insertSingleTransduction(alphabet(any_char ,0), localCurrentState);
-    recogniser.linkStates(localCurrentState, localLast, 0);
-    key = key + "<ANY_CHAR>"_u;
-  }
-  else
-  {
-    for(auto& it : lemma)
-    {
-      currentState = transducer.insertSingleTransduction(alphabet(0, it), currentState);
-      localCurrentState = recogniser.insertSingleTransduction(alphabet(it, 0), localCurrentState);
-    }
-  }
-
-  if(tags != ""_u)
-  {
-    UString tag = ""_u;
-    for(auto& it : tags)
-    {
-      if(it == '.')
-      {
-        tag = "<"_u + tag + ">"_u;
-        if(!alphabet.isSymbolDefined(tag.c_str()))
-        {
-          alphabet.includeSymbol(tag.c_str());
-        }
-        debug("        tag: %S\n", tag.c_str());
-        if(tag == "<*>"_u)
-        {
-          currentState = transducer.insertSingleTransduction(alphabet(0, any_tag), currentState);
-	  int localLast = localCurrentState;
-          localCurrentState = recogniser.insertSingleTransduction(alphabet(any_tag, 0), localCurrentState);
-	  recogniser.linkStates(localCurrentState, localLast, 0);
-          key = key + "<ANY_TAG>"_u;
-        }
-        else
-        {
-          currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(tag.c_str())), currentState);
-          localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(tag.c_str()),0), localCurrentState);
-          key = key + tag;
-        }
-        tag = ""_u;
-        continue;
-      }
-      tag = tag + it;
-    }
-    if(tag == "*"_u)
-    {
-      debug("        tag: %S\n", tag.c_str());
-      currentState = transducer.insertSingleTransduction(alphabet(0, any_tag), currentState);
-      int localLast = localCurrentState;
-      localCurrentState = recogniser.insertSingleTransduction(alphabet(any_tag, 0), localCurrentState);
-      recogniser.linkStates(localCurrentState, localLast, 0);
-      key = key + "<ANY_TAG>"_u;
-    }
-    else
-    {
-      tag = "<"_u + tag + ">"_u;
-      if(!alphabet.isSymbolDefined(tag.c_str()))
-      {
-        alphabet.includeSymbol(tag);
-      }
-      debug("        tag: %S\n", tag.c_str());
-      currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(tag.c_str())), currentState);
-      localCurrentState = recogniser.insertSingleTransduction(alphabet(alphabet(tag.c_str()),0), localCurrentState);
-      key = key + tag;
-    }
-  }
-  else
-  {
-    debug("        tag: -\n");
-    currentState = transducer.insertSingleTransduction(alphabet(0, any_tag), currentState);
-    int localLast = localCurrentState;
-    localCurrentState = recogniser.insertSingleTransduction(alphabet(any_tag,0), localCurrentState);
-    recogniser.linkStates(localCurrentState, localLast, 0);
-    key = key + "<ANY_TAG>"_u;
-  }
-
+  localCurrentState = compileSpecifier(LRX_COMPILER_TYPE_REMOVE, &recogniser,
+                                       localCurrentState, &key);
 
   recogniser.setFinal(localCurrentState);
 

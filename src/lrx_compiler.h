@@ -67,6 +67,7 @@ private:
   void procRule();
   void procDefSeq();
   void procOr();
+  int compileSpecifier(const UString& type, Transducer* t, int state, UString* key);
   void procMatch();
   void procSelect();
   void procRemove();
@@ -104,6 +105,7 @@ public:
   static UString const LRX_COMPILER_FROM_ATTR;
   static UString const LRX_COMPILER_UPTO_ATTR;
 
+  static UString const LRX_COMPILER_TYPE_MATCH;
   static UString const LRX_COMPILER_TYPE_SELECT;
   static UString const LRX_COMPILER_TYPE_REMOVE;
   static UString const LRX_COMPILER_TYPE_SKIP;
@@ -125,4 +127,3 @@ public:
 };
 
 #endif /* __LRX_COMPILER_H__ */
-
