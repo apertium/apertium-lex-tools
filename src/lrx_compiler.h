@@ -53,6 +53,8 @@ private:
   int32_t any_lower = 0;
   int32_t word_boundary = 0;
 
+  bool globIsStar = false;
+
   bool debugMode = false;
   bool outputGraph = false;
   UFILE* debug_output;
@@ -104,6 +106,9 @@ public:
   static UString const LRX_COMPILER_WEIGHT_ATTR;
   static UString const LRX_COMPILER_FROM_ATTR;
   static UString const LRX_COMPILER_UPTO_ATTR;
+  static UString const LRX_COMPILER_GLOB_ATTR;
+  static UString const LRX_COMPILER_GLOB_PLUS_VAL;
+  static UString const LRX_COMPILER_GLOB_STAR_VAL;
 
   static UString const LRX_COMPILER_TYPE_MATCH;
   static UString const LRX_COMPILER_TYPE_SELECT;

@@ -1,0 +1,33 @@
+<lrx glob="star">
+	<rules>
+		<rule weight="1.0">
+			<match lemma="blah" tags="n">
+				<select lemma="bloop"/>
+			</match>
+			<match lemma="hiya" tags="*"/>
+		</rule>
+		<rule weight="1.0">
+			<match lemma="blah" tags="n">
+				<select lemma="bloop"/>
+			</match>
+			<match lemma="hi" tags="n.+"/>
+		</rule>
+		<rule weight="1.0">
+			<match lemma="blah" tags="n">
+				<select lemma="bloop"/>
+			</match>
+			<match lemma="hi" tags="ij.?.q"/>
+		</rule>
+		<rule weight="1.0">
+			<match lemma="blah" tags="n">
+				<select lemma="bloop"/>
+			</match>
+			<match lemma="hi" tags="v.*.itj"/>
+		</rule>
+		<rule weight="0.1">
+			<match lemma="blah" tags="n">
+				<select lemma="shoop"/>
+			</match>
+		</rule>
+	</rules>
+</lrx>
