@@ -494,7 +494,12 @@ LRXProcessor::process(InputFile& input, UFILE *output)
       for(auto& s : alive_states)
       {
         res.clear();
-        if(val < 0)
+        if(val == '*' && sl[pos].empty()) {
+          if(debugMode) {
+            cerr << "  skipping unknown marker" << endl;
+          }
+        }
+        else if(val < 0)
         {
           alphabet.getSymbol(res, val,  false);
           if(debugMode)
