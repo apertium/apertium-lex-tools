@@ -1,0 +1,13 @@
+^blah<n>/bloop<n>$ ^*hiya/*hiya$
+^blah<n>/bloop<n>$ ^hiya<n>/hiya<n>$
+^blah<n>/bloop<n>$ ^hiya<n><nom><sg>/hiya<n>$
+
+^blah<n>/bloop<n>$ ^hi<n><nom><sg>/hi<n>$
+^blah<n>/shoop<n>$ ^hi<n>/hiya<n>$
+
+^blah<n>/shoop<n>$ ^hi<ij><q>/hiya<n>$
+^blah<n>/bloop<n>$ ^hi<ij><n><q>/hiya<n>$
+
+^blah<n>/bloop<n>$ ^hi<v><itj>/hiya<n>$
+^blah<n>/bloop<n>$ ^hi<v><inf><itj>/hiya<n>$
+^blah<n>/bloop<n>$ ^hi<v><inf><pl><itj>/hiya<n>$

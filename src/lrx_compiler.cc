@@ -48,6 +48,9 @@ UString const LRXCompiler::LRX_COMPILER_COMMENT_ATTR    = "c"_u;
 UString const LRXCompiler::LRX_COMPILER_NAME_ATTR       = "n"_u;
 UString const LRXCompiler::LRX_COMPILER_FROM_ATTR       = "from"_u;
 UString const LRXCompiler::LRX_COMPILER_UPTO_ATTR       = "upto"_u;
+UString const LRXCompiler::LRX_COMPILER_GLOB_ATTR       = "glob"_u;
+UString const LRXCompiler::LRX_COMPILER_GLOB_PLUS_VAL   = "plus"_u;
+UString const LRXCompiler::LRX_COMPILER_GLOB_STAR_VAL   = "star"_u;
 
 UString const LRXCompiler::LRX_COMPILER_TYPE_MATCH      = "match"_u;
 UString const LRXCompiler::LRX_COMPILER_TYPE_SELECT     = "select"_u;
@@ -205,7 +208,9 @@ LRXCompiler::procNode()
   }
   else if(nombre == LRX_COMPILER_LRX_ELEM)
   {
-    /* ignorar */
+    if (attrib(LRX_COMPILER_GLOB_ATTR, LRX_COMPILER_GLOB_PLUS_VAL) == LRX_COMPILER_GLOB_STAR_VAL) {
+      globIsStar = true;
+    }
   }
   else if(nombre == LRX_COMPILER_DEFSEQS_ELEM)
   {
@@ -217,7 +222,9 @@ LRXCompiler::procNode()
   }
   else if(nombre == LRX_COMPILER_RULES_ELEM)
   {
-    /* ignorar */
+    if (attrib(LRX_COMPILER_GLOB_ATTR, LRX_COMPILER_GLOB_PLUS_VAL) == LRX_COMPILER_GLOB_STAR_VAL) {
+      globIsStar = true;
+    }
   }
   else if(nombre == LRX_COMPILER_RULE_ELEM)
   {
@@ -516,8 +523,21 @@ LRXCompiler::compileSpecifier(const UString& type, Transducer* t, int state,
     }
     UString tag = "<"_u + it + ">"_u;
     debug("        tag: %S\n", tag.c_str());
-    if (tag == "<*>"_u) {
+    if ((!globIsStar && tag == "<*>"_u) ||
+        tag == "<+>"_u) {
+      state = add_loop(t, state, alphabet(any_tag, 0), false);
+      if (key) {
+        *key = *key + "<ANY_TAG>"_u;
+        currentState = transducer.insertSingleTransduction(alphabet(0, any_tag), currentState);
+      }
+    } else if (globIsStar && tag == "<*>"_u) {
       state = add_loop(t, state, alphabet(any_tag, 0), true);
+      if (key) {
+        *key = *key + "<ANY_TAG>"_u;
+        currentState = transducer.insertSingleTransduction(alphabet(0, any_tag), currentState);
+      }
+    } else if (tag == "<?>"_u) {
+      state = t->insertSingleTransduction(alphabet(any_tag, 0), state);
       if (key) {
         *key = *key + "<ANY_TAG>"_u;
         currentState = transducer.insertSingleTransduction(alphabet(0, any_tag), currentState);
