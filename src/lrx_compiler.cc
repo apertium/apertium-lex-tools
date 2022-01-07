@@ -411,9 +411,13 @@ LRXCompiler::procDefSeq()
 }
 
 
-int add_loop(Transducer* t, int state, int32_t sym)
+int add_loop(Transducer* t, int state, int32_t sym, bool star)
 {
-  state = t->insertSingleTransduction(sym, state);
+  if (star) {
+    state = t->insertNewSingleTransduction(0, state);
+  } else {
+    state = t->insertSingleTransduction(sym, state);
+  }
   t->linkStates(state, state, sym);
   return state;
 }
@@ -452,13 +456,13 @@ LRXCompiler::compileSpecifier(const UString& type, Transducer* t, int state,
   if (!_case.empty()) {
     for (auto& c : _case) {
       if (u_isupper(c)) {
-        state = add_loop(t, state, alphabet(any_upper, 0));
+        state = add_loop(t, state, alphabet(any_upper, 0), false);
         if (key) {
           *key = *key + "<ANY_UPPER>"_u;
           currentState = transducer.insertSingleTransduction(alphabet(0, any_upper), currentState);
         }
       } else {
-        state = add_loop(t, state, alphabet(any_lower, 0));
+        state = add_loop(t, state, alphabet(any_lower, 0), false);
         if (key) {
           *key = *key + "<ANY_LOWER>"_u;
           currentState = transducer.insertSingleTransduction(alphabet(0, any_lower), currentState);
@@ -466,7 +470,7 @@ LRXCompiler::compileSpecifier(const UString& type, Transducer* t, int state,
       }
     }
   } else if (!suffix.empty()) {
-    state = add_loop(t, state, alphabet(any_char, 0));
+    state = add_loop(t, state, alphabet(any_char, 0), true);
     state = add_str(t, state, alphabet, suffix);
     if (key) {
       *key = *key + "<ANY_CHAR>"_u;
@@ -477,9 +481,9 @@ LRXCompiler::compileSpecifier(const UString& type, Transducer* t, int state,
       }
     }
   } else if (!contains.empty()) {
-    state = add_loop(t, state, alphabet(any_char, 0));
+    state = add_loop(t, state, alphabet(any_char, 0), true);
     state = add_str(t, state, alphabet, contains);
-    state = add_loop(t, state, alphabet(any_char, 0));
+    state = add_loop(t, state, alphabet(any_char, 0), true);
     if (key) {
       *key = *key + "<ANY_CHAR>"_u;
       *key = *key + contains;
@@ -491,7 +495,7 @@ LRXCompiler::compileSpecifier(const UString& type, Transducer* t, int state,
       currentState = transducer.insertSingleTransduction(alphabet(0, any_char), currentState);
     }
   } else if (lemma == "*"_u) {
-    state = add_loop(t, state, alphabet(any_char, 0));
+    state = add_loop(t, state, alphabet(any_char, 0), false);
     if (key) {
       *key = *key + "<ANY_CHAR>"_u;
       currentState = transducer.insertSingleTransduction(alphabet(0, any_char), currentState);
@@ -513,7 +517,7 @@ LRXCompiler::compileSpecifier(const UString& type, Transducer* t, int state,
     UString tag = "<"_u + it + ">"_u;
     debug("        tag: %S\n", tag.c_str());
     if (tag == "<*>"_u) {
-      state = add_loop(t, state, alphabet(any_tag, 0));
+      state = add_loop(t, state, alphabet(any_tag, 0), true);
       if (key) {
         *key = *key + "<ANY_TAG>"_u;
         currentState = transducer.insertSingleTransduction(alphabet(0, any_tag), currentState);

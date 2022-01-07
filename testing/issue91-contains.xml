@@ -1,0 +1,7 @@
+<rules>
+	<rule weight="2.0">
+		<match contains="ver" tags="vblex">
+			<select suffix="blah"/>
+		</match>
+	</rule>
+</rules>
