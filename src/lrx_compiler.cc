@@ -89,7 +89,6 @@ LRXCompiler::LRXCompiler()
 
   initialState = transducer.getInitial();
   currentState = initialState;
-  lastState = initialState;
 
   alphabet.includeSymbol("<"_u+ LRX_COMPILER_TYPE_SELECT + ">"_u);
   alphabet.includeSymbol("<"_u+ LRX_COMPILER_TYPE_REMOVE + ">"_u);
@@ -194,6 +193,35 @@ LRXCompiler::parse(string const &fitxer)
 }
 
 void
+LRXCompiler::compileSequence()
+{
+  UString top_name = XMLParseUtil::readName(reader);
+  while (true) {
+    if (xmlTextReaderRead(reader) != 1) {
+      error("Parse error.");
+    }
+
+    UString name = XMLParseUtil::readName(reader);
+    skipBlanks(name);
+
+    if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_END_ELEMENT &&
+        name == top_name) {
+      break;
+    } else if (name == LRX_COMPILER_MATCH_ELEM) {
+      procMatch();
+    } else if (name == LRX_COMPILER_OR_ELEM) {
+      procOr();
+    } else if (name == LRX_COMPILER_REPEAT_ELEM) {
+      procRepeat();
+    } else if (name == LRX_COMPILER_SEQ_ELEM) {
+      procSeq();
+    } else {
+      error("Invalid inclusion of '<%S>' into '<%S>'.", name.c_str(), top_name.c_str());
+    }
+  }
+}
+
+void
 LRXCompiler::procNode()
 {
   UString nombre = XMLParseUtil::readName(reader);
@@ -263,50 +291,14 @@ LRXCompiler::procRule()
 
   debug("  rule: %d, weight: %.2f \n", currentRuleId, weight);
 
-  while(true)
-  {
-    int ret = xmlTextReaderRead(reader);
-    if(ret != 1) {
-      error("Parse error.");
-    }
-
-    UString name = XMLParseUtil::readName(reader);
-    skipBlanks(name);
-
-    if(name == LRX_COMPILER_MATCH_ELEM)
-    {
-      procMatch();
-    }
-    else if(name == LRX_COMPILER_OR_ELEM)
-    {
-      lastState = currentState;
-      procOr();
-    }
-    else if(name == LRX_COMPILER_REPEAT_ELEM)
-    {
-      procRepeat();
-    }
-    else if(name == LRX_COMPILER_SEQ_ELEM)
-    {
-      procSeq();
-    }
-    else if(name == LRX_COMPILER_RULE_ELEM)
-    {
-      currentState = transducer.insertSingleTransduction(word_boundary, currentState);
-      if(!alphabet.isSymbolDefined(ruleId.c_str()))
-      {
-        alphabet.includeSymbol(ruleId.c_str());
-      }
-      currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(ruleId.c_str())), currentState);
-      transducer.setFinal(currentState);
-      currentState = initialState;
-      return;
-    }
-    else
-    {
-      error("Invalid inclusion of '<%S>' into '<rule>'.", name.c_str());
-    }
+  compileSequence();
+  currentState = transducer.insertSingleTransduction(word_boundary, currentState);
+  if(!alphabet.isSymbolDefined(ruleId.c_str())) {
+    alphabet.includeSymbol(ruleId.c_str());
   }
+  currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(ruleId.c_str())), currentState);
+  transducer.setFinal(currentState);
+  currentState = initialState;
 }
 
 void
@@ -326,26 +318,11 @@ LRXCompiler::procOr()
     UString name = XMLParseUtil::readName(reader);
     skipBlanks(name);
 
-    if(name == LRX_COMPILER_MATCH_ELEM)
-    {
-      currentState = transducer.insertNewSingleTransduction(0, or_initial_state);
-      procMatch();
-      reachedStates.push_back(currentState);
-    }
-    else if(name == LRX_COMPILER_SEQ_ELEM)
-    {
-      currentState = transducer.insertNewSingleTransduction(0, or_initial_state);
-      procSeq();
-      reachedStates.push_back(currentState);
-    }
-    else if(name == LRX_COMPILER_OR_ELEM)
-    {
-      if(reachedStates.size() > 1)
-      {
-        for(auto& it : reachedStates)
-        {
-          if(it == currentState)
-          {
+    if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_END_ELEMENT &&
+        name == LRX_COMPILER_OR_ELEM) {
+      if(reachedStates.size() > 1) {
+        for(auto& it : reachedStates) {
+          if(it == currentState) {
             continue;
           }
           transducer.linkStates(it, currentState, 0);
@@ -353,68 +330,37 @@ LRXCompiler::procOr()
       }
       break;
     }
-    else
-    {
-      error("Invalid inclusion of '<%S>' into '<or>'.", name.c_str());
-    }
-  }
 
-  return;
+    currentState = transducer.insertNewSingleTransduction(0, or_initial_state);
+
+    if (name == LRX_COMPILER_MATCH_ELEM) {
+      procMatch();
+    } else if (name == LRX_COMPILER_OR_ELEM) {
+      procOr();
+    } else if (name == LRX_COMPILER_SEQ_ELEM) {
+      procSeq();
+    } else if (name == LRX_COMPILER_REPEAT_ELEM) {
+      procRepeat();
+    }
+
+    reachedStates.push_back(currentState);
+  }
 }
 
 
 void
 LRXCompiler::procDefSeq()
 {
-  canSelect = false;
   Transducer temp = transducer;
   transducer.clear();
   int oldstate = currentState;
   currentState = initialState;
-  lastState = initialState;
   UString seqname = this->attrib(LRX_COMPILER_NAME_ATTR);
-  while(true)
-  {
-    int ret = xmlTextReaderRead(reader);
-    if(ret != 1) {
-      error("Parse error.");
-    }
-
-    UString name = XMLParseUtil::readName(reader);
-    skipBlanks(name);
-
-    if(name == LRX_COMPILER_MATCH_ELEM)
-    {
-      procMatch();
-    }
-    else if(name == LRX_COMPILER_OR_ELEM)
-    {
-      lastState = currentState;
-      procOr();
-    }
-    else if(name == LRX_COMPILER_REPEAT_ELEM)
-    {
-      procRepeat();
-    }
-    else if(name == LRX_COMPILER_SEQ_ELEM)
-    {
-      procSeq();
-    }
-    else if(name == LRX_COMPILER_DEFSEQ_ELEM)
-    {
-      transducer.setFinal(currentState);
-      break;
-    }
-    else
-    {
-      error("Invalid inclusion of '<%S>' into '<repeat>'.", name.c_str());
-    }
-  }
+  compileSequence();
+  transducer.setFinal(currentState);
   sequences[seqname] = transducer;
   currentState = oldstate;
-  lastState = oldstate;
   transducer = temp;
-  canSelect = true;
 }
 
 
@@ -585,16 +531,10 @@ LRXCompiler::procMatch()
 
     if(name == LRX_COMPILER_SELECT_ELEM)
     {
-      if(!canSelect) {
-        error("<select> is not permitted inside <repeat>.");
-      }
       procSelect();
     }
     else if(name == LRX_COMPILER_REMOVE_ELEM)
     {
-      if(!canSelect) {
-        error("<remove> is not permitted inside <repeat>.");
-      }
       procRemove();
     }
     else if(name == LRX_COMPILER_MATCH_ELEM)
@@ -658,8 +598,6 @@ LRXCompiler::procRemove()
 void
 LRXCompiler::procRepeat()
 {
-  bool couldSelect = canSelect;
-  canSelect = false;
   UString xfrom = this->attrib(LRX_COMPILER_FROM_ATTR);
   UString xupto = this->attrib(LRX_COMPILER_UPTO_ATTR);
   int from = StringUtils::stoi(xfrom);
@@ -674,40 +612,8 @@ LRXCompiler::procRepeat()
   Transducer temp = transducer;
   transducer.clear();
   currentState = initialState;
-  lastState = initialState;
-  while(true)
-  {
-    int ret = xmlTextReaderRead(reader);
-    if(ret != 1) {
-      error("Parse error.");
-    }
-
-    UString name = XMLParseUtil::readName(reader);
-    skipBlanks(name);
-
-    if(name == LRX_COMPILER_MATCH_ELEM)
-    {
-      procMatch();
-    }
-    else if(name == LRX_COMPILER_OR_ELEM)
-    {
-      lastState = currentState;
-      procOr();
-    }
-    else if(name == LRX_COMPILER_SEQ_ELEM)
-    {
-      procSeq();
-    }
-    else if(name == LRX_COMPILER_REPEAT_ELEM)
-    {
-      transducer.setFinal(currentState);
-      break;
-    }
-    else
-    {
-      error("Invalid inclusion of '<%S>' into '<repeat>'.", name.c_str());
-    }
-  }
+  compileSequence();
+  transducer.setFinal(currentState);
   for(int i = 0; i < from; i++)
   {
     oldstate = temp.insertTransducer(oldstate, transducer);
@@ -718,9 +624,7 @@ LRXCompiler::procRepeat()
     oldstate = temp.insertTransducer(oldstate, transducer);
   }
   currentState = oldstate;
-  lastState = oldstate;
   transducer = temp;
-  canSelect = couldSelect;
 }
 
 

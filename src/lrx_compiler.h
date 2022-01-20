@@ -40,10 +40,7 @@ private:
   map<UString, Transducer> sequences;
 
   int32_t initialState;
-  int32_t lastState;
   int32_t currentState;
-  // disallow <select>, <remove> inside <def-seq>, <repeat>
-  bool canSelect = true;
 
   int32_t currentRuleId = 0;
 
@@ -70,6 +67,7 @@ private:
   void procDefSeq();
   void procOr();
   int compileSpecifier(const UString& type, Transducer* t, int state, UString* key);
+  void compileSequence();
   void procMatch();
   void procSelect();
   void procRemove();
