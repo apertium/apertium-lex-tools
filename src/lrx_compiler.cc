@@ -36,6 +36,7 @@ UString const LRXCompiler::LRX_COMPILER_REMOVE_ELEM     = "remove"_u;
 UString const LRXCompiler::LRX_COMPILER_OR_ELEM         = "or"_u;
 UString const LRXCompiler::LRX_COMPILER_REPEAT_ELEM     = "repeat"_u;
 UString const LRXCompiler::LRX_COMPILER_SEQ_ELEM        = "seq"_u;
+UString const LRXCompiler::LRX_COMPILER_BEGIN_ELEM      = "begin"_u;
 
 UString const LRXCompiler::LRX_COMPILER_LEMMA_ATTR      = "lemma"_u;
 UString const LRXCompiler::LRX_COMPILER_SUFFIX_ATTR     = "suffix"_u;
@@ -99,12 +100,14 @@ LRXCompiler::LRXCompiler()
   alphabet.includeSymbol("<ANY_UPPER>"_u);
   alphabet.includeSymbol("<ANY_LOWER>"_u);
   alphabet.includeSymbol("<$>"_u);
+  alphabet.includeSymbol("<$$>"_u);
 
   any_tag        = alphabet("<ANY_TAG>"_u);
   any_char       = alphabet("<ANY_CHAR>"_u);
   any_upper      = alphabet("<ANY_UPPER>"_u);
   any_lower      = alphabet("<ANY_LOWER>"_u);
   word_boundary  = alphabet(alphabet("<$>"_u), alphabet("<$>"_u));
+  null_boundary  = alphabet(alphabet("<$$>"_u), alphabet("<$$>"_u));
 }
 
 LRXCompiler::~LRXCompiler()
@@ -207,6 +210,8 @@ LRXCompiler::compileSequence()
     if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_END_ELEMENT &&
         name == top_name) {
       break;
+    } else if (name == LRX_COMPILER_BEGIN_ELEM) {
+      currentState = transducer.insertSingleTransduction(null_boundary, currentState);
     } else if (name == LRX_COMPILER_MATCH_ELEM) {
       procMatch();
     } else if (name == LRX_COMPILER_OR_ELEM) {

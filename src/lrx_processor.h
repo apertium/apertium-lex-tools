@@ -57,6 +57,7 @@ private:
   int32_t any_lower;
   int32_t any_tag;
   int32_t word_boundary;
+  int32_t null_boundary;
 
   unsigned int pos;
   unsigned long lineno;
@@ -87,6 +88,7 @@ public:
   static UString const LRX_PROCESSOR_TAG_ANY_UPPER;
   static UString const LRX_PROCESSOR_TAG_ANY_LOWER;
   static UString const LRX_PROCESSOR_TAG_WORD_BOUNDARY;
+  static UString const LRX_PROCESSOR_TAG_NULL_BOUNDARY;
 
   LRXProcessor();
   ~LRXProcessor();

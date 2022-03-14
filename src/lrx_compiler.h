@@ -49,6 +49,7 @@ private:
   int32_t any_upper = 0;
   int32_t any_lower = 0;
   int32_t word_boundary = 0;
+  int32_t null_boundary = 0;
 
   bool globIsStar = false;
 
@@ -92,6 +93,7 @@ public:
   static UString const LRX_COMPILER_OR_ELEM;
   static UString const LRX_COMPILER_REPEAT_ELEM;
   static UString const LRX_COMPILER_SEQ_ELEM;
+  static UString const LRX_COMPILER_BEGIN_ELEM;
 
   static UString const LRX_COMPILER_SURFACE_ATTR;
   static UString const LRX_COMPILER_SUFFIX_ATTR;

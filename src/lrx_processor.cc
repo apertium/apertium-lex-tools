@@ -32,6 +32,7 @@ UString const LRXProcessor::LRX_PROCESSOR_TAG_ANY_TAG        = "<ANY_TAG>"_u;
 UString const LRXProcessor::LRX_PROCESSOR_TAG_ANY_UPPER      = "<ANY_UPPER>"_u;
 UString const LRXProcessor::LRX_PROCESSOR_TAG_ANY_LOWER      = "<ANY_LOWER>"_u;
 UString const LRXProcessor::LRX_PROCESSOR_TAG_WORD_BOUNDARY  = "<$>"_u;
+UString const LRXProcessor::LRX_PROCESSOR_TAG_NULL_BOUNDARY  = "<$$>"_u;
 
 UString
 LRXProcessor::itow(int i)
@@ -90,6 +91,7 @@ LRXProcessor::load(FILE *in)
   any_upper     = alphabet(LRX_PROCESSOR_TAG_ANY_UPPER);
   any_lower     = alphabet(LRX_PROCESSOR_TAG_ANY_LOWER);
   word_boundary = alphabet(LRX_PROCESSOR_TAG_WORD_BOUNDARY);
+  null_boundary = alphabet(LRX_PROCESSOR_TAG_NULL_BOUNDARY);
 
   int len = Compression::multibyte_read(in);
 
@@ -271,6 +273,10 @@ LRXProcessor::process(InputFile& input, UFILE *output)
 
   vector<State*> alive_states ;
   alive_states.push_back(new State(*initial_state));
+  if (null_boundary) {
+    alive_states.push_back(new State(*initial_state));
+    alive_states[1]->step(null_boundary);
+  }
 
   int32_t val = 0;
   while((val = input.get()) != U_EOF)
@@ -288,6 +294,10 @@ LRXProcessor::process(InputFile& input, UFILE *output)
       operations.clear();
       alive_states.clear();
       alive_states.push_back(new State(*initial_state));
+      if (null_boundary) {
+        alive_states.push_back(new State(*initial_state));
+        alive_states[1]->step(null_boundary);
+      }
 
       u_fputc(val, output);
       u_fflush(output);

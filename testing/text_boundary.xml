@@ -1,0 +1,13 @@
+<rules>
+	<rule weight="1.0">
+		<begin/>
+		<match lemma="blah">
+			<select lemma="a"/>
+		</match>
+	</rule>
+	<rule weight="0.1">
+		<match lemma="blah">
+			<select lemma="b"/>
+		</match>
+	</rule>
+</rules>
