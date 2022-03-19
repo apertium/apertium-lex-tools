@@ -38,7 +38,7 @@ apertium_lex_tools_module = Extension(
     include_dirs=get_include_dirs(),
     library_dirs=['/usr/include/libxml2', '/usr/local/lib'],
     extra_compile_args='@CXXFLAGS@'.split(),
-    extra_link_args=['-lxml2', '-llttoolbox3'],
+    extra_link_args='@LIBS@'.split(),
 )
 
 setup(
