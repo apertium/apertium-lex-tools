@@ -7,3 +7,6 @@ BUILT_SOURCES = %_wrap.cpp
 
 install-exec-local:
 	$(PYTHON) setup.py install $(PYTHON_INSTALL_PARAMS)
+
+clean-local:
+	rm *.py *.cpp

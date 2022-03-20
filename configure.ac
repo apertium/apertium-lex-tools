@@ -1,14 +1,30 @@
 AC_PREREQ(2.61)
 
+m4_define([PKG_VERSION_MAJOR], [0])
+m4_define([PKG_VERSION_MINOR], [3])
+m4_define([PKG_VERSION_PATCH], [1])
+
 m4_define([required_libxml_version], [2.6.17])
 m4_define([required_lttoolbox_version], [3.6.0])
 
-AC_INIT([apertium-lex-tools], [0.3.0], [apertium-stuff@lists.sourceforge.net])
+AC_INIT([apertium-lex-tools], [PKG_VERSION_MAJOR.PKG_VERSION_MINOR.PKG_VERSION_PATCH], [apertium-stuff@lists.sourceforge.net])
 AM_INIT_AUTOMAKE
 AC_CONFIG_MACRO_DIR([m4])
 
+VERSION=$PACKAGE_VERSION
+VERSION_MAJOR=PKG_VERSION_MAJOR
+VERSION_API=PKG_VERSION_MAJOR.PKG_VERSION_MINOR
+SOVERSION=0:1:0
+
+AC_SUBST(PACKAGE_NAME)
+AC_SUBST(PACKAGE_VERSION)
+AC_SUBST(VERSION_MAJOR)
+AC_SUBST(VERSION_API)
+AC_SUBST(SOVERSION)
+
 AC_PROG_CXX
 AM_SANITY_CHECK
+AC_PROG_LIBTOOL
 AC_LANG_CPLUSPLUS
 
 CFLAGS="-Wall -Wextra $CFLAGS"

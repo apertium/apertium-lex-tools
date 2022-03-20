@@ -12,12 +12,17 @@ if platform == 'darwin':
     compile_args += ['-stdlib=libc++', '-mmacosx-version-min=10.7']
     link_args.append('-mmacosx-version-min=10.7')
 
+def include(args):
+	return args.replace('-I', '').split()
+
+dirs = ['@top_srcdir@', '@top_srcdir@/src'] + include('@LTTOOLBOX_CFLAGS@') + include('@ICU_CFLAGS@') + include('@LIBXML_CFLAGS@')
+
 apertium_lex_tools_module = Extension(
     name='_apertium_lex_tools',
     language='c++',
     sources=['apertium_lex_tools.i'],
-    swig_opts=['-c++', '-I..', '-I@top_srcdir@/src', '-Wall'],
-    include_dirs=['@top_srcdir@', '@top_srcdir@/src'] + '@LIBXML2_CFLAGS@'.replace('-I', '').split(),
+    swig_opts=['-c++', '-I..', '-I@top_srcdir@/src', '-Wall'] + '@LTTOOLBOX_CFLAGS@'.split() + '@LIBXML_CFLAGS@'.split(),
+    include_dirs=dirs,
     library_dirs=['@top_srcdir@/src/.libs'],
     libraries = ['apertium-lex-tools@VERSION_MAJOR@'],
     extra_compile_args=compile_args,

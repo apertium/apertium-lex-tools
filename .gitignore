@@ -21,6 +21,9 @@
 Makefile
 Makefile.in
 /missing
+/libtool
+/ltmain.sh
+/src/.libs
 
 # Prerequisites
 *.d
