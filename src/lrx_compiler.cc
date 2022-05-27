@@ -18,7 +18,7 @@
 #include <lrx_compiler.h>
 #include <weight.h>
 #include <lttoolbox/string_utils.h>
-#include <lttoolbox/xml_parse_util.h>
+#include <lttoolbox/xml_walk_util.h>
 #include <lttoolbox/compression.h>
 #include <iostream>
 #include <limits>
@@ -26,10 +26,13 @@
 using namespace std;
 
 UString const LRXCompiler::LRX_COMPILER_LRX_ELEM        = "lrx"_u;
+UString const LRXCompiler::LRX_COMPILER_DEFMACROS_ELEM  = "def-macros"_u;
+UString const LRXCompiler::LRX_COMPILER_DEFMACRO_ELEM   = "def-macro"_u;
 UString const LRXCompiler::LRX_COMPILER_DEFSEQS_ELEM    = "def-seqs"_u;
 UString const LRXCompiler::LRX_COMPILER_DEFSEQ_ELEM     = "def-seq"_u;
 UString const LRXCompiler::LRX_COMPILER_RULES_ELEM      = "rules"_u;
 UString const LRXCompiler::LRX_COMPILER_RULE_ELEM       = "rule"_u;
+UString const LRXCompiler::LRX_COMPILER_MACRO_ELEM      = "macro"_u;
 UString const LRXCompiler::LRX_COMPILER_MATCH_ELEM      = "match"_u;
 UString const LRXCompiler::LRX_COMPILER_SELECT_ELEM     = "select"_u;
 UString const LRXCompiler::LRX_COMPILER_REMOVE_ELEM     = "remove"_u;
@@ -37,6 +40,8 @@ UString const LRXCompiler::LRX_COMPILER_OR_ELEM         = "or"_u;
 UString const LRXCompiler::LRX_COMPILER_REPEAT_ELEM     = "repeat"_u;
 UString const LRXCompiler::LRX_COMPILER_SEQ_ELEM        = "seq"_u;
 UString const LRXCompiler::LRX_COMPILER_BEGIN_ELEM      = "begin"_u;
+UString const LRXCompiler::LRX_COMPILER_PARAM_ELEM      = "param"_u;
+UString const LRXCompiler::LRX_COMPILER_WITH_PARAM_ELEM = "with-param"_u;
 
 UString const LRXCompiler::LRX_COMPILER_LEMMA_ATTR      = "lemma"_u;
 UString const LRXCompiler::LRX_COMPILER_SUFFIX_ATTR     = "suffix"_u;
@@ -47,6 +52,9 @@ UString const LRXCompiler::LRX_COMPILER_TAGS_ATTR       = "tags"_u;
 UString const LRXCompiler::LRX_COMPILER_WEIGHT_ATTR     = "weight"_u;
 UString const LRXCompiler::LRX_COMPILER_COMMENT_ATTR    = "c"_u;
 UString const LRXCompiler::LRX_COMPILER_NAME_ATTR       = "n"_u;
+UString const LRXCompiler::LRX_COMPILER_VALUE_ATTR      = "v"_u;
+UString const LRXCompiler::LRX_COMPILER_NODES_ATTR      = "nodes"_u;
+UString const LRXCompiler::LRX_COMPILER_STRS_ATTR       = "strs"_u;
 UString const LRXCompiler::LRX_COMPILER_FROM_ATTR       = "from"_u;
 UString const LRXCompiler::LRX_COMPILER_UPTO_ATTR       = "upto"_u;
 UString const LRXCompiler::LRX_COMPILER_GLOB_ATTR       = "glob"_u;
@@ -57,6 +65,10 @@ UString const LRXCompiler::LRX_COMPILER_TYPE_MATCH      = "match"_u;
 UString const LRXCompiler::LRX_COMPILER_TYPE_SELECT     = "select"_u;
 UString const LRXCompiler::LRX_COMPILER_TYPE_REMOVE     = "remove"_u;
 UString const LRXCompiler::LRX_COMPILER_TYPE_SKIP       = "skip"_u;
+
+UString const LRXCompiler::LRX_COMPILER_SYM_SELECT      = "<select>"_u;
+UString const LRXCompiler::LRX_COMPILER_SYM_REMOVE      = "<remove>"_u;
+UString const LRXCompiler::LRX_COMPILER_SYM_SKIP        = "<skip>"_u;
 
 double const  LRXCompiler::LRX_COMPILER_DEFAULT_WEIGHT  = 1.0;
 
@@ -71,19 +83,6 @@ LRXCompiler::debug(const char* fmt, ...)
   }
 }
 
-void
-LRXCompiler::error(const char* fmt, ...)
-{
-  u_fprintf(debug_output, "Error (line %d): ",
-            xmlTextReaderGetParserLineNumber(reader));
-  va_list argptr;
-  va_start(argptr, fmt);
-  u_vfprintf(debug_output, fmt, argptr);
-  va_end(argptr);
-  u_fputc('\n', debug_output);
-  exit(EXIT_FAILURE);
-}
-
 LRXCompiler::LRXCompiler()
 {
   debug_output = u_finit(stderr, NULL, NULL);
@@ -91,9 +90,9 @@ LRXCompiler::LRXCompiler()
   initialState = transducer.getInitial();
   currentState = initialState;
 
-  alphabet.includeSymbol("<"_u+ LRX_COMPILER_TYPE_SELECT + ">"_u);
-  alphabet.includeSymbol("<"_u+ LRX_COMPILER_TYPE_REMOVE + ">"_u);
-  alphabet.includeSymbol("<"_u+ LRX_COMPILER_TYPE_SKIP + ">"_u);
+  alphabet.includeSymbol(LRX_COMPILER_SYM_SELECT);
+  alphabet.includeSymbol(LRX_COMPILER_SYM_REMOVE);
+  alphabet.includeSymbol(LRX_COMPILER_SYM_SKIP);
 
   alphabet.includeSymbol("<ANY_TAG>"_u);
   alphabet.includeSymbol("<ANY_CHAR>"_u);
@@ -108,6 +107,9 @@ LRXCompiler::LRXCompiler()
   any_lower      = alphabet("<ANY_LOWER>"_u);
   word_boundary  = alphabet(alphabet("<$>"_u), alphabet("<$>"_u));
   null_boundary  = alphabet(alphabet("<$$>"_u), alphabet("<$$>"_u));
+  select_sym     = alphabet(0, alphabet(LRX_COMPILER_SYM_SELECT));
+  remove_sym     = alphabet(0, alphabet(LRX_COMPILER_SYM_REMOVE));
+  skip_sym       = alphabet(0, alphabet(LRX_COMPILER_SYM_SKIP));
 }
 
 LRXCompiler::~LRXCompiler()
@@ -127,156 +129,111 @@ LRXCompiler::setOutputGraph(bool o)
   outputGraph = o;
 }
 
-void
-LRXCompiler::skipBlanks(UString &name)
+UString
+name(xmlNode* node)
 {
-  while(name == "#text"_u || name == "#comment"_u)
-  {
-    if(name != "#comment"_u)
-    {
-      if(!allBlanks())
-      {
-        error("Invalid construction.");
-      }
-    }
+  return to_ustring((const char*) node->name);
+}
 
-    xmlTextReaderRead(reader);
-    name = XMLParseUtil::readName(reader);
+UString
+LRXCompiler::attr(xmlNode* node, const UString& attr, const UString& fallback)
+{
+  UString id = getattr(node, "p"_u + attr);
+  if (!id.empty()) {
+    if (!getattr(node, attr).empty()) {
+      error_and_die(node, "Cannot provide both regular value and macro value for attribute %S.", attr.c_str());
+    }
+    int idx = StringUtils::stoi(id);
+    if (idx > macro_string_vars.size() || idx < 1) {
+      error_and_die(node, "Parameter index out of range for macro '%S' - %d is not between 1 and %d.", getattr(currentMacro, LRX_COMPILER_NAME_ATTR).c_str(), idx, macro_string_vars.size());
+    }
+    return macro_string_vars[idx-1];
+  } else {
+    return getattr(node, attr, fallback);
   }
 }
 
 UString
-LRXCompiler::attrib(UString const &name)
+LRXCompiler::attr(xmlNode* node, const UString& attr)
 {
-  return XMLParseUtil::attrib(reader, name);
-}
-
-UString
-LRXCompiler::attrib(UString const &name, const UString fallback)
-{
-  return XMLParseUtil::attrib(reader, name, fallback);
-}
-
-bool
-LRXCompiler::allBlanks()
-{
-  UString text = XMLParseUtil::readValue(reader);
-  for (auto& c : text) {
-    if (!u_isspace(c)) {
-      return false;
-    }
-  }
-  return true;
+  return this->attr(node, attr, ""_u);
 }
 
 void
 LRXCompiler::parse(string const &fitxer)
 {
-  reader = xmlReaderForFile(fitxer.c_str(), NULL, 0);
-  if(reader == NULL)
-  {
-    cerr << "Error: Cannot open '" << fitxer << "'." << endl;
-    exit(EXIT_FAILURE);
-  }
-
-  int ret = xmlTextReaderRead(reader);
-  while(ret == 1)
-  {
-    procNode();
-    ret = xmlTextReaderRead(reader);
-  }
-
+  procNode(load_xml(fitxer.c_str()));
   transducer.minimize();
-
-  if(ret != 0)
-  {
-    cerr << "Error: Parse error at the end of input." << endl;
-  }
-
 }
 
 void
-LRXCompiler::compileSequence()
+LRXCompiler::compileSequence(xmlNode* node)
 {
-  UString top_name = XMLParseUtil::readName(reader);
-  while (true) {
-    if (xmlTextReaderRead(reader) != 1) {
-      error("Parse error.");
-    }
-
-    UString name = XMLParseUtil::readName(reader);
-    skipBlanks(name);
-
-    if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_END_ELEMENT &&
-        name == top_name) {
-      break;
-    } else if (name == LRX_COMPILER_BEGIN_ELEM) {
+  UString outer_name = name(node);
+  for (auto ch : children(node)) {
+    UString inner_name = name(ch);
+    if (inner_name == LRX_COMPILER_BEGIN_ELEM) {
       currentState = transducer.insertSingleTransduction(null_boundary, currentState);
-    } else if (name == LRX_COMPILER_MATCH_ELEM) {
-      procMatch();
-    } else if (name == LRX_COMPILER_OR_ELEM) {
-      procOr();
-    } else if (name == LRX_COMPILER_REPEAT_ELEM) {
-      procRepeat();
-    } else if (name == LRX_COMPILER_SEQ_ELEM) {
-      procSeq();
+    } else if (inner_name == LRX_COMPILER_MATCH_ELEM) {
+      procMatch(ch);
+    } else if (inner_name == LRX_COMPILER_OR_ELEM) {
+      procOr(ch);
+    } else if (inner_name == LRX_COMPILER_REPEAT_ELEM) {
+      procRepeat(ch);
+    } else if (inner_name == LRX_COMPILER_SEQ_ELEM) {
+      procSeq(ch);
+    } else if (inner_name == LRX_COMPILER_PARAM_ELEM) {
+      int idx = StringUtils::stoi(getattr(ch, LRX_COMPILER_NAME_ATTR));
+      if (idx > macro_node_vars.size() || idx < 1) {
+        if (currentMacro == nullptr) {
+          error_and_die(ch, "Cannot use <param> outside of <def-macro>.");
+        } else {
+          error_and_die(ch, "Parameter index %d out of range for macro '%S' (0-%d).", idx, getattr(currentMacro, LRX_COMPILER_NAME_ATTR), macro_node_vars.size());
+        }
+      }
+      compileSequence(macro_node_vars[idx-1]);
     } else {
-      error("Invalid inclusion of '<%S>' into '<%S>'.", name.c_str(), top_name.c_str());
+      error_and_die(ch, "Invalid inclusion of '<%S>' into '<%S>'.", inner_name.c_str(), outer_name.c_str());
     }
   }
 }
 
 void
-LRXCompiler::procNode()
+LRXCompiler::procNode(xmlNode* node)
 {
-  UString nombre = XMLParseUtil::readName(reader);
-
-  if(nombre == "#text"_u)
-  {
-    /* ignorar */
-  }
-  else if(nombre== "#comment"_u)
-  {
-    /* ignorar */
-  }
-  else if(nombre == LRX_COMPILER_LRX_ELEM)
-  {
-    if (attrib(LRX_COMPILER_GLOB_ATTR, LRX_COMPILER_GLOB_PLUS_VAL) == LRX_COMPILER_GLOB_STAR_VAL) {
+  UString nombre = name(node);
+  if (nombre == LRX_COMPILER_LRX_ELEM || nombre == LRX_COMPILER_RULES_ELEM) {
+    if (getattr(node, LRX_COMPILER_GLOB_ATTR, LRX_COMPILER_GLOB_PLUS_VAL) == LRX_COMPILER_GLOB_STAR_VAL) {
       globIsStar = true;
     }
-  }
-  else if(nombre == LRX_COMPILER_DEFSEQS_ELEM)
-  {
-    /* ignorar */
-  }
-  else if(nombre == LRX_COMPILER_DEFSEQ_ELEM)
-  {
-    procDefSeq();
-  }
-  else if(nombre == LRX_COMPILER_RULES_ELEM)
-  {
-    if (attrib(LRX_COMPILER_GLOB_ATTR, LRX_COMPILER_GLOB_PLUS_VAL) == LRX_COMPILER_GLOB_STAR_VAL) {
-      globIsStar = true;
+    for (auto ch : children(node)) procNode(ch);
+  } else if (nombre == LRX_COMPILER_DEFSEQS_ELEM || nombre == LRX_COMPILER_DEFMACROS_ELEM) {
+    for (auto ch : children(node)) procNode(ch);
+  } else if (nombre == LRX_COMPILER_DEFSEQ_ELEM) {
+    procDefSeq(node);
+  } else if (nombre == LRX_COMPILER_DEFMACRO_ELEM) {
+    UString macname = attr(node, LRX_COMPILER_NAME_ATTR);
+    if (macname.empty()) {
+      error_and_die(node, "Macro is missing name.");
+    } else if (macros.find(macname) != macros.end()) {
+      error_and_die(node, "Macro '%S' is defined multiple times.", macname.c_str());
+    } else {
+      macros[macname] = node;
     }
+  } else if (nombre == LRX_COMPILER_RULE_ELEM) {
+    procRule(node);
+  } else if (nombre == LRX_COMPILER_MACRO_ELEM) {
+    procMacro(node);
+  } else {
+    error_and_die(node, "Invalid node '<%S>'.", nombre.c_str());
   }
-  else if(nombre == LRX_COMPILER_RULE_ELEM)
-  {
-    procRule();
-  }
-  else
-  {
-    error("Invalid node '<%S>'.", nombre.c_str());
-  }
-
-  return;
 }
 
 void
-LRXCompiler::procRule()
+LRXCompiler::procRule(xmlNode* node)
 {
-  UString comment = this->attrib(LRX_COMPILER_COMMENT_ATTR);
-  UString xweight = this->attrib(LRX_COMPILER_WEIGHT_ATTR);
-  UString nombre = this->attrib(LRX_COMPILER_NAME_ATTR);
+  UString xweight = attr(node, LRX_COMPILER_WEIGHT_ATTR);
+  UString nombre = attr(node, LRX_COMPILER_NAME_ATTR);
   double weight = LRX_COMPILER_DEFAULT_WEIGHT;
   if (!xweight.empty()) {
     weight = StringUtils::stod(xweight);
@@ -296,72 +253,57 @@ LRXCompiler::procRule()
 
   debug("  rule: %d, weight: %.2f \n", currentRuleId, weight);
 
-  compileSequence();
+  compileSequence(node);
   currentState = transducer.insertSingleTransduction(word_boundary, currentState);
-  if(!alphabet.isSymbolDefined(ruleId.c_str())) {
-    alphabet.includeSymbol(ruleId.c_str());
-  }
-  currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(ruleId.c_str())), currentState);
+  alphabet.includeSymbol(ruleId);
+  currentState = transducer.insertSingleTransduction(alphabet(0, alphabet(ruleId)), currentState);
   transducer.setFinal(currentState);
   currentState = initialState;
 }
 
 void
-LRXCompiler::procOr()
+LRXCompiler::procOr(xmlNode* node)
 {
   debug("    or: \n");
 
   int or_initial_state = currentState;
   vector<int> reachedStates;
-  while(true)
-  {
-    int ret = xmlTextReaderRead(reader);
-    if(ret != 1) {
-      error("Parse error.");
-    }
-
-    UString name = XMLParseUtil::readName(reader);
-    skipBlanks(name);
-
-    if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_END_ELEMENT &&
-        name == LRX_COMPILER_OR_ELEM) {
-      if(reachedStates.size() > 1) {
-        for(auto& it : reachedStates) {
-          if(it == currentState) {
-            continue;
-          }
-          transducer.linkStates(it, currentState, 0);
-        }
-      }
-      break;
-    }
+  for (auto ch : children(node)) {
+    UString nombre = name(ch);
 
     currentState = transducer.insertNewSingleTransduction(0, or_initial_state);
 
-    if (name == LRX_COMPILER_MATCH_ELEM) {
-      procMatch();
-    } else if (name == LRX_COMPILER_OR_ELEM) {
-      procOr();
-    } else if (name == LRX_COMPILER_SEQ_ELEM) {
-      procSeq();
-    } else if (name == LRX_COMPILER_REPEAT_ELEM) {
-      procRepeat();
+    if (nombre == LRX_COMPILER_MATCH_ELEM) {
+      procMatch(ch);
+    } else if (nombre == LRX_COMPILER_OR_ELEM) {
+      procOr(ch);
+    } else if (nombre == LRX_COMPILER_SEQ_ELEM) {
+      procSeq(ch);
+    } else if (nombre == LRX_COMPILER_REPEAT_ELEM) {
+      procRepeat(ch);
     }
 
     reachedStates.push_back(currentState);
+  }
+  if (reachedStates.size() > 1) {
+    for (auto& it : reachedStates) {
+      if (it != currentState) {
+        transducer.linkStates(it, currentState, 0);
+      }
+    }
   }
 }
 
 
 void
-LRXCompiler::procDefSeq()
+LRXCompiler::procDefSeq(xmlNode* node)
 {
   Transducer temp = transducer;
   transducer.clear();
   int oldstate = currentState;
   currentState = initialState;
-  UString seqname = this->attrib(LRX_COMPILER_NAME_ATTR);
-  compileSequence();
+  UString seqname = attr(node, LRX_COMPILER_NAME_ATTR);
+  compileSequence(node);
   transducer.setFinal(currentState);
   sequences[seqname] = transducer;
   currentState = oldstate;
@@ -390,26 +332,26 @@ int add_str(Transducer* t, int state, Alphabet& alpha, const UString& s)
 
 
 int
-LRXCompiler::compileSpecifier(const UString& type, Transducer* t, int state,
+LRXCompiler::compileSpecifier(xmlNode* node, Transducer* t, int state,
                               UString* key)
 {
-  UString lemma = this->attrib(LRX_COMPILER_LEMMA_ATTR, "*"_u);
-  UString suffix = this->attrib(LRX_COMPILER_SUFFIX_ATTR);
-  UString contains = this->attrib(LRX_COMPILER_CONTAINS_ATTR);
-  UString _case = this->attrib(LRX_COMPILER_CASE_ATTR);
+  UString lemma = attr(node, LRX_COMPILER_LEMMA_ATTR, "*"_u);
+  UString suffix = attr(node, LRX_COMPILER_SUFFIX_ATTR);
+  UString contains = attr(node, LRX_COMPILER_CONTAINS_ATTR);
+  UString _case = attr(node, LRX_COMPILER_CASE_ATTR);
   // case could in principle be non-exclusive with the others
 
   if ((lemma != "*"_u ? 1 : 0) + (suffix.empty() ? 0 : 1) +
       (contains.empty() ? 0 : 1) + (_case.empty() ? 0 : 1) > 1) {
-    error("Only 1 of lemma=, suffix=, contains=, case= is supported on a single element.");
+    error_and_die(node, "Only 1 of lemma=, suffix=, contains=, case= is supported on a single element.");
   }
 
   // for future use
-  //UString surface = this->attrib(LRX_COMPILER_SURFACE_ATTR);
+  //UString surface = attr(node, LRX_COMPILER_SURFACE_ATTR);
 
-  UString tags = this->attrib(LRX_COMPILER_TAGS_ATTR, "*"_u);
+  UString tags = attr(node, LRX_COMPILER_TAGS_ATTR, "*"_u);
 
-  debug("      %S: [%S, %S, %S, %S] %S\n", type.c_str(), lemma.c_str(), suffix.c_str(), contains.c_str(), _case.c_str(), tags.c_str());
+  debug("      %S: [%S, %S, %S, %S] %S\n", name(node).c_str(), lemma.c_str(), suffix.c_str(), contains.c_str(), _case.c_str(), tags.c_str());
 
   if (!_case.empty()) {
     for (auto& c : _case) {
@@ -510,114 +452,65 @@ LRXCompiler::compileSpecifier(const UString& type, Transducer* t, int state,
 
 
 void
-LRXCompiler::procMatch()
+LRXCompiler::procMatch(xmlNode* node)
 {
-  currentState = compileSpecifier(LRX_COMPILER_TYPE_MATCH, &transducer,
-                                  currentState, nullptr);
+  currentState = compileSpecifier(node, &transducer, currentState, nullptr);
+  currentState = transducer.insertSingleTransduction(word_boundary, currentState);
 
-  if(xmlTextReaderIsEmptyElement(reader))
-  {
-    // If self-closing
-    currentState = transducer.insertSingleTransduction(word_boundary, currentState);
-    currentState = transducer.insertSingleTransduction(alphabet(0, alphabet("<skip>"_u)), currentState);
-    return;
+  bool empty = true;
+  UString nombre;
+  for (auto ch : children(node)) {
+    nombre = name(ch);
+    if (nombre == LRX_COMPILER_SELECT_ELEM || nombre == LRX_COMPILER_REMOVE_ELEM) {
+      procSelectRemove(ch);
+    } else {
+      error_and_die(ch, "Invalid inclusion of '<%S>' into <match>'.", nombre.c_str());
+    }
+    empty = false;
   }
-
-  UString name = ""_u;
-  while(true)
-  {
-    int ret = xmlTextReaderRead(reader);
-    if(ret != 1) {
-      error("Parse error.");
-    }
-
-    name = XMLParseUtil::readName(reader);
-    skipBlanks(name);
-
-    if(name == LRX_COMPILER_SELECT_ELEM)
-    {
-      procSelect();
-    }
-    else if(name == LRX_COMPILER_REMOVE_ELEM)
-    {
-      procRemove();
-    }
-    else if(name == LRX_COMPILER_MATCH_ELEM)
-    {
-      return;
-    }
-    else
-    {
-      error("Invalid inclusion of '<%S>' into '<match>'.");
-    }
+  if (empty) {
+    currentState = transducer.insertSingleTransduction(skip_sym, currentState);
   }
-
-
-  return;
 }
 
+
 void
-LRXCompiler::procSelect()
+LRXCompiler::procSelectRemove(xmlNode* node)
 {
-  UString key = "<"_u + LRX_COMPILER_TYPE_SELECT + ">"_u;
+  bool select = (name(node) == LRX_COMPILER_SELECT_ELEM);
+  UString key = (select ? LRX_COMPILER_SYM_SELECT : LRX_COMPILER_SYM_REMOVE);
   Transducer recogniser;
   int localCurrentState = recogniser.getInitial();
+  currentState = transducer.insertSingleTransduction((select ? select_sym : remove_sym), currentState);
 
-  currentState = transducer.insertSingleTransduction(word_boundary, currentState);
-  currentState = transducer.insertSingleTransduction(alphabet(0, alphabet("<"_u + LRX_COMPILER_TYPE_SELECT + ">"_u)), currentState);
-
-  localCurrentState = compileSpecifier(LRX_COMPILER_TYPE_SELECT, &recogniser,
+  localCurrentState = compileSpecifier(node, &recogniser,
                                        localCurrentState, &key);
 
   recogniser.setFinal(localCurrentState);
 
   recognisers[key] = recogniser;
-  debug("        select: %d\n", recognisers[key].size());
-  //currentState = transducer.insertSingleTransduction(word_boundary, currentState);
-
-  return;
-}
-
-void
-LRXCompiler::procRemove()
-{
-  UString key = "<"_u + LRX_COMPILER_TYPE_REMOVE + ">"_u;
-  Transducer recogniser;
-  int localCurrentState = recogniser.getInitial();
-
-  currentState = transducer.insertSingleTransduction(word_boundary, currentState);
-  currentState = transducer.insertSingleTransduction(alphabet(0, alphabet("<"_u + LRX_COMPILER_TYPE_REMOVE + ">"_u)), currentState);
-
-  localCurrentState = compileSpecifier(LRX_COMPILER_TYPE_REMOVE, &recogniser,
-                                       localCurrentState, &key);
-
-  recogniser.setFinal(localCurrentState);
-
-  recognisers[key] = recogniser;
-  debug("        remove: %d\n", recognisers[key].size());
-
-  return;
+  debug("        %S: %d\n", name(node).c_str(), recognisers[key].size());
 }
 
 
 void
-LRXCompiler::procRepeat()
+LRXCompiler::procRepeat(xmlNode* node)
 {
-  UString xfrom = this->attrib(LRX_COMPILER_FROM_ATTR);
-  UString xupto = this->attrib(LRX_COMPILER_UPTO_ATTR);
+  UString xfrom = attr(node, LRX_COMPILER_FROM_ATTR);
+  UString xupto = attr(node, LRX_COMPILER_UPTO_ATTR);
   int from = StringUtils::stoi(xfrom);
   int upto = StringUtils::stoi(xupto);
   if(from < 0 || upto < 0) {
-    error("Number of repetitions cannot be negative.");
+    error_and_die(node, "Number of repetitions cannot be negative.");
   } else if(from > upto) {
-    error("Lower bound on number of repetitions cannot be larger than upper bound.");
+    error_and_die(node, "Lower bound on number of repetitions cannot be larger than upper bound.");
   }
   int count = upto - from;
   int oldstate = currentState;
   Transducer temp = transducer;
   transducer.clear();
   currentState = initialState;
-  compileSequence();
+  compileSequence(node);
   transducer.setFinal(currentState);
   for(int i = 0; i < from; i++)
   {
@@ -634,12 +527,12 @@ LRXCompiler::procRepeat()
 
 
 void
-LRXCompiler::procSeq()
+LRXCompiler::procSeq(xmlNode* node)
 {
-  UString name = this->attrib(LRX_COMPILER_NAME_ATTR);
+  UString name = attr(node, LRX_COMPILER_NAME_ATTR);
   if(sequences.find(name) == sequences.end())
   {
-    error("Sequence '%S' is not defined.", name.c_str());
+    error_and_die(node, "Sequence '%S' is not defined.", name.c_str());
   }
   currentState = transducer.insertTransducer(currentState, sequences[name]);
 }
@@ -680,4 +573,43 @@ LRXCompiler::write(FILE *fst)
   {
     u_fprintf(debug_output, "%d: %d@%d\n", currentRuleId, transducer.size(), transducer.numberOfTransitions());
   }
+}
+
+void
+LRXCompiler::procMacro(xmlNode* node)
+{
+  UString macname = attr(node, LRX_COMPILER_NAME_ATTR);
+  if (macros.find(macname) == macros.end()) {
+    error_and_die(node, "Unknown macro '%S'.", macname.c_str());
+  }
+  xmlNode* prevMacro = currentMacro;
+  xmlNode* nextMacro = macros[macname];
+  vector<UString> current_strings;
+  vector<xmlNode*> current_nodes;
+  int nodes = StringUtils::stoi(getattr(nextMacro, LRX_COMPILER_NODES_ATTR, "0"_u));
+  int strs = StringUtils::stoi(getattr(nextMacro, LRX_COMPILER_STRS_ATTR, "0"_u));
+  for (auto ch : children(node)) {
+    if (name(ch) != LRX_COMPILER_WITH_PARAM_ELEM) {
+      error_and_die(ch, "Unexpected inclusion of <%S> in <macro>.", name(ch).c_str());
+    }
+    UString val = attr(ch, LRX_COMPILER_VALUE_ATTR);
+    if (val.empty()) {
+      current_nodes.push_back(ch);
+    } else {
+      current_strings.push_back(val);
+    }
+  }
+  if (current_nodes.size() != nodes) {
+    error_and_die(node, "Macro '%S' expects %d node parameters, but %d were given.", macname.c_str(), nodes, macro_node_vars.size());
+  }
+  if (current_strings.size() != strs) {
+    error_and_die(node, "Macro '%S' expects %d string parameters, but %d were given.", macname.c_str(), strs, macro_string_vars.size());
+  }
+  current_strings.swap(macro_string_vars);
+  current_nodes.swap(macro_node_vars);
+  currentMacro = nextMacro;
+  for (auto ch : children(currentMacro)) procNode(ch);
+  currentMacro = prevMacro;
+  current_strings.swap(macro_string_vars);
+  current_nodes.swap(macro_node_vars);
 }
