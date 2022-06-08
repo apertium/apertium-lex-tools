@@ -43,6 +43,7 @@ void endProgram(char *name)
 
 int main(int argc, char *argv[])
 {
+  LtLocale::tryToSetLocale();
   LRXProcessor lrxp;
 
 #if HAVE_GETOPT_LONG
@@ -90,7 +91,6 @@ int main(int argc, char *argv[])
 
   InputFile input;
   UFILE* output = u_finit(stdout, NULL, NULL);
-  LtLocale::tryToSetLocale();
 
   if(optind == (argc - 3))
   {
