@@ -28,8 +28,8 @@
 <!ELEMENT def-macro (rule|macro)*>
 <!ATTLIST def-macro
   n ID #REQUIRED
-  nodes CDATA #REQUIRED
-  strs CDATA #REQUIRED
+  nodes CDATA #IMPLIED
+  strs CDATA #IMPLIED
 >
 
 <!ELEMENT def-seqs (def-seq+)>
@@ -37,18 +37,17 @@
 <!ELEMENT def-seq (match|or|repeat|seq|begin)*>
 <!ATTLIST def-seq n ID #REQUIRED>
 
-<!ELEMENT rule (match|or|repeat|seq|begin)*>
+<!ELEMENT rule (match|or|repeat|seq|begin|param)*>
 <!ATTLIST rule
   weight CDATA #IMPLIED
   c CDATA #IMPLIED
 
   pweight CDATA #IMPLIED
-  pc CDATA #IMPLIED
 >
 
-<!ELEMENT or (match|or|repeat|seq|begin)*>
+<!ELEMENT or (match|or|repeat|seq|begin|param)*>
 
-<!ELEMENT repeat (match|or|repeat|seq|begin)*>
+<!ELEMENT repeat (match|or|repeat|seq|begin|param)*>
 <!ATTLIST repeat
   from CDATA #IMPLIED
   upto CDATA #IMPLIED
@@ -71,10 +70,16 @@
   pn IDREF #IMPLIED
 >
 
-<!ELEMENT with-param (match|or|repeat|seq|begin)*>
+<!ELEMENT with-param (match|or|repeat|seq|begin|param)*>
 <!ATTLIST with-param
   v CDATA #IMPLIED
   pv CDATA #IMPLIED
+>
+
+<!ELEMENT param EMPTY>
+<!ATTLIST param
+  n CDATA #IMPLIED
+  pn CDATA #IMPLIED
 >
 
 <!ELEMENT match (select|remove)?>
