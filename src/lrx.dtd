@@ -1,0 +1,129 @@
+<!--
+   Copyright (C) 2022 Apertium
+
+   This program is free software; you can redistribute it and/or
+   modify it under the terms of the GNU General Public License as
+   published by the Free Software Foundation; either version 2 of the
+   License, or (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not <https://www.gnu.org/licenses/>.
+
+      DTD for the format of lexical selection rules
+-->
+
+<!ELEMENT lrx (rules|def-macros|def-seqs)*>
+<!ATTLIST lrx glob (plus|star) #IMPLIED>
+
+<!ELEMENT rules (rule|macro)*>
+<!ATTLIST rules glob (plus|star) #IMPLIED>
+
+<!ELEMENT def-macros (def-macro*)>
+
+<!ELEMENT def-macro (rule|macro)*>
+<!ATTLIST def-macro
+  n ID #REQUIRED
+  nodes CDATA #REQUIRED
+  strs CDATA #REQUIRED
+>
+
+<!ELEMENT def-seqs (def-seq+)>
+
+<!ELEMENT def-seq (match|or|repeat|seq|begin)*>
+<!ATTLIST def-seq n ID #REQUIRED>
+
+<!ELEMENT rule (match|or|repeat|seq|begin)*>
+<!ATTLIST rule
+  weight CDATA #IMPLIED
+  c CDATA #IMPLIED
+
+  pweight CDATA #IMPLIED
+  pc CDATA #IMPLIED
+>
+
+<!ELEMENT or (match|or|repeat|seq|begin)*>
+
+<!ELEMENT repeat (match|or|repeat|seq|begin)*>
+<!ATTLIST repeat
+  from CDATA #IMPLIED
+  upto CDATA #IMPLIED
+
+  pfrom CDATA #IMPLIED
+  pupto CDATA #IMPLIED
+>
+
+<!ELEMENT begin EMPTY>
+
+<!ELEMENT seq EMPTY>
+<!ATTLIST seq
+  n IDREF #IMPLIED
+  pn IDREF #IMPLIED
+>
+
+<!ELEMENT macro (with-param*)>
+<!ATTLIST macro
+  n IDREF #IMPLIED
+  pn IDREF #IMPLIED
+>
+
+<!ELEMENT with-param (match|or|repeat|seq|begin)*>
+<!ATTLIST with-param
+  v CDATA #IMPLIED
+  pv CDATA #IMPLIED
+>
+
+<!ELEMENT match (select|remove)?>
+<!ATTLIST match
+  lemma CDATA #IMPLIED
+  suffix CDATA #IMPLIED
+  contains CDATA #IMPLIED
+  case CDATA #IMPLIED
+  surface CDATA #IMPLIED
+  tags CDATA #IMPLIED
+
+  plemma CDATA #IMPLIED
+  psuffix CDATA #IMPLIED
+  pcontains CDATA #IMPLIED
+  pcase CDATA #IMPLIED
+  psurface CDATA #IMPLIED
+  ptags CDATA #IMPLIED
+>
+
+<!ELEMENT select EMPTY>
+<!ATTLIST select
+  lemma CDATA #IMPLIED
+  suffix CDATA #IMPLIED
+  contains CDATA #IMPLIED
+  case CDATA #IMPLIED
+  surface CDATA #IMPLIED
+  tags CDATA #IMPLIED
+
+  plemma CDATA #IMPLIED
+  psuffix CDATA #IMPLIED
+  pcontains CDATA #IMPLIED
+  pcase CDATA #IMPLIED
+  psurface CDATA #IMPLIED
+  ptags CDATA #IMPLIED
+>
+
+<!ELEMENT remove EMPTY>
+<!ATTLIST remove
+  lemma CDATA #IMPLIED
+  suffix CDATA #IMPLIED
+  contains CDATA #IMPLIED
+  case CDATA #IMPLIED
+  surface CDATA #IMPLIED
+  tags CDATA #IMPLIED
+
+  plemma CDATA #IMPLIED
+  psuffix CDATA #IMPLIED
+  pcontains CDATA #IMPLIED
+  pcase CDATA #IMPLIED
+  psurface CDATA #IMPLIED
+  ptags CDATA #IMPLIED
+>

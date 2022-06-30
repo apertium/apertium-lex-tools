@@ -32,4 +32,17 @@ if HAVE_IRSTLM
     bin_PROGRAMS += irstlm-ranker
 endif
 
-EXTRA_DIST = lrx_compiler.h lrx_processor.h multi_translator.h tagger_output_processor.h
+apertium-validate-lrx: Makefile.am validate-lrx.sh
+	@echo "Creating apertium-validate-lrx script"
+	@cat validate-lrx.sh > $@
+	@echo "xmllint --dtdvalid \"$(prefix)\"/share/apertium-lex-tools/lrx.dtd --noout \"\$$FILE1\"" >> $@
+	@chmod a+x $@
+
+GENERATEDSCRIPTS = apertium-validate-lrx
+bin_SCRIPTS = $(GENERATEDSCRIPTS)
+CLEANFILES = *~ $(GENERATEDSCRIPTS)
+
+apertium_lex_toolsdir = $(prefix)/share/apertium-lex-tools
+apertium_lex_tools_DATA = lrx.dtd
+
+EXTRA_DIST = lrx_compiler.h lrx_processor.h multi_translator.h tagger_output_processor.h validate-lrx.sh
