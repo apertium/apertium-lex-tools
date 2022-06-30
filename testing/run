@@ -29,7 +29,7 @@ for xml in *.xml; do
     test=${xml%%.xml}
     rm -f "$test.{output,bin}"
     if ! (
-			../src/apertium-validate-lrx "$test.xml" &&
+			xmllint --dtdvalid ../src/lrx.dtd --noout "$test.xml" &&
 				../src/lrx-comp "$test.xml" "$test.bin" &> >(err "$test") &&
                 ../src/lrx-proc -m -z "$test.bin" < "$test.input" > "$test.output" 2> >(err "$test") &&
                 diff -au "$test.expected" "$test.output" | colournul
