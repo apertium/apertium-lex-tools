@@ -23,11 +23,10 @@
 #include <set>
 #include <cstdint>
 
-#include <libxml/xmlreader.h>
-
-#include <lttoolbox/alphabet.h>
+#include <lttoolbox/alphabet_exe.h>
 #include <lttoolbox/state.h>
-#include <lttoolbox/trans_exe.h>
+#include <lttoolbox/string_writer.h>
+#include <lttoolbox/transducer_exe.h>
 #include <lttoolbox/input_file.h>
 
 using namespace std;
@@ -36,21 +35,22 @@ class LRXProcessor
 {
 private:
 
-  Alphabet alphabet;
-  TransExe transducer;
-  map<UString, TransExe> recognisers;
+  StringWriter str_write;
+  AlphabetExe alphabet;
+  TransducerExe transducer;
+  map<UString, TransducerExe> recognisers;
   map<UString, double> weights;
 
   vector<State> alive_states;
 
-  map<Node *, double> anfinals;
+  set<TransducerExe*> anfinals;
   set<UChar32> escaped_chars;
   State *initial_state;
 
-  bool traceMode;
-  bool debugMode;
-  bool nullFlush;
-  bool outOfWord;
+  bool traceMode = false;
+  bool debugMode = false;
+  bool nullFlush = false;
+  bool outOfWord = true;
 
   int32_t any_char;
   int32_t any_upper;
@@ -59,8 +59,12 @@ private:
   int32_t word_boundary;
   int32_t null_boundary;
 
-  unsigned int pos;
-  unsigned long lineno;
+  unsigned int pos = 0;
+  unsigned long lineno = 1; // Used for rule tracing
+
+  bool mmapping = false;
+  void* mmap_pointer = nullptr;
+  int mmap_len = 0;
 
   UString itow(int i);
   bool recognisePattern(const UString lu, const UString op);

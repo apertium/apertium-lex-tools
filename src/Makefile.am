@@ -1,5 +1,5 @@
 h_sources = irstlm_ranker.h lrx_compiler.h lrx_processor.h multi_translator.h \
-			tagger_output_processor.h weight.h
+			tagger_output_processor.h binary_header.h
 cc_sources = lrx_compiler.cc lrx_processor.cc multi_translator.cc \
 			 tagger_output_processor.cc
 
