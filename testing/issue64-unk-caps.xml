@@ -1,0 +1,19 @@
+<rules>
+	<rule weight="1.0">
+		<match lemma="bassin" tags="n.*"><select lemma="conca"/></match>
+		<match lemma="de" tags="pr"/>
+		<match tags="det.*"/>
+		<or>
+			<match lemma="mer" tags="n.*"/>
+			<match lemma="fleuve" tags="n.*"/>
+			<match lemma="rivière" tags="n.*"/>
+			<match tags="np.top.*"/>
+			<match tags="" case="Aa"/>
+		</or>
+	</rule>
+	<rule weight="0.1">
+		<match lemma="bassin" tags="n.*">
+			<select lemma="blah"/>
+		</match>
+	</rule>
+</rules>

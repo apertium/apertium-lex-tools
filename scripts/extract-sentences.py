@@ -5,19 +5,6 @@
 import sys
 import common
 
-
-def ambiguous(bt):
-    # legislation<n><sg>/legislación<n><f><sg>/ordenamiento<n><m><sg>
-
-    ambig = False
-    for token in bt:
-        tls = token['tls']
-        if len(tls) > 1:
-            return True
-
-    return ambig
-
-
 def extract_sentences(phrase_table_file, biltrans_out_file):
     lineno = 0
     total_valid = 0
@@ -41,7 +28,7 @@ def extract_sentences(phrase_table_file, biltrans_out_file):
                 sl = common.tokenise_tagger_line(row[1].strip())
                 tl = common.tokenise_tagger_line(row[0].strip())
 
-                if not ambiguous(bt):
+                if not common.ambiguous(bt):
                     not_ambiguous.append(str(lineno))
                     if len(not_ambiguous) >= 10:
                         print("not ambiguous:", ' '.join(

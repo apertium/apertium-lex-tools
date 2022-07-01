@@ -28,39 +28,38 @@ import biltrans_count_common as BCC
 
 #	 d) Crispiness threshold
 
-cur_line = 0
-crisphold = 3.0  # Default
-only_max = True
-#only_max = False
-
-if len(sys.argv) == 5:
-    crisphold = float(sys.argv[4])
-    print('crisp:', crisphold, file=sys.stderr)
-
-# First read in the frequency defaults
-
-sl_tl, sl_tl_defaults, _ = BCC.read_frequencies(sys.argv[1])
-
-print('Reading...', file=sys.stderr)
-sys.stderr.flush()
-
-
 class Counter(BCC.BiltransCounter):
     tokenizer = 'biltrans'
     line_ids = True
     count_ngrams = True
     max_ngrams = 3
+    
+def biltrans_count_patterns_ngrams(biltrans_ambig, biltrans_annotated, crisphold=3.0):
+    # First read in the frequency defaults
 
+    print('Reading...', file=sys.stderr)
+    sys.stderr.flush()
 
-c = Counter()
-c.read_files(sys.argv[2],  # File with ambiguous biltrans output
-             sys.argv[3])  # File with disambiguated biltrans output
-ngrams = c.ngrams
+    c = Counter()
+    c.read_files(biltrans_ambig,  # File with ambiguous biltrans output
+                biltrans_annotated)  # File with disambiguated biltrans output
+    ngrams = c.ngrams
 
-print('Caching counts...', file=sys.stderr)
-for sl in ngrams:
-    for ngram in ngrams[sl]:
-        for tl in ngrams[sl][ngram]:
-            print('%.10f\t%s\t%s\t%s' % (ngrams[sl][ngram][tl], ngram, sl, tl))
+    print('Caching counts...', file=sys.stderr)
+    for sl in ngrams:
+        for ngram in ngrams[sl]:
+            for tl in ngrams[sl][ngram]:
+                print('%.10f\t%s\t%s\t%s' % (ngrams[sl][ngram][tl], ngram, sl, tl))
 
-print('\n', file=sys.stderr)
+    print('\n', file=sys.stderr)
+
+if __name__ == '__main__':
+    if len(sys.argv) < 3:
+        print('Usage: biltrans-count-patterns-ngrams.py <biltrans_ambig> <biltrans_annotated> [crisphold]', file=sys.stderr)
+        exit(1)
+    
+    if len(sys.argv) == 4:
+        print('crisp:', sys.argv[3], file=sys.stderr)
+        biltrans_count_patterns_ngrams(sys.argv[1], sys.argv[2], sys.argv[3])
+    else:
+        biltrans_count_patterns_ngrams(sys.argv[1], sys.argv[2])

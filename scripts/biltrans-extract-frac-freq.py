@@ -17,32 +17,38 @@ import common
 #
 #
 
-# The sl-tl possible combinations
-sl_tl = defaultdict(lambda: defaultdict(lambda: 0.0))
-
-
 class Counter(BCC.BiltransCounter):
     tokenizer = 'biltrans'
     line_ids = True
+    # The sl-tl possible combinations
+    sl_tl = defaultdict(lambda: defaultdict(lambda: 0.0))
+
 
     def process_lu(self, sl, tl, idx, cur_sl_row, frac_count=0):
-        global sl_tl
-        sl_tl[sl][tl] += frac_count
+        self.sl_tl[sl][tl] += frac_count
 
+def biltrans_extract_frac_freq(biltrans_ambig, biltrans_annotated):
 
-c = Counter()
-c.read_files(sys.argv[1],  # File with ambiguous biltrans output
-             sys.argv[2])  # File with disambiguated biltrans output
+    c = Counter()
+    c.read_files(biltrans_ambig,  # File with ambiguous biltrans output
+                biltrans_annotated)  # File with disambiguated biltrans output
 
-for sl in sl_tl:
-    newtl = sorted(sl_tl[sl], key=lambda x: sl_tl[sl][x])
-    newtl.reverse()
-    first = True
-    for tl in newtl:
-        if first:
-            print('%.10f %s %s @' %
-                  (sl_tl[sl][tl], common.wrap(sl), common.wrap(tl)))
-            first = False
-        else:
-            print('%.10f %s %s' %
-                  (sl_tl[sl][tl], common.wrap(sl), common.wrap(tl)))
+    for sl in c.sl_tl:
+        newtl = sorted(c.sl_tl[sl], key=lambda x: c.sl_tl[sl][x])
+        newtl.reverse()
+        first = True
+        for tl in newtl:
+            if first:
+                print('%.10f %s %s @' %
+                    (c.sl_tl[sl][tl], common.wrap(sl), common.wrap(tl)))
+                first = False
+            else:
+                print('%.10f %s %s' %
+                    (c.sl_tl[sl][tl], common.wrap(sl), common.wrap(tl)))
+
+if __name__ == '__main__':
+    if len(sys.argv) < 3:
+        print('Usage: biltrans-extract-frac-freq.py <biltrans_ambig> <biltrans_annotated>', file=sys.stderr)
+        exit(1)
+    
+    biltrans_extract_frac_freq(sys.argv[1], sys.argv[2])

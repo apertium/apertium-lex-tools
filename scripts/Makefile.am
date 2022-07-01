@@ -12,4 +12,5 @@ apertium_lex_tools_DATA = \
 	biltrans-count-patterns-ngrams.py \
 	ngram-pruning-frac.py \
 	ngrams-to-rules.py \
-	biltrans_count_common.py
+	biltrans_count_common.py \
+	ngram-count-patterns.py

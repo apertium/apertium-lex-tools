@@ -18,13 +18,13 @@ def ngrams_to_rules(ngrams, crisphold):
     lineno = 1
     ruleno = 0
     for line in open(ngrams).readlines():
-        #	print('\n';
-        #	print(line
+        #	print('\n')
+        #	print(line)
         if len(line) < 2:
             continue
 
         line = line.strip()
-        #line = line.strip();
+        #line = line.strip()
 
         # + 0.571428571429 14 8 8 	troiñ<vblex>		tourner<vblex>	8
         row = line.split('\t')
@@ -32,7 +32,7 @@ def ngrams_to_rules(ngrams, crisphold):
         if len(row) == 3:
             row.insert(0, '')
 
-    #	tipus = row[0].split(' ')[0];
+    #	tipus = row[0].split(' ')[0]
         weight = row[0].split(' ')[1]
         sl = row[1].strip()[1:-1]
         tl = row[3][1:-1]

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # coding=utf-8
 # -*- encoding: utf-8 -*-
 
@@ -19,14 +19,8 @@ import common
 # 5 	0-0 4-2 5-3 8-1 9-5 10-6 12-7 13-8 14-9 15-10
 # -------------------------------------------------------------------------------
 
-
-def wrap(x):
-    return '^' + x + '$'
-
-
-def ngram_count_patterns(freq_lexicon, candidates, crisphold):
+def ngram_count_patterns(freq_lexicon, candidates, crisphold, max_rules):
     MAX_NGRAMS = 2
-
     cur_line = 0
 
     sl_tl_defaults = {}
@@ -42,8 +36,8 @@ def ngram_count_patterns(freq_lexicon, candidates, crisphold):
             continue
 
         row = common.tokenise_tagger_line(line)
-        sl = wrap(row[0])
-        tl = wrap(row[1])
+        sl = common.wrap(row[0])
+        tl = common.wrap(row[1])
         if tl[1] == '*':
             tl = tl[:-3] + '$'
         if line.count('@') > 0:
@@ -82,19 +76,18 @@ def ngram_count_patterns(freq_lexicon, candidates, crisphold):
                         if al_sl != i:
                             continue
 
-                        tlword = wrap(cur_tl_row[al_tl])
-                        slword = wrap(slword)
+                        tlword = common.wrap(cur_tl_row[al_tl])
+                        slword = common.wrap(slword)
 
                         if slword not in sl_tl_defaults:
                             print('!', file=sys.stderr)
                             continue
 
                         for j in range(1, MAX_NGRAMS):
-
-                            pregram = ' '.join(map(wrap, cur_sl_row[i-j:i+1]))
-                            postgram = ' '.join(map(wrap, cur_sl_row[i:i+j+1]))
+                            pregram = ' '.join(map(common.wrap, cur_sl_row[i-j:i+1]))
+                            postgram = ' '.join(map(common.wrap, cur_sl_row[i:i+j+1]))
                             roundgram = ' '.join(
-                                map(wrap, cur_sl_row[i-j:i+j+1]))
+                                map(common.wrap, cur_sl_row[i-j:i+j+1]))
 
                             if slword not in ngrams:
                                 ngrams[slword] = {}
@@ -121,10 +114,6 @@ def ngram_count_patterns(freq_lexicon, candidates, crisphold):
                             ngrams[slword][postgram][tlword] = ngrams[slword][postgram][tlword] + 1
                             ngrams[slword][roundgram][tlword] = ngrams[slword][roundgram][tlword] + 1
 
-    #				for j in range(0, MAX_NGRAMS):
-    #					print cur_sl_row[i-j:i+1]
-    #					print cur_sl_row[i:i+j]
-
                 i = i + 1
 
             cur_line = 0
@@ -145,12 +134,14 @@ def ngram_count_patterns(freq_lexicon, candidates, crisphold):
         cur_line = cur_line + 1
 
     for sl in ngrams:
-
         for ngram in ngrams[sl]:
             total = 0
             max_freq = -1
             current_tl = ''
-            for tl in ngrams[sl][ngram]:
+            newtl = sorted(ngrams[sl][ngram], key=lambda x: ngrams[sl][ngram][x])
+            newtl.reverse()
+            newtl = newtl[:max_rules]
+            for tl in newtl:
                 if ngrams[sl][ngram][tl] > max_freq:
                     max_freq = ngrams[sl][ngram][tl]
                     current_tl = tl
@@ -173,7 +164,7 @@ def ngram_count_patterns(freq_lexicon, candidates, crisphold):
             # It would be "2" in this case: the alternative is seen twice as often as
             # the default.
 
-            for tl in ngrams[sl][ngram]:
+            for tl in newtl:
                 crispiness = 0.0
                 default = sl_tl_defaults[sl]
                 alt_crisp = float(ngrams[sl][ngram][tl]) / float(total)
@@ -197,9 +188,9 @@ def ngram_count_patterns(freq_lexicon, candidates, crisphold):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 4:
+    if len(sys.argv) < 5:
         print(
-            'Usage: count-patterns.py <lex> <candidates> <crispiness threshold>', file=sys.stderr)
+            'Usage: count-patterns.py <lex> <candidates> <crispiness threshold> <max_rules>', file=sys.stderr)
         exit(1)
 
-    ngram_count_patterns(sys.argv[1], sys.argv[2], sys.argv[3])
+    ngram_count_patterns(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])

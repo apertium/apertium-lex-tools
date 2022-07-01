@@ -5,51 +5,58 @@
 import sys
 import common
 
-with open(sys.argv[1]) as d:
-    print('<rules>')
-    for line in d:  # {
 
-        sys.stdout.flush()
-        if line[-2] == '@':  # {
-            row = common.tokenize_tagger_line(line)
+def extract_alig_lrx(lex_freq):
+    with open(lex_freq) as d:
+        print('<rules>')
 
-            fq = line.split(' ')[0]
-            sl = row[0]
-            tl = row[1]
+        for line in d:
+            sys.stdout.flush()
+            if line[-2] == '@':
+                row = common.tokenize_tagger_line(line)
 
-            if line.count('>') < 2:  # {
-                continue
-            # }
-            print(sl, tl, file=sys.stderr)
-            sl_lem = sl.split('<')[0]
-            tl_lem = tl.split('<')[0]
-            sl_lem = sl_lem.replace(
-                '-', '\\-').replace('~', ' ').replace('&', '&amp;')
-            tl_lem = tl_lem.replace(
-                '-', '\\-').replace('~', ' ').replace('&', '&amp;')
+                fq = line.split(' ')[0]
+                sl = row[0]
+                tl = row[1]
 
-            sl_tag = sl.replace('><', '.').split('<')[1].strip('>')
-            tl_tag = tl.replace('><', '.').split('<')[1].strip('>')
+                if line.count('>') < 2:
+                    continue
 
-            cmb = ''
-            cma = ''
+                print(sl, tl, file=sys.stderr)
+                sl_lem = sl.split('<')[0]
+                tl_lem = tl.split('<')[0]
+                sl_lem = sl_lem.replace(
+                    '-', '\\-').replace('~', ' ').replace('&', '&amp;')
+                tl_lem = tl_lem.replace(
+                    '-', '\\-').replace('~', ' ').replace('&', '&amp;')
 
-            if sl_tag.split('.')[0] not in ['adj', 'vblex', 'n']:  # {
-                cmb = '<!--'
-                cma = '-->'
-            else:  # {
-                cma = ''
+                sl_tag = sl.replace('><', '.').split('<')[1].strip('>')
+                tl_tag = tl.replace('><', '.').split('<')[1].strip('>')
+
                 cmb = ''
-            # }
+                cma = ''
 
-            rule = cmb + '<rule comment="' + fq + '">'
-            #rule = rule + '<match lemma="' + sl_lem + '" tags="' + sl_tag + '"><select lemma="' + tl_lem + '" tags="' + tl_tag + '"/>';
-            rule = rule + '<match lemma="' + sl_lem + '"><select lemma="' + tl_lem + '"/>'
-            rule = rule + '</match>'
-            rule = rule + '</rule>' + cma
+                if sl_tag.split('.')[0] not in ['adj', 'vblex', 'n']:
+                    cmb = '<!--'
+                    cma = '-->'
+                else:
+                    cma = ''
+                    cmb = ''
 
-            print(rule)
-        # }
+                rule = cmb + '<rule comment="' + fq + '">'
+                # rule = rule + '<match lemma="' + sl_lem + '" tags="' + sl_tag + '"><select lemma="' + tl_lem + '" tags="' + tl_tag + '"/>'
+                rule = rule + '<match lemma="' + sl_lem + '"><select lemma="' + tl_lem + '"/>'
+                rule = rule + '</match>'
+                rule = rule + '</rule>' + cma
 
-    # }
-    print('</rules>')
+                print(rule)
+
+        print('</rules>')
+
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print('Usage: extract-alig-lrx.py <lex_freq>', file=sys.stderr)
+        exit(1)
+
+    extract_alig_lrx(sys.argv[1])

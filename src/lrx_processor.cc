@@ -35,6 +35,7 @@ UString const LRXProcessor::LRX_PROCESSOR_TAG_ANY_TAG        = "<ANY_TAG>"_u;
 UString const LRXProcessor::LRX_PROCESSOR_TAG_ANY_UPPER      = "<ANY_UPPER>"_u;
 UString const LRXProcessor::LRX_PROCESSOR_TAG_ANY_LOWER      = "<ANY_LOWER>"_u;
 UString const LRXProcessor::LRX_PROCESSOR_TAG_WORD_BOUNDARY  = "<$>"_u;
+UString const LRXProcessor::LRX_PROCESSOR_TAG_NULL_BOUNDARY  = "<$$>"_u;
 
 UString
 LRXProcessor::itow(int i)
@@ -81,22 +82,16 @@ void
 LRXProcessor::load(FILE *in)
 {
   bool mmap = false;
-  fpos_t pos;
-  if (fgetpos(in, &pos) == 0) {
-    char header[4]{};
-    if (fread_unlocked(header, 1, 4, in) == 4 &&
-        strncmp(header, HEADER_LRX, 4) == 0) {
-      auto features = read_le_64(in);
-      if (features >= LRX_UNKNOWN) {
-        throw std::runtime_error("Rule file has features that are unknown to this version of apertium-lex-tools - upgrade!");
-      }
-      mmap = features & LRX_MMAP;
-    } else {
-      fsetpos(in, &pos);
+  uint64_t features;
+  if (readHeader(in, HEADER_LRX, features)) {
+    if (features >= LRX_UNKNOWN) {
+      throw std::runtime_error("Rule file has features that are unknown to this version of apertium-lex-tools - upgrade!");
     }
+    mmap = features & LRX_MMAP;
   }
 
-  if(mmap) {
+  if (mmap) {
+    fpos_t pos;
     fgetpos(in, &pos);
     rewind(in);
     mmapping = mmap_file(in, mmap_pointer, mmap_len);
@@ -148,6 +143,7 @@ LRXProcessor::load(FILE *in)
       }
     }
   } else {
+    fpos_t pos;
     Alphabet temp_alpha;
     temp_alpha.read(in);
     fsetpos(in, &pos);
@@ -186,6 +182,7 @@ LRXProcessor::load(FILE *in)
   any_upper     = alphabet(LRX_PROCESSOR_TAG_ANY_UPPER);
   any_lower     = alphabet(LRX_PROCESSOR_TAG_ANY_LOWER);
   word_boundary = alphabet(LRX_PROCESSOR_TAG_WORD_BOUNDARY);
+  null_boundary = alphabet(LRX_PROCESSOR_TAG_NULL_BOUNDARY);
 }
 
 void
@@ -320,6 +317,10 @@ LRXProcessor::process(InputFile& input, UFILE *output)
 
   vector<State*> alive_states ;
   alive_states.push_back(new State(*initial_state));
+  if (null_boundary) {
+    alive_states.push_back(new State(*initial_state));
+    alive_states[1]->step(null_boundary);
+  }
 
   int32_t val = 0;
   while((val = input.get()) != U_EOF)
@@ -337,6 +338,10 @@ LRXProcessor::process(InputFile& input, UFILE *output)
       operations.clear();
       alive_states.clear();
       alive_states.push_back(new State(*initial_state));
+      if (null_boundary) {
+        alive_states.push_back(new State(*initial_state));
+        alive_states[1]->step(null_boundary);
+      }
 
       u_fputc(val, output);
       u_fflush(output);
@@ -543,7 +548,12 @@ LRXProcessor::process(InputFile& input, UFILE *output)
       for(auto& s : alive_states)
       {
         res.clear();
-        if(val < 0)
+        if(val == '*' && sl[pos].empty()) {
+          if(debugMode) {
+            cerr << "  skipping unknown marker" << endl;
+          }
+        }
+        else if(val < 0)
         {
           alphabet.getSymbol(res, val,  false);
           if(debugMode)
@@ -673,7 +683,7 @@ LRXProcessor::processFlush(UFILE *output,
             std::string op = (m.op == Select ? "SELECT" : "REMOVE");
             cerr << lineno << ":" << op << ":" << m.weight;
             cerr << ":" << sl[spos] << ":" << ti_keep.size();
-            cerr << ":" << m.ti << endl;
+            cerr << ":" << *m.ti << endl;
           }
           // We have to keep track of translations that have been removed so
           // that we don't end up adding back a translation that was removed.

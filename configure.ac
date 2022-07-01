@@ -1,14 +1,30 @@
 AC_PREREQ(2.61)
 
-m4_define([required_libxml_version], [2.6.17])
-m4_define([required_lttoolbox_version], [3.6.0])
+m4_define([PKG_VERSION_MAJOR], [0])
+m4_define([PKG_VERSION_MINOR], [4])
+m4_define([PKG_VERSION_PATCH], [0])
 
-AC_INIT([apertium-lex-tools], [0.3.0], [apertium-stuff@lists.sourceforge.net])
+m4_define([required_libxml_version], [2.6.17])
+m4_define([required_lttoolbox_version], [3.6.5])
+
+AC_INIT([apertium-lex-tools], [PKG_VERSION_MAJOR.PKG_VERSION_MINOR.PKG_VERSION_PATCH], [apertium-stuff@lists.sourceforge.net])
 AM_INIT_AUTOMAKE
 AC_CONFIG_MACRO_DIR([m4])
 
+VERSION=$PACKAGE_VERSION
+VERSION_MAJOR=PKG_VERSION_MAJOR
+VERSION_API=PKG_VERSION_MAJOR.PKG_VERSION_MINOR
+SOVERSION=0:1:0
+
+AC_SUBST(PACKAGE_NAME)
+AC_SUBST(PACKAGE_VERSION)
+AC_SUBST(VERSION_MAJOR)
+AC_SUBST(VERSION_API)
+AC_SUBST(SOVERSION)
+
 AC_PROG_CXX
 AM_SANITY_CHECK
+AC_PROG_LIBTOOL
 AC_LANG_CPLUSPLUS
 
 CFLAGS="-Wall -Wextra $CFLAGS"
@@ -59,17 +75,14 @@ LIBS="$LIBS $LTTOOLBOX_LIBS $LIBXML_LIBS $ICU_LIBS"
 
 # Checks for highest supported C++ standard
 AC_LANG(C++)
-AX_CHECK_COMPILE_FLAG([-std=c++20], [CXXFLAGS="$CXXFLAGS -std=c++20"], [
- AX_CHECK_COMPILE_FLAG([-std=c++2a], [CXXFLAGS="$CXXFLAGS -std=c++2a"], [
-  AX_CHECK_COMPILE_FLAG([-std=c++17], [CXXFLAGS="$CXXFLAGS -std=c++17"], [
-   AX_CHECK_COMPILE_FLAG([-std=c++1z], [CXXFLAGS="$CXXFLAGS -std=c++1z"], [
-    AX_CHECK_COMPILE_FLAG([-std=c++14], [CXXFLAGS="$CXXFLAGS -std=c++14"], [
-     AX_CHECK_COMPILE_FLAG([-std=c++1y], [CXXFLAGS="$CXXFLAGS -std=c++1y"], [])
-    ])
-   ])
-  ])
- ])
+for version in 23 2b 20 2a 17 1z 14 1y; do
+  version_flag="-std=c++${version}"
+  AX_CHECK_COMPILE_FLAG([${version_flag}], [break], [version_flag=none])
+done
+AS_IF([test "$version_flag" == none], [
+  AC_MSG_ERROR([Could not enable at least C++1y (C++14) - upgrade your compiler])
 ])
+CXXFLAGS="$CXXFLAGS ${version_flag}"
 
 AS_IF([test "x$irstlm" == "xno"],
       [AC_MSG_NOTICE([IRSTLM is not enabled; you will not be able run monolingual rule-learning; enable using --with-irstlm])])
