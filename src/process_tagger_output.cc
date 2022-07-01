@@ -111,8 +111,8 @@ void processTaggerOutput(FSTProcessor *bilingual) {
 
 int main(int argc, char **argv) {
 	if (argc != 2) {
-		std::cout << "Usage: " << argv[0] << " bidix_bin_file" << endl;
-		std::cout << "with output from pretransfer on standard input." << endl;
+		std::cout << "Usage: " << argv[0] << " bidix_bin_file" << std::endl;
+		std::cout << "with output from pretransfer on standard input." << std::endl;
 		exit(-1);
 	}
 
