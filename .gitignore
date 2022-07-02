@@ -64,6 +64,7 @@ src/irstlm-ranker
 src/process-tagger-output
 src/yasmet
 src/multitrans
+src/apertium-validate-lrx
 stamp-h1
 
 /python/apertium_lex_tools.py

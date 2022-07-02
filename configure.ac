@@ -1,11 +1,11 @@
 AC_PREREQ(2.61)
 
 m4_define([PKG_VERSION_MAJOR], [0])
-m4_define([PKG_VERSION_MINOR], [3])
-m4_define([PKG_VERSION_PATCH], [1])
+m4_define([PKG_VERSION_MINOR], [4])
+m4_define([PKG_VERSION_PATCH], [0])
 
 m4_define([required_libxml_version], [2.6.17])
-m4_define([required_lttoolbox_version], [3.6.0])
+m4_define([required_lttoolbox_version], [3.6.5])
 
 AC_INIT([apertium-lex-tools], [PKG_VERSION_MAJOR.PKG_VERSION_MINOR.PKG_VERSION_PATCH], [apertium-stuff@lists.sourceforge.net])
 AM_INIT_AUTOMAKE

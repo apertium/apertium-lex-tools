@@ -1,4 +1,4 @@
 <rules>
-<rule comment="193"><match lemma="garrantzi" tags="*"><select lemma="importancia"/></match></rule>
-<rule comment="7"><match lemma="garratz" tags="*"><select lemma="ácido"/></match></rule>
+<rule c="193"><match lemma="garrantzi" tags="*"><select lemma="importancia"/></match></rule>
+<rule c="7"><match lemma="garratz" tags="*"><select lemma="ácido"/></match></rule>
 </rules>

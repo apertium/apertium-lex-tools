@@ -1,0 +1,45 @@
+<lrx>
+	<def-macros>
+		<def-macro n="n" nodes="2" npar="0">
+			<rule>
+				<param n="1"/>
+				<match tags="n.*"/>
+				<param n="2"/>
+			</rule>
+		</def-macro>
+		<def-macro n="s" nodes="0" npar="2">
+			<rule>
+				<match plemma="1"/>
+				<match plemma="2">
+					<select lemma="noodle"/>
+				</match>
+			</rule>
+		</def-macro>
+		<def-macro n="nest" npar="1">
+			<macro n="s">
+				<with-param pv="1"/>
+				<with-param v="potato"/>
+			</macro>
+		</def-macro>
+	</def-macros>
+	<rules>
+		<macro n="n">
+			<with-param>
+				<match lemma="hi"/>
+			</with-param>
+			<with-param>
+				<match lemma="ho"/>
+				<match lemma="yo">
+					<select lemma="blah"/>
+				</match>
+			</with-param>
+		</macro>
+		<macro n="s">
+			<with-param v="a"/>
+			<with-param v="b"/>
+		</macro>
+		<macro n="nest">
+			<with-param v="octopi"/>
+		</macro>
+	</rules>
+</lrx>
