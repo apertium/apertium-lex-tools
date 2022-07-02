@@ -54,7 +54,7 @@ UString const LRXCompiler::LRX_COMPILER_COMMENT_ATTR    = "c"_u;
 UString const LRXCompiler::LRX_COMPILER_NAME_ATTR       = "n"_u;
 UString const LRXCompiler::LRX_COMPILER_VALUE_ATTR      = "v"_u;
 UString const LRXCompiler::LRX_COMPILER_NODES_ATTR      = "nodes"_u;
-UString const LRXCompiler::LRX_COMPILER_STRS_ATTR       = "strs"_u;
+UString const LRXCompiler::LRX_COMPILER_NPAR_ATTR       = "npar"_u;
 UString const LRXCompiler::LRX_COMPILER_FROM_ATTR       = "from"_u;
 UString const LRXCompiler::LRX_COMPILER_UPTO_ATTR       = "upto"_u;
 UString const LRXCompiler::LRX_COMPILER_GLOB_ATTR       = "glob"_u;
@@ -587,7 +587,7 @@ LRXCompiler::procMacro(xmlNode* node)
   vector<UString> current_strings;
   vector<xmlNode*> current_nodes;
   int nodes = StringUtils::stoi(getattr(nextMacro, LRX_COMPILER_NODES_ATTR, "0"_u));
-  int strs = StringUtils::stoi(getattr(nextMacro, LRX_COMPILER_STRS_ATTR, "0"_u));
+  int npar = StringUtils::stoi(getattr(nextMacro, LRX_COMPILER_NPAR_ATTR, "0"_u));
   for (auto ch : children(node)) {
     if (name(ch) != LRX_COMPILER_WITH_PARAM_ELEM) {
       error_and_die(ch, "Unexpected inclusion of <%S> in <macro>.", name(ch).c_str());
@@ -602,8 +602,8 @@ LRXCompiler::procMacro(xmlNode* node)
   if (current_nodes.size() != nodes) {
     error_and_die(node, "Macro '%S' expects %d node parameters, but %d were given.", macname.c_str(), nodes, macro_node_vars.size());
   }
-  if (current_strings.size() != strs) {
-    error_and_die(node, "Macro '%S' expects %d string parameters, but %d were given.", macname.c_str(), strs, macro_string_vars.size());
+  if (current_strings.size() != npar) {
+    error_and_die(node, "Macro '%S' expects %d string parameters, but %d were given.", macname.c_str(), npar, macro_string_vars.size());
   }
   current_strings.swap(macro_string_vars);
   current_nodes.swap(macro_node_vars);

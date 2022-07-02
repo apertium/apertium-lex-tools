@@ -29,7 +29,7 @@
 <!ATTLIST def-macro
   n ID #REQUIRED
   nodes CDATA #IMPLIED
-  strs CDATA #IMPLIED
+  npar CDATA #IMPLIED
 >
 
 <!ELEMENT def-seqs (def-seq+)>

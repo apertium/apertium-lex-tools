@@ -112,7 +112,7 @@ public:
   static UString const LRX_COMPILER_COMMENT_ATTR;
   static UString const LRX_COMPILER_NAME_ATTR;
   static UString const LRX_COMPILER_NODES_ATTR;
-  static UString const LRX_COMPILER_STRS_ATTR;
+  static UString const LRX_COMPILER_NPAR_ATTR;
   static UString const LRX_COMPILER_VALUE_ATTR;
   static UString const LRX_COMPILER_WEIGHT_ATTR;
   static UString const LRX_COMPILER_FROM_ATTR;

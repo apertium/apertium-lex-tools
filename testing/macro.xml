@@ -1,13 +1,13 @@
 <lrx>
 	<def-macros>
-		<def-macro n="n" nodes="2" strs="0">
+		<def-macro n="n" nodes="2" npar="0">
 			<rule>
 				<param n="1"/>
 				<match tags="n.*"/>
 				<param n="2"/>
 			</rule>
 		</def-macro>
-		<def-macro n="s" nodes="0" strs="2">
+		<def-macro n="s" nodes="0" npar="2">
 			<rule>
 				<match plemma="1"/>
 				<match plemma="2">
@@ -15,7 +15,7 @@
 				</match>
 			</rule>
 		</def-macro>
-		<def-macro n="nest" strs="1">
+		<def-macro n="nest" npar="1">
 			<macro n="s">
 				<with-param pv="1"/>
 				<with-param v="potato"/>
