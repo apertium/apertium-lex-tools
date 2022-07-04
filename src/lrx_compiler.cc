@@ -188,7 +188,7 @@ LRXCompiler::compileSequence(xmlNode* node)
         if (currentMacro == nullptr) {
           error_and_die(ch, "Cannot use <param> outside of <def-macro>.");
         } else {
-          error_and_die(ch, "Parameter index %d out of range for macro '%S' (0-%d).", idx, getattr(currentMacro, LRX_COMPILER_NAME_ATTR), macro_node_vars.size());
+          error_and_die(ch, "Parameter index %d out of range for macro '%S' (0-%d).", idx, getattr(currentMacro, LRX_COMPILER_NAME_ATTR).c_str(), macro_node_vars.size());
         }
       }
       compileSequence(macro_node_vars[idx-1]);
