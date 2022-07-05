@@ -600,10 +600,10 @@ LRXCompiler::procMacro(xmlNode* node)
     }
   }
   if (current_nodes.size() != nodes) {
-    error_and_die(node, "Macro '%S' expects %d node parameters, but %d were given.", macname.c_str(), nodes, macro_node_vars.size());
+    error_and_die(node, "Macro '%S' expects %d node parameters, but %d were given.", macname.c_str(), nodes, current_nodes.size());
   }
   if (current_strings.size() != npar) {
-    error_and_die(node, "Macro '%S' expects %d string parameters, but %d were given.", macname.c_str(), npar, macro_string_vars.size());
+    error_and_die(node, "Macro '%S' expects %d string parameters, but %d were given.", macname.c_str(), npar, current_strings.size());
   }
   current_strings.swap(macro_string_vars);
   current_nodes.swap(macro_node_vars);

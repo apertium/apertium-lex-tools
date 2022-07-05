@@ -41,6 +41,7 @@
 <!ATTLIST rule
   weight CDATA #IMPLIED
   c CDATA #IMPLIED
+  v CDATA #IMPLIED
 
   pweight CDATA #IMPLIED
 >
