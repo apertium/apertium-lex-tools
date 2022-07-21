@@ -144,6 +144,9 @@ LRXCompiler::attr(xmlNode* node, const UString& attr, const UString& fallback)
       error_and_die(node, "Cannot provide both regular value and macro value for attribute %S.", attr.c_str());
     }
     int idx = StringUtils::stoi(id);
+    if (currentMacro == nullptr) {
+      error_and_die(node, "Cannot access macro parameter 'p%S' - not in a macro.", attr.c_str());
+    }
     if (idx > macro_string_vars.size() || idx < 1) {
       error_and_die(node, "Parameter index out of range for macro '%S' - %d is not between 1 and %d.", getattr(currentMacro, LRX_COMPILER_NAME_ATTR).c_str(), idx, macro_string_vars.size());
     }
