@@ -24,7 +24,7 @@ apertium_lex_tools_module = Extension(
     swig_opts=['-c++', '-I..', '-I@top_srcdir@/src', '-Wall'] + '@LTTOOLBOX_CFLAGS@'.split() + '@LIBXML_CFLAGS@'.split(),
     include_dirs=dirs,
     library_dirs=['@top_srcdir@/src/.libs'],
-    libraries = ['apertium-lex-tools@VERSION_MAJOR@'],
+    libraries = ['apertium-lex-tools'],
     extra_compile_args=compile_args,
     extra_link_args=link_args,
 )
