@@ -59,6 +59,10 @@ AC_SUBST(LIBXML_LIBS)
 
 PKG_CHECK_MODULES([ICU], [icu-i18n, icu-io, icu-uc])
 
+AC_CHECK_HEADER([utf8cpp/utf8.h], [CPPFLAGS="-I/usr/include/utf8cpp/ $CPPFLAGS"], [
+  AC_CHECK_HEADER([utf8.h], [], [AC_MSG_ERROR([You don't have utfcpp installed.])])
+])
+
 AC_SUBST(ICU_CFLAGS)
 AC_SUBST(ICU_LIBS)
 
