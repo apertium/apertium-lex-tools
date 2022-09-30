@@ -47,10 +47,9 @@ private:
   set<UChar32> escaped_chars;
   State *initial_state;
 
-  bool traceMode;
-  bool debugMode;
-  bool nullFlush;
-  bool outOfWord;
+  bool traceMode = false;
+  bool debugMode = false;
+  bool nullFlush = false;
 
   int32_t any_char;
   int32_t any_upper;
@@ -59,16 +58,13 @@ private:
   int32_t word_boundary;
   int32_t null_boundary;
 
-  unsigned int pos;
-  unsigned long lineno;
+  unsigned int pos = 0;
+  unsigned long lineno = 1; // Used for rule tracing
 
   UString itow(int i);
-  bool recognisePattern(const UString lu, const UString op);
-  UString readFullBlock(InputFile& input, UChar32 const delim1, UChar32 const delim2);
-
-  void makeTransition(int);
-  void filterFinals();
-  void evaluateRules();
+  bool recognisePattern(const UString& lu, const UString& op);
+  void read_seg(InputFile& input, UString& seg);
+  void make_anys(int32_t sym, std::set<int32_t>& alts);
 
   enum OpType { Select, Remove };
 

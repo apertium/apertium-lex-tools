@@ -47,16 +47,7 @@ LRXProcessor::itow(int i)
 
 LRXProcessor::LRXProcessor()
 {
-
   initial_state = new State();
-
-  lineno = 1; // Used for rule tracing
-  pos = 0;
-
-  traceMode = false;
-  debugMode = false;
-  outOfWord = true;
-  nullFlush = false;
 }
 
 LRXProcessor::~LRXProcessor()
@@ -155,8 +146,24 @@ LRXProcessor::init()
 
 }
 
+void
+LRXProcessor::make_anys(int32_t sym, std::set<int32_t>& alts)
+{
+  if (sym <= 0) {
+    alts.insert(any_tag);
+  } else {
+    alts.insert(any_char);
+    if (u_isupper(sym)) {
+      alts.insert(u_tolower(sym));
+      alts.insert(any_upper);
+    } else {
+      alts.insert(any_lower);
+    }
+  }
+}
+
 bool
-LRXProcessor::recognisePattern(const UString lu, const UString op)
+LRXProcessor::recognisePattern(const UString& lu, const UString& op)
 {
   if(recognisers.count(op) < 1)
   {
@@ -164,106 +171,50 @@ LRXProcessor::recognisePattern(const UString lu, const UString op)
     return false;
   }
 
-  State *first_state = new State();
-  first_state->init(recognisers[op].getInitial());
-  State cur = *first_state;
+  State cur;
+  cur.init(recognisers[op].getInitial());
 
-  map<Node *, double> end_states;
-  end_states.insert(recognisers[op].getFinals().begin(), recognisers[op].getFinals().end());
-
-  bool readingTag = false;
-  UString tag;
-  int val = 0;
-  for(auto& it : lu)
-  {
-/*
-    if(debugMode)
-    {
-      cerr << "alive: " << cur.size() << endl;
-    }
-*/
+  auto syms = alphabet.tokenize(lu);
+  for (auto& sym : syms) {
     if(cur.size() < 1)  // I think that any time we have 0 alive states,
                         // we can say that the string is unrecognised
     {
       return false;
     }
-    if(it == '<')
-    {
-      tag.clear();
-      readingTag = true;
-      tag += it;
-      continue;
-    }
-    if(it == '>')
-    {
-      tag = tag + it;
-      val = alphabet(tag);
-      if(val == 0)
-      {
-        val = any_tag;
-      }
-/*
-      if(debugMode)
-      {
-        cerr << ":: tag " << tag << ": " << val << endl;
-        cerr << "  step: " << tag << endl;
-      }
-*/
-      cur.step(val, any_tag);
-      readingTag = false;
-      continue;
-    }
-    if(readingTag)
-    {
-      tag += it;
-    }
-    else
-    {
-      // We're not in a tag, so were just reading characters
-      int val = static_cast<int>(it);
-/*
-      if(debugMode)
-      {
-        cerr << "  step: " << val << endl;
-      }
-*/
-      //cur.step(val, a("<ANY_CHAR>"));
-      //cur.step(val);
-      set<int> alts;
-      alts.insert(any_char);
-      if(!u_isupper(val))
-      {
-        alts.insert(any_lower);
-      }
-      else
-      {
-        alts.insert(any_upper);
-        alts.insert(u_tolower(val));
-      }
-      cur.step(val, alts);
-
-    }
+    std::set<int32_t> alts;
+    make_anys(sym, alts);
+    cur.step((sym == 0 ? any_tag : sym), alts);
   }
 
-/*
-  if(debugMode)
-  {
-    cerr << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
-  }
-*/
-  if(cur.isFinal(end_states))
-  {
-    return true;
-  }
+  return cur.isFinal(recognisers[op].getFinals());
+}
 
-  return false;
+void
+LRXProcessor::read_seg(InputFile& input, UString& seg)
+{
+  bool escaped = false;
+  while (!input.eof()) {
+    UChar32 c = input.get();
+    if (escaped) {
+      seg += c;
+      escaped = false;
+    } else if (c == '\\') {
+      seg += c;
+      escaped = true;
+    } else if (c == '<') {
+      seg += input.readBlock('<', '>');
+    } else if (c == '/' || c == '$') {
+      input.unget(c);
+      break;
+    } else {
+      seg += c;
+    }
+  }
 }
 
 void
 LRXProcessor::process(InputFile& input, UFILE *output)
 {
-  bool isEscaped = false;
-
   map<int, UString > sl; // map of SL words
   map<int, vector<UString> > tl; // map of vectors of TL translations
   map<int, UString > blanks; // map of the superblanks
@@ -305,45 +256,49 @@ LRXProcessor::process(InputFile& input, UFILE *output)
     }
 
     // We're starting to read a new lexical form
-    if(val == '^' && !isEscaped && outOfWord)
-    {
-      outOfWord = false;
-      continue;
-    }
-
-    // We've seen the surface form
-    if(val == '/' && !isEscaped && !outOfWord)
-    {
-      // Read in target equivalences
-      UString trad;
-      val = input.get();
-      while(val != '$' && val != U_EOF)
-      {
-        if(val != '$')
-        {
-          trad += val;
-        }
-        if(val == '/')
-        {
-          tl[pos].push_back(trad.substr(0, trad.length()-1));
-          trad.clear();
-        }
-        val = input.get();
+    if(val == '^') {
+      if (debugMode) {
+        cerr << "outOfWord = false\n";
       }
-      tl[pos].push_back(trad);
-
-      if(debugMode)
-      {
+      read_seg(input, sl[pos]);
+      if (debugMode) {
+        cerr << "  read sl: " << sl[pos] << std::endl;
+      }
+      bool unknown = false;
+      if (!sl[pos].empty() && sl[pos][0] == '*') {
+        unknown = true;
+        if (debugMode) {
+          cerr << "  skipping unknown marker" << endl;
+        }
+      }
+      while (input.peek() == '/') {
+        input.get();
+        UString trad;
+        read_seg(input, trad);
+        tl[pos].push_back(trad);
+      }
+      input.get();
+      if(debugMode) {
         for(auto& it : tl[pos]) {
           cerr << "trad[" << pos << "]: " << it << endl;
         }
       }
-    }
 
-    if((input.eof() || val == '$') && !isEscaped && !outOfWord)
-    {
-      if(debugMode)
-      {
+      auto syms = alphabet.tokenize(unknown ? sl[pos].substr(1): sl[pos]);
+      for (auto& sym : syms) {
+        std::set<int32_t> alts;
+        make_anys(sym, alts);
+        for (auto& state : alive_states) {
+          state->step((sym == 0 ? any_tag : sym), alts);
+        }
+        if (debugMode) {
+          UString res;
+          alphabet.getSymbol(res, sym, false);
+          cerr << "  step: " << res << " [alts: " << alts.size() << "]\n";
+        }
+      }
+
+      if(debugMode) {
         cerr << "[POS] " << pos << ": [sl " << sl[pos].size() << " ; tl " << tl[pos].size() << " ; bl " << blanks[pos].size() << "]: " << sl[pos] << endl;
       }
       {
@@ -474,93 +429,12 @@ LRXProcessor::process(InputFile& input, UFILE *output)
         cerr << "==> new pos: " << pos << endl;
       }
 
-      outOfWord = true;
       continue;
     }
 
-    // We're reading a tag
-    if(val == '<' && !isEscaped && !outOfWord)
-    {
-      UString tag = input.readBlock('<', '>');
-      sl[pos] = sl[pos] + tag;
-      val = alphabet(tag);
-      if (val == 0) {
-        val = any_tag;
-      }
-      if(debugMode)
-      {
-        cerr << "tag " << tag << ": " << val << "\n";
-      }
-    }
-
-    if(!outOfWord)
-    {
-      if(debugMode)
-      {
-        cerr << "outOfWord = false\n";
-      }
-
-      UString res;
-      for(auto& s : alive_states)
-      {
-        res.clear();
-        if(val == '*' && sl[pos].empty()) {
-          if(debugMode) {
-            cerr << "  skipping unknown marker" << endl;
-          }
-        }
-        else if(val < 0)
-        {
-          alphabet.getSymbol(res, val,  false);
-          if(debugMode)
-          {
-            cerr << "  step: " << res << endl;
-          }
-          s->step(val, any_tag);
-        }
-        else
-        {
-
-          set<int> alts;
-          alts.insert(any_char);
-          if(u_isupper(val))
-          {
-            alts.insert(u_tolower(val));
-            alts.insert(any_upper);
-          }
-          else
-          {
-            alts.insert(any_lower);
-          }
-          if(debugMode)
-          {
-            cerr << "  step: " << val << " [alts: " << alts.size() << "]\n";
-          }
-          s->step(val, alts);
-        }
-      }
-      // In the middle of a word, don't push initial state here cf. https://github.com/apertium/apertium-lex-tools/issues/19
-    }
-
-    // We're still reading a surface form
-    if(val > 0 && val != '$' && !isEscaped && !outOfWord)
-    {
-      sl[pos] += val;
-    }
-
     // Reading a superblank
-    if(outOfWord)
-    {
-      if(!input.eof())
-      {
-        blanks[pos] += val;
-      }
-      /*
-      if(debugMode)
-      {
-        cerr << "blanks[" << pos << "] = " << blanks[pos] << endl;
-      }
-      */
+    if(!input.eof()) {
+      blanks[pos] += val;
     }
 
     // Increment the current line number (for rule tracing)

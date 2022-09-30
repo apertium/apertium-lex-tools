@@ -1,0 +1,11 @@
+<rules>
+	<rule>
+		<match tags="num"><select tags="num.ord"/></match>
+	</rule>
+	<rule weight="3">
+		<match lemma="$"/>
+		<match tags="num">
+			<select tags="num.card"/>
+		</match>
+	</rule>
+</rules>
