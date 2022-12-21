@@ -41,11 +41,9 @@ private:
   map<UString, TransExe> recognisers;
   map<UString, double> weights;
 
-  vector<State> alive_states;
-
   map<Node *, double> anfinals;
   set<UChar32> escaped_chars;
-  State *initial_state;
+  State initial_state;
 
   bool traceMode = false;
   bool debugMode = false;

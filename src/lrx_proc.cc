@@ -16,132 +16,41 @@
  */
 #include <lrx_processor.h>
 
-#include <cstdlib>
-#include <getopt.h>
-#include <iostream>
-#include <libgen.h>
 #include <lttoolbox/lt_locale.h>
+#include <lttoolbox/cli.h>
+#include <lttoolbox/file_utils.h>
 
 using namespace std;
-
-void endProgram(char *name)
-{
-  cout << basename(name) << ": process a bilingual stream with a lexical rule transducer" << endl;
-  cout << "USAGE: " << basename(name) << "[ -z | -d | -t ] fst_file [input_file [output_file]]" << endl;
-#if HAVE_GETOPT_LONG
-  cout << "  -t, --trace:         trace the rules which have been applied" << endl;
-  cout << "  -d, --debug:         print out information about how the rules are run" << endl;
-  cout << "  -z, --null-flush:    flush on the null character" << endl;
-#else
-  cout << "  -t:         trace the rules which have been applied" << endl;
-  cout << "  -d:         print out information about how the rules are run" << endl;
-  cout << "  -z:         flush on the null character" << endl;
-#endif
-  exit(EXIT_FAILURE);
-}
-
 
 int main(int argc, char *argv[])
 {
   LtLocale::tryToSetLocale();
+  CLI cli("process a bilingual stream with a lexical rule transducer", PACKAGE_VERSION);
+  cli.add_bool_arg('t', "trace", "trace rules which have been applied");
+  cli.add_bool_arg('d', "debug", "print out information about which rules are run");
+  cli.add_bool_arg('z', "null-flush", "flush on the null character");
+  cli.add_bool_arg('m', "max-ent", "no-op (retained for backwards compatibility)");
+  cli.add_bool_arg('h', "help", "print this message and exit");
+  cli.add_file_arg("fst_file", false);
+  cli.add_file_arg("input_file", true);
+  cli.add_file_arg("output_file", true);
+  cli.parse_args(argc, argv);
+
   LRXProcessor lrxp;
 
-#if HAVE_GETOPT_LONG
-  static struct option long_options[]=
-    {
-      {"trace",        0, 0, 't'},
-      {"max-ent",      0, 0, 'm'}, // deprecated cf. https://github.com/apertium/apertium-lex-tools/issues/24
-      {"debug",        0, 0, 'd'},
-      {"null-flush",   0, 0, 'z'},
-    };
-#endif
+  lrxp.setNullFlush(cli.get_bools()["null-flush"]);
+  lrxp.setTraceMode(cli.get_bools()["trace"]);
+  lrxp.setDebugMode(cli.get_bools()["debug"]);
 
-  while(true)
-  {
-#if HAVE_GETOPT_LONG
-    int option_index;
-    int c = getopt_long(argc, argv, "mztd", long_options, &option_index);
-#else
-    int c = getopt(argc, argv, "mztd");
-#endif
-
-    if(c == -1)
-    {
-      break;
-    }
-
-    switch(c)
-    {
-    case 'm':
-      break;
-    case 'z':
-      lrxp.setNullFlush(true);
-      break;
-    case 't':
-      lrxp.setTraceMode(true);
-      break;
-    case 'd':
-      lrxp.setDebugMode(true);
-      break;
-    default:
-      endProgram(argv[0]);
-      break;
-    }
-  }
+  FILE* in = openInBinFile(cli.get_files()[0]);
+  lrxp.load(in);
+  fclose(in);
 
   InputFile input;
-  UFILE* output = u_finit(stdout, NULL, NULL);
-
-  if(optind == (argc - 3))
-  {
-    FILE *in = fopen(argv[optind], "rb");
-    if(in == NULL || ferror(in))
-    {
-      endProgram(argv[0]);
-    }
-
-    if (!input.open(argv[optind+1])) {
-      endProgram(argv[0]);
-    }
-
-    output = u_fopen(argv[optind+2], "w", NULL, NULL);
-    if(output == NULL)
-    {
-      endProgram(argv[0]);
-    }
-
-    lrxp.load(in);
-    fclose(in);
+  if (!cli.get_files()[1].empty()) {
+    input.open_or_exit(cli.get_files()[1].c_str());
   }
-  else if(optind == (argc -2))
-  {
-    FILE *in = fopen(argv[optind], "rb");
-    if(in == NULL || ferror(in))
-    {
-      endProgram(argv[0]);
-    }
-
-    if (!input.open(argv[optind+1])) {
-      endProgram(argv[0]);
-    }
-
-    lrxp.load(in);
-    fclose(in);
-  }
-  else if(optind == (argc - 1))
-  {
-    FILE *in = fopen(argv[optind], "rb");
-    if(in == NULL || ferror(in))
-    {
-      endProgram(argv[0]);
-    }
-    lrxp.load(in);
-    fclose(in);
-  }
-  else
-  {
-    endProgram(argv[0]);
-  }
+  UFILE* output = openOutTextFile(cli.get_files()[2]);
 
   lrxp.init();
   lrxp.process(input, output);

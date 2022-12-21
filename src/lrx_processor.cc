@@ -47,12 +47,10 @@ LRXProcessor::itow(int i)
 
 LRXProcessor::LRXProcessor()
 {
-  initial_state = new State();
 }
 
 LRXProcessor::~LRXProcessor()
 {
-  delete initial_state;
 }
 
 void
@@ -128,7 +126,7 @@ LRXProcessor::load(FILE *in)
 void
 LRXProcessor::init()
 {
-  initial_state->init(transducer.getInitial());
+  initial_state.init(transducer.getInitial());
 
   anfinals.insert(transducer.getFinals().begin(), transducer.getFinals().end());
 
@@ -222,11 +220,9 @@ LRXProcessor::process(InputFile& input, UFILE *output)
   map<int, map<UString, double> > scores; //
   map<int, map<UString, OpType> > operations;
 
-  vector<State*> alive_states ;
-  alive_states.push_back(new State(*initial_state));
+  State s = initial_state;
   if (null_boundary) {
-    alive_states.push_back(new State(*initial_state));
-    alive_states[1]->step(null_boundary);
+    s.step_optional(null_boundary);
   }
 
   int32_t val = 0;
@@ -243,11 +239,9 @@ LRXProcessor::process(InputFile& input, UFILE *output)
       blanks.clear();
       scores.clear();
       operations.clear();
-      alive_states.clear();
-      alive_states.push_back(new State(*initial_state));
+      s = initial_state;
       if (null_boundary) {
-        alive_states.push_back(new State(*initial_state));
-        alive_states[1]->step(null_boundary);
+        s.step_optional(null_boundary);
       }
 
       u_fputc(val, output);
@@ -288,9 +282,7 @@ LRXProcessor::process(InputFile& input, UFILE *output)
       for (auto& sym : syms) {
         std::set<int32_t> alts;
         make_anys(sym, alts);
-        for (auto& state : alive_states) {
-          state->step((sym == 0 ? any_tag : sym), alts);
-        }
+        s.step((sym == 0 ? any_tag : sym), alts);
         if (debugMode) {
           UString res;
           alphabet.getSymbol(res, sym, false);
@@ -302,22 +294,14 @@ LRXProcessor::process(InputFile& input, UFILE *output)
         cerr << "[POS] " << pos << ": [sl " << sl[pos].size() << " ; tl " << tl[pos].size() << " ; bl " << blanks[pos].size() << "]: " << sl[pos] << endl;
       }
       {
-        vector<State *> new_states; // TODO: Can we avoid the State-copying here?
         // \forall s \in A
-        set<UString> seen_ids;
-        for(auto& it : alive_states)
+        sorted_vector<UString> seen_ids;
         {
-          State s = *it;
           // \IF \exists c \in Q : \delta(s, sent[i]) = c
           s.step(word_boundary);
 
           // A \gets A \cup {c}
-          if (s.size() > 0) // If the current state has outgoing transitions,
-                            // add it to the new alive states
-          {
-            new_states.push_back(new State(s));
-          }
-          s.step(word_boundary);
+          s.step_optional(word_boundary);
 
           // \IF c \in F
           if (s.isFinal(anfinals))
@@ -334,9 +318,8 @@ LRXProcessor::process(InputFile& input, UFILE *output)
 
             for (auto& it : outpaths)
             {
-              vector<State> reached;
-              vector<UString> path = it.second;
-              UString id = it.first;
+              const vector<UString>& path = it.second;
+              const UString& id = it.first;
 
               if (seen_ids.find(id) != seen_ids.end())
               {
@@ -382,13 +365,6 @@ LRXProcessor::process(InputFile& input, UFILE *output)
             }
           }
         }
-        alive_states.swap(new_states);
-        alive_states.push_back(new State(*initial_state));
-        for (auto& s : new_states) {
-          if (s != initial_state) {
-            delete s;
-          }
-        }
 
         if (debugMode)
         {
@@ -397,11 +373,11 @@ LRXProcessor::process(InputFile& input, UFILE *output)
             cerr << " " << it << " ";
           }
           cerr << endl;
-          cerr << "#CURRENT_ALIVE: " << alive_states.size() << endl;
+          cerr << "#CURRENT_ALIVE: " << s.size() << endl;
         }
       }
 
-      if(alive_states.size() == 1)
+      if (s.size() == 0)
       {
         // If we have only a single alive state, it means no rules are
         // active, and we can flush the buffers.
@@ -422,6 +398,8 @@ LRXProcessor::process(InputFile& input, UFILE *output)
         scores.clear();
         //spans.clear();
       }
+
+      s.merge(initial_state);
 
       pos++;
       if(debugMode)
