@@ -38,6 +38,7 @@ private:
   map<int32_t, double> weights; // keyed on rule id
 
   map<UString, Transducer> sequences;
+  map<UString, pair<Transducer*, UString>> sets;
 
   map<UString, xmlNode*> macros;
   vector<UString> macro_string_vars;
@@ -83,6 +84,8 @@ private:
   void procRepeat(xmlNode* node);
   void procSeq(xmlNode* node);
   void procMacro(xmlNode* node);
+  void procSet(xmlNode* node);
+  void procDefSet(xmlNode* node);
 
 public:
   static UString const LRX_COMPILER_LRX_ELEM;
@@ -102,6 +105,9 @@ public:
   static UString const LRX_COMPILER_BEGIN_ELEM;
   static UString const LRX_COMPILER_PARAM_ELEM;
   static UString const LRX_COMPILER_WITH_PARAM_ELEM;
+  static UString const LRX_COMPILER_SET_ELEM;
+  static UString const LRX_COMPILER_DEF_SET_ELEM;
+  static UString const LRX_COMPILER_LEMMA_ELEM;
 
   static UString const LRX_COMPILER_SURFACE_ATTR;
   static UString const LRX_COMPILER_SUFFIX_ATTR;

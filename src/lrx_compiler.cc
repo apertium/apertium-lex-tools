@@ -42,6 +42,9 @@ UString const LRXCompiler::LRX_COMPILER_SEQ_ELEM        = "seq"_u;
 UString const LRXCompiler::LRX_COMPILER_BEGIN_ELEM      = "begin"_u;
 UString const LRXCompiler::LRX_COMPILER_PARAM_ELEM      = "param"_u;
 UString const LRXCompiler::LRX_COMPILER_WITH_PARAM_ELEM = "with-param"_u;
+UString const LRXCompiler::LRX_COMPILER_DEF_SET_ELEM    = "def-set"_u;
+UString const LRXCompiler::LRX_COMPILER_SET_ELEM        = "set"_u;
+UString const LRXCompiler::LRX_COMPILER_LEMMA_ELEM      = "lemma"_u;
 
 UString const LRXCompiler::LRX_COMPILER_LEMMA_ATTR      = "lemma"_u;
 UString const LRXCompiler::LRX_COMPILER_SUFFIX_ATTR     = "suffix"_u;
@@ -114,6 +117,9 @@ LRXCompiler::LRXCompiler()
 
 LRXCompiler::~LRXCompiler()
 {
+  for (auto& it : sets) {
+    delete it.second.first;
+  }
 }
 
 void
@@ -185,6 +191,8 @@ LRXCompiler::compileSequence(xmlNode* node)
       procRepeat(ch);
     } else if (inner_name == LRX_COMPILER_SEQ_ELEM) {
       procSeq(ch);
+    } else if (inner_name == LRX_COMPILER_SET_ELEM) {
+      procSet(ch);
     } else if (inner_name == LRX_COMPILER_PARAM_ELEM) {
       int idx = StringUtils::stoi(getattr(ch, LRX_COMPILER_NAME_ATTR));
       if (idx > macro_node_vars.size() || idx < 1) {
@@ -214,6 +222,8 @@ LRXCompiler::procNode(xmlNode* node)
     for (auto ch : children(node)) procNode(ch);
   } else if (nombre == LRX_COMPILER_DEFSEQ_ELEM) {
     procDefSeq(node);
+  } else if (nombre == LRX_COMPILER_DEF_SET_ELEM) {
+    procDefSet(node);
   } else if (nombre == LRX_COMPILER_DEFMACRO_ELEM) {
     UString macname = attr(node, LRX_COMPILER_NAME_ATTR);
     if (macname.empty()) {
@@ -282,6 +292,8 @@ LRXCompiler::procOr(xmlNode* node)
       procOr(ch);
     } else if (nombre == LRX_COMPILER_SEQ_ELEM) {
       procSeq(ch);
+    } else if (nombre == LRX_COMPILER_SET_ELEM) {
+      procSet(ch);
     } else if (nombre == LRX_COMPILER_REPEAT_ELEM) {
       procRepeat(ch);
     }
@@ -615,4 +627,47 @@ LRXCompiler::procMacro(xmlNode* node)
   currentMacro = prevMacro;
   current_strings.swap(macro_string_vars);
   current_nodes.swap(macro_node_vars);
+}
+
+void
+LRXCompiler::procSet(xmlNode* node)
+{
+  UString name = attr(node, LRX_COMPILER_NAME_ATTR);
+  auto loc = sets.find(name);
+  if (loc == sets.end()) {
+    error_and_die(node, "Undefined set %S.", name.c_str());
+  }
+  currentState = transducer.insertTransducer(currentState, *(loc->second.first));
+  UString tags = attr(node, LRX_COMPILER_TAGS_ATTR, loc->second.second);
+  for (auto& it : StringUtils::split(tags, "."_u)) {
+    if (it.empty()) continue;
+    UString tag = "<"_u + it + ">"_u;
+    if ((!globIsStar && tag == "<*>"_u) ||
+        tag == "<+>"_u) {
+      currentState = add_loop(&transducer, currentState, alphabet(any_tag, 0), false);
+    } else if (globIsStar && tag == "<*>"_u) {
+      currentState = add_loop(&transducer, currentState, alphabet(any_tag, 0), true);
+    } else if (tag == "<?>"_u) {
+      currentState = transducer.insertSingleTransduction(alphabet(any_tag, 0), currentState);
+    } else {
+      if (!alphabet.isSymbolDefined(tag)) {
+        alphabet.includeSymbol(tag);
+      }
+      currentState = transducer.insertSingleTransduction(alphabet(alphabet(tag), 0), currentState);
+    }
+  }
+  currentState = transducer.insertSingleTransduction(word_boundary, currentState);
+  currentState = transducer.insertSingleTransduction(skip_sym, currentState);
+}
+
+void
+LRXCompiler::procDefSet(xmlNode* node)
+{
+  Transducer* t = new Transducer();
+  for (auto ch : children(node)) {
+    if (name(ch) != LRX_COMPILER_LEMMA_ELEM) continue;
+    t->setFinal(add_str(t, 0, alphabet, to_ustring((const char*) xmlNodeGetContent(ch))));
+  }
+  UString tags = attr(node, LRX_COMPILER_TAGS_ATTR, "*"_u);
+  sets[attr(node, LRX_COMPILER_NAME_ATTR)] = std::make_pair(t, tags);
 }

@@ -1,0 +1,41 @@
+<lrx>
+	<def-seqs>
+		<def-set n="bloop" tags="n.*">
+			<lemma>bloop</lemma>
+			<lemma>shoop</lemma>
+		</def-set>
+		<def-set n="blah">
+			<lemma>qaa</lemma>
+			<lemma>qzz</lemma>
+		</def-set>
+	</def-seqs>
+	<rules>
+		<rule>
+			<match lemma="free" tags="adj.*"><select lemma="gratis"/></match>
+		</rule>
+		<rule weight="3">
+			<match lemma="free" tags="adj.*">
+				<select lemma="libre1"/>
+			</match>
+			<set n="bloop"/>
+		</rule>
+		<rule weight="4">
+			<match lemma="free" tags="adj.*">
+				<select lemma="libre2"/>
+			</match>
+			<set n="bloop" tags="n.f.*"/>
+		</rule>
+		<rule weight="2">
+			<match lemma="free" tags="adj.*">
+				<select lemma="libre3"/>
+			</match>
+			<set n="blah"/>
+		</rule>
+		<rule weight="3">
+			<match lemma="free" tags="adj.*">
+				<select lemma="libre4"/>
+			</match>
+			<set n="blah" tags="adj.*"/>
+		</rule>
+	</rules>
+</lrx>

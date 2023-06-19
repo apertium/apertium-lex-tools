@@ -32,12 +32,20 @@
   npar CDATA #IMPLIED
 >
 
-<!ELEMENT def-seqs (def-seq+)>
+<!ELEMENT def-seqs (def-seq|def-set)+>
 
 <!ELEMENT def-seq (match|or|repeat|seq|begin)*>
 <!ATTLIST def-seq n ID #REQUIRED>
 
-<!ELEMENT rule (match|or|repeat|seq|begin|param)*>
+<!ELEMENT def-set (lemma)*>
+<!ATTLIST def-set
+  n ID #REQUIRED
+  tags CDATA #IMPLIED
+>
+
+<!ELEMENT lemma (#PCDATA)>
+
+<!ELEMENT rule (match|or|repeat|seq|begin|param|set)*>
 <!ATTLIST rule
   weight CDATA #IMPLIED
   c CDATA #IMPLIED
@@ -46,9 +54,9 @@
   pweight CDATA #IMPLIED
 >
 
-<!ELEMENT or (match|or|repeat|seq|begin|param)*>
+<!ELEMENT or (match|or|repeat|seq|begin|param|set)*>
 
-<!ELEMENT repeat (match|or|repeat|seq|begin|param)*>
+<!ELEMENT repeat (match|or|repeat|seq|begin|param|set)*>
 <!ATTLIST repeat
   from CDATA #IMPLIED
   upto CDATA #IMPLIED
@@ -65,13 +73,21 @@
   pn IDREF #IMPLIED
 >
 
+<!ELEMENT set EMPTY>
+<!ATTLIST set
+  n IDREF #IMPLIED
+  pn IDREF #IMPLIED
+  tags CDATA #IMPLIED
+  ptags CDATA #IMPLIED
+>
+
 <!ELEMENT macro (with-param*)>
 <!ATTLIST macro
   n IDREF #IMPLIED
   pn IDREF #IMPLIED
 >
 
-<!ELEMENT with-param (match|or|repeat|seq|begin|param)*>
+<!ELEMENT with-param (match|or|repeat|seq|begin|param|set)*>
 <!ATTLIST with-param
   v CDATA #IMPLIED
   pv CDATA #IMPLIED
