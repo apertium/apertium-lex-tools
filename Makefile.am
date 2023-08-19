@@ -1,6 +1,6 @@
 AM_LDFLAGS=$(LIBS)
 
-SUBDIRS = src scripts
+SUBDIRS = src scripts locales
 
 pkgconfigdir = $(libdir)/pkgconfig
 dist_pkgconfig_DATA = apertium-lex-tools.pc
@@ -15,3 +15,7 @@ check:
 
 .PHONY: test
 test: check
+
+export LTTB_I18N_DATA=$(datadir)/lttoolbox/lttoolbox.dat
+export LOCALES_DIR=$(datadir)/$(PACKAGE_NAME)
+export APER_I18N_DATA=$(LOCALES_DIR)/apertium.dat

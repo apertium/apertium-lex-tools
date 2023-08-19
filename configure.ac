@@ -48,6 +48,7 @@ AM_CONDITIONAL([HAVE_YASMET], [test "x$yasmet" != "xno"])
 
 
 PKG_CHECK_MODULES([LTTOOLBOX], [lttoolbox >= required_lttoolbox_version])
+PKG_CHECK_MODULES(I18N, [i18n], CPPFLAGS="$CPPFLAGS $I18N_CFLAGS"; LIBS="$LIBS $I18N_LIBS")
 
 AC_SUBST(LTTOOLBOX_CFLAGS)
 AC_SUBST(LTTOOLBOX_LIBS)
@@ -112,5 +113,5 @@ then
 	fi
 fi
 
-AC_CONFIG_FILES([Makefile apertium-lex-tools.pc src/Makefile scripts/Makefile])
+AC_CONFIG_FILES([Makefile apertium-lex-tools.pc src/Makefile scripts/Makefile locales/Makefile])
 AC_OUTPUT

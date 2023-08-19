@@ -1,0 +1,3 @@
+root{
+    biltrans_without_queue_desc{Usage: {program}<path to a binary bilingual transducer> [--trimmed | -t]}
+}

@@ -79,3 +79,9 @@ stamp-h1
 /testing/*.output
 /compile_commands.json
 /.projectile
+
+/.vscode/
+/locales/Makefile
+/locales/Makefile.in
+*.res
+*.dat

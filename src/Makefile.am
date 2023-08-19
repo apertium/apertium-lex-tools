@@ -19,6 +19,8 @@ multitrans_SOURCES = multitrans.cc
 
 process_tagger_output_SOURCES = process_tagger_output.cc
 
+AM_CPPFLAGS = -DAPLT_I18N_DATA='"$(APLT_I18N_DATA)"' -DLTTB_I18N_DATA='"$(LTTB_I18N_DATA)"'
+
 LDADD = -lapertium-lex-tools $(lib_LTLIBRARIES)
 
 if HAVE_YASMET
