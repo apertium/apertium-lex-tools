@@ -20,6 +20,7 @@
 #include <iostream>
 #include <algorithm>
 #include <lttoolbox/compression.h>
+#include <i18n.h>
 
 using namespace std;
 
@@ -165,7 +166,8 @@ LRXProcessor::recognisePattern(const UString& lu, const UString& op)
 {
   if(recognisers.count(op) < 1)
   {
-    cerr << "WARNING: Recogniser not found for key " << op << ", skipping... [LU: " << lu << "]" << endl;
+    I18n(APLT_I18N_DATA, "aplt").error("APLT1022", {"key", "lu"},
+      {icu::UnicodeString(op.data()), icu::UnicodeString(lu.data())}, false);
     return false;
   }
 

@@ -29,6 +29,7 @@
 #include <lttoolbox/input_file.h>
 #include <unicode/uchar.h>
 #include <unicode/ustdio.h>
+#include <i18n.h>
 
 using namespace std;
 
@@ -160,8 +161,9 @@ int main(int argc, char **argv)
 
   if(argc < 2)
   {
-    cout << basename(argv[0]) << " v" << PACKAGE_VERSION <<": assign default lexical selection values" << endl;
-    cout << "USAGE: " << basename(argv[0]) << " lex_file " << endl;
+    cout << I18n(APLT_I18N_DATA, "aplt").format("ldx_proc_desc", {"program", "version"},
+                {basename(argv[0]), PACKAGE_VERSION})
+         << endl;
     exit(-1);
   }
 

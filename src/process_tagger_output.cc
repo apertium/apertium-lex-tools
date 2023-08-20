@@ -6,6 +6,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <i18n.h>
 
 int find(std::vector<UString> xs, UString x) {
 	for (size_t i = 0; i < xs.size(); i++) {
@@ -111,8 +112,8 @@ void processTaggerOutput(FSTProcessor *bilingual) {
 
 int main(int argc, char **argv) {
 	if (argc != 2) {
-		std::cout << "Usage: " << argv[0] << " bidix_bin_file" << std::endl;
-		std::cout << "with output from pretransfer on standard input." << std::endl;
+		std::cout << I18n(APLT_I18N_DATA, "aplt").format("process_tagger_output_desc", {"program"}, {argv[0]})
+		          << std::endl;
 		exit(-1);
 	}
 

@@ -19,18 +19,20 @@
 #include <lttoolbox/lt_locale.h>
 #include <lttoolbox/cli.h>
 #include <lttoolbox/file_utils.h>
+#include <i18n.h>
 
 using namespace std;
 
 int main(int argc, char *argv[])
 {
+  I18n i18n {APLT_I18N_DATA, "aplt"};
   LtLocale::tryToSetLocale();
-  CLI cli("process a bilingual stream with a lexical rule transducer", PACKAGE_VERSION);
-  cli.add_bool_arg('t', "trace", "trace rules which have been applied");
-  cli.add_bool_arg('d', "debug", "print out information about which rules are run");
-  cli.add_bool_arg('z', "null-flush", "flush on the null character");
-  cli.add_bool_arg('m', "max-ent", "no-op (retained for backwards compatibility)");
-  cli.add_bool_arg('h', "help", "print this message and exit");
+  CLI cli(i18n.format("lrx_proc_desc"), PACKAGE_VERSION);
+  cli.add_bool_arg('t', "trace", i18n.format("trace_desc"));
+  cli.add_bool_arg('d', "debug", i18n.format("debug_desc"));
+  cli.add_bool_arg('z', "null-flush", i18n.format("null_flush_desc"));
+  cli.add_bool_arg('m', "max-ent", i18n.format("max_ent_desc"));
+  cli.add_bool_arg('h', "help", i18n.format("help_desc"));
   cli.add_file_arg("fst_file", false);
   cli.add_file_arg("input_file", true);
   cli.add_file_arg("output_file", true);

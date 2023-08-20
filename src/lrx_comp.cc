@@ -20,6 +20,7 @@
 #include <iostream>
 #include <libgen.h>
 #include <lttoolbox/lt_locale.h>
+#include <i18n.h>
 
 using namespace std;
 
@@ -27,8 +28,9 @@ void endProgram(char *name)
 {
   if(name != NULL)
   {
-    cout << basename(name) << " v" << PACKAGE_VERSION <<": build a selection transducer from a ruleset" << endl;
-    cout << "USAGE: " << basename(name) << " rule_file output_file" << endl;
+    cout << I18n(APLT_I18N_DATA, "aplt").format("lrx_comp_desc", {"program", "version"},
+                {basename(name), PACKAGE_VERSION})
+         << endl;
   }
   exit(EXIT_FAILURE);
 }

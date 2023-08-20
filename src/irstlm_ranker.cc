@@ -1,3 +1,4 @@
+#include <i18n.h>
 #include "irstlm_ranker.h"
 using namespace std;
 
@@ -8,15 +9,12 @@ IrstlmRanker::IrstlmRanker(const string &filePath,
     bool val = this->load(filePath, 1.0);
 
     if(!val) {
-        cerr<<"There was a problem when loadling the language model from file '";
-        cerr << filePath <<"'"<<endl;
-        exit(EXIT_FAILURE);
+        I18n(APLT_I18N_DATA, "aplt").error("APLT1000", {"file"}, {filePath.c_str()}, true);
     }
 	this->probMassThr = params[0];
 	tmtrans.open(tmtrans_path);
 	if (!tmtrans.is_open()) {
-		cout << "Could not open trimmed multitrans file: " << tmtrans_path << endl;
-		exit(-1);
+        I18n(APLT_I18N_DATA, "aplt").error("APLT1000", {"file"}, {tmtrans_path}, true);
 	}
     cout.precision(10);
 
@@ -369,7 +367,7 @@ vector<double> parseArgs(int argc, char **argv) {
 }
 
 void printError(char* name) {
-    cout<<"Error: Wrong number of parameters"<<endl;
+    I18n(APLT_I18N_DATA, "aplt").error("APLT1001", {}, {}, false);
     cout<<"Usage: "<<name<<" <lm_file> <trimmed-multitrans-file> <mode> [-m | --probability-mass-threshold]"<<endl;
     cout<<"modes:" << endl;
     cout<<"\t -s | --standard"<<endl;
@@ -385,7 +383,7 @@ int main(int argc, char ** argv) {
 	// I don't know :)
 
     if(setlocale(LC_CTYPE, "") == NULL) {
-        cerr << "Warning: unsupported locale, fallback to \"C\"" << endl;
+        I18n(APLT_I18N_DATA, "aplt").error("APLT1002", {}, {}, false);
         setlocale(LC_ALL, "C");
     }
 

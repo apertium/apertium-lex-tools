@@ -1,3 +1,51 @@
 root{
-    biltrans_without_queue_desc{Usage: {program}<path to a binary bilingual transducer> [--trimmed | -t]}
+    biltrans_without_queue_desc{"Usage: {program} <path to a binary bilingual transducer> [--trimmed | -t]"}
+    ldx_proc_desc{"{program} v{version}: assign default lexical selection values\n"
+                  "USAGE: {program} lex_file"}
+    lrx_comp_desc{"{program} v{version}: build a selection transducer from a ruleset\n"
+                  "USAGE: {program} rule_file output_file"}
+
+    lrx_proc_desc{"process a bilingual stream with a lexical rule transducer"}
+    trace_desc{"trace rules which have been applied"}
+    debug_desc{"print out information about which rules are run"}
+    null_flush_desc{"flush on the null character"}
+    max_ent_desc{"no-op (retained for backwards compatibility)"}
+    help_desc{"print this message and exit"}
+
+    process_tagger_output_desc{"Usage: {program} bidix_bin_file\n"
+                               "with output from pretransfer on standard input."}
+    yasmet_desc{"\nUsage: {program} [-v|-V|-red n|-iter n|-dN d|-lNorm|-deltaPP dpp][mu]\n"
+                " none: GIS \n"
+                " -red: count-based feature selection\n"
+                "   mu: test pp\n"
+                "-iter: number of iterations\n"
+                "  -dN: smoothing of event counts\n"
+                "-lNorm: length normalisation\n"
+                "-deltaPP: end criterion minimal change of perplexity\n"
+                "-kw: write K file\n"
+                "-kr: read K file\n"}
+
+    APLT1000{"ERROR APLT1000: Unable to access \"{file}\"."}
+    APLT1001{"ERROR APLT1001: Wrong number of parameters."}
+    APLT1002{"WARNING APLT1002: unsupported locale, fallback to \"C\"."}
+    APLT1003{"ERROR APLT1003: On file \"{file}\" line {line}: Cannot provide both regular value and macro value for attribute {attr}."}
+    APLT1004{"ERROR APLT1004: On file \"{file}\" line {line}: Cannot access macro parameter \"p{attr}\" - not in a macro."}
+    APLT1005{"ERROR APLT1005: On file \"{file}\" line {line}: Parameter index out of range for macro \"{attr}\" - {index} is not between 1 and {size}."}
+    APLT1006{"ERROR APLT1006: On file \"{file}\" line {line}: Cannot use <param> outside of <def-macro>."}
+    APLT1007{"ERROR APLT1007: On file \"{file}\" line {line}: Parameter index {idx} out of range for macro \"{attr}\" (0-{size})."}
+    APLT1008{"ERROR APLT1008: On file \"{file}\" line {line}: Invalid inclusion of \"<{inner}>\" into \"<{outer}>\""}
+    APLT1009{"ERROR APLT1009: On file \"{file}\" line {line}: Macro is missing name."}
+    APLT1010{"ERROR APLT1010: On file \"{file}\" line {line}: Macro \"{macro}\" is defined multiple times."}
+    APLT1011{"ERROR APLT1011: On file \"{file}\" line {line}: Invalid node \"<{node}>\"."}
+    APLT1012{"ERROR APLT1012: On file \"{file}\" line {line}: Only 1 of lemma=, suffix=, contains=, case= is supported on a single element."}
+    APLT1013{"ERROR APLT1013: On file \"{file}\" line {line}: Invalid inclusion of \"<{node}>\" into \"<match>\"."}
+    APLT1014{"ERROR APLT1014: On file \"{file}\" line {line}: Number of repetitions cannot be negative."}
+    APLT1015{"ERROR APLT1015: On file \"{file}\" line {line}: Lower bound on number of repetitions cannot be larger than upper bound."}
+    APLT1016{"ERROR APLT1016: On file \"{file}\" line {line}: Sequence \"{seq}\" is not defined."}
+    APLT1017{"ERROR APLT1017: On file \"{file}\" line {line}: Unknown macro \"{macro}\"."}
+    APLT1018{"ERROR APLT1018: On file \"{file}\" line {line}: Macro \"{macro}\" expects {expected} node parameters, but {given} were given."}
+    APLT1019{"ERROR APLT1019: On file \"{file}\" line {line}: Macro \"{macro}\" expects {expected} string parameters, but {given} were given."}
+    APLT1020{"ERROR APLT1020: On file \"{file}\" line {line}: Unexpected inclusion of <{node}> in <macro>."}
+    APLT1021{"ERROR APLT1021: On file \"{file}\" line {line}: Undefined set {set}."}
+    APLT1022{"WARNING APLT1022: On file \"{file}\" line {line}: Recogniser not found for key {key}, skipping... [LU: {lu}]."}
 }
