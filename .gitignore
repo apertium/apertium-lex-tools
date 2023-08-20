@@ -85,3 +85,4 @@ stamp-h1
 /locales/Makefile.in
 *.res
 *.dat
+/configure~
