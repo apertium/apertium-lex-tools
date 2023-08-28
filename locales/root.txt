@@ -25,14 +25,13 @@ root{
                 "-kw: write K file\n"
                 "-kr: read K file\n"}
 
-    APLT1000{"ERROR APLT1000: Unable to access \"{file}\"."}
+    APLT1000{"ERROR APLT1000: Unable to access file \"{file}\"."}
     APLT1001{"ERROR APLT1001: Wrong number of parameters."}
     APLT1002{"WARNING APLT1002: unsupported locale, fallback to \"C\"."}
     APLT1003{"ERROR APLT1003: On file \"{file}\" line {line}: Cannot provide both regular value and macro value for attribute {attr}."}
     APLT1004{"ERROR APLT1004: On file \"{file}\" line {line}: Cannot access macro parameter \"p{attr}\" - not in a macro."}
     APLT1005{"ERROR APLT1005: On file \"{file}\" line {line}: Parameter index out of range for macro \"{attr}\" - {index} is not between 1 and {size}."}
     APLT1006{"ERROR APLT1006: On file \"{file}\" line {line}: Cannot use <param> outside of <def-macro>."}
-    APLT1007{"ERROR APLT1007: On file \"{file}\" line {line}: Parameter index {idx} out of range for macro \"{attr}\" (0-{size})."}
     APLT1008{"ERROR APLT1008: On file \"{file}\" line {line}: Invalid inclusion of \"<{inner}>\" into \"<{outer}>\""}
     APLT1009{"ERROR APLT1009: On file \"{file}\" line {line}: Macro is missing name."}
     APLT1010{"ERROR APLT1010: On file \"{file}\" line {line}: Macro \"{macro}\" is defined multiple times."}

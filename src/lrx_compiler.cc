@@ -166,7 +166,7 @@ LRXCompiler::attr(xmlNode* node, const UString& attr, const UString& fallback)
                                          {(char*)node->doc->URL,
                                          to_string(node->line).c_str(),
                                          icu::UnicodeString(getattr(currentMacro, LRX_COMPILER_NAME_ATTR).data()),
-                                         to_string(idx).c_str(),idx,
+                                         to_string(idx).c_str(),
                                          to_string(macro_string_vars.size()).c_str()}, true);
     }
     return macro_string_vars[idx-1];
@@ -210,22 +210,23 @@ LRXCompiler::compileSequence(xmlNode* node)
       int idx = StringUtils::stoi(getattr(ch, LRX_COMPILER_NAME_ATTR));
       if (idx > macro_node_vars.size() || idx < 1) {
         if (currentMacro == nullptr) {
-          I18n(APLT_I18N_DATA, "aplt").error("APLT1006", {"file", "line", "attr"},
+          I18n(APLT_I18N_DATA, "aplt").error("APLT1006", {"file", "line"},
                                          {(char*)ch->doc->URL,
                                          to_string(ch->line).c_str()}, true);
         } else {
-          I18n(APLT_I18N_DATA, "aplt").error("APLT1007", {"file", "line", "idx", "attr", "size"},
+          I18n(APLT_I18N_DATA, "aplt").error("APLT1005", {"file", "line", "attr", "index", "size"},
                                          {(char*)ch->doc->URL,
                                          to_string(ch->line).c_str(),
-                                         to_string(idx).c_str(),
                                          icu::UnicodeString(getattr(currentMacro, LRX_COMPILER_NAME_ATTR).data()),
-                                         to_string(macro_node_vars.size()).c_str()}, true);
+                                         to_string(idx).c_str(),
+                                         to_string(macro_string_vars.size()).c_str()}, true);
         }
       }
       compileSequence(macro_node_vars[idx-1]);
     } else {
       I18n(APLT_I18N_DATA, "aplt").error("APLT1008", {"file", "line", "inner" "outer"},
                                          {(char*)node->doc->URL,
+                                         to_string(node->line).c_str(),
                                          icu::UnicodeString(inner_name.data()),
                                          icu::UnicodeString(outer_name.data())}, true);
     }
@@ -664,7 +665,7 @@ LRXCompiler::procMacro(xmlNode* node)
     }
   }
   if (current_nodes.size() != nodes) {
-    I18n(APLT_I18N_DATA, "aplt").error("APLT1019", {"file", "line", "macro", "expected", "given"},
+    I18n(APLT_I18N_DATA, "aplt").error("APLT1018", {"file", "line", "macro", "expected", "given"},
                                          {(char*)node->doc->URL,
                                          to_string(node->line).c_str(),
                                          icu::UnicodeString(macname.data()),
