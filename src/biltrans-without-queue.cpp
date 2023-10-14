@@ -1,10 +1,10 @@
 #include "BiltransWithoutQueue.h"
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 int main(int argc, char** argv) {
 
 	if (argc != 2 && argc != 3) {
-		cout << I18n(APLT_I18N_DATA, "aplt").format("biltrans_without_queue_desc");
+		cout << I18n(ALX_I18N_DATA, "alx").format("biltrans_without_queue_desc");
 			 << endl;
 		exit(1);
 	}

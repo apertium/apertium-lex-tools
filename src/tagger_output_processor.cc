@@ -1,7 +1,7 @@
 #include "tagger_output_processor.h"
 #include <lttoolbox/string_utils.h>
 #include <lttoolbox/input_file.h>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 int TaggerOutputProcessor::find(vector<UString> xs, UString x)
 {

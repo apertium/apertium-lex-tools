@@ -19,13 +19,13 @@
 #include <lttoolbox/lt_locale.h>
 #include <lttoolbox/cli.h>
 #include <lttoolbox/file_utils.h>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 using namespace std;
 
 int main(int argc, char *argv[])
 {
-  I18n i18n {APLT_I18N_DATA, "aplt"};
+  I18n i18n {ALX_I18N_DATA, "alx"};
   LtLocale::tryToSetLocale();
   CLI cli(i18n.format("lrx_proc_desc"), PACKAGE_VERSION);
   cli.add_bool_arg('t', "trace", i18n.format("trace_desc"));

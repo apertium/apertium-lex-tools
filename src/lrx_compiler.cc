@@ -22,7 +22,7 @@
 #include <lttoolbox/compression.h>
 #include <iostream>
 #include <limits>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 #include <unicode/ustream.h>
 
 using namespace std;
@@ -149,20 +149,20 @@ LRXCompiler::attr(xmlNode* node, const UString& attr, const UString& fallback)
   UString id = getattr(node, "p"_u + attr);
   if (!id.empty()) {
     if (!getattr(node, attr).empty()) {
-      I18n(APLT_I18N_DATA, "aplt").error("APLT1003", {"file", "line", "attr"},
+      I18n(ALX_I18N_DATA, "alx").error("ALX80030", {"file", "line", "attr"},
                                          {(const char*)node->doc->URL,
                                          to_string(node->line).c_str(),
                                          icu::UnicodeString(attr.data())}, true);
     }
     int idx = StringUtils::stoi(id);
     if (currentMacro == nullptr) {
-      I18n(APLT_I18N_DATA, "aplt").error("APLT1004", {"file", "line", "attr"},
+      I18n(ALX_I18N_DATA, "alx").error("ALX80040", {"file", "line", "attr"},
                                          {(char*)node->doc->URL,
                                          to_string(node->line).c_str(),
                                          icu::UnicodeString(attr.data())}, true);
     }
     if (idx > macro_string_vars.size() || idx < 1) {
-      I18n(APLT_I18N_DATA, "aplt").error("APLT1005", {"file", "line", "attr", "index", "size"},
+      I18n(ALX_I18N_DATA, "alx").error("ALX80050", {"file", "line", "attr", "index", "size"},
                                          {(char*)node->doc->URL,
                                          to_string(node->line).c_str(),
                                          icu::UnicodeString(getattr(currentMacro, LRX_COMPILER_NAME_ATTR).data()),
@@ -210,11 +210,11 @@ LRXCompiler::compileSequence(xmlNode* node)
       int idx = StringUtils::stoi(getattr(ch, LRX_COMPILER_NAME_ATTR));
       if (idx > macro_node_vars.size() || idx < 1) {
         if (currentMacro == nullptr) {
-          I18n(APLT_I18N_DATA, "aplt").error("APLT1006", {"file", "line"},
+          I18n(ALX_I18N_DATA, "alx").error("ALX80060", {"file", "line"},
                                          {(char*)ch->doc->URL,
                                          to_string(ch->line).c_str()}, true);
         } else {
-          I18n(APLT_I18N_DATA, "aplt").error("APLT1005", {"file", "line", "attr", "index", "size"},
+          I18n(ALX_I18N_DATA, "alx").error("ALX80050", {"file", "line", "attr", "index", "size"},
                                          {(char*)ch->doc->URL,
                                          to_string(ch->line).c_str(),
                                          icu::UnicodeString(getattr(currentMacro, LRX_COMPILER_NAME_ATTR).data()),
@@ -224,7 +224,7 @@ LRXCompiler::compileSequence(xmlNode* node)
       }
       compileSequence(macro_node_vars[idx-1]);
     } else {
-      I18n(APLT_I18N_DATA, "aplt").error("APLT1008", {"file", "line", "inner" "outer"},
+      I18n(ALX_I18N_DATA, "alx").error("ALX80080", {"file", "line", "inner" "outer"},
                                          {(char*)node->doc->URL,
                                          to_string(node->line).c_str(),
                                          icu::UnicodeString(inner_name.data()),
@@ -251,11 +251,11 @@ LRXCompiler::procNode(xmlNode* node)
   } else if (nombre == LRX_COMPILER_DEFMACRO_ELEM) {
     UString macname = attr(node, LRX_COMPILER_NAME_ATTR);
     if (macname.empty()) {
-      I18n(APLT_I18N_DATA, "aplt").error("APLT1009", {"file", "line"},
+      I18n(ALX_I18N_DATA, "alx").error("ALX80090", {"file", "line"},
                                          {(char*)node->doc->URL,
                                          to_string(node->line).c_str()}, true);
     } else if (macros.find(macname) != macros.end()) {
-      I18n(APLT_I18N_DATA, "aplt").error("APLT1010", {"file", "line", "macro"},
+      I18n(ALX_I18N_DATA, "alx").error("ALX80100", {"file", "line", "macro"},
                                          {(char*)node->doc->URL,
                                          to_string(node->line).c_str(),
                                          icu::UnicodeString(macname.data())}, true);
@@ -267,7 +267,7 @@ LRXCompiler::procNode(xmlNode* node)
   } else if (nombre == LRX_COMPILER_MACRO_ELEM) {
     procMacro(node);
   } else {
-    I18n(APLT_I18N_DATA, "aplt").error("APLT1011", {"file", "line", "node"},
+    I18n(ALX_I18N_DATA, "alx").error("ALX80110", {"file", "line", "node"},
                                          {(char*)node->doc->URL,
                                          to_string(node->line).c_str(),
                                          icu::UnicodeString(nombre.data())}, true);
@@ -390,7 +390,7 @@ LRXCompiler::compileSpecifier(xmlNode* node, Transducer* t, int state,
 
   if ((lemma != "*"_u ? 1 : 0) + (suffix.empty() ? 0 : 1) +
       (contains.empty() ? 0 : 1) + (_case.empty() ? 0 : 1) > 1) {
-    I18n(APLT_I18N_DATA, "aplt").error("APLT1012", {"file", "line"},
+    I18n(ALX_I18N_DATA, "alx").error("ALX80120", {"file", "line"},
                                          {(char*)node->doc->URL,
                                          to_string(node->line).c_str()}, true);
   }
@@ -513,7 +513,7 @@ LRXCompiler::procMatch(xmlNode* node)
     if (nombre == LRX_COMPILER_SELECT_ELEM || nombre == LRX_COMPILER_REMOVE_ELEM) {
       procSelectRemove(ch);
     } else {
-      I18n(APLT_I18N_DATA, "aplt").error("APLT1013", {"file", "line", "node"},
+      I18n(ALX_I18N_DATA, "alx").error("ALX80130", {"file", "line", "node"},
                                          {(char*)ch->doc->URL,
                                          to_string(ch->line).c_str(),
                                          icu::UnicodeString(nombre.c_str())}, true);
@@ -553,11 +553,11 @@ LRXCompiler::procRepeat(xmlNode* node)
   int from = StringUtils::stoi(xfrom);
   int upto = StringUtils::stoi(xupto);
   if(from < 0 || upto < 0) {
-    I18n(APLT_I18N_DATA, "aplt").error("APLT1014", {"file", "line"},
+    I18n(ALX_I18N_DATA, "alx").error("ALX80140", {"file", "line"},
                                          {(char*)node->doc->URL,
                                          to_string(node->line).c_str()}, true);
   } else if(from > upto) {
-    I18n(APLT_I18N_DATA, "aplt").error("APLT1015", {"file", "line"},
+    I18n(ALX_I18N_DATA, "alx").error("ALX80150", {"file", "line"},
                                          {(char*)node->doc->URL,
                                          to_string(node->line).c_str()}, true);
   }
@@ -588,7 +588,7 @@ LRXCompiler::procSeq(xmlNode* node)
   UString name = attr(node, LRX_COMPILER_NAME_ATTR);
   if(sequences.find(name) == sequences.end())
   {
-    I18n(APLT_I18N_DATA, "aplt").error("APLT1016", {"file", "line", "seq"},
+    I18n(ALX_I18N_DATA, "alx").error("ALX80160", {"file", "line", "seq"},
                                          {(char*)node->doc->URL,
                                          to_string(node->line).c_str(),
                                          icu::UnicodeString(name.data())}, true);
@@ -639,7 +639,7 @@ LRXCompiler::procMacro(xmlNode* node)
 {
   UString macname = attr(node, LRX_COMPILER_NAME_ATTR);
   if (macros.find(macname) == macros.end()) {
-    I18n(APLT_I18N_DATA, "aplt").error("APLT1017", {"file", "line", "macro"},
+    I18n(ALX_I18N_DATA, "alx").error("ALX80170", {"file", "line", "macro"},
                                          {(char*)node->doc->URL,
                                          to_string(node->line).c_str(),
                                          icu::UnicodeString(macname.data())}, true);
@@ -652,7 +652,7 @@ LRXCompiler::procMacro(xmlNode* node)
   int npar = StringUtils::stoi(getattr(nextMacro, LRX_COMPILER_NPAR_ATTR, "0"_u));
   for (auto ch : children(node)) {
     if (name(ch) != LRX_COMPILER_WITH_PARAM_ELEM) {
-      I18n(APLT_I18N_DATA, "aplt").error("APLT1020", {"file", "line", "node"},
+      I18n(ALX_I18N_DATA, "alx").error("ALX80200", {"file", "line", "node"},
                                          {(char*)ch->doc->URL,
                                          to_string(ch->line).c_str(),
                                          icu::UnicodeString(name(ch).data())}, true);
@@ -665,7 +665,7 @@ LRXCompiler::procMacro(xmlNode* node)
     }
   }
   if (current_nodes.size() != nodes) {
-    I18n(APLT_I18N_DATA, "aplt").error("APLT1018", {"file", "line", "macro", "expected", "given"},
+    I18n(ALX_I18N_DATA, "alx").error("ALX80180", {"file", "line", "macro", "expected", "given"},
                                          {(char*)node->doc->URL,
                                          to_string(node->line).c_str(),
                                          icu::UnicodeString(macname.data()),
@@ -673,7 +673,7 @@ LRXCompiler::procMacro(xmlNode* node)
                                          to_string(current_nodes.size()).c_str()}, true);
   }
   if (current_strings.size() != npar) {
-    I18n(APLT_I18N_DATA, "aplt").error("APLT1019", {"file", "line", "macro", "expected", "given"},
+    I18n(ALX_I18N_DATA, "alx").error("ALX80190", {"file", "line", "macro", "expected", "given"},
                                          {(char*)node->doc->URL,
                                          to_string(node->line).c_str(),
                                          icu::UnicodeString(macname.data()),
@@ -695,7 +695,7 @@ LRXCompiler::procSet(xmlNode* node)
   UString name = attr(node, LRX_COMPILER_NAME_ATTR);
   auto loc = sets.find(name);
   if (loc == sets.end()) {
-    I18n(APLT_I18N_DATA, "aplt").error("APLT1021", {"file", "line", "set"},
+    I18n(ALX_I18N_DATA, "alx").error("ALX80210", {"file", "line", "set"},
                                          {(char*)node->doc->URL,
                                          to_string(node->line).c_str(),
                                          icu::UnicodeString(name.data())}, true);

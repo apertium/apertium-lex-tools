@@ -1,4 +1,4 @@
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 #include "irstlm_ranker.h"
 using namespace std;
 
@@ -9,12 +9,12 @@ IrstlmRanker::IrstlmRanker(const string &filePath,
     bool val = this->load(filePath, 1.0);
 
     if(!val) {
-        I18n(APLT_I18N_DATA, "aplt").error("APLT1000", {"file"}, {filePath.c_str()}, true);
+        I18n(ALX_I18N_DATA, "alx").error("ALX80000", {"file"}, {filePath.c_str()}, true);
     }
 	this->probMassThr = params[0];
 	tmtrans.open(tmtrans_path);
 	if (!tmtrans.is_open()) {
-        I18n(APLT_I18N_DATA, "aplt").error("APLT1000", {"file"}, {tmtrans_path}, true);
+        I18n(ALX_I18N_DATA, "alx").error("ALX80000", {"file"}, {tmtrans_path}, true);
 	}
     cout.precision(10);
 
@@ -367,7 +367,7 @@ vector<double> parseArgs(int argc, char **argv) {
 }
 
 void printError(char* name) {
-    I18n(APLT_I18N_DATA, "aplt").error("APLT1001", {}, {}, false);
+    I18n(ALX_I18N_DATA, "alx").error("ALX80010", {}, {}, false);
     cout<<"Usage: "<<name<<" <lm_file> <trimmed-multitrans-file> <mode> [-m | --probability-mass-threshold]"<<endl;
     cout<<"modes:" << endl;
     cout<<"\t -s | --standard"<<endl;
@@ -383,7 +383,7 @@ int main(int argc, char ** argv) {
 	// I don't know :)
 
     if(setlocale(LC_CTYPE, "") == NULL) {
-        I18n(APLT_I18N_DATA, "aplt").error("APLT1002", {}, {}, false);
+        I18n(ALX_I18N_DATA, "alx").error("ALX60020", {}, {}, false);
         setlocale(LC_ALL, "C");
     }
 

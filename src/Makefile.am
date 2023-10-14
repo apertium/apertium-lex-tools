@@ -19,7 +19,7 @@ multitrans_SOURCES = multitrans.cc
 
 process_tagger_output_SOURCES = process_tagger_output.cc
 
-AM_CPPFLAGS = -DAPLT_I18N_DATA='"$(APLT_I18N_DATA)"' -DLTTB_I18N_DATA='"$(LTTB_I18N_DATA)"'
+AM_CPPFLAGS = -DALX_I18N_DATA='"$(ALX_I18N_DATA)"' -DALT_I18N_DATA='"$(ALT_I18N_DATA)"'
 
 LDADD = -lapertium-lex-tools $(lib_LTLIBRARIES)
 

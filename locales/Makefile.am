@@ -1,7 +1,7 @@
-aplt.dat: root.txt en.txt
+alx.dat: root.txt en.txt
 	genrb -d . root.txt en.txt
 	echo root.res en.res > package_list.txt
-	pkgdata -p aplt --mode archive -d . package_list.txt
+	pkgdata -p alx --mode archive -d . package_list.txt
 
 localesdir = $(LOCALES_DIR)
-dist_locales_DATA = aplt.dat
+dist_locales_DATA = alx.dat

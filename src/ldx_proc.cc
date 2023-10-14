@@ -29,7 +29,7 @@
 #include <lttoolbox/input_file.h>
 #include <unicode/uchar.h>
 #include <unicode/ustdio.h>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 using namespace std;
 
@@ -161,7 +161,7 @@ int main(int argc, char **argv)
 
   if(argc < 2)
   {
-    cout << I18n(APLT_I18N_DATA, "aplt").format("ldx_proc_desc", {"program", "version"},
+    cout << I18n(ALX_I18N_DATA, "alx").format("ldx_proc_desc", {"program", "version"},
                 {basename(argv[0]), PACKAGE_VERSION})
          << endl;
     exit(-1);

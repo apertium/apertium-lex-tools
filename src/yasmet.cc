@@ -9,7 +9,7 @@
 #include <set>
 #include <iterator>
 #include <math.h>
-#include <i18n.h>
+#include <lttoolbox/i18n.h>
 
 /* YASMET 1.0 toolkit Copyright (C) 2002 Franz Josef Och */
 #include <fstream> /* This program is free software; you can redistribute */
@@ -106,7 +106,7 @@ int main(int argc, char **argv)
 		else if (si == "-kw" || si == "-kr") kfl = 1 + (si == "-kr");
 		else if (si == "-initmu") initmu = 1;
 		else if (argv[i][0] == '-') {
-			std::cerr << I18n(APLT_I18N_DATA, "aplt").format("yasmet_desc", {"program"}, {argv[0]});
+			std::cerr << I18n(ALX_I18N_DATA, "alx").format("yasmet_desc", {"program"}, {argv[0]});
 			return 0;
 		}
 		else {

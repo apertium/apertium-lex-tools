@@ -25,26 +25,26 @@ root{
                 "-kw: write K file\n"
                 "-kr: read K file\n"}
 
-    APLT1000{"ERROR APLT1000: Unable to access file \"{file}\"."}
-    APLT1001{"ERROR APLT1001: Wrong number of parameters."}
-    APLT1002{"WARNING APLT1002: unsupported locale, fallback to \"C\"."}
-    APLT1003{"ERROR APLT1003: On file \"{file}\" line {line}: Cannot provide both regular value and macro value for attribute {attr}."}
-    APLT1004{"ERROR APLT1004: On file \"{file}\" line {line}: Cannot access macro parameter \"p{attr}\" - not in a macro."}
-    APLT1005{"ERROR APLT1005: On file \"{file}\" line {line}: Parameter index out of range for macro \"{attr}\" - {index} is not between 1 and {size}."}
-    APLT1006{"ERROR APLT1006: On file \"{file}\" line {line}: Cannot use <param> outside of <def-macro>."}
-    APLT1008{"ERROR APLT1008: On file \"{file}\" line {line}: Invalid inclusion of \"<{inner}>\" into \"<{outer}>\""}
-    APLT1009{"ERROR APLT1009: On file \"{file}\" line {line}: Macro is missing name."}
-    APLT1010{"ERROR APLT1010: On file \"{file}\" line {line}: Macro \"{macro}\" is defined multiple times."}
-    APLT1011{"ERROR APLT1011: On file \"{file}\" line {line}: Invalid node \"<{node}>\"."}
-    APLT1012{"ERROR APLT1012: On file \"{file}\" line {line}: Only 1 of lemma=, suffix=, contains=, case= is supported on a single element."}
-    APLT1013{"ERROR APLT1013: On file \"{file}\" line {line}: Invalid inclusion of \"<{node}>\" into \"<match>\"."}
-    APLT1014{"ERROR APLT1014: On file \"{file}\" line {line}: Number of repetitions cannot be negative."}
-    APLT1015{"ERROR APLT1015: On file \"{file}\" line {line}: Lower bound on number of repetitions cannot be larger than upper bound."}
-    APLT1016{"ERROR APLT1016: On file \"{file}\" line {line}: Sequence \"{seq}\" is not defined."}
-    APLT1017{"ERROR APLT1017: On file \"{file}\" line {line}: Unknown macro \"{macro}\"."}
-    APLT1018{"ERROR APLT1018: On file \"{file}\" line {line}: Macro \"{macro}\" expects {expected} node parameters, but {given} were given."}
-    APLT1019{"ERROR APLT1019: On file \"{file}\" line {line}: Macro \"{macro}\" expects {expected} string parameters, but {given} were given."}
-    APLT1020{"ERROR APLT1020: On file \"{file}\" line {line}: Unexpected inclusion of <{node}> in <macro>."}
-    APLT1021{"ERROR APLT1021: On file \"{file}\" line {line}: Undefined set {set}."}
-    APLT1022{"WARNING APLT1022: On file \"{file}\" line {line}: Recogniser not found for key {key}, skipping... [LU: {lu}]."}
+    ALX80000{"ERROR ALX80000: Unable to access file \"{file}\"."}
+    ALX80010{"ERROR ALX80010: Wrong number of parameters."}
+    ALX60020{"WARNING ALX60020: unsupported locale, fallback to \"C\"."}
+    ALX80030{"ERROR ALX80030: On file \"{file}\" line {line}: Cannot provide both regular value and macro value for attribute {attr}."}
+    ALX80040{"ERROR ALX80040: On file \"{file}\" line {line}: Cannot access macro parameter \"p{attr}\" - not in a macro."}
+    ALX80050{"ERROR ALX80050: On file \"{file}\" line {line}: Parameter index out of range for macro \"{attr}\" - {index} is not between 1 and {size}."}
+    ALX80060{"ERROR ALX80060: On file \"{file}\" line {line}: Cannot use <param> outside of <def-macro>."}
+    ALX80080{"ERROR ALX80080: On file \"{file}\" line {line}: Invalid inclusion of \"<{inner}>\" into \"<{outer}>\""}
+    ALX80090{"ERROR ALX80090: On file \"{file}\" line {line}: Macro is missing name."}
+    ALX80100{"ERROR ALX80100: On file \"{file}\" line {line}: Macro \"{macro}\" is defined multiple times."}
+    ALX80110{"ERROR ALX80110: On file \"{file}\" line {line}: Invalid node \"<{node}>\"."}
+    ALX80120{"ERROR ALX80120: On file \"{file}\" line {line}: Only 1 of lemma=, suffix=, contains=, case= is supported on a single element."}
+    ALX80130{"ERROR ALX80130: On file \"{file}\" line {line}: Invalid inclusion of \"<{node}>\" into \"<match>\"."}
+    ALX80140{"ERROR ALX80140: On file \"{file}\" line {line}: Number of repetitions cannot be negative."}
+    ALX80150{"ERROR ALX80150: On file \"{file}\" line {line}: Lower bound on number of repetitions cannot be larger than upper bound."}
+    ALX80160{"ERROR ALX80160: On file \"{file}\" line {line}: Sequence \"{seq}\" is not defined."}
+    ALX80170{"ERROR ALX80170: On file \"{file}\" line {line}: Unknown macro \"{macro}\"."}
+    ALX80180{"ERROR ALX80180: On file \"{file}\" line {line}: Macro \"{macro}\" expects {expected} node parameters, but {given} were given."}
+    ALX80190{"ERROR ALX80190: On file \"{file}\" line {line}: Macro \"{macro}\" expects {expected} string parameters, but {given} were given."}
+    ALX80200{"ERROR ALX80200: On file \"{file}\" line {line}: Unexpected inclusion of <{node}> in <macro>."}
+    ALX80210{"ERROR ALX80210: On file \"{file}\" line {line}: Undefined set {set}."}
+    ALX60220{"WARNING ALX60220: On file \"{file}\" line {line}: Recogniser not found for key {key}, skipping... [LU: {lu}]."}
 }
