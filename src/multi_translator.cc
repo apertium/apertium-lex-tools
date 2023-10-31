@@ -1,5 +1,6 @@
 #include "multi_translator.h"
 #include <iostream>
+#include <lttoolbox/i18n.h>
 
 MultiTranslator::MultiTranslator(string path, string mode, bool trimmed, bool filter, bool number_lines) {
 	this->trimmed = trimmed;
@@ -11,10 +12,7 @@ MultiTranslator::MultiTranslator(string path, string mode, bool trimmed, bool fi
 
 	FILE *f_bin = fopen(path.c_str(), "rb");
 	if(!f_bin)
-	{
-		cerr << "Error: Could not open file '" << path << "'." << endl;
-		exit(EXIT_FAILURE);
-	}
+		I18n(ALX_I18N_DATA, "alx").error("ALX80000", {"file"}, {path.c_str()}, true);
 	bilingual.load(f_bin);
 	fclose(f_bin);
 	bilingual.initBiltrans();

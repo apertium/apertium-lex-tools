@@ -1,0 +1,50 @@
+root{
+    biltrans_without_queue_desc{"Usage: {program} <path to a binary bilingual transducer> [--trimmed | -t]"}
+    ldx_proc_desc{"{program} v{version}: assign default lexical selection values\n"
+                  "USAGE: {program} lex_file"}
+    lrx_comp_desc{"{program} v{version}: build a selection transducer from a ruleset\n"
+                  "USAGE: {program} rule_file output_file"}
+
+    lrx_proc_desc{"process a bilingual stream with a lexical rule transducer"}
+    trace_desc{"trace rules which have been applied"}
+    debug_desc{"print out information about which rules are run"}
+    null_flush_desc{"flush on the null character"}
+    max_ent_desc{"no-op (retained for backwards compatibility)"}
+    help_desc{"print this message and exit"}
+
+    process_tagger_output_desc{"Usage: {program} bidix_bin_file\n"
+                               "with output from pretransfer on standard input."}
+    yasmet_desc{"\nUsage: {program} [-v|-V|-red n|-iter n|-dN d|-lNorm|-deltaPP dpp][mu]\n"
+                " none: GIS \n"
+                " -red: count-based feature selection\n"
+                "   mu: test pp\n"
+                "-iter: number of iterations\n"
+                "  -dN: smoothing of event counts\n"
+                "-lNorm: length normalisation\n"
+                "-deltaPP: end criterion minimal change of perplexity\n"
+                "-kw: write K file\n"
+                "-kr: read K file\n"}
+
+    ALX80000{"ERROR ALX80000: Unable to access file \"{file}\"."}
+    ALX80010{"ERROR ALX80010: Wrong number of parameters."}
+    ALX60020{"WARNING ALX60020: unsupported locale, fallback to \"C\"."}
+    ALX80030{"ERROR ALX80030: On file \"{file}\" line {line}: Cannot provide both regular value and macro value for attribute {attr}."}
+    ALX80040{"ERROR ALX80040: On file \"{file}\" line {line}: Cannot access macro parameter \"p{attr}\" - not in a macro."}
+    ALX80050{"ERROR ALX80050: On file \"{file}\" line {line}: Parameter index out of range for macro \"{attr}\" - {index} is not between 1 and {size}."}
+    ALX80060{"ERROR ALX80060: On file \"{file}\" line {line}: Cannot use <param> outside of <def-macro>."}
+    ALX80080{"ERROR ALX80080: On file \"{file}\" line {line}: Invalid inclusion of \"<{inner}>\" into \"<{outer}>\""}
+    ALX80090{"ERROR ALX80090: On file \"{file}\" line {line}: Macro is missing name."}
+    ALX80100{"ERROR ALX80100: On file \"{file}\" line {line}: Macro \"{macro}\" is defined multiple times."}
+    ALX80110{"ERROR ALX80110: On file \"{file}\" line {line}: Invalid node \"<{node}>\"."}
+    ALX80120{"ERROR ALX80120: On file \"{file}\" line {line}: Only 1 of lemma=, suffix=, contains=, case= is supported on a single element."}
+    ALX80130{"ERROR ALX80130: On file \"{file}\" line {line}: Invalid inclusion of \"<{node}>\" into \"<match>\"."}
+    ALX80140{"ERROR ALX80140: On file \"{file}\" line {line}: Number of repetitions cannot be negative."}
+    ALX80150{"ERROR ALX80150: On file \"{file}\" line {line}: Lower bound on number of repetitions cannot be larger than upper bound."}
+    ALX80160{"ERROR ALX80160: On file \"{file}\" line {line}: Sequence \"{seq}\" is not defined."}
+    ALX80170{"ERROR ALX80170: On file \"{file}\" line {line}: Unknown macro \"{macro}\"."}
+    ALX80180{"ERROR ALX80180: On file \"{file}\" line {line}: Macro \"{macro}\" expects {expected} node parameters, but {given} were given."}
+    ALX80190{"ERROR ALX80190: On file \"{file}\" line {line}: Macro \"{macro}\" expects {expected} string parameters, but {given} were given."}
+    ALX80200{"ERROR ALX80200: On file \"{file}\" line {line}: Unexpected inclusion of <{node}> in <macro>."}
+    ALX80210{"ERROR ALX80210: On file \"{file}\" line {line}: Undefined set {set}."}
+    ALX60220{"WARNING ALX60220: On file \"{file}\" line {line}: Recogniser not found for key {key}, skipping... [LU: {lu}]."}
+}

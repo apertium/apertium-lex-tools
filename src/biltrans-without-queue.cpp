@@ -1,10 +1,11 @@
 #include "BiltransWithoutQueue.h"
+#include <lttoolbox/i18n.h>
 
 int main(int argc, char** argv) {
 
 	if (argc != 2 && argc != 3) {
-		cout << "Usage: " << argv[0];
-		cout << "<path to a binary bilingual transducer> [--trimmed | -t]" << endl;
+		cout << I18n(ALX_I18N_DATA, "alx").format("biltrans_without_queue_desc");
+			 << endl;
 		exit(1);
 	}
 	string path(argv[1]);

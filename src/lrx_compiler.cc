@@ -22,6 +22,8 @@
 #include <lttoolbox/compression.h>
 #include <iostream>
 #include <limits>
+#include <lttoolbox/i18n.h>
+#include <unicode/ustream.h>
 
 using namespace std;
 
@@ -147,14 +149,25 @@ LRXCompiler::attr(xmlNode* node, const UString& attr, const UString& fallback)
   UString id = getattr(node, "p"_u + attr);
   if (!id.empty()) {
     if (!getattr(node, attr).empty()) {
-      error_and_die(node, "Cannot provide both regular value and macro value for attribute %S.", attr.c_str());
+      I18n(ALX_I18N_DATA, "alx").error("ALX80030", {"file", "line", "attr"},
+                                         {(const char*)node->doc->URL,
+                                         to_string(node->line).c_str(),
+                                         icu::UnicodeString(attr.data())}, true);
     }
     int idx = StringUtils::stoi(id);
     if (currentMacro == nullptr) {
-      error_and_die(node, "Cannot access macro parameter 'p%S' - not in a macro.", attr.c_str());
+      I18n(ALX_I18N_DATA, "alx").error("ALX80040", {"file", "line", "attr"},
+                                         {(char*)node->doc->URL,
+                                         to_string(node->line).c_str(),
+                                         icu::UnicodeString(attr.data())}, true);
     }
     if (idx > macro_string_vars.size() || idx < 1) {
-      error_and_die(node, "Parameter index out of range for macro '%S' - %d is not between 1 and %d.", getattr(currentMacro, LRX_COMPILER_NAME_ATTR).c_str(), idx, macro_string_vars.size());
+      I18n(ALX_I18N_DATA, "alx").error("ALX80050", {"file", "line", "attr", "index", "size"},
+                                         {(char*)node->doc->URL,
+                                         to_string(node->line).c_str(),
+                                         icu::UnicodeString(getattr(currentMacro, LRX_COMPILER_NAME_ATTR).data()),
+                                         to_string(idx).c_str(),
+                                         to_string(macro_string_vars.size()).c_str()}, true);
     }
     return macro_string_vars[idx-1];
   } else {
@@ -197,14 +210,25 @@ LRXCompiler::compileSequence(xmlNode* node)
       int idx = StringUtils::stoi(getattr(ch, LRX_COMPILER_NAME_ATTR));
       if (idx > macro_node_vars.size() || idx < 1) {
         if (currentMacro == nullptr) {
-          error_and_die(ch, "Cannot use <param> outside of <def-macro>.");
+          I18n(ALX_I18N_DATA, "alx").error("ALX80060", {"file", "line"},
+                                         {(char*)ch->doc->URL,
+                                         to_string(ch->line).c_str()}, true);
         } else {
-          error_and_die(ch, "Parameter index %d out of range for macro '%S' (0-%d).", idx, getattr(currentMacro, LRX_COMPILER_NAME_ATTR).c_str(), macro_node_vars.size());
+          I18n(ALX_I18N_DATA, "alx").error("ALX80050", {"file", "line", "attr", "index", "size"},
+                                         {(char*)ch->doc->URL,
+                                         to_string(ch->line).c_str(),
+                                         icu::UnicodeString(getattr(currentMacro, LRX_COMPILER_NAME_ATTR).data()),
+                                         to_string(idx).c_str(),
+                                         to_string(macro_string_vars.size()).c_str()}, true);
         }
       }
       compileSequence(macro_node_vars[idx-1]);
     } else {
-      error_and_die(ch, "Invalid inclusion of '<%S>' into '<%S>'.", inner_name.c_str(), outer_name.c_str());
+      I18n(ALX_I18N_DATA, "alx").error("ALX80080", {"file", "line", "inner" "outer"},
+                                         {(char*)node->doc->URL,
+                                         to_string(node->line).c_str(),
+                                         icu::UnicodeString(inner_name.data()),
+                                         icu::UnicodeString(outer_name.data())}, true);
     }
   }
 }
@@ -227,9 +251,14 @@ LRXCompiler::procNode(xmlNode* node)
   } else if (nombre == LRX_COMPILER_DEFMACRO_ELEM) {
     UString macname = attr(node, LRX_COMPILER_NAME_ATTR);
     if (macname.empty()) {
-      error_and_die(node, "Macro is missing name.");
+      I18n(ALX_I18N_DATA, "alx").error("ALX80090", {"file", "line"},
+                                         {(char*)node->doc->URL,
+                                         to_string(node->line).c_str()}, true);
     } else if (macros.find(macname) != macros.end()) {
-      error_and_die(node, "Macro '%S' is defined multiple times.", macname.c_str());
+      I18n(ALX_I18N_DATA, "alx").error("ALX80100", {"file", "line", "macro"},
+                                         {(char*)node->doc->URL,
+                                         to_string(node->line).c_str(),
+                                         icu::UnicodeString(macname.data())}, true);
     } else {
       macros[macname] = node;
     }
@@ -238,7 +267,10 @@ LRXCompiler::procNode(xmlNode* node)
   } else if (nombre == LRX_COMPILER_MACRO_ELEM) {
     procMacro(node);
   } else {
-    error_and_die(node, "Invalid node '<%S>'.", nombre.c_str());
+    I18n(ALX_I18N_DATA, "alx").error("ALX80110", {"file", "line", "node"},
+                                         {(char*)node->doc->URL,
+                                         to_string(node->line).c_str(),
+                                         icu::UnicodeString(nombre.data())}, true);
   }
 }
 
@@ -358,7 +390,9 @@ LRXCompiler::compileSpecifier(xmlNode* node, Transducer* t, int state,
 
   if ((lemma != "*"_u ? 1 : 0) + (suffix.empty() ? 0 : 1) +
       (contains.empty() ? 0 : 1) + (_case.empty() ? 0 : 1) > 1) {
-    error_and_die(node, "Only 1 of lemma=, suffix=, contains=, case= is supported on a single element.");
+    I18n(ALX_I18N_DATA, "alx").error("ALX80120", {"file", "line"},
+                                         {(char*)node->doc->URL,
+                                         to_string(node->line).c_str()}, true);
   }
 
   // for future use
@@ -479,7 +513,10 @@ LRXCompiler::procMatch(xmlNode* node)
     if (nombre == LRX_COMPILER_SELECT_ELEM || nombre == LRX_COMPILER_REMOVE_ELEM) {
       procSelectRemove(ch);
     } else {
-      error_and_die(ch, "Invalid inclusion of '<%S>' into <match>'.", nombre.c_str());
+      I18n(ALX_I18N_DATA, "alx").error("ALX80130", {"file", "line", "node"},
+                                         {(char*)ch->doc->URL,
+                                         to_string(ch->line).c_str(),
+                                         icu::UnicodeString(nombre.c_str())}, true);
     }
     empty = false;
   }
@@ -516,9 +553,13 @@ LRXCompiler::procRepeat(xmlNode* node)
   int from = StringUtils::stoi(xfrom);
   int upto = StringUtils::stoi(xupto);
   if(from < 0 || upto < 0) {
-    error_and_die(node, "Number of repetitions cannot be negative.");
+    I18n(ALX_I18N_DATA, "alx").error("ALX80140", {"file", "line"},
+                                         {(char*)node->doc->URL,
+                                         to_string(node->line).c_str()}, true);
   } else if(from > upto) {
-    error_and_die(node, "Lower bound on number of repetitions cannot be larger than upper bound.");
+    I18n(ALX_I18N_DATA, "alx").error("ALX80150", {"file", "line"},
+                                         {(char*)node->doc->URL,
+                                         to_string(node->line).c_str()}, true);
   }
   int count = upto - from;
   int oldstate = currentState;
@@ -547,7 +588,10 @@ LRXCompiler::procSeq(xmlNode* node)
   UString name = attr(node, LRX_COMPILER_NAME_ATTR);
   if(sequences.find(name) == sequences.end())
   {
-    error_and_die(node, "Sequence '%S' is not defined.", name.c_str());
+    I18n(ALX_I18N_DATA, "alx").error("ALX80160", {"file", "line", "seq"},
+                                         {(char*)node->doc->URL,
+                                         to_string(node->line).c_str(),
+                                         icu::UnicodeString(name.data())}, true);
   }
   currentState = transducer.insertTransducer(currentState, sequences[name]);
 }
@@ -595,7 +639,10 @@ LRXCompiler::procMacro(xmlNode* node)
 {
   UString macname = attr(node, LRX_COMPILER_NAME_ATTR);
   if (macros.find(macname) == macros.end()) {
-    error_and_die(node, "Unknown macro '%S'.", macname.c_str());
+    I18n(ALX_I18N_DATA, "alx").error("ALX80170", {"file", "line", "macro"},
+                                         {(char*)node->doc->URL,
+                                         to_string(node->line).c_str(),
+                                         icu::UnicodeString(macname.data())}, true);
   }
   xmlNode* prevMacro = currentMacro;
   xmlNode* nextMacro = macros[macname];
@@ -605,7 +652,10 @@ LRXCompiler::procMacro(xmlNode* node)
   int npar = StringUtils::stoi(getattr(nextMacro, LRX_COMPILER_NPAR_ATTR, "0"_u));
   for (auto ch : children(node)) {
     if (name(ch) != LRX_COMPILER_WITH_PARAM_ELEM) {
-      error_and_die(ch, "Unexpected inclusion of <%S> in <macro>.", name(ch).c_str());
+      I18n(ALX_I18N_DATA, "alx").error("ALX80200", {"file", "line", "node"},
+                                         {(char*)ch->doc->URL,
+                                         to_string(ch->line).c_str(),
+                                         icu::UnicodeString(name(ch).data())}, true);
     }
     UString val = attr(ch, LRX_COMPILER_VALUE_ATTR);
     if (val.empty()) {
@@ -615,10 +665,20 @@ LRXCompiler::procMacro(xmlNode* node)
     }
   }
   if (current_nodes.size() != nodes) {
-    error_and_die(node, "Macro '%S' expects %d node parameters, but %d were given.", macname.c_str(), nodes, current_nodes.size());
+    I18n(ALX_I18N_DATA, "alx").error("ALX80180", {"file", "line", "macro", "expected", "given"},
+                                         {(char*)node->doc->URL,
+                                         to_string(node->line).c_str(),
+                                         icu::UnicodeString(macname.data()),
+                                         nodes,
+                                         to_string(current_nodes.size()).c_str()}, true);
   }
   if (current_strings.size() != npar) {
-    error_and_die(node, "Macro '%S' expects %d string parameters, but %d were given.", macname.c_str(), npar, current_strings.size());
+    I18n(ALX_I18N_DATA, "alx").error("ALX80190", {"file", "line", "macro", "expected", "given"},
+                                         {(char*)node->doc->URL,
+                                         to_string(node->line).c_str(),
+                                         icu::UnicodeString(macname.data()),
+                                         npar,
+                                         to_string(current_strings.size()).c_str()}, true);
   }
   current_strings.swap(macro_string_vars);
   current_nodes.swap(macro_node_vars);
@@ -635,7 +695,10 @@ LRXCompiler::procSet(xmlNode* node)
   UString name = attr(node, LRX_COMPILER_NAME_ATTR);
   auto loc = sets.find(name);
   if (loc == sets.end()) {
-    error_and_die(node, "Undefined set %S.", name.c_str());
+    I18n(ALX_I18N_DATA, "alx").error("ALX80210", {"file", "line", "set"},
+                                         {(char*)node->doc->URL,
+                                         to_string(node->line).c_str(),
+                                         icu::UnicodeString(name.data())}, true);
   }
   currentState = transducer.insertTransducer(currentState, *(loc->second.first));
   UString tags = attr(node, LRX_COMPILER_TAGS_ATTR, loc->second.second);
