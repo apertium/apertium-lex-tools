@@ -367,7 +367,7 @@ vector<double> parseArgs(int argc, char **argv) {
 }
 
 void printError(char* name) {
-    I18n(ALX_I18N_DATA, "alx").error("ALX80010", {}, {}, false);
+    I18n(ALX_I18N_DATA, "alx").error("ALX80010", false);
     cout<<"Usage: "<<name<<" <lm_file> <trimmed-multitrans-file> <mode> [-m | --probability-mass-threshold]"<<endl;
     cout<<"modes:" << endl;
     cout<<"\t -s | --standard"<<endl;
@@ -383,7 +383,7 @@ int main(int argc, char ** argv) {
 	// I don't know :)
 
     if(setlocale(LC_CTYPE, "") == NULL) {
-        I18n(ALX_I18N_DATA, "alx").error("ALX60020", {}, {}, false);
+        I18n(ALX_I18N_DATA, "alx").error("ALX60020", false);
         setlocale(LC_ALL, "C");
     }
 
