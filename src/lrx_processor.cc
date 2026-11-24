@@ -446,9 +446,20 @@ LRXProcessor::processFlush(UFILE *output,
   {
     if(sl[spos].empty())
     {
+      u_fprintf(output, "%S^", blanks[spos].c_str());
+      if (tl[spos].empty()) {
+        u_fputc('$', output);
+        continue;
+      }
+      for (auto it = tl[spos].begin(); it != tl[spos].end(); ++it) {
+        if (it != tl[spos].begin()) {
+          u_fputc('/', output);
+        }
+        u_fprintf(output, "%S", it->c_str());
+      }
+      u_fputc('$', output);
       continue;
     }
-
     u_fprintf(output, "%S^%S/", blanks[spos].c_str(), sl[spos].c_str());
 
     vector<UString>::iterator ti;
